@@ -1,6 +1,6 @@
 {
-    "name": "myangatheque",
-    "short_name": "myangatheque",
+    "name": "mymangatheque",
+    "short_name": "mymangatheque",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

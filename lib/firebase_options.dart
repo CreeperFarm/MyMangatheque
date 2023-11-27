@@ -70,6 +70,6 @@ class DefaultFirebaseOptions {
     messagingSenderId: '390944577899',
     projectId: 'mymangatheque',
     storageBucket: 'mymangatheque.appspot.com',
-    iosBundleId: 'fr.creeperfarm.mymangatheque.myangatheque',
+    iosBundleId: 'fr.creeperfarm.mymangatheque.mymangatheque',
   );
 }

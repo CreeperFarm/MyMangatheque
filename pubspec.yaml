@@ -1,4 +1,4 @@
-name: myangatheque
+name: mymangatheque
 description: "Une application pour mettre les mangas que l'on a, a lu, nos envies manga, les mangas qui sortent, etc."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
