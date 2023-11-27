@@ -1,4 +1,4 @@
-package fr.creeperfarm.mymangatheque.mymangatheque
+package fr.creeperfarm.mymangatheque
 
 import io.flutter.embedding.android.FlutterActivity
 
