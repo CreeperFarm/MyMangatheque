@@ -61,6 +61,8 @@ dependencies:
   firebase_database: ^10.3.1
   firebase_auth: ^4.9.0
   google_sign_in: ^6.1.5
+  flutter_riverpod: ^2.4.9
+  riverpod_annotation: ^2.3.3
 
 dev_dependencies:
   flutter_test:
@@ -72,6 +74,10 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^3.0.1
+  riverpod_generator: ^2.3.9
+  build_runner: ^2.4.6
+  custom_lint: ^0.5.7
+  riverpod_lint: ^2.3.7
 
 # Display Splash Screen
 flutter_native_splash:
