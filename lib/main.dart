@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mymangatheque/provider/compteur_provider.dart';
 import 'firebase_options.dart';
 
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -13,13 +12,11 @@ void main() async {
   );
 
   runApp(const ProviderScope(child: MyApp()));
-
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -43,7 +40,6 @@ class MyHomePage extends ConsumerStatefulWidget {
 }
 
 class MyHomePageState extends ConsumerState<MyHomePage> {
-
   @override
   Widget build(BuildContext context) {
     final compteur = ref.watch(compteurProvider);
@@ -68,12 +64,12 @@ class MyHomePageState extends ConsumerState<MyHomePage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: (){
+        onPressed: () {
           ref.read(compteurProvider.notifier).incrementer();
         },
         tooltip: 'Increment',
         child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      ),
     );
   }
 }
