@@ -48,18 +48,18 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions web = FirebaseOptions(
     apiKey: 'AIzaSyD3Hw9Tm5JxwcHv7fdpDvBCZOhN5Py0-UU',
-    appId: '1:390944577899:web:21679fd6aa3cbf98f7142e',
+    appId: '1:390944577899:web:485cb140ed50a86df7142e',
     messagingSenderId: '390944577899',
     projectId: 'mymangatheque',
     authDomain: 'mymangatheque.firebaseapp.com',
     databaseURL: 'https://mymangatheque-default-rtdb.europe-west1.firebasedatabase.app',
     storageBucket: 'mymangatheque.appspot.com',
-    measurementId: 'G-3KXYCRX2L3',
+    measurementId: 'G-F758F7ZW4J',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyAq4h5rJN8kUk7vKu5YvkCaISHBQjMiz98',
-    appId: '1:390944577899:android:180d63c693d98006f7142e',
+    appId: '1:390944577899:android:76650421eaae60d2f7142e',
     messagingSenderId: '390944577899',
     projectId: 'mymangatheque',
     databaseURL: 'https://mymangatheque-default-rtdb.europe-west1.firebasedatabase.app',
@@ -68,12 +68,12 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyAAdrTx38SuEocRDswxSryy-_ucgfdRZpU',
-    appId: '1:390944577899:ios:13662cadf0b5864bf7142e',
+    appId: '1:390944577899:ios:6a1ecfd383f0002cf7142e',
     messagingSenderId: '390944577899',
     projectId: 'mymangatheque',
     databaseURL: 'https://mymangatheque-default-rtdb.europe-west1.firebasedatabase.app',
     storageBucket: 'mymangatheque.appspot.com',
-    iosClientId: '390944577899-35sk6e1n6n03tavnm1ursse7aodv11t2.apps.googleusercontent.com',
+    iosClientId: '390944577899-fbir0pu2vlaac78fcv6klli48onav4vc.apps.googleusercontent.com',
     iosBundleId: 'fr.creeperfarm.mymangatheque',
   );
 }

@@ -5,6 +5,7 @@ import 'package:mymangatheque/components/my_button.dart';
 import 'package:mymangatheque/components/my_textfield.dart';
 import 'package:mymangatheque/components/square_tile.dart';
 import 'package:mymangatheque/screen/auth/auth_page.dart';
+import 'package:mymangatheque/screen/auth/forgot_password_page.dart';
 import 'package:mymangatheque/screen/auth/signup_page.dart';
 import 'package:mymangatheque/services/auth_services.dart';
 

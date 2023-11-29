@@ -1,7 +1,9 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mymangatheque/provider/compteur_provider.dart';
+import 'package:mymangatheque/screen/auth/auth_page.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -60,6 +62,16 @@ class MyHomePageState extends ConsumerState<MyHomePage> {
               "$compteur",
               style: Theme.of(context).textTheme.headlineMedium,
             ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const AuthPageToProfile()
+                  )
+                );
+              },
+              child: Text("Go to Profile Page"))
           ],
         ),
       ),

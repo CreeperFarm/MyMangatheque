@@ -1,7 +1,4 @@
-import 'package:mymangatheque/get_data/get_user_creation_date.dart';
-import 'package:mymangatheque/get_data/get_user_profile_picture.dart';
-import 'package:mymangatheque/get_data/get_user_pseudo.dart';
-import 'package:mymangatheque/get_data/get_user_email.dart';
+import 'package:mymangatheque/get_data/get_user_information.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -110,21 +107,16 @@ class _ProfilePageState extends State<ProfilePage> {
                   onTap: (){
                     pickUploadImage();
                   },
-                  child: GetUserProfilePicture(documentId: user.uid),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal:10.0, vertical: 10),
-                  child: Container(
-                    height: 1.0,
-                    width: MediaQuery.of(context).size.width,
-                    color: Colors.grey,
-                  ),
-                ),
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                    child: GetUserEmail(documentId: user.uid, beforeText: "Votre adresse email est : "),
+                  child: Center(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(150.0),
+                      child: Image.network(
+                        GetUserInformation.getUserProfilePicture(user.uid) as String,
+                        height: 175,
+                        width: 175,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
                   ),
                 ),
                 Padding(
@@ -139,7 +131,26 @@ class _ProfilePageState extends State<ProfilePage> {
                   scrollDirection: Axis.horizontal,
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                    child: GetUserPseudo(documentId: user.uid, beforeText: "Votre pseudo est : "),
+                    child: Text(
+                      "useremail",
+                    )
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal:10.0, vertical: 10),
+                  child: Container(
+                    height: 1.0,
+                    width: MediaQuery.of(context).size.width,
+                    color: Colors.grey,
+                  ),
+                ),
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                    child: Text(
+                        GetUserInformation.getUserPseudo(user.uid, "Votre pseudo est : ") as String
+                    ),
                   ),
                 ),
                 Padding(
@@ -152,15 +163,10 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                  child: Row(
-                    children: [
-                      const Text("Compte créer depuis le "),
-                      SingleChildScrollView(
-                        child: Text(
-                        GetUserInformation.getUserCreationDate(),
-                        ),
-                      ),
-                    ],
+                  child: SingleChildScrollView(
+                    child: Text(
+                      GetUserInformation.getUserCreationDate(user.uid, "Compte créer depuis le ") as String,
+                    ),
                   ),
                 ),
                 Padding(
