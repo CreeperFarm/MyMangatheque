@@ -1,6 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dart_date/dart_date.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mymangatheque/components/my_button.dart';
@@ -81,7 +81,7 @@ class _SignUpPageState extends State<SignUpPage> {
       };
 
       final user = FirebaseAuth.instance.currentUser!;
-      await FirebaseDatabase.instance.ref('users/${user.uid}').set({
+      await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
         'pseudo': pseudoController.text,
         'email': user.email,
         'imageUrl': 'https://cdn.statically.io/gh/CreeperFarm/AppManga/main/default_pdp.jpg',

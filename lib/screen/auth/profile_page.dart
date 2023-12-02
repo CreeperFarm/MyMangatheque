@@ -1,5 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:mymangatheque/get_data/get_user_information.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:adaptive_theme/adaptive_theme.dart';
@@ -23,7 +23,7 @@ class _ProfilePageState extends State<ProfilePage> {
   final user = FirebaseAuth.instance.currentUser!;
 
   void modifyImg(image) async {
-    await FirebaseDatabase.instance.ref('users/${user.uid}')
+    await FirebaseFirestore.instance.collection('users').doc(user.uid)
         .update({"imageUrl": image})
         .whenComplete(() => Navigator.pushReplacement(
         context,
@@ -107,16 +107,21 @@ class _ProfilePageState extends State<ProfilePage> {
                   onTap: (){
                     pickUploadImage();
                   },
-                  child: Center(
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(150.0),
-                      child: Image.network(
-                        GetUserInformation.getUserProfilePicture(user.uid) as String,
-                        height: 175,
-                        width: 175,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
+                  child: GetUserProfilePicture(documentId: user.uid),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal:10.0, vertical: 10),
+                  child: Container(
+                    height: 1.0,
+                    width: MediaQuery.of(context).size.width,
+                    color: Colors.grey,
+                  ),
+                ),
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                    child: GetUserEmail(documentId: user.uid, beforeText: "L'email du compte est : ",)
                   ),
                 ),
                 Padding(
@@ -131,26 +136,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   scrollDirection: Axis.horizontal,
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                    child: Text(
-                      "useremail",
-                    )
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal:10.0, vertical: 10),
-                  child: Container(
-                    height: 1.0,
-                    width: MediaQuery.of(context).size.width,
-                    color: Colors.grey,
-                  ),
-                ),
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                    child: Text(
-                        GetUserInformation.getUserPseudo(user.uid, "Votre pseudo est : ") as String
-                    ),
+                    child: GetUserPseudo(documentId: user.uid, beforeText: "Votre pseudo est : "),
                   ),
                 ),
                 Padding(
@@ -164,9 +150,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 10.0),
                   child: SingleChildScrollView(
-                    child: Text(
-                      GetUserInformation.getUserCreationDate(user.uid, "Compte créer depuis le ") as String,
-                    ),
+                    child: GetUserCreationDate(documentId: user.uid, beforeText: "Compte créer le : "),
                   ),
                 ),
                 Padding(
@@ -248,29 +232,6 @@ class _ProfilePageState extends State<ProfilePage> {
                         }
                       }),
                 ),
-                /*Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                  child: Column(
-                    children: [
-                      const Text(
-                        "In dev, it's normal if it don't work",
-                        style: TextStyle(color: Colors.red),
-                      ),
-                      Row(
-                        children: [
-                          Text(
-                            "DarkMode :",
-                            style: GoogleFonts.poppins(),
-                          ),
-                          Switch(
-                            value: !lightThemeOn,
-                            onChanged: null,
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),*/
                 Padding(
                   padding: const EdgeInsets.only(left:10.0, right: 10.0, top: 10.0),
                   child: Container(

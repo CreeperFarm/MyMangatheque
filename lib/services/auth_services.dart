@@ -1,25 +1,25 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dart_date/dart_date.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 class AuthServices {
 
   // Google Sign In
   signInWithGoogle() async {
-    // begin interactive sign in process
+    // Begin interactive sign in process
     final GoogleSignInAccount? gUser = await GoogleSignIn().signIn();
 
-    // obtain auth details from request
+    // Obtain auth details from request
     final GoogleSignInAuthentication gAuth = await gUser!.authentication;
 
-    // create a new credential for user
+    // Create a new credential for user
     final credential = GoogleAuthProvider.credential(
         accessToken: gAuth.accessToken,
         idToken: gAuth.idToken
     );
 
-    // finally, let's sign in
+    // Finally, let's sign in
     await FirebaseAuth.instance.signInWithCredential(credential);
 
     // Add detail about user
@@ -44,7 +44,7 @@ class AuthServices {
     };
     final createdOn = "$createdOnDay ${month[createdOnMonthInt]} $createdOnYear";
 
-    await FirebaseDatabase.instance.ref('users/${user.uid}').set({
+    await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
       'pseudo': user.displayName,
       'email': user.email,
       'imageUrl': user.photoURL,
