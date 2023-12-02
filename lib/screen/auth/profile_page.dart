@@ -8,6 +8,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
 
+import 'package:mymangatheque/screen/auth/auth_page.dart';
+
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
 
@@ -27,7 +29,7 @@ class _ProfilePageState extends State<ProfilePage> {
         .update({"imageUrl": image})
         .whenComplete(() => Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const ProfilePage())
+        MaterialPageRoute(builder: (context) => const AuthPageToProfile())
     )
     ).catchError((e) => print(e));
   }

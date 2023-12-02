@@ -232,7 +232,8 @@ class _SignInPageState extends State<SignInPage> {
                       children: [
                         Text(
                           "Pas encore de compte ?",
-                          style: TextStyle(color: Colors.grey[700]),
+                          style: TextStyle(color: Colors.grey[700]
+                          ),
                         ),
                         const SizedBox(width: 4),
                         TextButton(
@@ -240,14 +241,16 @@ class _SignInPageState extends State<SignInPage> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) => const SignUpPage()),
+                                    builder: (context) => const SignUpPage()
+                                ),
                               );
                             },
                             child: const Text(
                               "Créer en un maintenant",
                               style: TextStyle(
                                   color: Colors.blue,
-                                  fontWeight: FontWeight.bold),
+                                  fontWeight: FontWeight.bold
+                              ),
                             )),
                       ],
                     ),
