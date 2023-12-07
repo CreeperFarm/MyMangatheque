@@ -1,3 +1,4 @@
+import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -14,22 +15,49 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  runApp(const ProviderScope(child: MyApp()));
+  final savedThemeMode = await AdaptiveTheme.getThemeMode();
+
+  runApp(ProviderScope(child: MyApp(savedThemeMode: savedThemeMode)));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  dynamic savedThemeMode;
+  MyApp({required this.savedThemeMode, super.key});
 
   @override
   Widget build(BuildContext context) {
     FlutterNativeSplash.remove();
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+    return AdaptiveTheme(
+      light: ThemeData(
         useMaterial3: true,
+        brightness: Brightness.light,
+        primaryColor: Colors.deepPurpleAccent.shade100,
+        bottomNavigationBarTheme: BottomNavigationBarThemeData(
+          selectedItemColor: Colors.deepPurpleAccent.shade100,
+          unselectedItemColor: Colors.grey,
+        ),
+        textTheme: const TextTheme(
+          labelLarge: TextStyle(color: Colors.black),
+          labelMedium: TextStyle(color: Colors.black),
+          labelSmall: TextStyle(color: Colors.black),
+        ),
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      dark: ThemeData(
+        useMaterial3: true,
+        brightness: Brightness.dark,
+        textTheme: const TextTheme(
+          bodyLarge: TextStyle(color: Colors.white),
+          bodyMedium: TextStyle(color: Colors.white),
+          bodySmall: TextStyle(color: Colors.white),
+        ),
+      ),
+      initial: savedThemeMode ?? AdaptiveThemeMode.light,
+      builder: (theme, darkTheme) => MaterialApp(
+        title: 'MyMangatheque',
+        theme: theme,
+        darkTheme: darkTheme,
+        home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      ),
     );
   }
 }

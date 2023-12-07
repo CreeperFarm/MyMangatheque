@@ -79,6 +79,28 @@ class _ProfilePageState extends State<ProfilePage> {
     });
   }
 
+  Widget getWidget(userPhoneNumber) {
+    return Column(
+      children: [
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10.0),
+              child: Text("Le numéro de téléphone est : $userPhoneNumber")
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal:10.0, vertical: 10),
+          child: Container(
+            height: 1.0,
+            width: MediaQuery.of(context).size.width,
+            color: Colors.grey,
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -149,6 +171,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     color: Colors.grey,
                   ),
                 ),
+                if (user.phoneNumber != null) getWidget(user.phoneNumber),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 10.0),
                   child: SingleChildScrollView(
