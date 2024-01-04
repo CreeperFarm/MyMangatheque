@@ -27,6 +27,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
 
   Future passwordReset() async {
     try {
+      await FirebaseAuth.instance.setLanguageCode("fr");
       await FirebaseAuth.instance.sendPasswordResetEmail(email: emailController.text);
       Navigator.pop(context);
       showMessage("Réinitialisation du mot de passe envoyé, vérifier votre boite mail.");
@@ -73,10 +74,9 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.deepPurple[200],
+        title: const Text('Mot de passe oublié'),
         elevation: 0,
       ),
-      backgroundColor: Colors.grey[300],
       body: Center(
         child: Container(
           margin: const EdgeInsets.symmetric(horizontal: 10),

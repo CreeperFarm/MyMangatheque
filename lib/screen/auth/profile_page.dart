@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:mymangatheque/components/my_line.dart';
 import 'package:mymangatheque/get_data/get_user_information.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -9,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'dart:io';
 
 import 'package:mymangatheque/screen/auth/auth_page.dart';
+import 'package:mymangatheque/screen/auth/modify_password_page.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -24,6 +26,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
   final user = FirebaseAuth.instance.currentUser!;
 
+  // Modify the profile picture of the user
   void modifyImg(image) async {
     await FirebaseFirestore.instance.collection('users').doc(user.uid)
         .update({"imageUrl": image})
@@ -32,6 +35,13 @@ class _ProfilePageState extends State<ProfilePage> {
         MaterialPageRoute(builder: (context) => const AuthPageToProfile())
     )
     ).catchError((e) => print(e));
+  }
+
+  // Send a email to reset password
+  void resetPassword() async {
+    await FirebaseAuth.instance.setLanguageCode("fr");
+    await FirebaseAuth.instance.sendPasswordResetEmail(email: user.email.toString())
+        .catchError((e) => print(e));
   }
 
   // Sign Out a Connected User
@@ -79,28 +89,6 @@ class _ProfilePageState extends State<ProfilePage> {
     });
   }
 
-  Widget getWidget(userPhoneNumber) {
-    return Column(
-      children: [
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10.0),
-              child: Text("Le numéro de téléphone est : $userPhoneNumber")
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal:10.0, vertical: 10),
-          child: Container(
-            height: 1.0,
-            width: MediaQuery.of(context).size.width,
-            color: Colors.grey,
-          ),
-        ),
-      ],
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -115,32 +103,14 @@ class _ProfilePageState extends State<ProfilePage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text("Bienvenue sur votre page de profile, uid : ${user.uid}, email : ${user.email}, display name : ${user.displayName}",textAlign: TextAlign.center),
-                    ElevatedButton.icon(
-                      onPressed: signUserOut,
-                      icon: const Icon(Icons.logout),
-                      label: const Text("Se déconnecter (Temporary)"),
-                    ),
-                  ],
-                ),
                 GestureDetector(
                   onTap: (){
                     pickUploadImage();
                   },
                   child: GetUserProfilePicture(documentId: user.uid),
                 ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal:10.0, vertical: 10),
-                  child: Container(
-                    height: 1.0,
-                    width: MediaQuery.of(context).size.width,
-                    color: Colors.grey,
-                  ),
-                ),
+                const Padding(padding: EdgeInsets.only(bottom: 25)),
+                MyLine(width: MediaQuery.of(context).size.width),
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: Padding(
@@ -148,14 +118,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     child: GetUserEmail(documentId: user.uid, beforeText: "L'email du compte est : ",)
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal:10.0, vertical: 10),
-                  child: Container(
-                    height: 1.0,
-                    width: MediaQuery.of(context).size.width,
-                    color: Colors.grey,
-                  ),
-                ),
+                MyLine(width: MediaQuery.of(context).size.width),
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: Padding(
@@ -163,29 +126,16 @@ class _ProfilePageState extends State<ProfilePage> {
                     child: GetUserPseudo(documentId: user.uid, beforeText: "Votre pseudo est : "),
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal:10.0, vertical: 10),
-                  child: Container(
-                    height: 1.0,
-                    width: MediaQuery.of(context).size.width,
-                    color: Colors.grey,
-                  ),
-                ),
-                if (user.phoneNumber != null) getWidget(user.phoneNumber),
+                MyLine(width: MediaQuery.of(context).size.width),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 10.0),
                   child: SingleChildScrollView(
                     child: GetUserCreationDate(documentId: user.uid, beforeText: "Compte créer le : "),
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal:10.0, vertical: 10),
-                  child: Container(
-                    height: 1.0,
-                    width: MediaQuery.of(context).size.width,
-                    color: Colors.grey,
-                  ),
-                ),
+
+                MyLine(width: MediaQuery.of(context).size.width),
+
                 // Drop Down Menu du DarkMode
                 Container(
                   padding: const EdgeInsets.all(10),
@@ -256,6 +206,27 @@ class _ProfilePageState extends State<ProfilePage> {
                           });
                         }
                       }),
+                ),
+                MyLine(width: MediaQuery.of(context).size.width),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                  child: SingleChildScrollView(
+                    child: GestureDetector(
+                      onTap: () => {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const ModifyPasswordPage()),
+                      )},
+                      child: const Row(
+                        children: [
+                          Padding(padding: EdgeInsets.only(right: 16)),
+                          Icon(Icons.lock_outline),
+                          Padding(padding: EdgeInsets.only(right: 5)),
+                          Text("Changer de mot de passe"),
+                        ],
+                      ),
+                    ),
+                  ),
                 ),
                 Padding(
                   padding: const EdgeInsets.only(left:10.0, right: 10.0, top: 10.0),

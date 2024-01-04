@@ -59,6 +59,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
     try {
       // Authenticate user
+      await FirebaseAuth.instance.setLanguageCode("fr");
       await FirebaseAuth.instance.createUserWithEmailAndPassword(email: emailController.text, password: passwordController.text);
 
       // Add detail about user
@@ -81,6 +82,9 @@ class _SignUpPageState extends State<SignUpPage> {
       };
 
       final user = FirebaseAuth.instance.currentUser!;
+
+      await user.sendEmailVerification();
+
       await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
         'pseudo': pseudoController.text,
         'email': user.email,
