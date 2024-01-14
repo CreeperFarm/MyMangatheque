@@ -3,7 +3,7 @@
     "short_name": "mymangatheque",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0b4b6c",
+    "background_color": "#000b4b6c",
     "theme_color": "#0b4b6c",
     "description": "Une application pour mettre les mangas que l'on a, a lu, nos envies manga, les mangas qui sortent, etc.",
     "orientation": "portrait-primary",

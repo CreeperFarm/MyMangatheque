@@ -83,8 +83,9 @@ dev_dependencies:
 
 # Display Splash Screen
 flutter_native_splash:
-  background_image: assets/images/logo_background.png
-  image: assets/images/logo.png
+  color: '#000000'
+  # background_image: assets/images/logo_background.png
+  image: assets/images/logo_nobg.png
 
 # Display Icon for the app
 flutter_launcher_icons:
@@ -93,12 +94,12 @@ flutter_launcher_icons:
   ios: true
   remove_alpha_ios: true
   image_path: "assets/images/logo_foreground.png"
-  adaptive_icon_background: "assets/images/logo_background.png"
-  adaptive_icon_foreground: "assets/images/logo_foreground.png"
+  # adaptive_icon_background: "assets/images/logo_background.png"
+  # daptive_icon_foreground: "assets/images/logo_foreground.png"
   web:
     generate: true
     image_path: "assets/images/logo_foreground.png"
-    background_color: "#0b4b6c"
+    background_color: "#000b4b6c"
     theme_color: "#0b4b6c"
 
 # For information on the generic Dart part of this file, see the
