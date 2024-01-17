@@ -1,8 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:mymangatheque/components/my_button.dart';
-import 'package:mymangatheque/components/my_textfield.dart';
+import 'package:go_router/go_router.dart';
+import 'package:mymangatheque/src/components/my_button.dart';
+import 'package:mymangatheque/src/components/my_textfield.dart';
 
 // ignore_for_file: use_build_context_synchronously
 
@@ -56,6 +56,7 @@ class _ModifyPasswordPageState extends State<ModifyPasswordPage> {
       await user.updatePassword(oldPasswordController.text);
       Navigator.pop(context);
       showMessage("Réinitialisation du mot de passe envoyé, vérifier votre boite mail.");
+      GoRouter.of(context).go('/profile');
     } on FirebaseAuthException catch (e) {
       if (e.code == "weak-password") {
         Navigator.pop(context);

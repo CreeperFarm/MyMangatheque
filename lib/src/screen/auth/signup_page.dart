@@ -2,13 +2,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dart_date/dart_date.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:mymangatheque/components/my_button.dart';
-import 'package:mymangatheque/components/my_textfield.dart';
-import 'package:mymangatheque/components/square_tile.dart';
-import 'package:mymangatheque/screen/auth/auth_page.dart';
-import 'package:mymangatheque/screen/auth/signin_page.dart';
-import 'package:mymangatheque/services/auth_services.dart';
+import 'package:mymangatheque/src/components/my_button.dart';
+import 'package:mymangatheque/src/components/my_textfield.dart';
+import 'package:mymangatheque/src/components/square_tile.dart';
+import 'package:mymangatheque/src/services/auth_services.dart';
 
 // ignore_for_file: use_build_context_synchronously
 
@@ -93,12 +92,8 @@ class _SignUpPageState extends State<SignUpPage> {
         'authType': 'emailpass',
       });
 
-      // Go to home page
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-            builder: (context) => const AuthPage()),
-      );
+      // Go to profile page
+      GoRouter.of(context).go('/profile');
     } on FirebaseAuthException catch (e){
       if (e.code == "weak-password") {
         Navigator.pop(context);
@@ -299,7 +294,7 @@ class _SignUpPageState extends State<SignUpPage> {
                     // Google Button
                     SquareTile(
                       imagePath: 'assets/images/google.png',
-                      onTap: () => AuthServices().signInWithGoogle(),
+                      onTap: () => AuthServices().signInWithGoogle().then(() => GoRouter.of(context).go('/profile')),
                     ),
 
                     // const SizedBox(width: 25),
@@ -310,7 +305,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
                 const SizedBox(height: 15),
 
-                // Not a Member ? register now
+                // Already a Member ? Sign In now
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: Row(
@@ -324,14 +319,7 @@ class _SignUpPageState extends State<SignUpPage> {
                       ),
                       const SizedBox(width: 4),
                       TextButton(
-                          onPressed: (){
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => const SignInPage(pageBefore: true)
-                              ),
-                            );
-                          },
+                          onPressed: () => GoRouter.of(context).go('/profile/signin'),
                           child: const Text(
                             "Se connecter",
                             style: TextStyle(

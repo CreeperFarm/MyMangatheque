@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:mymangatheque/components/my_line.dart';
-import 'package:mymangatheque/get_data/get_user_information.dart';
+import 'package:go_router/go_router.dart';
+import 'package:mymangatheque/src/components/my_line.dart';
+import 'package:mymangatheque/src/get_data/get_user_information.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:adaptive_theme/adaptive_theme.dart';
@@ -8,9 +9,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
-
-import 'package:mymangatheque/screen/auth/auth_page.dart';
-import 'package:mymangatheque/screen/auth/modify_password_page.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -29,24 +27,13 @@ class _ProfilePageState extends State<ProfilePage> {
   // Modify the profile picture of the user
   void modifyImg(image) async {
     await FirebaseFirestore.instance.collection('users').doc(user.uid)
-        .update({"imageUrl": image})
-        .whenComplete(() => Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const AuthPageToProfile())
-    )
-    ).catchError((e) => print(e));
-  }
-
-  // Send a email to reset password
-  void resetPassword() async {
-    await FirebaseAuth.instance.setLanguageCode("fr");
-    await FirebaseAuth.instance.sendPasswordResetEmail(email: user.email.toString())
-        .catchError((e) => print(e));
+        .update({"imageUrl": image}).catchError((e) => print(e));
   }
 
   // Sign Out a Connected User
   void signUserOut() {
     FirebaseAuth.instance.signOut();
+    GoRouter.of(context).go('/profile/signin');
   }
 
   // Select an image to change profile picture image
@@ -111,26 +98,24 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
                 const Padding(padding: EdgeInsets.only(bottom: 25)),
                 MyLine(width: MediaQuery.of(context).size.width),
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Padding(
+                Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                    child: GetUserEmail(documentId: user.uid, beforeText: "L'email du compte est : ",)
-                  ),
+                    child: SingleChildScrollView(
+                        child: GetUserInfo(documentId: user.uid, beforeText: "L'email est : ", dataWanted: 'email')
+                    )
                 ),
                 MyLine(width: MediaQuery.of(context).size.width),
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                    child: GetUserPseudo(documentId: user.uid, beforeText: "Votre pseudo est : "),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                  child: SingleChildScrollView(
+                      child: GetUserInfo(documentId: user.uid, beforeText: "Votre pseudo est : ", dataWanted: 'pseudo')
                   ),
                 ),
                 MyLine(width: MediaQuery.of(context).size.width),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 10.0),
                   child: SingleChildScrollView(
-                    child: GetUserCreationDate(documentId: user.uid, beforeText: "Compte créer le : "),
+                    child: GetUserInfo(documentId: user.uid, beforeText: "Compte créer le : ", dataWanted: 'createdOn')
                   ),
                 ),
 
@@ -212,11 +197,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   padding: const EdgeInsets.symmetric(horizontal: 10.0),
                   child: SingleChildScrollView(
                     child: GestureDetector(
-                      onTap: () => {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const ModifyPasswordPage()),
-                      )},
+                      onTap: () => GoRouter.of(context).go('/profile/modify_password'),
                       child: const Row(
                         children: [
                           Padding(padding: EdgeInsets.only(right: 16)),

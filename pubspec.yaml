@@ -65,6 +65,7 @@ dependencies:
   riverpod_annotation: ^2.3.3
   auto_route: ^7.8.4
   dart_date: ^1.3.2
+  go_router: ^13.0.1
 
 dev_dependencies:
   flutter_test:
@@ -83,9 +84,9 @@ dev_dependencies:
 
 # Display Splash Screen
 flutter_native_splash:
-  color: '#000000'
-  # background_image: assets/images/logo_background.png
-  image: assets/images/logo_nobg.png
+  color: '#0b4b6c'
+  background_image: assets/images/splash_bg.png
+  image: assets/images/logow_nobg.png
 
 # Display Icon for the app
 flutter_launcher_icons:
