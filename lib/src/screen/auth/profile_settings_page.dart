@@ -10,14 +10,14 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
 
-class ProfilePage extends StatefulWidget {
-  const ProfilePage({super.key});
+class SettingsProfilePage extends StatefulWidget {
+  const SettingsProfilePage({super.key});
 
   @override
-  State<ProfilePage> createState() => _ProfilePageState();
+  State<SettingsProfilePage> createState() => _SettingsProfilePageState();
 }
 
-class _ProfilePageState extends State<ProfilePage> {
+class _SettingsProfilePageState extends State<SettingsProfilePage> {
 
   dynamic savedThemeMode;
   dynamic theme;

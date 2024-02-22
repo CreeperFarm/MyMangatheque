@@ -59,7 +59,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyAq4h5rJN8kUk7vKu5YvkCaISHBQjMiz98',
-    appId: '1:390944577899:android:76650421eaae60d2f7142e',
+    appId: '1:390944577899:android:876fc7a86c7d83ebf7142e',
     messagingSenderId: '390944577899',
     projectId: 'mymangatheque',
     databaseURL: 'https://mymangatheque-default-rtdb.europe-west1.firebasedatabase.app',
@@ -73,6 +73,7 @@ class DefaultFirebaseOptions {
     projectId: 'mymangatheque',
     databaseURL: 'https://mymangatheque-default-rtdb.europe-west1.firebasedatabase.app',
     storageBucket: 'mymangatheque.appspot.com',
+    androidClientId: '390944577899-jpi1p5n0usr2kvi2cn50rq65g0ueam45.apps.googleusercontent.com',
     iosClientId: '390944577899-fbir0pu2vlaac78fcv6klli48onav4vc.apps.googleusercontent.com',
     iosBundleId: 'fr.creeperfarm.mymangatheque',
   );

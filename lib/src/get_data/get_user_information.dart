@@ -5,9 +5,10 @@ class GetUserInfo extends StatelessWidget {
   final String documentId;
   final String beforeText;
   final String dataWanted;
+  final String afterText;
 
   const GetUserInfo(
-      {required this.documentId, required this.beforeText, required this.dataWanted, super.key});
+      {required this.documentId, required this.beforeText, required this.dataWanted, required this.afterText, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +25,7 @@ class GetUserInfo extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(beforeText),
-              Text(data[dataWanted]),
+              Text(data[dataWanted] + afterText),
             ],
           );
         }

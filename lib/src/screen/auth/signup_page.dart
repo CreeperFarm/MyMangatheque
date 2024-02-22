@@ -93,7 +93,7 @@ class _SignUpPageState extends State<SignUpPage> {
       });
 
       // Go to profile page
-      GoRouter.of(context).go('/profile');
+      context.go('/profile');
     } on FirebaseAuthException catch (e){
       if (e.code == "weak-password") {
         Navigator.pop(context);
@@ -294,7 +294,7 @@ class _SignUpPageState extends State<SignUpPage> {
                     // Google Button
                     SquareTile(
                       imagePath: 'assets/images/google.png',
-                      onTap: () => AuthServices().signInWithGoogle().then(() => GoRouter.of(context).go('/profile')),
+                      onTap: () => AuthServices().signInWithGoogle().then(() => context.go('/profile')),
                     ),
 
                     // const SizedBox(width: 25),
@@ -319,7 +319,7 @@ class _SignUpPageState extends State<SignUpPage> {
                       ),
                       const SizedBox(width: 4),
                       TextButton(
-                          onPressed: () => GoRouter.of(context).go('/profile/signin'),
+                          onPressed: () => context.go('/profile/signin'),
                           child: const Text(
                             "Se connecter",
                             style: TextStyle(

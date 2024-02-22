@@ -9,6 +9,7 @@ import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:mymangatheque/src/screen/auth/forgot_password_page.dart';
 import 'package:mymangatheque/src/screen/auth/modify_password_page.dart';
 import 'package:mymangatheque/src/screen/auth/profile_page.dart';
+import 'package:mymangatheque/src/screen/auth/profile_settings_page.dart';
 import 'package:mymangatheque/src/screen/auth/signin_page.dart';
 import 'package:mymangatheque/src/screen/auth/signup_page.dart';
 import 'firebase_options.dart';
@@ -30,73 +31,45 @@ class MyApp extends StatelessWidget {
   dynamic savedThemeMode;
   MyApp({required this.savedThemeMode, super.key});
 
-  GoRouter router = GoRouter(
+  final GoRouter router = GoRouter(
       routes: [
-        ShellRoute(
-            routes: [
-              GoRoute(
-                  path: '/',
-                  builder: (context, state) => const MyHomePage(title: 'HomePage'),
-                  routes: [
-                    GoRoute(
-                      path: 'profile',
-                      builder: (context, state) => const ProfilePage(),
-                      routes: [
-                        GoRoute(
-                            path: '/signin',
-                            builder: (context, state) => const SignInPage()
-                        ),
-                        GoRoute(
-                            path: '/signup',
-                            builder: (context, state) => const SignUpPage()
-                        ),
-                        GoRoute(
-                            path: '/modify_password',
-                            builder: (context, state) => const ModifyPasswordPage()
-                        ),
-                        GoRoute(
-                            path: '/forgot_password',
-                            builder: (context, state) => const ForgotPasswordPage()
-                        ),
-                      ]
-                    )
-                  ]
-              ),
-            ],
-          builder: (context, state, child) {
-              return BottomNavigationBar(
-                  items: const [
-                    BottomNavigationBarItem(
-                      icon: Icon(Icons.home),
-                      label: 'Home',
-                    ),
-                    BottomNavigationBarItem(
-                      icon: Icon(Icons.menu_book_outlined),
-                      label: 'Collection',
-                    ),
-                    BottomNavigationBarItem(
-                      icon: Icon(Icons.calendar_month),
-                      label: 'Planning',
-                    ),
-                    BottomNavigationBarItem(
-                      icon: Icon(Icons.search),
-                      label: 'Recherche',
-                    ),
-                    BottomNavigationBarItem(
-                      icon: Icon(Icons.account_circle_outlined),
-                      label: 'Compte',
-                    ),
-                  ]
-              );
-          }
-        )
+        GoRoute(
+          path: '/',
+          builder: (context, state) => const MyHomePage(title: 'HomePage'),
+          routes: [
+            GoRoute(
+              path: 'profile',
+              builder: (context, state) => const ProfilePage(),
+              routes: [
+                GoRoute(
+                  path: 'signin',
+                  builder: (context, state) => const SignInPage()
+                ),
+                GoRoute(
+                  path: 'signup',
+                  builder: (context, state) => const SignUpPage()
+                ),
+                GoRoute(
+                  path: 'modify_password',
+                  builder: (context, state) => const ModifyPasswordPage()
+                ),
+                GoRoute(
+                  path: 'forgot_password',
+                  builder: (context, state) => const ForgotPasswordPage()
+                ),
+                GoRoute(
+                  path: 'settings',
+                  builder: (context, state) => const SettingsProfilePage()
+                )
+              ]
+            ),
+          ]
+        ),
       ]
   );
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-
-    final goRouter = ref.watch(GoRouterProvider);
+  Widget build(BuildContext context) {
     FlutterNativeSplash.remove();
     return AdaptiveTheme(
       light: ThemeData(
@@ -124,7 +97,7 @@ class MyApp extends StatelessWidget {
       ),
       initial: savedThemeMode ?? AdaptiveThemeMode.light,
       builder: (theme, darkTheme) => MaterialApp.router(
-        routerConfig: goRouter,
+        routerConfig: router,
         title: 'MyMangatheque',
         theme: theme,
         darkTheme: darkTheme,
@@ -167,12 +140,23 @@ class MyHomePageState extends ConsumerState<MyHomePage> {
             ElevatedButton(
               onPressed: () {
                 if (user != null) {
-                  GoRouter.of(context).go('/profile');
+                  context.go('/profile');
                 } else {
-                  GoRouter.of(context).go('/profile/signin');
+                  context.go('/profile/signin');
                 }
               },
-              child: const Text("Go to Profile Page"))
+              child: const Text("Go to Profile Page")
+            ),
+            ElevatedButton(
+                onPressed: () {
+                  if (user != null) {
+                    context.go('/profile/settings');
+                  } else {
+                    context.go('/profile/signin');
+                  }
+                },
+                child: const Text("Go to Setting Profile Page")
+            ),
           ],
         ),
       ),
