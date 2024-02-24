@@ -90,6 +90,7 @@ class _SignUpPageState extends State<SignUpPage> {
         'imageUrl': 'https://cdn.statically.io/gh/CreeperFarm/AppManga/main/default_pdp.jpg',
         'createdOn': '$todayDay ${month[todayMonth]} $todayYear',
         'authType': 'emailpass',
+        'uid': user.uid,
       });
 
       // Go to profile page
@@ -294,7 +295,10 @@ class _SignUpPageState extends State<SignUpPage> {
                     // Google Button
                     SquareTile(
                       imagePath: 'assets/images/google.png',
-                      onTap: () => AuthServices().signInWithGoogle().then(() => context.go('/profile')),
+                      onTap: () => {
+                        AuthServices().signInWithGoogle(),
+                        context.go('/profile'),
+                      },
                     ),
 
                     // const SizedBox(width: 25),

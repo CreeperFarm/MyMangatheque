@@ -198,7 +198,10 @@ class _SignInPageState extends State<SignInPage> {
                     // Google Button
                     SquareTile(
                       imagePath: 'assets/images/google.png',
-                      onTap: () => AuthServices().signInWithGoogle().then(() => GoRouter.of(context).go('/profile')),
+                      onTap: () => {
+                        AuthServices().signInWithGoogle(),
+                        context.go('/profile'),
+                      },
                     ),
 
                     // const SizedBox(width: 25),

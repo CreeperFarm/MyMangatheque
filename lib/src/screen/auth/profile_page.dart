@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mymangatheque/src/components/my_line.dart';
+import 'package:mymangatheque/src/const/navbar_color.dart';
 import 'package:mymangatheque/src/get_data/get_user_information.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -9,15 +11,16 @@ import 'package:image_picker/image_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
+import 'package:mymangatheque/src/provider/theme_color_provider.dart';
 
-class ProfilePage extends StatefulWidget {
+class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});
 
   @override
-  State<ProfilePage> createState() => _ProfilePageState();
+  ConsumerState<ProfilePage> createState() => _ProfilePageState();
 }
 
-class _ProfilePageState extends State<ProfilePage> {
+class _ProfilePageState extends ConsumerState<ProfilePage> {
 
   dynamic savedThemeMode;
   dynamic theme;
@@ -27,13 +30,15 @@ class _ProfilePageState extends State<ProfilePage> {
   // Modify the profile picture of the user
   void modifyImg(image) async {
     await FirebaseFirestore.instance.collection('users').doc(user.uid)
-        .update({'imageUrl': image}).catchError((e) => print(e));
+        .update({'imageUrl': image}).then((query) {
+          setState(() {});
+        }).catchError((e) => print(e));
   }
 
   // Sign Out a Connected User
   void signUserOut() {
     FirebaseAuth.instance.signOut();
-    GoRouter.of(context).go('/profile/signin');
+    context.go('/profile/signin');
   }
 
   // Select an image to change profile picture image
@@ -53,11 +58,19 @@ class _ProfilePageState extends State<ProfilePage> {
     });
   }
 
+  // Change the color of the app
+  void changeThemeColor(Color colorBg, Color colorText, WidgetRef ref) {
+    ref.read(themeBgColorProvider.notifier).changeThemeBgColor(colorBg);
+    ref.read(themeTextColorProvider.notifier).changeThemeTextColor(colorText);
+  }
+
   // Get the theme
   @override
   void initState() {
     super.initState();
     getCurrentTheme();
+    ref.read(themeBgColorProvider);
+    ref.read(themeTextColorProvider);
   }
 
   // Set a string to the current theme
@@ -66,12 +79,22 @@ class _ProfilePageState extends State<ProfilePage> {
     setState(() {
       if (savedThemeMode == AdaptiveThemeMode.light) {
         theme = 'light';
+        changeThemeColor(lightBgColor, lightTextColor, ref);
+
       } else if (savedThemeMode == AdaptiveThemeMode.dark) {
         theme = 'dark';
+        changeThemeColor(darkBgColor, darkTextColor, ref);
       } else if (savedThemeMode == AdaptiveThemeMode.system) {
         theme = 'system';
+        final brightness = WidgetsBinding.instance.platformDispatcher.platformBrightness;
+        if (brightness == Brightness.dark) {
+          changeThemeColor(darkBgColor, darkTextColor, ref);
+        } else {
+          changeThemeColor(lightBgColor, lightTextColor, ref);
+        }
       } else {
         theme = 'light';
+        changeThemeColor(lightBgColor, lightTextColor, ref);
       }
     });
   }
@@ -185,21 +208,30 @@ class _ProfilePageState extends State<ProfilePage> {
                           setState(() {
                             savedThemeMode = AdaptiveThemeMode.light;
                           });
+                          changeThemeColor(lightBgColor, lightTextColor, ref);
                         } else if (value == 'dark') {
                           AdaptiveTheme.of(context).setDark();
                           setState(() {
                             savedThemeMode = AdaptiveThemeMode.dark;
                           });
+                          changeThemeColor(darkBgColor, darkTextColor, ref);
                         } else if (value == 'system') {
                           AdaptiveTheme.of(context).setSystem();
                           setState(() {
                             savedThemeMode = AdaptiveThemeMode.system;
                           });
+                          final brightness = WidgetsBinding.instance.platformDispatcher.platformBrightness;
+                          if (brightness == Brightness.dark) {
+                            changeThemeColor(darkBgColor, darkTextColor, ref);
+                          } else {
+                            changeThemeColor(lightBgColor, lightTextColor, ref);
+                          }
                         } else {
                           AdaptiveTheme.of(context).setLight();
                           setState(() {
                             savedThemeMode = AdaptiveThemeMode.light;
                           });
+                          changeThemeColor(lightBgColor, lightTextColor, ref);
                         }
                       }),
                 ),

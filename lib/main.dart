@@ -4,72 +4,35 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:mymangatheque/src/app_router/app_navigation.dart';
 import 'package:mymangatheque/src/provider/compteur_provider.dart';
+import 'package:mymangatheque/src/provider/theme_color_provider.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
-import 'package:mymangatheque/src/screen/auth/forgot_password_page.dart';
-import 'package:mymangatheque/src/screen/auth/modify_password_page.dart';
-import 'package:mymangatheque/src/screen/auth/profile_page.dart';
-import 'package:mymangatheque/src/screen/auth/profile_settings_page.dart';
-import 'package:mymangatheque/src/screen/auth/signin_page.dart';
-import 'package:mymangatheque/src/screen/auth/signup_page.dart';
 import 'firebase_options.dart';
 
 void main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
 
+  final savedThemeMode = await AdaptiveTheme.getThemeMode();
+
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  final savedThemeMode = await AdaptiveTheme.getThemeMode();
-
-  runApp(ProviderScope(child: MyApp(savedThemeMode: savedThemeMode)));
+  runApp(
+    ProviderScope(
+      child: MyApp(savedThemeMode: savedThemeMode),
+    )
+  );
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends ConsumerWidget {
   dynamic savedThemeMode;
   MyApp({required this.savedThemeMode, super.key});
 
-  final GoRouter router = GoRouter(
-      routes: [
-        GoRoute(
-          path: '/',
-          builder: (context, state) => const MyHomePage(title: 'HomePage'),
-          routes: [
-            GoRoute(
-              path: 'profile',
-              builder: (context, state) => const ProfilePage(),
-              routes: [
-                GoRoute(
-                  path: 'signin',
-                  builder: (context, state) => const SignInPage()
-                ),
-                GoRoute(
-                  path: 'signup',
-                  builder: (context, state) => const SignUpPage()
-                ),
-                GoRoute(
-                  path: 'modify_password',
-                  builder: (context, state) => const ModifyPasswordPage()
-                ),
-                GoRoute(
-                  path: 'forgot_password',
-                  builder: (context, state) => const ForgotPasswordPage()
-                ),
-                GoRoute(
-                  path: 'settings',
-                  builder: (context, state) => const SettingsProfilePage()
-                )
-              ]
-            ),
-          ]
-        ),
-      ]
-  );
-
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     FlutterNativeSplash.remove();
     return AdaptiveTheme(
       light: ThemeData(
@@ -97,7 +60,7 @@ class MyApp extends StatelessWidget {
       ),
       initial: savedThemeMode ?? AdaptiveThemeMode.light,
       builder: (theme, darkTheme) => MaterialApp.router(
-        routerConfig: router,
+        routerConfig: AppNavigation.router,
         title: 'MyMangatheque',
         theme: theme,
         darkTheme: darkTheme,
@@ -123,7 +86,6 @@ class MyHomePageState extends ConsumerState<MyHomePage> {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(widget.title),
       ),
       body: Center(

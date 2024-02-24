@@ -7,17 +7,18 @@ class AuthServices {
 
   // Google Sign In
   signInWithGoogle() async {
-
     // Begin interactive sign in process
-    final GoogleSignInAccount? gUser = await GoogleSignIn(forceCodeForRefreshToken: true).signIn();
+    final GoogleSignInAccount? gUser = await GoogleSignIn(
+      forceCodeForRefreshToken: true,
+    ).signIn();
 
     // Obtain auth details from request
     final GoogleSignInAuthentication gAuth = await gUser!.authentication;
 
     // Create a new credential for user
     final credential = GoogleAuthProvider.credential(
-        accessToken: gAuth.accessToken,
-        idToken: gAuth.idToken
+      accessToken: gAuth.accessToken,
+      idToken: gAuth.idToken,
     );
 
     // Finally, let's sign in
@@ -43,15 +44,17 @@ class AuthServices {
       '11': 'Novembre',
       '12': 'Décembre',
     };
-    final createdOn = "$createdOnDay ${month[createdOnMonthInt]} $createdOnYear";
 
-    await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
-      'pseudo': user.displayName,
-      'email': user.email,
-      'imageUrl': user.photoURL,
-      'createdOn': createdOn,
-      'authType': 'google',
-    });
+    final userCollection = FirebaseFirestore.instance.collection("users");
+    if (userCollection.doc(user.uid).get() == null) {
+      userCollection.doc(user.uid).set({
+        'uid': user.uid,
+        'email': user.email,
+        'displayName': user.displayName,
+        'photoURL': user.photoURL,
+        'createdOn': '$createdOnDay ${month[createdOnMonthInt]} $createdOnYear',
+      });
+    }
 
     return await FirebaseAuth.instance.signInWithCredential(credential);
   }
