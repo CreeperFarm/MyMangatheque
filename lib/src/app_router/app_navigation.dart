@@ -9,6 +9,8 @@ import 'package:mymangatheque/src/screen/auth/profile_settings_page.dart';
 import 'package:mymangatheque/src/screen/auth/signin_page.dart';
 import 'package:mymangatheque/src/screen/auth/signup_page.dart';
 import 'package:mymangatheque/src/screen/library/library_page.dart';
+import 'package:mymangatheque/src/screen/planning/planning_page.dart';
+import 'package:mymangatheque/src/screen/search/search_page.dart';
 
 class AppNavigation {
   AppNavigation._();
@@ -55,6 +57,28 @@ class AppNavigation {
                 }
               )
             ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/search',
+                name: 'Search',
+                builder: (context, state) {
+                  return SearchPage(key: state.pageKey,);
+                }
+              )
+            ]
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/planning',
+                name: 'Planning',
+                builder: (context, state) {
+                  return PlanningPage(key: state.pageKey,);
+                }
+              )
+            ]
           ),
           StatefulShellBranch(
             navigatorKey: _rootNavigatorProfile,

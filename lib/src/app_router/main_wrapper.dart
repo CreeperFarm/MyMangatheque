@@ -70,30 +70,33 @@ class _MainWrapperState extends ConsumerState<MainWrapper> {
         height: double.infinity,
         child: widget.navigationShell,
       ),
-      bottomNavigationBar: SlidingClippedNavBar(
+      bottomNavigationBar: BottomNavigationBar(
         backgroundColor: bgColor,
-        activeColor: textColor,
-        inactiveColor: textColor,
-        onButtonPressed: (index) {
-          setState(() {
-            selectedIndex = index;
-          });
-          _goBranch(selectedIndex);
-        },
-        iconSize: 30,
-        selectedIndex: selectedIndex,
-        barItems: [
-          BarItem(
-            icon: Icons.home,
-            title: 'Acceuil',
+        selectedItemColor: textColor,
+        unselectedItemColor: textColor,
+        currentIndex: widget.navigationShell.currentIndex,
+        showUnselectedLabels: true,
+        onTap: _goBranch,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: "Accueil",
           ),
-          BarItem(
-            icon: Icons.collections_bookmark,
-            title: 'Mangathèque',
+          BottomNavigationBarItem(
+            icon: Icon(Icons.book),
+            label: "Mangathèque",
           ),
-          BarItem(
-            icon: Icons.account_circle,
-            title: 'Profile',
+          BottomNavigationBarItem(
+            icon: Icon(Icons.search),
+            label: "Recherche",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.calendar_month),
+            label: "Planning",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: "Profil",
           ),
         ],
       ),
