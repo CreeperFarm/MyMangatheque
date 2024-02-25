@@ -15,14 +15,21 @@ class _PlanningPageState extends State<PlanningPage> {
         title: const Text("Planning"),
       ),
       body: const Center(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text("Planning"),
-            Image(
-              image: AssetImage("assets/images/splash_bg.png"),
-            ),
-          ],
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                "Planning",
+                style: TextStyle(
+                  fontSize: 25,
+                ),
+              ),
+              Image(
+                image: AssetImage("assets/images/splash_bg.png"),
+              ),
+            ],
+          ),
         ),
       ),
     );
