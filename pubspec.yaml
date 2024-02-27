@@ -85,7 +85,6 @@ dev_dependencies:
 
 # Display Splash Screen
 flutter_native_splash:
-  color: '#0b4b6c'
   background_image: assets/images/splash_bg.png
   image: assets/images/logow_nobg.png
 

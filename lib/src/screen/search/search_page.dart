@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class SearchPage extends StatefulWidget {
-  const SearchPage({super.key});
+  SearchPage({super.key});
 
   @override
   State<SearchPage> createState() => _SearchPageState();
@@ -15,7 +15,11 @@ class _SearchPageState extends State<SearchPage> {
         title: const Text("Recherche"),
       ),
       body: const Center(
-        child: Text("Recherche"),
+        child: Column(
+          children: [
+            Text("Recherche"),
+          ],
+        ),
       ),
     );
   }

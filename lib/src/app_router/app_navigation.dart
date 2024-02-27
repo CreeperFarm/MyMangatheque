@@ -64,7 +64,9 @@ class AppNavigation {
                 path: '/search',
                 name: 'Search',
                 builder: (context, state) {
-                  return SearchPage(key: state.pageKey,);
+                  return SearchPage(
+                    key: state.pageKey,
+                  );
                 }
               )
             ]
