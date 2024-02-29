@@ -45,7 +45,37 @@ class AppNavigation {
                 name: 'Home',
                 builder: (context, state) {
                   return MyHomePage(title: 'HomePage', key: state.pageKey);
-                }
+                },
+                routes: [
+                  GoRoute(
+                      path: 'editor/:name',
+                      name: 'Editor Home',
+                      builder: (context, state) {
+                        return EditorPage(editorName: state.pathParameters['name']!, key: state.pageKey);
+                      }
+                  ),
+                  GoRoute(
+                      path: 'author/:name',
+                      name: 'Author Home',
+                      builder: (context, state) {
+                        return AuthorPage(authorName: state.pathParameters['name']!, key: state.pageKey);
+                      }
+                  ),
+                  GoRoute(
+                      path: 'series/:name',
+                      name: 'Series Home',
+                      builder: (context, state) {
+                        return SeriesPages(seriesName: state.pathParameters['name']!, key: state.pageKey);
+                      }
+                  ),
+                  GoRoute(
+                      path: 'manga/:tomeId',
+                      name: 'Manga Home',
+                      builder: (context, state) {
+                        return SeriesPages(seriesName: state.pathParameters['tomeId']!, key: state.pageKey);
+                      }
+                  )
+                ]
               ),
             ]
           ),
@@ -61,28 +91,28 @@ class AppNavigation {
                   routes: [
                     GoRoute(
                         path: 'editor/:name',
-                        name: 'Editor',
+                        name: 'Editor Library',
                         builder: (context, state) {
                           return EditorPage(editorName: state.pathParameters['name']!, key: state.pageKey);
                         }
                     ),
                     GoRoute(
                         path: 'author/:name',
-                        name: 'Author',
+                        name: 'Author Library',
                         builder: (context, state) {
                           return AuthorPage(authorName: state.pathParameters['name']!, key: state.pageKey);
                         }
                     ),
                     GoRoute(
                         path: 'series/:name',
-                        name: 'Series',
+                        name: 'Series Library',
                         builder: (context, state) {
                           return SeriesPages(seriesName: state.pathParameters['name']!, key: state.pageKey);
                         }
                     ),
                     GoRoute(
                         path: 'manga/:tomeId',
-                        name: 'Manga',
+                        name: 'Manga Library',
                         builder: (context, state) {
                           return SeriesPages(seriesName: state.pathParameters['tomeId']!, key: state.pageKey);
                         }
@@ -104,28 +134,28 @@ class AppNavigation {
                   routes: [
                     GoRoute(
                         path: 'editor/:name',
-                        name: 'Editor',
+                        name: 'Editor Search',
                         builder: (context, state) {
                           return EditorPage(editorName: state.pathParameters['name']!, key: state.pageKey);
                         }
                     ),
                     GoRoute(
                         path: 'author/:name',
-                        name: 'Author',
+                        name: 'Author Search',
                         builder: (context, state) {
                           return AuthorPage(authorName: state.pathParameters['name']!, key: state.pageKey);
                         }
                     ),
                     GoRoute(
                         path: 'series/:name',
-                        name: 'Series',
+                        name: 'Series Search',
                         builder: (context, state) {
                           return SeriesPages(seriesName: state.pathParameters['name']!, key: state.pageKey);
                         }
                     ),
                     GoRoute(
                         path: 'manga/:tomeId',
-                        name: 'Manga',
+                        name: 'Manga Search',
                         builder: (context, state) {
                           return SeriesPages(seriesName: state.pathParameters['tomeId']!, key: state.pageKey);
                         }
@@ -141,7 +171,37 @@ class AppNavigation {
                 name: 'Planning',
                 builder: (context, state) {
                   return PlanningPage(key: state.pageKey,);
-                }
+                },
+                  routes: [
+                    GoRoute(
+                        path: 'editor/:name',
+                        name: 'Editor Planning',
+                        builder: (context, state) {
+                          return EditorPage(editorName: state.pathParameters['name']!, key: state.pageKey);
+                        }
+                    ),
+                    GoRoute(
+                        path: 'author/:name',
+                        name: 'Author Planning',
+                        builder: (context, state) {
+                          return AuthorPage(authorName: state.pathParameters['name']!, key: state.pageKey);
+                        }
+                    ),
+                    GoRoute(
+                        path: 'series/:name',
+                        name: 'Series Planning',
+                        builder: (context, state) {
+                          return SeriesPages(seriesName: state.pathParameters['name']!, key: state.pageKey);
+                        }
+                    ),
+                    GoRoute(
+                        path: 'manga/:tomeId',
+                        name: 'Manga Planning',
+                        builder: (context, state) {
+                          return SeriesPages(seriesName: state.pathParameters['tomeId']!, key: state.pageKey);
+                        }
+                    )
+                  ]
               )
             ]
           ),
