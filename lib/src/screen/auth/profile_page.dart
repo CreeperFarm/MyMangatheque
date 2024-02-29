@@ -120,42 +120,42 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   child: GetUserProfilePicture(documentId: user.uid),
                 ),
                 const Padding(padding: EdgeInsets.only(bottom: 25)),
-                MyLine(width: MediaQuery.of(context).size.width),
+                MyLine(width: MediaQuery.of(context).size.width, vertical: 10),
                 Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 10.0),
                     child: SingleChildScrollView(
                         child: GetUserInfo(documentId: user.uid, beforeText: "L'email est : ", dataWanted: 'email', afterText: '')
                     )
                 ),
-                MyLine(width: MediaQuery.of(context).size.width),
+                MyLine(width: MediaQuery.of(context).size.width, vertical: 10),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 10.0),
                   child: SingleChildScrollView(
                       child: GetUserInfo(documentId: user.uid, beforeText: 'Votre pseudo est : ', dataWanted: 'pseudo', afterText: '')
                   ),
                 ),
-                MyLine(width: MediaQuery.of(context).size.width),
+                MyLine(width: MediaQuery.of(context).size.width, vertical: 10),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 10.0),
                   child: SingleChildScrollView(
                     child: GetUserInfo(documentId: user.uid, beforeText: 'Compte créer le : ', dataWanted: 'createdOn', afterText: '')
                   ),
                 ),
-                /*MyLine(width: MediaQuery.of(context).size.width),
+                /*MyLine(width: MediaQuery.of(context).size.width, vertical: 10),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 10.0),
                   child: SingleChildScrollView(
                       child: GetUserInfo(documentId: user.uid, beforeText: 'Nombre de tome de manga possédé : ', dataWanted: 'createdOn', afterText: ' tomes') //TODO: Set the number of manga owned
                   ),
                 ),
-                MyLine(width: MediaQuery.of(context).size.width),
+                MyLine(width: MediaQuery.of(context).size.width, vertical: 10),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 10.0),
                   child: SingleChildScrollView(
                       child: GetUserInfo(documentId: user.uid, beforeText: 'Nombre de tome de manga en favoris : ', dataWanted: 'createdOn', afterText: ' tomes') //TODO: Set the number of manga fav
                   ),
                 ),*/
-                MyLine(width: MediaQuery.of(context).size.width),                // Drop Down Menu du DarkMode
+                MyLine(width: MediaQuery.of(context).size.width, vertical: 10),                // Drop Down Menu du DarkMode
                 Container(
                   padding: const EdgeInsets.all(10),
                   margin: const EdgeInsets.symmetric(horizontal: 5),
@@ -235,7 +235,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                         }
                       }),
                 ),
-                MyLine(width: MediaQuery.of(context).size.width),
+                MyLine(width: MediaQuery.of(context).size.width, vertical: 10),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 10.0),
                   child: SingleChildScrollView(

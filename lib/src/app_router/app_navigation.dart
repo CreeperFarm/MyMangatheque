@@ -8,6 +8,9 @@ import 'package:mymangatheque/src/screen/auth/modify_password_page.dart';
 import 'package:mymangatheque/src/screen/auth/profile_settings_page.dart';
 import 'package:mymangatheque/src/screen/auth/signin_page.dart';
 import 'package:mymangatheque/src/screen/auth/signup_page.dart';
+import 'package:mymangatheque/src/screen/info_manga/authors.dart';
+import 'package:mymangatheque/src/screen/info_manga/editors.dart';
+import 'package:mymangatheque/src/screen/info_manga/series.dart';
 import 'package:mymangatheque/src/screen/library/library_page.dart';
 import 'package:mymangatheque/src/screen/planning/planning_page.dart';
 import 'package:mymangatheque/src/screen/search/search_page.dart';
@@ -42,7 +45,7 @@ class AppNavigation {
                 name: 'Home',
                 builder: (context, state) {
                   return MyHomePage(title: 'HomePage', key: state.pageKey);
-                },
+                }
               ),
             ]
           ),
@@ -54,7 +57,37 @@ class AppNavigation {
                 name: 'Mangathèque',
                 builder: (context, state) {
                   return LibraryPage(key: state.pageKey,);
-                }
+                },
+                  routes: [
+                    GoRoute(
+                        path: 'editor/:name',
+                        name: 'Editor',
+                        builder: (context, state) {
+                          return EditorPage(editorName: state.pathParameters['name']!, key: state.pageKey);
+                        }
+                    ),
+                    GoRoute(
+                        path: 'author/:name',
+                        name: 'Author',
+                        builder: (context, state) {
+                          return AuthorPage(authorName: state.pathParameters['name']!, key: state.pageKey);
+                        }
+                    ),
+                    GoRoute(
+                        path: 'series/:name',
+                        name: 'Series',
+                        builder: (context, state) {
+                          return SeriesPages(seriesName: state.pathParameters['name']!, key: state.pageKey);
+                        }
+                    ),
+                    GoRoute(
+                        path: 'manga/:tomeId',
+                        name: 'Manga',
+                        builder: (context, state) {
+                          return SeriesPages(seriesName: state.pathParameters['tomeId']!, key: state.pageKey);
+                        }
+                    )
+                  ]
               )
             ],
           ),
@@ -67,7 +100,37 @@ class AppNavigation {
                   return SearchPage(
                     key: state.pageKey,
                   );
-                }
+                },
+                  routes: [
+                    GoRoute(
+                        path: 'editor/:name',
+                        name: 'Editor',
+                        builder: (context, state) {
+                          return EditorPage(editorName: state.pathParameters['name']!, key: state.pageKey);
+                        }
+                    ),
+                    GoRoute(
+                        path: 'author/:name',
+                        name: 'Author',
+                        builder: (context, state) {
+                          return AuthorPage(authorName: state.pathParameters['name']!, key: state.pageKey);
+                        }
+                    ),
+                    GoRoute(
+                        path: 'series/:name',
+                        name: 'Series',
+                        builder: (context, state) {
+                          return SeriesPages(seriesName: state.pathParameters['name']!, key: state.pageKey);
+                        }
+                    ),
+                    GoRoute(
+                        path: 'manga/:tomeId',
+                        name: 'Manga',
+                        builder: (context, state) {
+                          return SeriesPages(seriesName: state.pathParameters['tomeId']!, key: state.pageKey);
+                        }
+                    )
+                  ]
               )
             ]
           ),

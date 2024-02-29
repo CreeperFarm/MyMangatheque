@@ -6,7 +6,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mymangatheque/src/app_router/app_navigation.dart';
 import 'package:mymangatheque/src/provider/compteur_provider.dart';
-import 'package:mymangatheque/src/provider/theme_color_provider.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'firebase_options.dart';
 

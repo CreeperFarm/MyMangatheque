@@ -1,10 +1,10 @@
-import 'dart:async';
-import 'package:adaptive_theme/adaptive_theme.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
-import 'package:mymangatheque/src/const/navbar_color.dart';
 import 'package:mymangatheque/src/provider/theme_color_provider.dart';
+import 'package:mymangatheque/src/const/navbar_color.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:adaptive_theme/adaptive_theme.dart';
+import 'package:go_router/go_router.dart';
+import 'package:flutter/material.dart';
+import 'dart:async';
 
 class MainWrapper extends ConsumerStatefulWidget {
   final StatefulNavigationShell navigationShell;
