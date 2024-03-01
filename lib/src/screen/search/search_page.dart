@@ -82,12 +82,24 @@ class _SearchPageState extends ConsumerState<SearchPage> {
 
   searchResultsList() {
     var showResults = [];
+    var filter = ref.watch(searchFilterProvider);
 
     if (_searchController.text != "") {
       for (var clientSnapshot in _allResults) {
         var name = clientSnapshot['manga'].toString().toLowerCase();
-        if (name.contains(_searchController.text.toLowerCase())) {
-          showResults.add(clientSnapshot);
+
+        if (filter == 'manga') {
+          if (name.contains(_searchController.text.toLowerCase())) {
+            showResults.add(clientSnapshot);
+          }
+        } else if (filter == 'editor') {
+          if (name.contains(_searchController.text.toLowerCase())) {
+            showResults.add(clientSnapshot);
+          }
+        } else {
+          if (name.contains(_searchController.text.toLowerCase())) {
+            showResults.add(clientSnapshot);
+          }
         }
       }
     } else {
@@ -222,7 +234,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                                 ),
                               ),
                               Text(
-                                "2022",
+                                "2022", //Todo: change to date
                                 style: TextStyle(
                                   color: textColor,
                                   fontSize: 14,
@@ -248,7 +260,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                 ),
               ],
             );
-          } else if (selectedFilter == 'editor') {
+          } else if (selectedFilter == 'author') {
             return Column(
               children: [
                 ListTile(
@@ -260,7 +272,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                           Padding(
                             padding: const EdgeInsets.only(right: 10),
                             child: Image.network(
-                              'https://cdn.statically.io/gh/CreeperFarm/AppManga/main/author/${_resultsList[index]['img']}.jpg',
+                              'https://cdn.statically.io/gh/CreeperFarm/AppManga/main/author/${_resultsList[index]['author']}.jpg',
                               width: 50,
                             ),
                           ),
@@ -276,19 +288,12 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                                 ),
                               ),
                               Text(
-                                textLength(_resultsList[index]['author'], 40),
+                                textLength(_resultsList[index]['manga'], 40),
                                 style: TextStyle(
                                   color: textColor,
                                   fontSize: 14,
                                 ),
                               ),
-                              Text(
-                                "2022",
-                                style: TextStyle(
-                                  color: textColor,
-                                  fontSize: 14,
-                                ),
-                              )
                             ],
                           ),
                         ],
@@ -300,7 +305,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                     ],
                   ),
                   onTap: () {
-                    context.go('search/series/${_resultsList[index]['manga']}');
+                    context.go('search/author/${_resultsList[index]['author']}');
                   },
                 ),
                 MyLine(
@@ -329,7 +334,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                textLength(_resultsList[index]['manga'], 33),
+                                textLength(_resultsList[index]['editor'], 33),
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 17,
@@ -343,13 +348,6 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                                   fontSize: 14,
                                 ),
                               ),
-                              Text(
-                                "2022",
-                                style: TextStyle(
-                                  color: textColor,
-                                  fontSize: 14,
-                                ),
-                              )
                             ],
                           ),
                         ],
@@ -361,7 +359,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                     ],
                   ),
                   onTap: () {
-                    context.go('search/series/${_resultsList[index]['manga']}');
+                    context.go('search/editor/${_resultsList[index]['editor']}');
                   },
                 ),
                 MyLine(
