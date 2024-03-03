@@ -251,7 +251,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                     ],
                   ),
                   onTap: () {
-                    context.go('search/series/${_resultsList[index]['manga']}');
+                    context.go('/search/series/${_resultsList[index]['manga']}');
                   },
                 ),
                 MyLine(
@@ -305,7 +305,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                     ],
                   ),
                   onTap: () {
-                    context.go('search/author/${_resultsList[index]['author']}');
+                    context.go('/search/author/${_resultsList[index]['author']}');
                   },
                 ),
                 MyLine(
@@ -359,7 +359,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                     ],
                   ),
                   onTap: () {
-                    context.go('search/editor/${_resultsList[index]['editor']}');
+                    context.go('/search/editor/${_resultsList[index]['editor']}');
                   },
                 ),
                 MyLine(
