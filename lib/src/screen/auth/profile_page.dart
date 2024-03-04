@@ -51,8 +51,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       imageQuality: 75,
     );
 
-    Reference ref =
-        FirebaseStorage.instance.ref().child('images/pdp/pdp-${user.uid}.jpg');
+    Reference ref = FirebaseStorage.instance.ref().child('images/pdp/pdp-${user.uid}.jpg');
 
     await ref.putFile(File(image!.path));
     ref.getDownloadURL().then((value) => {modifyImg(value)});
