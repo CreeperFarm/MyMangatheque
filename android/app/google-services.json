@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "390944577899-qfsd2gks3obesqd9svmo9ldf6iaq8nrb.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.mymangatheque",
+            "certificate_hash": "3324692a83e9a3e8256e6257365e80ef97ddab4c"
+          }
+        },
+        {
           "client_id": "390944577899-172gpsu655vggutsekd691d3qqepqhif.apps.googleusercontent.com",
           "client_type": 3
         }
