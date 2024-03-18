@@ -46,15 +46,6 @@ class AuthServices {
     };
 
     final userCollection = FirebaseFirestore.instance.collection("users");
-    if (userCollection.doc(user.uid).get() == null) {
-      userCollection.doc(user.uid).set({
-        'uid': user.uid,
-        'email': user.email,
-        'displayName': user.displayName,
-        'photoURL': user.photoURL,
-        'createdOn': '$createdOnDay ${month[createdOnMonthInt]} $createdOnYear',
-      });
-    }
 
     return await FirebaseAuth.instance.signInWithCredential(credential);
   }

@@ -51,6 +51,7 @@
 			<dict>
 				<key>CFBundleTypeRole</key>
 				<string>Editor</string>
+				<key>CFBundleURLSchemes</key>
 				<array>
 					<string>com.googleusercontent.apps.390944577899-35sk6e1n6n03tavnm1ursse7aodv11t2</string>
 				</array>
