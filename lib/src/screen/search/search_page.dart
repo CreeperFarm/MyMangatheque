@@ -2,6 +2,7 @@ import 'package:mymangatheque/src/provider/search_filter_provider.dart';
 import 'package:mymangatheque/src/provider/theme_color_provider.dart';
 import 'package:mymangatheque/src/components/my_line.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mymangatheque/src/const/own_icon.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/cupertino.dart';
@@ -24,9 +25,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
     ref.read(themeTextColorProvider);
     ref.read(themeBgColorProvider);
     ref.read(searchFilterProvider);
-    getClientStreamManga();
-    getClientStreamEditor();
-    getClientStreamAuthor();
+    getClientStream();
     _searchController.addListener(_onSearchChanged);
     super.initState();
   }
@@ -35,32 +34,10 @@ class _SearchPageState extends ConsumerState<SearchPage> {
     ref.read(searchFilterProvider.notifier).changeSearchFilter(filter);
   }
 
-  getClientStreamManga() async {
+  getClientStream() async {
     var data = await FirebaseFirestore.instance
         .collection('manga')
         .orderBy('manga')
-        .get();
-
-    setState(() {
-      _allResults = data.docs;
-    });
-  }
-
-  getClientStreamEditor() async {
-    var data = await FirebaseFirestore.instance
-        .collection('manga')
-        .orderBy('editor')
-        .get();
-
-    setState(() {
-      _allResults = data.docs;
-    });
-  }
-
-  getClientStreamAuthor() async {
-    var data = await FirebaseFirestore.instance
-        .collection('manga')
-        .orderBy('author')
         .get();
 
     setState(() {
@@ -86,20 +63,10 @@ class _SearchPageState extends ConsumerState<SearchPage> {
 
     if (_searchController.text != "") {
       for (var clientSnapshot in _allResults) {
-        var name = clientSnapshot['manga'].toString().toLowerCase();
+        var name = clientSnapshot[filter].toString().toLowerCase();
 
-        if (filter == 'manga') {
-          if (name.contains(_searchController.text.toLowerCase())) {
-            showResults.add(clientSnapshot);
-          }
-        } else if (filter == 'editor') {
-          if (name.contains(_searchController.text.toLowerCase())) {
-            showResults.add(clientSnapshot);
-          }
-        } else {
-          if (name.contains(_searchController.text.toLowerCase())) {
-            showResults.add(clientSnapshot);
-          }
+        if (name.contains(_searchController.text.toLowerCase())) {
+          showResults.add(clientSnapshot);
         }
       }
     } else {
@@ -108,6 +75,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
 
     setState(() {
       _resultsList = showResults;
+
     });
   }
 
@@ -120,7 +88,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
 
   @override
   void didChangeDependencies() {
-    getClientStreamManga();
+    getClientStream();
     super.didChangeDependencies();
   }
 
@@ -142,13 +110,13 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                 placeholderStyle: TextStyle(
                   color: textColor,
                 ),
+                style: TextStyle(
+                  color: textColor,
+                ),
               ),
             ),
             PopupMenuButton<String>(
-              icon: Icon(
-                Icons.filter_list,
-                color: textColor,
-              ),
+              icon: OwnIcon(iconColor: textColor, iconName: "filter_right"),
               onSelected: (String result) {
                 setState(() {
                   changeFilter(result);

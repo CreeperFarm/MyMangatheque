@@ -58,6 +58,13 @@
 			</dict>
 		</array>
 		<!-- End of Google Sign-in Section -->
+
+		<!-- Start of Image Picker Section -->
+		<key>NSPhotoLibraryUsageDescription</key>
+		<string>Used to get the Profile Picture</string>
+		<key>NSCameraUsageDescription</key>
+		<string>Used for the scan of barcode of the book</string>
+		<!-- End of Image Picker Section -->
 		<key>UIStatusBarHidden</key>
 		<false/>
 	</dict>

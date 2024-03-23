@@ -40,7 +40,7 @@ dependencies:
   flutter_launcher_icons: ^0.13.1
   flutter_staggered_grid_view: ^0.7.0
   flutter_native_splash: ^2.3.1
-  flutter_svg: ^2.0.7
+  flutter_svg: ^2.0.10+1
   google_fonts: ^6.1.0
 
   # Theme dependency
@@ -94,12 +94,12 @@ flutter_launcher_icons:
   min_sdk_android: 19
   ios: true
   remove_alpha_ios: true
-  image_path: "assets/images/logo_foreground.png"
+  image_path: "assets/images/logo_app.png"
   # adaptive_icon_background: "assets/images/logo_background.png"
   # daptive_icon_foreground: "assets/images/logo_foreground.png"
   web:
     generate: true
-    image_path: "assets/images/logo_foreground.png"
+    image_path: "assets/images/logo_app.png"
     background_color: "#000b4b6c"
     theme_color: "#0b4b6c"
 
@@ -118,6 +118,7 @@ flutter:
   assets:
     - assets/images/
     - assets/svg/
+    - assets/icons/
     - assets/images/theme/
     - assets/
 

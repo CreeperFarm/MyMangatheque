@@ -1,19 +1,22 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mymangatheque/src/components/my_button.dart';
 import 'package:mymangatheque/src/components/my_textfield.dart';
+import 'package:mymangatheque/src/provider/theme_color_provider.dart';
 
 // ignore_for_file: use_build_context_synchronously
 
-class ModifyPasswordPage extends StatefulWidget {
+class ModifyPasswordPage extends ConsumerStatefulWidget {
   const ModifyPasswordPage({super.key});
 
   @override
-  State<ModifyPasswordPage> createState() => _ModifyPasswordPageState();
+  ConsumerState<ModifyPasswordPage> createState() => _ModifyPasswordPageState();
 }
 
-class _ModifyPasswordPageState extends State<ModifyPasswordPage> {
+class _ModifyPasswordPageState extends ConsumerState<ModifyPasswordPage> {
   // Define variable
   final oldPasswordController = TextEditingController();
   final newPasswordController = TextEditingController();
@@ -91,9 +94,19 @@ class _ModifyPasswordPageState extends State<ModifyPasswordPage> {
     );
   }
 
+  @override
+  void initState() {
+    super.initState();
+    ref.read(themeBgColorProvider);
+    ref.read(themeTextColorProvider);
+  }
 
   @override
   Widget build(BuildContext context) {
+
+    final bgColor = ref.watch(themeBgColorProvider);
+    final textColor = ref.watch(themeTextColorProvider);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Modification du mot de passe'),
@@ -105,9 +118,10 @@ class _ModifyPasswordPageState extends State<ModifyPasswordPage> {
           child: SingleChildScrollView(
             child: Column(
               children: [
-                const Icon(
-                    Icons.lock,
-                    size: 200,
+                SvgPicture.asset(
+                    'assets/icons/locker.svg',
+                    height: 200,
+                    colorFilter: ColorFilter.mode(textColor, BlendMode.srcIn)
                 ),
 
                 const SizedBox(height: 11),
@@ -117,28 +131,31 @@ class _ModifyPasswordPageState extends State<ModifyPasswordPage> {
                   child: Column(
                     children: [
                       MyTextField(
-                          controller: oldPasswordController,
-                          labelText: "Ancien mot de passe",
-                          obscureText: true,
-                          errorMessage: "Veuillez enter votre ancien mot de passe!"
+                        controller: oldPasswordController,
+                        labelText: "Ancien mot de passe",
+                        obscureText: true,
+                        errorMessage: "Veuillez enter votre ancien mot de passe!",
+                        textColor: textColor,
                       ),
 
                       const SizedBox(height: 11),
 
                       MyTextField(
-                          controller: newPasswordController,
-                          labelText: "Nouveau mot de passe",
-                          obscureText: true,
-                          errorMessage: "Veuillez enter votre nouveau mot de passe!"
+                        controller: newPasswordController,
+                        labelText: "Nouveau mot de passe",
+                        obscureText: true,
+                        errorMessage: "Veuillez enter votre nouveau mot de passe!",
+                        textColor: textColor
                       ),
 
                       const SizedBox(height: 11),
 
                       MyTextField(
-                          controller: newPasswordController,
-                          labelText: "Confirmer le mot de passe",
-                          obscureText: true,
-                          errorMessage: "Veuillez enter votre nouveau mot de passe!"
+                        controller: newPasswordController,
+                        labelText: "Confirmer le mot de passe",
+                        obscureText: true,
+                        errorMessage: "Veuillez enter votre nouveau mot de passe!",
+                          textColor: textColor
                       ),
                     ],
                   ),
@@ -147,6 +164,9 @@ class _ModifyPasswordPageState extends State<ModifyPasswordPage> {
                 const SizedBox(height: 11),
 
                 MyButton(
+                  text: "Changer le mot de passe",
+                  bgColor: bgColor,
+                  textColor: textColor,
                   onTap: () => {
                     // Verify if all field is complete
                     if (_formKey.currentState!.validate()) {
@@ -157,7 +177,6 @@ class _ModifyPasswordPageState extends State<ModifyPasswordPage> {
                       }
                     }
                   },
-                  text: "Changer le mot de passe",
                 ),
               ],
             ),

@@ -2,23 +2,26 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dart_date/dart_date.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mymangatheque/src/components/my_button.dart';
 import 'package:mymangatheque/src/components/my_textfield.dart';
 import 'package:mymangatheque/src/components/square_tile.dart';
+import 'package:mymangatheque/src/provider/theme_color_provider.dart';
 import 'package:mymangatheque/src/services/auth_services.dart';
 
 // ignore_for_file: use_build_context_synchronously
 
-class SignUpPage extends StatefulWidget {
+class SignUpPage extends ConsumerStatefulWidget {
   const SignUpPage({super.key});
 
   @override
-  State<SignUpPage> createState() => _SignUpPageState();
+  ConsumerState<SignUpPage> createState() => _SignUpPageState();
 }
 
-class _SignUpPageState extends State<SignUpPage> {
+class _SignUpPageState extends ConsumerState<SignUpPage> {
   // Define variable
   // For Sign Up
   final emailController = TextEditingController();
@@ -98,7 +101,7 @@ class _SignUpPageState extends State<SignUpPage> {
     } on FirebaseAuthException catch (e){
       if (e.code == "weak-password") {
         Navigator.pop(context);
-        errorText = "Veuillez inséré un mot de passe plus fort!";
+        errorText = "Veuillez insérer un mot de passe plus sécurisé!";
         showMessage(errorText);
       } else if (e.code == "invalid-email" || e.code == "wrong-password") {
         Navigator.pop(context);
@@ -139,7 +142,17 @@ class _SignUpPageState extends State<SignUpPage> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    ref.read(themeBgColorProvider);
+    ref.read(themeTextColorProvider);
+  }
+
+  @override
   Widget build(BuildContext context) {
+
+    final bgColor = ref.watch(themeBgColorProvider);
+    final textColor = ref.watch(themeTextColorProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -159,9 +172,10 @@ class _SignUpPageState extends State<SignUpPage> {
                 const SizedBox(height: 10),
 
                 // Locker Icon
-                const Icon(
-                  Icons.lock,
-                  size: 75,
+                SvgPicture.asset(
+                    'assets/icons/locker.svg',
+                    height: 75,
+                    colorFilter: ColorFilter.mode(textColor, BlendMode.srcIn)
                 ),
 
                 const SizedBox(height: 15),
@@ -170,7 +184,7 @@ class _SignUpPageState extends State<SignUpPage> {
                   "Inscrivez-vous pour pouvoir sauvegarder vos mangas favoris et dans votre collection",
                   textAlign: TextAlign.center,
                   style: GoogleFonts.poppins(
-                    color: Colors.grey,
+                    color: textColor,
                     fontSize: 17,
                   ),
                 ),
@@ -185,6 +199,7 @@ class _SignUpPageState extends State<SignUpPage> {
                         labelText: "Pseudo",
                         obscureText: false,
                         errorMessage: "Veuillez entrer un pseudo!",
+                        textColor: textColor,
                       ),
 
                       const SizedBox(height: 11),
@@ -195,6 +210,7 @@ class _SignUpPageState extends State<SignUpPage> {
                         labelText: "Votre Email",
                         obscureText: false,
                         errorMessage: "Veuillez enter votre email!",
+                        textColor: textColor,
                       ),
 
                       const SizedBox(height: 11),
@@ -205,6 +221,7 @@ class _SignUpPageState extends State<SignUpPage> {
                         labelText: "Votre mot de passe",
                         obscureText: true,
                         errorMessage: "Veuillez entrer votre mot de passe!",
+                        textColor: textColor,
                       ),
 
                       const SizedBox(height: 11),
@@ -230,7 +247,7 @@ class _SignUpPageState extends State<SignUpPage> {
                             ),
                             filled: true,
                             labelStyle: TextStyle(
-                              color: Colors.grey[400],
+                              color: textColor,
                             ),
                             hintText: "Confirmer le mot de passe",
                           ),
@@ -245,6 +262,8 @@ class _SignUpPageState extends State<SignUpPage> {
                 // Button who create the account
                 MyButton(
                   text: "Créer un compte",
+                  bgColor: bgColor,
+                  textColor: textColor,
                   onTap: () async {
                     // Verify if all field is complete
                     if (_formKey.currentState!.validate()){
@@ -265,7 +284,7 @@ class _SignUpPageState extends State<SignUpPage> {
                     Expanded(
                       child: Divider(
                         thickness: 0.5,
-                        color: Colors.grey[400],
+                        color: textColor,
                       ),
                     ),
                     Padding(
@@ -273,14 +292,14 @@ class _SignUpPageState extends State<SignUpPage> {
                       child: Text(
                         "Ou continuer avec",
                         style: TextStyle(
-                          color: Colors.grey[700],
+                          color: textColor,
                         ),
                       ),
                     ),
                     Expanded(
                       child: Divider(
                         thickness: 0.5,
-                        color: Colors.grey[400],
+                        color: textColor,
                       ),
                     ),
                   ],
@@ -318,7 +337,7 @@ class _SignUpPageState extends State<SignUpPage> {
                       Text(
                         "J'ai déjà un compte ?",
                         style: TextStyle(
-                            color: Colors.grey[700]
+                            color: textColor
                         ),
                       ),
                       const SizedBox(width: 4),

@@ -1,22 +1,23 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mymangatheque/src/components/my_button.dart';
 import 'package:mymangatheque/src/components/my_textfield.dart';
 import 'package:mymangatheque/src/components/square_tile.dart';
+import 'package:mymangatheque/src/provider/theme_color_provider.dart';
 import 'package:mymangatheque/src/services/auth_services.dart';
 
-// ignore_for_file: use_build_context_synchronously
-
-class SignInPage extends StatefulWidget {
+class SignInPage extends ConsumerStatefulWidget {
   const SignInPage({super.key});
 
   @override
-  State<SignInPage> createState() => _SignInPageState();
+  ConsumerState<SignInPage> createState() => _SignInPageState();
 }
 
-class _SignInPageState extends State<SignInPage> {
+class _SignInPageState extends ConsumerState<SignInPage> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
 
@@ -29,7 +30,7 @@ class _SignInPageState extends State<SignInPage> {
   }
 
   // sign-in user method
-  void signUserIn() async {
+  void signUserIn(context) async {
     // show circular progress
     showDialog(
         context: context,
@@ -76,7 +77,18 @@ class _SignInPageState extends State<SignInPage> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    ref.read(themeBgColorProvider);
+    ref.read(themeTextColorProvider);
+  }
+
+  @override
   Widget build(BuildContext context) {
+
+    final bgColor = ref.watch(themeBgColorProvider);
+    final textColor = ref.watch(themeTextColorProvider);
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -96,18 +108,19 @@ class _SignInPageState extends State<SignInPage> {
                 const SizedBox(height: 10),
 
                 // Locker Icon
-                const Icon(
-                  Icons.lock,
-                  size: 100,
+                SvgPicture.asset(
+                  'assets/icons/locker.svg',
+                  height: 100,
+                  colorFilter: ColorFilter.mode(textColor, BlendMode.srcIn)
                 ),
 
                 const SizedBox(height: 15),
 
                 Text(
-                  "Connectez-vous pour pouvoir sauvegarder vos mangas favoris et dans votre collection",
+                  "Connectez-vous pour pouvoir sauvegarder vos mangas favoris et dans votre collection et vous éviter les doublons.",
                   textAlign: TextAlign.center,
                   style: GoogleFonts.poppins(
-                    color: Colors.grey,
+                    color: textColor,
                     fontSize: 17,
                   ),
                 ),
@@ -122,6 +135,7 @@ class _SignInPageState extends State<SignInPage> {
                       labelText: "Votre Email",
                       obscureText: false,
                       errorMessage: "Veuillez enter votre email!",
+                      textColor: textColor,
                     ),
 
                     const SizedBox(height: 15),
@@ -129,9 +143,10 @@ class _SignInPageState extends State<SignInPage> {
                     // Password field
                     MyTextField(
                       controller: passwordController,
-                      labelText: "Mot de passe",
+                      labelText: "Votre Mot de passe",
                       obscureText: true,
                       errorMessage: "Veuillez entrer votre mot de passe!",
+                      textColor: textColor,
                     ),
                   ],
                 ),
@@ -149,7 +164,7 @@ class _SignInPageState extends State<SignInPage> {
                       textAlign: TextAlign.right,
                       style: GoogleFonts.poppins(
                         fontWeight: FontWeight.bold,
-                        color: Colors.grey[600],
+                        color: textColor,
                       ),
                     ),
                   ),
@@ -158,7 +173,9 @@ class _SignInPageState extends State<SignInPage> {
                 // Display sign in button
                 MyButton(
                   text: "Se connecter",
-                  onTap: signUserIn,
+                  bgColor: bgColor,
+                  textColor: textColor,
+                  onTap: () => signUserIn(context),
                 ),
                 const SizedBox(height: 35),
 
@@ -168,7 +185,7 @@ class _SignInPageState extends State<SignInPage> {
                     Expanded(
                       child: Divider(
                         thickness: 0.5,
-                        color: Colors.grey[400],
+                        color: textColor,
                       ),
                     ),
                     Padding(
@@ -176,14 +193,14 @@ class _SignInPageState extends State<SignInPage> {
                       child: Text(
                         "Ou continuer avec",
                         style: TextStyle(
-                          color: Colors.grey[700],
+                          color: textColor,
                         ),
                       ),
                     ),
                     Expanded(
                       child: Divider(
                         thickness: 0.5,
-                        color: Colors.grey[400],
+                        color: textColor,
                       ),
                     ),
                   ],
@@ -220,8 +237,7 @@ class _SignInPageState extends State<SignInPage> {
                     children: [
                       Text(
                         "Pas encore de compte ?",
-                        style: TextStyle(color: Colors.grey[700]
-                        ),
+                        style: TextStyle(color: textColor),
                       ),
                       const SizedBox(width: 4),
                       TextButton(

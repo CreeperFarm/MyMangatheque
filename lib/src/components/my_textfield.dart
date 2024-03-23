@@ -5,12 +5,14 @@ class MyTextField extends StatelessWidget {
   final String labelText;
   final bool obscureText;
   final String errorMessage;
+  final Color textColor;
 
   const MyTextField({
     required this.controller,
     required this.labelText,
     required this.obscureText,
     required this.errorMessage,
+    required this.textColor,
     super.key,
   });
 
@@ -34,7 +36,7 @@ class MyTextField extends StatelessWidget {
           ),
           filled: true,
           labelStyle: TextStyle(
-            color: Colors.grey[400],
+            color: textColor,
           ),
           hintText: labelText,
         ),

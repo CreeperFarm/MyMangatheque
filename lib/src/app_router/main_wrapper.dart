@@ -1,3 +1,5 @@
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:mymangatheque/src/const/own_icon.dart';
 import 'package:mymangatheque/src/provider/theme_color_provider.dart';
 import 'package:mymangatheque/src/const/navbar_color.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -76,25 +78,25 @@ class _MainWrapperState extends ConsumerState<MainWrapper> {
         currentIndex: widget.navigationShell.currentIndex,
         showUnselectedLabels: true,
         onTap: _goBranch,
-        items: const [
+        items: [
           BottomNavigationBarItem(
-            icon: Icon(Icons.home),
+            icon: OwnIcon(iconColor: textColor, iconName: "home"),
             label: "Accueil",
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.book),
+            icon: OwnIcon(iconColor: textColor, iconName: "collection"),
             label: "Collection",
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.search),
+            icon: OwnIcon(iconColor: textColor, iconName: "search"),
             label: "Recherche",
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.calendar_month),
+            icon: OwnIcon(iconColor: textColor, iconName: "calendar"),
             label: "Planning",
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.person),
+            icon: OwnIcon(iconColor: textColor, iconName: "user"),
             label: "Profil",
           ),
         ],

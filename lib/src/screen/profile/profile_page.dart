@@ -1,17 +1,18 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
+import 'package:mymangatheque/src/const/own_icon.dart';
+import 'package:mymangatheque/src/provider/theme_color_provider.dart';
+import 'package:mymangatheque/src/get_data/get_user_information.dart';
 import 'package:mymangatheque/src/components/my_line.dart';
 import 'package:mymangatheque/src/const/navbar_color.dart';
-import 'package:mymangatheque/src/get_data/get_user_information.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:adaptive_theme/adaptive_theme.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
-import 'package:mymangatheque/src/provider/theme_color_provider.dart';
 
 class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});
@@ -100,10 +101,14 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+
+    final bgColor = ref.watch(themeBgColorProvider);
+    final textColor = ref.watch(themeTextColorProvider);
+
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        title: const Text('Page de profil et de réglage'),
+        title: const Text('Page de profile et de réglage'),
       ),
       body: Center(
         child: SingleChildScrollView(
@@ -251,20 +256,17 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                       }),
                 ),
                 MyLine(width: MediaQuery.of(context).size.width, vertical: 10),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                  child: SingleChildScrollView(
-                    child: GestureDetector(
-                      onTap: () =>
-                          GoRouter.of(context).go('/profile/modify_password'),
-                      child: const Row(
-                        children: [
-                          Padding(padding: EdgeInsets.only(right: 16)),
-                          Icon(Icons.lock_outline),
-                          Padding(padding: EdgeInsets.only(right: 5)),
-                          Text('Changer de mot de passe'),
-                        ],
-                      ),
+                SingleChildScrollView(
+                  child: GestureDetector(
+                    onTap: () =>
+                        GoRouter.of(context).go('/profile/modify_password'),
+                    child: Row(
+                      children: [
+                        const Padding(padding: EdgeInsets.only(right: 16)),
+                        OwnIcon(iconColor: textColor, iconName: 'lock'),
+                        const Padding(padding: EdgeInsets.only(right: 9)),
+                        const Text('Changer de mot de passe'),
+                      ],
                     ),
                   ),
                 ),
@@ -278,13 +280,12 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.only(left: 18.0, right: 18.0),
+                  padding: const EdgeInsets.only(left: 4.0, right: 18.0),
                   child: TextButton.icon(
                     onPressed: signUserOut,
-                    icon: const Icon(
-                      Icons.logout,
-                      color: Colors.red,
-                    ),
+                    icon: OwnIcon(
+                      iconColor: Colors.red,
+                      iconName: 'logout'),
                     label: Text(
                       'Se déconnecter',
                       style: GoogleFonts.poppins(
