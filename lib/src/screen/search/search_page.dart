@@ -20,16 +20,6 @@ class _SearchPageState extends ConsumerState<SearchPage> {
   List _resultsList = [];
   final TextEditingController _searchController = TextEditingController();
 
-  @override
-  void initState() {
-    ref.read(themeTextColorProvider);
-    ref.read(themeBgColorProvider);
-    ref.read(searchFilterProvider);
-    getClientStream();
-    _searchController.addListener(_onSearchChanged);
-    super.initState();
-  }
-
   void changeFilter(String filter) {
     ref.read(searchFilterProvider.notifier).changeSearchFilter(filter);
   }
@@ -37,7 +27,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
   getClientStream() async {
     var data = await FirebaseFirestore.instance
         .collection('manga')
-        .orderBy('manga')
+        .orderBy(ref.watch(searchFilterProvider))
         .get();
 
     setState(() {
@@ -58,6 +48,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
   }
 
   searchResultsList() {
+    getClientStream();
     var showResults = [];
     var filter = ref.watch(searchFilterProvider);
 
@@ -75,7 +66,6 @@ class _SearchPageState extends ConsumerState<SearchPage> {
 
     setState(() {
       _resultsList = showResults;
-
     });
   }
 
@@ -93,11 +83,23 @@ class _SearchPageState extends ConsumerState<SearchPage> {
   }
 
   @override
+  void initState() {
+    ref.read(themeTextColorProvider);
+    ref.read(themeBgColorProvider);
+    ref.read(searchFilterProvider);
+    getClientStream();
+    _searchController.addListener(_onSearchChanged);
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
 
+    final selectedFilter = ref.watch(searchFilterProvider);
     final textColor = ref.watch(themeTextColorProvider);
     final bgColor = ref.watch(themeBgColorProvider);
-    final selectedFilter = ref.watch(searchFilterProvider);
+
+    searchResultsList();
 
     return Scaffold(
       appBar: AppBar(
@@ -202,7 +204,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                                 ),
                               ),
                               Text(
-                                "2022", //Todo: change to date
+                                _resultsList[index]['releaseDate'],
                                 style: TextStyle(
                                   color: textColor,
                                   fontSize: 14,

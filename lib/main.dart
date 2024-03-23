@@ -118,10 +118,6 @@ class MyHomePageState extends ConsumerState<MyHomePage> {
                 },
                 child: const Text("Go to Setting Profile Page")
             ),
-            ElevatedButton(
-              onPressed: () => context.go('/library_new'),
-              child: const Text("Go to Library New"),
-            )
           ],
         ),
       ),

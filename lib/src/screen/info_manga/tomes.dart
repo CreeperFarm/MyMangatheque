@@ -15,22 +15,20 @@ class _TomesPagesState extends State<TomesPages> {
       appBar: AppBar(
         title: const Text("Tomes"),
       ),
-      body: const Center(
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                "Tomes",
-                style: TextStyle(
-                  fontSize: 25,
-                ),
+      body: const SingleChildScrollView(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              "Tomes",
+              style: TextStyle(
+                fontSize: 25,
               ),
-              Image(
-                image: AssetImage("assets/images/splash_bg.png"),
-              ),
-            ],
-          ),
+            ),
+            Image(
+              image: AssetImage("assets/images/splash_bg.png"),
+            ),
+          ],
         ),
       ),
     );
