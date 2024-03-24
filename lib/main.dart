@@ -88,37 +88,39 @@ class MyHomePageState extends ConsumerState<MyHomePage> {
         title: Text(widget.title),
       ),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              "$compteur",
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-            ElevatedButton(
-              onPressed: () {
-                if (user != null) {
-                  context.go('/profile');
-                } else {
-                  context.go('/profile/signin');
-                }
-              },
-              child: const Text("Go to Profile Page")
-            ),
-            ElevatedButton(
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              const Text(
+                'You have pushed the button this many times:',
+              ),
+              Text(
+                "$compteur",
+                style: Theme.of(context).textTheme.headlineMedium,
+              ),
+              ElevatedButton(
                 onPressed: () {
                   if (user != null) {
-                    context.go('/profile/settings');
+                    context.go('/profile');
                   } else {
                     context.go('/profile/signin');
                   }
                 },
-                child: const Text("Go to Setting Profile Page")
-            ),
-          ],
+                child: const Text("Go to Profile Page")
+              ),
+              ElevatedButton(
+                  onPressed: () {
+                    if (user != null) {
+                      context.go('/profile/settings');
+                    } else {
+                      context.go('/profile/signin');
+                    }
+                  },
+                  child: const Text("Go to Setting Profile Page")
+              ),
+            ],
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton(

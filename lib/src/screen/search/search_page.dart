@@ -1,12 +1,12 @@
-import 'package:mymangatheque/src/provider/search_filter_provider.dart';
-import 'package:mymangatheque/src/provider/theme_color_provider.dart';
-import 'package:mymangatheque/src/components/my_line.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:mymangatheque/src/const/own_icon.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:go_router/go_router.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:mymangatheque/src/components/my_line.dart';
+import 'package:mymangatheque/src/const/own_icon.dart';
+import 'package:mymangatheque/src/provider/search_filter_provider.dart';
+import 'package:mymangatheque/src/provider/theme_color_provider.dart';
 
 class SearchPage extends ConsumerStatefulWidget {
   const SearchPage({super.key});
@@ -94,7 +94,6 @@ class _SearchPageState extends ConsumerState<SearchPage> {
 
   @override
   Widget build(BuildContext context) {
-
     final selectedFilter = ref.watch(searchFilterProvider);
     final textColor = ref.watch(themeTextColorProvider);
     final bgColor = ref.watch(themeBgColorProvider);
@@ -136,27 +135,35 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      if (selectedFilter == 'manga') const Icon(Icons.check) else const Padding(padding: EdgeInsets.only(right: 0)),
+                      if (selectedFilter == 'manga')
+                        const Icon(Icons.check)
+                      else
+                        const Padding(padding: EdgeInsets.only(right: 0)),
                       const Text('Manga'),
                     ],
                   ),
                 ),
                 PopupMenuItem<String>(
-                  value: 'editor',
-                  child: Row(
+                    value: 'editor',
+                    child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        if (selectedFilter == 'editor') const Icon(Icons.check) else const Padding(padding: EdgeInsets.only(right: 0)),
+                        if (selectedFilter == 'editor')
+                          const Icon(Icons.check)
+                        else
+                          const Padding(padding: EdgeInsets.only(right: 0)),
                         const Text('Éditeur'),
                       ],
-                    )
-                ),
+                    )),
                 PopupMenuItem<String>(
                   value: 'author',
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      if (selectedFilter == 'author') const Icon(Icons.check) else const Padding(padding: EdgeInsets.only(right: 0)),
+                      if (selectedFilter == 'author')
+                        const Icon(Icons.check)
+                      else
+                        const Padding(padding: EdgeInsets.only(right: 0)),
                       const Text('Auteur'),
                     ],
                   ),
@@ -189,7 +196,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                textLength(_resultsList[index]['manga'], 33),
+                                textLength(_resultsList[index]['manga'], 27),
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 17,
@@ -221,7 +228,8 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                     ],
                   ),
                   onTap: () {
-                    context.go('/search/series/${_resultsList[index]['manga']}');
+                    context
+                        .go('/search/series/${_resultsList[index]['manga']}');
                   },
                 ),
                 MyLine(
@@ -250,7 +258,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                textLength(_resultsList[index]['author'], 33),
+                                textLength(_resultsList[index]['author'], 27),
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 17,
@@ -275,7 +283,8 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                     ],
                   ),
                   onTap: () {
-                    context.go('/search/author/${_resultsList[index]['author']}');
+                    context
+                        .go('/search/author/${_resultsList[index]['author']}');
                   },
                 ),
                 MyLine(
@@ -304,7 +313,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                textLength(_resultsList[index]['editor'], 33),
+                                textLength(_resultsList[index]['editor'], 27),
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 17,
@@ -329,7 +338,8 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                     ],
                   ),
                   onTap: () {
-                    context.go('/search/editor/${_resultsList[index]['editor']}');
+                    context
+                        .go('/search/editor/${_resultsList[index]['editor']}');
                   },
                 ),
                 MyLine(

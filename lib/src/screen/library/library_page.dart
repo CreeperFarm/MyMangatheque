@@ -1,9 +1,14 @@
-import 'package:flutter/cupertino.dart';
-import 'package:mymangatheque/src/const/own_icon.dart';
+import 'package:mymangatheque/src/components/my_tome_number_show.dart';
+import 'package:mymangatheque/src/provider/search_filter_provider.dart';
 import 'package:mymangatheque/src/provider/search_order_provider.dart';
 import 'package:mymangatheque/src/provider/theme_color_provider.dart';
 import 'package:mymangatheque/src/components/my_tab_bar_item.dart';
+import 'package:mymangatheque/src/components/my_line.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mymangatheque/src/const/own_icon.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:go_router/go_router.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class LibraryPage extends ConsumerStatefulWidget {
@@ -20,19 +25,22 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
   final TextEditingController _searchController = TextEditingController();
 
 
-  @override
-  void initState() {
-    super.initState();
-    ref.read(themeBgColorProvider);
-    ref.read(themeTextColorProvider);
-    ref.read(searchOrderProvider);
-    _searchController.addListener(_onSearchChanged);
-  }
 
   void changeOrder(String filter) {
-    ref.read(searchOrderProvider.notifier).changeSearchOrder(filter);
+    ref.read(searchFilterProvider.notifier).changeSearchFilter(filter);
   }
 
+  getClientStream() async {
+    var order = ref.watch(searchOrderProvider);
+    var data = await FirebaseFirestore.instance
+        .collection('manga')
+        .orderBy(order, descending: order == 'releaseDate' ? true : false)
+        .get();
+
+    setState(() {
+      _allResults = data.docs;
+    });
+  }
 
   _onSearchChanged() {
     searchResultsList();
@@ -52,20 +60,10 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
 
     if (_searchController.text != "") {
       for (var clientSnapshot in _allResults) {
-        var name = clientSnapshot['manga'].toString().toLowerCase();
+        var name = clientSnapshot[order].toString().toLowerCase();
 
-        if (order == 'manga') {
-          if (name.contains(_searchController.text.toLowerCase())) {
-            showResults.add(clientSnapshot);
-          }
-        } else if (order == 'editor') {
-          if (name.contains(_searchController.text.toLowerCase())) {
-            showResults.add(clientSnapshot);
-          }
-        } else {
-          if (name.contains(_searchController.text.toLowerCase())) {
-            showResults.add(clientSnapshot);
-          }
+        if (name.contains(_searchController.text.toLowerCase())) {
+          showResults.add(clientSnapshot);
         }
       }
     } else {
@@ -78,10 +76,26 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
   }
 
   @override
+  void didChangeDependencies() {
+    getClientStream();
+    super.didChangeDependencies();
+  }
+
+  @override
   void dispose() {
     _searchController.removeListener(() {});
     _searchController.dispose();
     super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    ref.read(themeBgColorProvider);
+    ref.read(themeTextColorProvider);
+    ref.read(searchOrderProvider);
+    getClientStream();
+    _searchController.addListener(_onSearchChanged);
   }
 
   @override
@@ -90,6 +104,8 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
     final bgColor = ref.watch(themeBgColorProvider);
     final textColor = ref.watch(themeTextColorProvider);
     final selectedOrder = ref.watch(searchOrderProvider);
+
+    searchResultsList();
 
     return DefaultTabController(
       initialIndex: 1,
@@ -100,51 +116,63 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
             children: [
               Expanded(
                 child: CupertinoSearchTextField(
-                    controller: _searchController,
-                    placeholder: 'Recherche',
-                    placeholderStyle: TextStyle(
-                      color: textColor,
-                    ),
-                    style: TextStyle(
-                      color: textColor,
-                    ),
+                  controller: _searchController,
+                  placeholder: 'Recherche',
+                  placeholderStyle: TextStyle(
+                    color: textColor,
                   ),
-              ),
-              PopupMenuButton(
-                icon: OwnIcon(iconColor: textColor, iconName: "filter_right"),
-                onSelected: (String result) {
-                  setState(() {
-                    changeOrder(result);
-                  });
-                },
-                offset: const Offset(0, 50),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+                  style: TextStyle(
+                    color: textColor,
+                  ),
                 ),
-                shadowColor: textColor.withOpacity(0.5),
-                color: bgColor,
-                itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-                  PopupMenuItem<String>(
-                    value: 'order_alpha',
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        if (selectedOrder == 'order_alpha') const Icon(Icons.check) else const Padding(padding: EdgeInsets.only(right: 0)),
-                        const Text('Ordre Alphabétique'),
-                      ],
+              ),
+              SizedBox(
+                width: 50,
+                child: PopupMenuButton(
+                  icon: OwnIcon(iconColor: textColor, iconName: "filter_right"),
+                  onSelected: (String result) {
+                    setState(() {
+                      changeOrder(result);
+                    });
+                  },
+                  offset: const Offset(0, 50),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  shadowColor: textColor.withOpacity(0.5),
+                  color: bgColor,
+                  itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                    PopupMenuItem<String>(
+                      value: 'manga',
+                      child: SizedBox(
+                        width: 175,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            if (selectedOrder == 'manga') const Icon(Icons.check) else const Padding(padding: EdgeInsets.only(right: 0)),
+                            const Text(
+                              'Ordre Alphabétique',
+                              textAlign: TextAlign.right,
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                  ),
-                  PopupMenuItem<String>(
-                      value: 'last_out',
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          if (selectedOrder == 'last_out') const Icon(Icons.check) else const Padding(padding: EdgeInsets.only(right: 0)),
-                          const Text('Dernière Sortie'),
-                        ],
+                    PopupMenuItem<String>(
+                      value: 'releaseDate',
+                      child: SizedBox(
+                        width: 175,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            if (selectedOrder == 'releaseDate') const Icon(Icons.check) else const Padding(padding: EdgeInsets.only(right: 0)),
+                            const Text('Dernière Sortie'),
+                          ],
+                        ),
                       )
-                  ),
-                ],
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
@@ -192,35 +220,114 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
             ]
           ),
         ),
-        body: const Center(
-          child: TabBarView(
-            children: [
-              Column(
+        body: TabBarView(
+          physics: const NeverScrollableScrollPhysics(),
+          children: [
+            const Padding(
+              padding: EdgeInsets.all(10),
+              child: Column(
                 children: [
                   Text('Tab1'),
                   Text('data'),
                 ],
               ),
-              Column(
+            ),
+            Padding(
+              padding: const EdgeInsets.all(10),
+              child: Column(
                 children: [
-                  Text('Tab2'),
-                  Text('data'),
+                  const MyTomeNumberShow(tomeTotal: "10", editionTotal: "5"),
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: _resultsList.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        return Column(
+                          children: [
+                            ListTile(
+                              title: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.only(right: 10),
+                                        child: Image.network(
+                                          'https://cdn.statically.io/gh/CreeperFarm/AppManga/main/${_resultsList[index]['img']}.jpg',
+                                          width: 50,
+                                        ),
+                                      ),
+                                      Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            textLength(_resultsList[index]['manga'], 27),
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 17,
+                                              color: textColor,
+                                            ),
+                                          ),
+                                          Text(
+                                            textLength(_resultsList[index]['author'], 40),
+                                            style: TextStyle(
+                                              color: textColor,
+                                              fontSize: 14,
+                                            ),
+                                          ),
+                                          Text(
+                                            _resultsList[index]['releaseDate'],
+                                            style: TextStyle(
+                                              color: textColor,
+                                              fontSize: 14,
+                                            ),
+                                          )
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                  Icon(
+                                    Icons.arrow_forward_ios,
+                                    color: textColor,
+                                  ),
+                                ],
+                              ),
+                              onTap: () {
+                                context.go('/library/series/${_resultsList[index]['manga']}');
+                              },
+                            ),
+                            MyLine(
+                              width: MediaQuery.of(context).size.width,
+                              vertical: 0,
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                  ),
                 ],
               ),
-              Column(
+            ),
+            const Padding(
+              padding: EdgeInsets.all(10),
+              child: Column(
                 children: [
+                  MyTomeNumberShow(tomeTotal: "10", editionTotal: "5"),
                   Text('Tab3'),
                   Text('data'),
                 ],
               ),
-              Column(
+            ),
+            const Padding(
+              padding: EdgeInsets.all(10),
+              child: Column(
                 children: [
+                  MyTomeNumberShow(tomeTotal: "10", editionTotal: "5"),
                   Text('Tab4'),
                   Text('data'),
                 ],
               ),
-            ],
-          )
+            ),
+          ],
         )
       ),
     );

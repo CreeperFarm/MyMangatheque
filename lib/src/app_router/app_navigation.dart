@@ -1,20 +1,19 @@
-import 'package:flutter/cupertino.dart';
-import 'package:go_router/go_router.dart';
-import 'package:mymangatheque/main.dart';
-import 'package:mymangatheque/src/app_router/main_wrapper.dart';
+import 'package:mymangatheque/src/screen/profile/profile_settings_page.dart';
 import 'package:mymangatheque/src/app_router/redirect_profile_page.dart';
 import 'package:mymangatheque/src/screen/auth/forgot_password_page.dart';
 import 'package:mymangatheque/src/screen/auth/modify_password_page.dart';
+import 'package:mymangatheque/src/screen/planning/planning_page.dart';
 import 'package:mymangatheque/src/screen/library/library_page.dart';
-import 'package:mymangatheque/src/screen/profile/profile_settings_page.dart';
-import 'package:mymangatheque/src/screen/auth/signin_page.dart';
-import 'package:mymangatheque/src/screen/auth/signup_page.dart';
 import 'package:mymangatheque/src/screen/info_manga/authors.dart';
 import 'package:mymangatheque/src/screen/info_manga/editors.dart';
-import 'package:mymangatheque/src/screen/info_manga/series.dart';
-import 'package:mymangatheque/src/screen/library/library_page.dart';
-import 'package:mymangatheque/src/screen/planning/planning_page.dart';
 import 'package:mymangatheque/src/screen/search/search_page.dart';
+import 'package:mymangatheque/src/screen/info_manga/series.dart';
+import 'package:mymangatheque/src/app_router/main_wrapper.dart';
+import 'package:mymangatheque/src/screen/auth/signin_page.dart';
+import 'package:mymangatheque/src/screen/auth/signup_page.dart';
+import 'package:go_router/go_router.dart';
+import 'package:mymangatheque/main.dart';
+import 'package:flutter/cupertino.dart';
 
 class AppNavigation {
   AppNavigation._();
