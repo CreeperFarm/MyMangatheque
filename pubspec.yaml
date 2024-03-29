@@ -67,6 +67,7 @@ dependencies:
   go_router: ^13.0.1
   sliding_clipped_nav_bar: ^3.1.0+4
   riverpod: ^2.5.0
+  mobile_scanner: ^4.0.1
 
 dev_dependencies:
   flutter_test:

@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -7,6 +9,7 @@ import 'package:go_router/go_router.dart';
 import 'package:mymangatheque/src/app_router/app_navigation.dart';
 import 'package:mymangatheque/src/provider/compteur_provider.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -78,6 +81,7 @@ class MyHomePage extends ConsumerStatefulWidget {
 }
 
 class MyHomePageState extends ConsumerState<MyHomePage> {
+  var result;
   @override
   Widget build(BuildContext context) {
     final compteur = ref.watch(compteurProvider);
@@ -118,6 +122,37 @@ class MyHomePageState extends ConsumerState<MyHomePage> {
                     }
                   },
                   child: const Text("Go to Setting Profile Page")
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  var res = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => MobileScanner(
+                        // fit: BoxFit.contain,
+                        controller: MobileScannerController(
+                          detectionSpeed: DetectionSpeed.normal,
+                          facing: CameraFacing.front,
+                          torchEnabled: true,
+                        ),
+                        onDetect: (capture) {
+                          final List<Barcode> barcodes = capture.barcodes;
+                          final Uint8List? image = capture.image;
+                          for (final barcode in barcodes) {
+                            debugPrint('Barcode found! ${barcode.rawValue}');
+                          }
+                        },
+                      ),
+                    ),
+                  );
+                },
+                child: const Text('Open Scanner'),
+              ),
+              Row(
+                children: [
+                  const Text('The barcode is: '),
+                  Text(result.toString()),
+                ],
               ),
             ],
           ),
