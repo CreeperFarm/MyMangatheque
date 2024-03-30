@@ -6,6 +6,7 @@ import 'package:mymangatheque/src/screen/planning/planning_page.dart';
 import 'package:mymangatheque/src/screen/library/library_page.dart';
 import 'package:mymangatheque/src/screen/info_manga/authors.dart';
 import 'package:mymangatheque/src/screen/info_manga/editors.dart';
+import 'package:mymangatheque/src/screen/scan_ean_page.dart';
 import 'package:mymangatheque/src/screen/search/search_page.dart';
 import 'package:mymangatheque/src/screen/info_manga/series.dart';
 import 'package:mymangatheque/src/app_router/main_wrapper.dart';
@@ -75,6 +76,13 @@ class AppNavigation {
                         return SeriesPages(seriesName: state.pathParameters['tomeId']!, key: state.pageKey);
                       }
                   ),
+                  GoRoute(
+                    path: 'scan',
+                    name: 'Scan',
+                    builder: (context, state) {
+                      return ScanEanPage(key: state.pageKey);
+                    }
+                  )
                 ]
               ),
             ]
