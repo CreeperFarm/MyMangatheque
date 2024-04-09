@@ -29,6 +29,8 @@ class _ScanEanPageState extends ConsumerState<ScanEanPage> {
       formats: [BarcodeFormat.ean13],
     );
 
+    var ean;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("Scan EAN"),
@@ -40,19 +42,26 @@ class _ScanEanPageState extends ConsumerState<ScanEanPage> {
           final List<Barcode> barcodes = captureObject.barcodes;
           if (barcodes.first.rawValue != null) {
             print(barcodes.first.rawValue);
+            setState(() {
+              ean = barcodes.first.rawValue;
+            });
           }
         },
         overlay: Column(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [ // TODO: Replace this images by the tome that are scanned but not already in the user collection
-                Image.network(
-                  "https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/Barcode-scanner.jpg/220px-Barcode-scanner.jpg",
-                  width: 10,
-                )
-              ],
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [ // TODO: Replace this images by the tome that are scanned but not already in the user collection
+                  Image.network(
+                    "https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/Barcode-scanner.jpg/220px-Barcode-scanner.jpg",
+                    width: 10,
+                  ),
+                  Text(ean.toString())
+                ],
+              ),
             ),
             const Padding(padding: EdgeInsets.only(bottom: 20)),
             ElevatedButton(
