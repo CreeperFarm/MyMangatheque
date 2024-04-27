@@ -1,5 +1,5 @@
 import 'package:mymangatheque/src/screen/profile/profile_settings_page.dart';
-import 'package:mymangatheque/src/app_router/redirect_profile_page.dart';
+import 'package:mymangatheque/src/app_router/redirect_to_page.dart';
 import 'package:mymangatheque/src/screen/auth/forgot_password_page.dart';
 import 'package:mymangatheque/src/screen/auth/modify_password_page.dart';
 import 'package:mymangatheque/src/screen/planning/planning_page.dart';
@@ -12,6 +12,7 @@ import 'package:mymangatheque/src/screen/info_manga/series.dart';
 import 'package:mymangatheque/src/app_router/main_wrapper.dart';
 import 'package:mymangatheque/src/screen/auth/signin_page.dart';
 import 'package:mymangatheque/src/screen/auth/signup_page.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mymangatheque/main.dart';
 import 'package:flutter/cupertino.dart';
@@ -76,13 +77,6 @@ class AppNavigation {
                         return SeriesPages(seriesName: state.pathParameters['tomeId']!, key: state.pageKey);
                       }
                   ),
-                  GoRoute(
-                    path: 'scan',
-                    name: 'Scan',
-                    builder: (context, state) {
-                      return ScanEanPage(key: state.pageKey);
-                    }
-                  )
                 ]
               ),
             ]
@@ -94,7 +88,7 @@ class AppNavigation {
                 path: '/library',
                 name: 'Mangathèque',
                 builder: (context, state) {
-                  return LibraryPage(key: state.pageKey,);
+                  return RedirectToLibrary(key: state.pageKey);
                 },
                   routes: [
                     GoRoute(
@@ -123,6 +117,13 @@ class AppNavigation {
                         name: 'Manga Library',
                         builder: (context, state) {
                           return SeriesPages(seriesName: state.pathParameters['tomeId']!, key: state.pageKey);
+                        }
+                    ),
+                    GoRoute(
+                        path: 'scan',
+                        name: 'Scan',
+                        builder: (context, state) {
+                          return ScanEanPage(key: state.pageKey);
                         }
                     )
                   ]

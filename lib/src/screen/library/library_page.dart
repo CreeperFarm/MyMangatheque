@@ -328,7 +328,14 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
               ),
             ),
           ],
-        )
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            context.go('/library/scan');
+          },
+          tooltip: 'Scan barcode',
+          child: const Icon(CupertinoIcons.barcode),
+        ),
       ),
     );
   }

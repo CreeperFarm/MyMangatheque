@@ -29,7 +29,7 @@ class _ScanEanPageState extends ConsumerState<ScanEanPage> {
       formats: [BarcodeFormat.ean13],
     );
 
-    var ean;
+    dynamic ean;
 
     return Scaffold(
       appBar: AppBar(

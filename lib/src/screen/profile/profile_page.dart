@@ -2,7 +2,7 @@ import 'package:mymangatheque/src/const/own_icon.dart';
 import 'package:mymangatheque/src/provider/theme_color_provider.dart';
 import 'package:mymangatheque/src/get_data/get_user_information.dart';
 import 'package:mymangatheque/src/components/my_line.dart';
-import 'package:mymangatheque/src/const/navbar_color.dart';
+import 'package:mymangatheque/src/const/theme.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';

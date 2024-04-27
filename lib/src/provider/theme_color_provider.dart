@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:mymangatheque/src/const/navbar_color.dart';
+import 'package:mymangatheque/src/const/theme.dart';
 
 class ThemeBgColorNotifier extends Notifier<Color> {
   @override

@@ -1,7 +1,7 @@
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:mymangatheque/src/const/own_icon.dart';
 import 'package:mymangatheque/src/provider/theme_color_provider.dart';
-import 'package:mymangatheque/src/const/navbar_color.dart';
+import 'package:mymangatheque/src/const/theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:go_router/go_router.dart';

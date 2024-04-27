@@ -19,6 +19,8 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
+  
+
   runApp(
     ProviderScope(
       child: MyApp(savedThemeMode: savedThemeMode),
@@ -122,15 +124,9 @@ class MyHomePageState extends ConsumerState<MyHomePage> {
               ),
               ElevatedButton(
                   onPressed: () {
-                    context.go('/scan');
+                    context.go('/library/scan');
                   },
                   child: const Text("Go to Scan Page")
-              ),
-              Row(
-                children: [
-                  const Text('The barcode is: '),
-                  Text(result.toString()),
-                ],
               ),
             ],
           ),
