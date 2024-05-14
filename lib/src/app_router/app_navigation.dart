@@ -1,3 +1,4 @@
+import 'package:mymangatheque/src/screen/discover_page.dart';
 import 'package:mymangatheque/src/screen/profile/profile_settings_page.dart';
 import 'package:mymangatheque/src/app_router/redirect_to_page.dart';
 import 'package:mymangatheque/src/screen/auth/forgot_password_page.dart';
@@ -77,6 +78,13 @@ class AppNavigation {
                         return SeriesPages(seriesName: state.pathParameters['tomeId']!, key: state.pageKey);
                       }
                   ),
+                  GoRoute(
+                    path: 'discover',
+                    name: 'Discover',
+                    builder: (context, state) {
+                      return DiscoverPage(key: state.pageKey);
+                    }
+                  )
                 ]
               ),
             ]

@@ -128,6 +128,12 @@ class MyHomePageState extends ConsumerState<MyHomePage> {
                   },
                   child: const Text("Go to Scan Page")
               ),
+              ElevatedButton(
+                  onPressed: () {
+                    context.go('/discover');
+                  },
+                  child: const Text("Go to Discover Page")
+              ),
             ],
           ),
         ),

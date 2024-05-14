@@ -1,11 +1,10 @@
-import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter/material.dart';
 import 'package:mymangatheque/src/const/own_icon.dart';
 import 'package:mymangatheque/src/provider/theme_color_provider.dart';
 import 'package:mymangatheque/src/const/theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:go_router/go_router.dart';
-import 'package:flutter/material.dart';
 import 'dart:async';
 
 class MainWrapper extends ConsumerStatefulWidget {
@@ -21,6 +20,7 @@ class MainWrapper extends ConsumerStatefulWidget {
 }
 
 class _MainWrapperState extends ConsumerState<MainWrapper> {
+  final int selectedItemColor = 0xFF1783a5;
 
   int selectedIndex = 0;
 
@@ -47,7 +47,7 @@ class _MainWrapperState extends ConsumerState<MainWrapper> {
   @override
   Widget build(BuildContext context) {
     // This is to change color when starting the app
-    Timer(const Duration(milliseconds: 250), () {
+    Timer(const Duration(milliseconds: 50), () {
       if (AdaptiveTheme.of(context).mode.isSystem) {
         final brightness = WidgetsBinding.instance.platformDispatcher.platformBrightness;
         if (brightness == Brightness.dark) {
@@ -73,30 +73,44 @@ class _MainWrapperState extends ConsumerState<MainWrapper> {
       ),
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: bgColor,
-        selectedItemColor: textColor,
+        selectedItemColor: const Color(0xFF1783a5),
         unselectedItemColor: textColor,
         currentIndex: widget.navigationShell.currentIndex,
         showUnselectedLabels: true,
         onTap: _goBranch,
         items: [
           BottomNavigationBarItem(
-            icon: OwnIcon(iconColor: textColor, iconName: "home"),
+            icon: OwnIcon(
+                iconColor: widget.navigationShell.currentIndex == 0 ? const Color(0xFF1783a5) : textColor,
+                iconName: "home"
+            ),
             label: "Accueil",
           ),
           BottomNavigationBarItem(
-            icon: OwnIcon(iconColor: textColor, iconName: "collection"),
+            icon: OwnIcon(
+                iconColor: widget.navigationShell.currentIndex == 1 ? const Color(0xFF1783a5) : textColor,
+                iconName: "collection"
+            ),
             label: "Collection",
           ),
           BottomNavigationBarItem(
-            icon: OwnIcon(iconColor: textColor, iconName: "search"),
+            icon: OwnIcon(
+                iconColor: widget.navigationShell.currentIndex == 2 ? const Color(0xFF1783a5) : textColor,
+                iconName: "search"),
             label: "Recherche",
           ),
           BottomNavigationBarItem(
-            icon: OwnIcon(iconColor: textColor, iconName: "calendar"),
+            icon: OwnIcon(
+                iconColor: widget.navigationShell.currentIndex == 3 ? const Color(0xFF1783a5) : textColor,
+                iconName: "calendar"
+            ),
             label: "Planning",
           ),
           BottomNavigationBarItem(
-            icon: OwnIcon(iconColor: textColor, iconName: "user"),
+            icon: OwnIcon(
+                iconColor: widget.navigationShell.currentIndex == 4 ? const Color(0xFF1783a5) : textColor,
+                iconName: "user"
+            ),
             label: "Profil",
           ),
         ],

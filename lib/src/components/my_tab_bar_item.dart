@@ -16,7 +16,7 @@ class MyTabBarItem extends StatelessWidget {
           decoration: BoxDecoration(
             border: Border.all(
                 color: Colors.transparent,
-                width: 3.0
+                width: 2.0
             ),
             borderRadius: BorderRadius.circular(360),
           ),
@@ -24,9 +24,9 @@ class MyTabBarItem extends StatelessWidget {
             color: colorIn,
             borderRadius: BorderRadius.circular(360),
             child: Padding(
-              padding: const EdgeInsets.all(6.0),
+              padding: const EdgeInsets.symmetric(vertical: 2.0, horizontal: 4),
               child: Transform.translate(
-                offset: const Offset(0,-0.5),
+                offset: const Offset(0, 3.5),
                 child: Text(
                   tabText,
                   style: TextStyle(
