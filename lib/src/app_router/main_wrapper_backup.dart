@@ -1,10 +1,10 @@
-import 'package:mymangatheque/src/provider/theme_color_provider.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/material.dart';
 import 'package:mymangatheque/src/const/own_icon.dart';
+import 'package:mymangatheque/src/provider/theme_color_provider.dart';
 import 'package:mymangatheque/src/const/theme.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:go_router/go_router.dart';
-import 'package:flutter/material.dart';
 import 'dart:async';
 
 class MainWrapper extends ConsumerStatefulWidget {
@@ -66,23 +66,55 @@ class _MainWrapperState extends ConsumerState<MainWrapper> {
     final textColor = ref.watch(themeTextColorProvider);
 
     return Scaffold(
-      body: Stack(
-        children: [
-          widget.navigationShell,
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: navBar(),
+      body: SizedBox(
+        width: double.infinity,
+        height: double.infinity,
+        child: widget.navigationShell,
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: bgColor,
+        selectedItemColor: const Color(0xFF1783a5),
+        unselectedItemColor: textColor,
+        currentIndex: widget.navigationShell.currentIndex,
+        onTap: _goBranch,
+        items: [
+          BottomNavigationBarItem(
+            icon: OwnIcon(
+                iconColor: widget.navigationShell.currentIndex == 0 ? const Color(0xFF1783a5) : textColor,
+                iconName: "home"
+            ),
+            label: "Accueil",
+          ),
+          BottomNavigationBarItem(
+            icon: OwnIcon(
+                iconColor: widget.navigationShell.currentIndex == 1 ? const Color(0xFF1783a5) : textColor,
+                iconName: "collection"
+            ),
+            label: "Collection",
+          ),
+          BottomNavigationBarItem(
+            icon: OwnIcon(
+                iconColor: widget.navigationShell.currentIndex == 2 ? const Color(0xFF1783a5) : textColor,
+                iconName: "search",
+            ),
+            label: "Recherche",
+          ),
+          BottomNavigationBarItem(
+            icon: OwnIcon(
+                iconColor: widget.navigationShell.currentIndex == 3 ? const Color(0xFF1783a5) : textColor,
+                iconName: "calendar"
+            ),
+            label: "Planning",
+          ),
+          BottomNavigationBarItem(
+            icon: OwnIcon(
+                iconColor: widget.navigationShell.currentIndex == 4 ? const Color(0xFF1783a5) : textColor,
+                iconName: "user"
+            ),
+            label: "Profil",
           ),
         ],
       ),
-    );
-  }
-
-  Widget navBar() {
-    return Container(
-      height: 60,
-      margin: const EdgeInsets.only(bottom: 16, left: 16, right: 16),
-
     );
   }
 }

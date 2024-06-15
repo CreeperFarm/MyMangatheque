@@ -47,41 +47,50 @@ class _ScanEanPageState extends ConsumerState<ScanEanPage> {
             });
           }
         },
-        overlay: Column(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [ // TODO: Replace this images by the tome that are scanned but not already in the user collection
-                  Image.network(
-                    "https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/Barcode-scanner.jpg/220px-Barcode-scanner.jpg",
-                    width: 10,
-                  ),
-                  Text(ean.toString())
-                ],
+        overlayBuilder: (context, constraints) {
+          return Column(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [ // TODO: Replace this images by the tome that are scanned but not already in the user collection
+                    Image.network(
+                      "https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/Barcode-scanner.jpg/220px-Barcode-scanner.jpg",
+                      width: 10,
+                    ),
+                    Text(ean.toString())
+                  ],
+                ),
               ),
-            ),
-            const Padding(padding: EdgeInsets.only(bottom: 20)),
-            ElevatedButton(
-              onPressed: () {
-                cameraController.toggleTorch();
-              },
-              child: ValueListenableBuilder(
-                valueListenable: cameraController.torchState,
-                builder: (context, isTorchOn, child) {
-                  switch (isTorchOn) {
-                    case TorchState.on:
-                      return const Icon(Icons.flash_on);
-                    case TorchState.off:
-                      return const Icon(Icons.flash_off);
-                  }
+              const Padding(padding: EdgeInsets.only(bottom: 20)),
+              ElevatedButton(
+                onPressed: () {
+                  cameraController.toggleTorch();
                 },
+                child: ValueListenableBuilder(
+                  valueListenable: cameraController,
+                  builder: (context, value, child) {
+                    switch (value.torchState) {
+                      case TorchState.on:
+                        return const Icon(Icons.flash_on);
+                      case TorchState.off:
+                        return const Icon(Icons.flash_off);
+                      case TorchState.auto:
+                        return const Icon(Icons.flash_auto);
+                      case TorchState.unavailable:
+                        return const Icon(
+                          Icons.no_flash,
+                          color: Colors.grey
+                        );
+                    }
+                  },
+                ),
               ),
-            ),
-          ],
-        ),
+            ],
+          );
+        }
       ),
     );
   }
