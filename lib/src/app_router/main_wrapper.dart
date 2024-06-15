@@ -6,7 +6,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:go_router/go_router.dart';
 import 'dart:async';
-import 'package:glassmorphism_widgets/glassmorphism_widgets.dart';
 
 class MainWrapper extends ConsumerStatefulWidget {
   final StatefulNavigationShell navigationShell;
@@ -72,47 +71,47 @@ class _MainWrapperState extends ConsumerState<MainWrapper> {
         height: double.infinity,
         child: widget.navigationShell,
       ),
-      bottomNavigationBar: GlassBottomBar(
-        //backgroundColor: bgColor,
+      bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: bgColor,
         selectedItemColor: const Color(0xFF1783a5),
         unselectedItemColor: textColor,
         currentIndex: widget.navigationShell.currentIndex,
-        //showUnselectedtitles: true,
         onTap: _goBranch,
         items: [
-          GlassBottomBarItem(
+          BottomNavigationBarItem(
             icon: OwnIcon(
                 iconColor: widget.navigationShell.currentIndex == 0 ? const Color(0xFF1783a5) : textColor,
                 iconName: "home"
             ),
-            title: const GlassText("Accueil"),
+            label: "Accueil",
           ),
-          GlassBottomBarItem(
+          BottomNavigationBarItem(
             icon: OwnIcon(
                 iconColor: widget.navigationShell.currentIndex == 1 ? const Color(0xFF1783a5) : textColor,
                 iconName: "collection"
             ),
-            title: const GlassText("Collection"),
+            label: "Collection",
           ),
-          GlassBottomBarItem(
+          BottomNavigationBarItem(
             icon: OwnIcon(
                 iconColor: widget.navigationShell.currentIndex == 2 ? const Color(0xFF1783a5) : textColor,
-                iconName: "search"),
-            title: const GlassText("Recherche"),
+                iconName: "search",
+            ),
+            label: "Recherche",
           ),
-          GlassBottomBarItem(
+          BottomNavigationBarItem(
             icon: OwnIcon(
                 iconColor: widget.navigationShell.currentIndex == 3 ? const Color(0xFF1783a5) : textColor,
                 iconName: "calendar"
             ),
-            title: const GlassText("Planning"),
+            label: "Planning",
           ),
-          GlassBottomBarItem(
+          BottomNavigationBarItem(
             icon: OwnIcon(
                 iconColor: widget.navigationShell.currentIndex == 4 ? const Color(0xFF1783a5) : textColor,
                 iconName: "user"
             ),
-            title: const GlassText("Profil"),
+            label: "Profil",
           ),
         ],
       ),
