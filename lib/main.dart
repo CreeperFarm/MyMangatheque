@@ -138,12 +138,15 @@ class MyHomePageState extends ConsumerState<MyHomePage> {
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          ref.read(compteurProvider.notifier).incrementer();
-        },
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
+      floatingActionButton: Container(
+        transform: Matrix4.translationValues(0, -32, 0),
+        child: FloatingActionButton(
+          onPressed: () {
+            ref.read(compteurProvider.notifier).incrementer();
+          },
+          tooltip: 'Increment',
+          child: const Icon(Icons.add),
+        ),
       ),
     );
   }

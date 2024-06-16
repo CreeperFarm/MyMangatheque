@@ -50,13 +50,11 @@ class _MainWrapperState extends ConsumerState<MainWrapper> {
   @override
   void initState() {
     super.initState();
-    ref.read(themeBgColorProvider);
     ref.read(themeTextColorProvider);
   }
 
   // Change the color of the app
   void changeThemeColor(Color colorBg, Color colorText, WidgetRef ref) {
-    ref.read(themeBgColorProvider.notifier).changeThemeBgColor(colorBg);
     ref.read(themeTextColorProvider.notifier).changeThemeTextColor(colorText);
   }
 
@@ -78,7 +76,6 @@ class _MainWrapperState extends ConsumerState<MainWrapper> {
       }
     });
 
-    final bgColor = ref.watch(themeBgColorProvider);
     final textColor = ref.watch(themeTextColorProvider);
 
     return Scaffold(
@@ -96,7 +93,7 @@ class _MainWrapperState extends ConsumerState<MainWrapper> {
 
   Widget navBar(unSelectedColor) {
     Color? selectedColor = Colors.cyanAccent;
-    if (unSelectedColor == Color(0xFF1c1b1f)) {
+    if (unSelectedColor == const Color(0xFF1c1b1f)) {
       selectedColor = Colors.blueAccent[700];
     } else {
       selectedColor = Colors.cyanAccent;
