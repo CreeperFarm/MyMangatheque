@@ -1,3 +1,4 @@
+import 'package:mymangatheque/src/dev_page/component_show_page.dart';
 import 'package:mymangatheque/src/screen/discover_page.dart';
 import 'package:mymangatheque/src/screen/profile/profile_settings_page.dart';
 import 'package:mymangatheque/src/app_router/redirect_to_page.dart';
@@ -84,7 +85,14 @@ class AppNavigation {
                     builder: (context, state) {
                       return DiscoverPage(key: state.pageKey);
                     }
-                  )
+                  ),
+                  GoRoute(
+                    path: 'devpage',
+                    name: 'DevPage',
+                    builder: (context, state) {
+                      return ComponentShowPage(key: state.pageKey);
+                    }
+                  ),
                 ]
               ),
             ]

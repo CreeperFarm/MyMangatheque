@@ -134,6 +134,12 @@ class MyHomePageState extends ConsumerState<MyHomePage> {
                   },
                   child: const Text("Go to Discover Page")
               ),
+              ElevatedButton(
+                  onPressed: () {
+                    context.go('/devpage');
+                  },
+                  child: const Text("Go to Dev Compo Show Page")
+              )
             ],
           ),
         ),
