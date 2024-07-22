@@ -1,5 +1,6 @@
 import 'package:mymangatheque/src/dev_page/component_show_page.dart';
 import 'package:mymangatheque/src/screen/discover_page.dart';
+import 'package:mymangatheque/src/screen/mentions_legales_page.dart';
 import 'package:mymangatheque/src/screen/profile/profile_settings_page.dart';
 import 'package:mymangatheque/src/app_router/redirect_to_page.dart';
 import 'package:mymangatheque/src/screen/auth/forgot_password_page.dart';
@@ -93,6 +94,13 @@ class AppNavigation {
                       return ComponentShowPage(key: state.pageKey);
                     }
                   ),
+                  GoRoute(
+                    path: 'mentions_legales',
+                    name: 'Mentions Légales',
+                    builder: (context, state) {
+                      return MentionsLegalesPage(key: state.pageKey);
+                    }
+                  )
                 ]
               ),
             ]
