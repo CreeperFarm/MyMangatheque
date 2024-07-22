@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:mymangatheque/src/components/my_button.dart';
 import 'package:mymangatheque/src/components/my_line.dart';
 import 'package:mymangatheque/src/components/my_picture_display.dart';
-import 'package:mymangatheque/src/components/my_tab_bar_item.dart';
 import 'package:mymangatheque/src/components/my_textfield.dart';
 import 'package:mymangatheque/src/components/my_tome_number_show.dart';
 import 'package:mymangatheque/src/components/square_tile.dart';
