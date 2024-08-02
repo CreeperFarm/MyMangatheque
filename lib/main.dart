@@ -8,6 +8,7 @@ import 'package:mymangatheque/src/app_router/app_navigation.dart';
 import 'package:mymangatheque/src/provider/compteur_provider.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'firebase_options.dart';
+import 'package:url_strategy/url_strategy.dart';
 
 void main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
@@ -19,7 +20,7 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  
+  setPathUrlStrategy();
 
   runApp(
     ProviderScope(

@@ -69,6 +69,7 @@ dependencies:
   riverpod: ^2.5.0
   mobile_scanner: ^5.1.1
   glass_kit: ^4.0.1
+  url_strategy: ^0.3.0
 
 dev_dependencies:
   flutter_test:
