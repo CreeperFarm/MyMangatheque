@@ -61,13 +61,16 @@ class MentionsLegalesPage extends StatelessWidget {
     return Column(
       children: [
         const Padding(padding: EdgeInsets.only(top: 10)),
-        Text(
-          text,
-          style: const TextStyle(
-            fontSize: 14,
+        SizedBox(
+          width: double.infinity,
+          child: Text(
+            text,
+            style: const TextStyle(
+              fontSize: 14,
+            ),
+            textAlign: TextAlign.justify,
           ),
-          textAlign: TextAlign.justify,
-        ),
+        )
       ]
     );
   }
