@@ -1,14 +1,16 @@
-import 'package:adaptive_theme/adaptive_theme.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
-import 'package:mymangatheque/src/app_router/app_navigation.dart';
 import 'package:mymangatheque/src/provider/compteur_provider.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
-import 'firebase_options.dart';
+import 'package:mymangatheque/src/app_router/app_navigation.dart';
+import 'package:mymangatheque/src/theme/light_mode.dart';
+import 'package:mymangatheque/src/theme/dark_mode.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:adaptive_theme/adaptive_theme.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:url_strategy/url_strategy.dart';
+import 'package:go_router/go_router.dart';
+import 'package:flutter/material.dart';
+import 'firebase_options.dart';
 
 void main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
@@ -37,29 +39,8 @@ class MyApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     FlutterNativeSplash.remove();
     return AdaptiveTheme(
-      light: ThemeData(
-        useMaterial3: true,
-        brightness: Brightness.light,
-        primaryColor: Colors.deepPurpleAccent.shade100,
-        bottomNavigationBarTheme: BottomNavigationBarThemeData(
-          selectedItemColor: Colors.deepPurpleAccent.shade100,
-          unselectedItemColor: Colors.grey,
-        ),
-        textTheme: const TextTheme(
-          labelLarge: TextStyle(color: Colors.black),
-          labelMedium: TextStyle(color: Colors.black),
-          labelSmall: TextStyle(color: Colors.black),
-        ),
-      ),
-      dark: ThemeData(
-        useMaterial3: true,
-        brightness: Brightness.dark,
-        textTheme: const TextTheme(
-          bodyLarge: TextStyle(color: Colors.white),
-          bodyMedium: TextStyle(color: Colors.white),
-          bodySmall: TextStyle(color: Colors.white),
-        ),
-      ),
+      light: lightMode,
+      dark: darkMode,
       initial: savedThemeMode ?? AdaptiveThemeMode.light,
       builder: (theme, darkTheme) => MaterialApp.router(
         routerConfig: AppNavigation.router,
@@ -82,6 +63,7 @@ class MyHomePage extends ConsumerStatefulWidget {
 
 class MyHomePageState extends ConsumerState<MyHomePage> {
   var result;
+
   @override
   Widget build(BuildContext context) {
     final compteur = ref.watch(compteurProvider);

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class MyTabBarItem extends StatelessWidget {
-  final tabText;
+  final String tabText;
   Color colorIn;
   Color colorOut;
   MyTabBarItem({required this.tabText, required this.colorIn, required this.colorOut, super.key});

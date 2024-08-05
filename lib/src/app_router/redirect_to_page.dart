@@ -1,8 +1,8 @@
   import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:mymangatheque/src/screen/library/library_page.dart';
-import 'package:mymangatheque/src/screen/profile/profile_page.dart';
-import 'package:mymangatheque/src/screen/auth/signin_page.dart';
+import 'package:mymangatheque/src/page/library/library_page.dart';
+import 'package:mymangatheque/src/page/profile/profile_page.dart';
+import 'package:mymangatheque/src/page/auth/signin_page.dart';
 
 class RedirectToProfile extends StatelessWidget {
   const RedirectToProfile({super.key});
