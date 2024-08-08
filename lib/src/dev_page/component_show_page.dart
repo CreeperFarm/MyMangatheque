@@ -4,7 +4,7 @@ import 'package:mymangatheque/src/components/my_line.dart';
 import 'package:mymangatheque/src/components/my_picture_display.dart';
 import 'package:mymangatheque/src/components/my_textfield.dart';
 import 'package:mymangatheque/src/components/my_tome_number_show.dart';
-import 'package:mymangatheque/src/components/square_tile.dart';
+import 'package:mymangatheque/src/components/my_square_tile.dart';
 
 class ComponentShowPage extends StatelessWidget {
   const ComponentShowPage({super.key});
@@ -72,6 +72,7 @@ class ComponentShowPage extends StatelessWidget {
               child: SquareTile(imagePath: 'assets/images/google.png', onTap: () {}
               )
             ),
+            const Text(''),
           ],
         )
       ),

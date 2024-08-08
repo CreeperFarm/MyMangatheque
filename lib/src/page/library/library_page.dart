@@ -251,9 +251,12 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
                                     children: [
                                       Padding(
                                         padding: const EdgeInsets.only(right: 10),
-                                        child: Image.network(
-                                          'https://cdn.statically.io/gh/CreeperFarm/AppManga/main/${_resultsList[index]['img']}.jpg',
+                                        child: SizedBox(
                                           width: 50,
+                                          child: Image.network(
+                                            'https://cdn.statically.io/gh/CreeperFarm/AppManga/main/${_resultsList[index]['img']}.jpg',
+                                            width: 50,
+                                          ),
                                         ),
                                       ),
                                       Column(
