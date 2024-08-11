@@ -69,23 +69,19 @@ class MyHomePageState extends ConsumerState<MyHomePage> {
     final compteur = ref.watch(compteurProvider);
     final user = FirebaseAuth.instance.currentUser;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
-      body: Center(
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              const Text(
-                'You have pushed the button this many times:',
-              ),
-              Text(
-                "$compteur",
-                style: Theme.of(context).textTheme.headlineMedium,
-              ),
-              ElevatedButton(
+    return Center(
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            const Text(
+              'You have pushed the button this many times:',
+            ),
+            Text(
+              "$compteur",
+              style: Theme.of(context).textTheme.headlineMedium,
+            ),
+            ElevatedButton(
                 onPressed: () {
                   if (user != null) {
                     context.go('/profile');
@@ -94,53 +90,42 @@ class MyHomePageState extends ConsumerState<MyHomePage> {
                   }
                 },
                 child: const Text("Go to Profile Page")
-              ),
-              ElevatedButton(
-                  onPressed: () {
-                    if (user != null) {
-                      context.go('/profile/settings');
-                    } else {
-                      context.go('/profile/signin');
-                    }
-                  },
-                  child: const Text("Go to Setting Profile Page")
-              ),
-              ElevatedButton(
-                  onPressed: () {
-                    context.go('/library/scan');
-                  },
-                  child: const Text("Go to Scan Page")
-              ),
-              ElevatedButton(
-                  onPressed: () {
-                    context.go('/discover');
-                  },
-                  child: const Text("Go to Discover Page")
-              ),
-              ElevatedButton(
-                  onPressed: () {
-                    context.go('/devpage');
-                  },
-                  child: const Text("Go to Dev Compo Show Page")
-              ),
-              ElevatedButton(
+            ),
+            ElevatedButton(
+                onPressed: () {
+                  if (user != null) {
+                    context.go('/profile/settings');
+                  } else {
+                    context.go('/profile/signin');
+                  }
+                },
+                child: const Text("Go to Setting Profile Page")
+            ),
+            ElevatedButton(
+                onPressed: () {
+                  context.go('/library/scan');
+                },
+                child: const Text("Go to Scan Page")
+            ),
+            ElevatedButton(
+                onPressed: () {
+                  context.go('/discover');
+                },
+                child: const Text("Go to Discover Page")
+            ),
+            ElevatedButton(
+                onPressed: () {
+                  context.go('/devpage');
+                },
+                child: const Text("Go to Dev Compo Show Page")
+            ),
+            ElevatedButton(
                 onPressed: () {
                   context.go('/mentions_legales');
                 },
                 child: const Text("Go to Mentions Légales Page")
-              ),
-            ],
-          ),
-        ),
-      ),
-      floatingActionButton: Container(
-        transform: Matrix4.translationValues(0, -32, 0),
-        child: FloatingActionButton(
-          onPressed: () {
-            ref.read(compteurProvider.notifier).incrementer();
-          },
-          tooltip: 'Increment',
-          child: const Icon(Icons.add),
+            ),
+          ],
         ),
       ),
     );

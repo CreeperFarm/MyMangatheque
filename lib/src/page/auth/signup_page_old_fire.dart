@@ -1,14 +1,18 @@
-import 'package:mymangatheque/src/provider/theme_color_provider.dart';
-import 'package:mymangatheque/src/components/my_square_tile.dart';
-import 'package:mymangatheque/src/components/my_textfield.dart';
-import 'package:mymangatheque/src/services/auth_services.dart';
-import 'package:mymangatheque/src/components/my_button.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:pocketbase/pocketbase.dart';
-import 'package:go_router/go_router.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:dart_date/dart_date.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:mymangatheque/src/components/my_button.dart';
+import 'package:mymangatheque/src/components/my_textfield.dart';
+import 'package:mymangatheque/src/components/my_square_tile.dart';
+import 'package:mymangatheque/src/provider/theme_color_provider.dart';
+import 'package:mymangatheque/src/services/auth_services.dart';
+
+// ignore_for_file: use_build_context_synchronously
 
 class SignUpPage extends ConsumerStatefulWidget {
   const SignUpPage({super.key});
@@ -23,53 +27,9 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final passwordVerifierController = TextEditingController();
-  final usernameController = TextEditingController();
+  final pseudoController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-
-  final pb = PocketBase('https://api.mymangatheque.com');
-
   String errorText = "";
-
-  void signingProcess() async {
-    final body = <String, dynamic> {
-      "username": usernameController.text,
-      "email": emailController.text,
-      "emailVisibility": true,
-      "password": passwordController.text,
-      "passwordConfirm": passwordVerifierController.text,
-      "role": "user"
-    };
-
-    final record = await pb.collection('users').create(body: body);
-    print(record);
-    await pb.collection('users').requestVerification(emailController.text);
-
-    print(pb.authStore.isValid);
-    print(pb.authStore.token);
-    print(pb.authStore.model.id);
-  }
-
-  void signUp() async {
-
-    if (passwordController.text.length < 8) {
-      print('Password must be at least 8 characters');
-      errorText = 'Password must be at least 8 characters';
-      return showMessage(errorText);
-    }
-    else if (!emailController.text.contains('@')) {
-      print('Invalid email');
-      errorText = 'Invalid email';
-      return showMessage(errorText);
-    }
-    else if (usernameController.text.length < 3) {
-      print('Username must be at least 3 characters');
-      errorText = 'Username must be at least 3 characters';
-      return showMessage(errorText);
-    } else {
-      signingProcess();
-    }
-  }
-
   // For Ui
 
   // Dispose Variable
@@ -78,7 +38,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
     emailController.dispose();
     passwordController.dispose();
     passwordVerifierController.dispose();
-    usernameController.dispose();
+    pseudoController.dispose();
     super.dispose();
   }
 
@@ -87,6 +47,78 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
     await FirebaseFirestore.instance.collection('users').snapshots();
 
   }*/
+
+  void signUserUp() async {
+    // show circular progress
+    showDialog(
+        context: context,
+        builder: (context) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+    );
+
+    try {
+      // Authenticate user
+      await FirebaseAuth.instance.setLanguageCode("fr");
+      await FirebaseAuth.instance.createUserWithEmailAndPassword(email: emailController.text, password: passwordController.text);
+
+      // Add detail about user
+      final todayDay = DateTime.now().format('dd');
+      final todayMonth = DateTime.now().format('MM');
+      final todayYear = DateTime.now().format('yyyy');
+      Map month = {
+        '01': 'Janvier',
+        '02': 'Février',
+        '03': 'Mars',
+        '04': 'Avril',
+        '05': 'Mai',
+        '06': 'Juin',
+        '07': 'Billet',
+        '08': 'Août',
+        '09': 'Septembre',
+        '10': 'Octobre',
+        '11': 'Novembre',
+        '12': 'Décembre',
+      };
+
+      final user = FirebaseAuth.instance.currentUser!;
+
+      await user.sendEmailVerification();
+
+      await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+        'pseudo': pseudoController.text,
+        'email': user.email,
+        'imageUrl': 'https://cdn.statically.io/gh/CreeperFarm/AppManga/main/default_pdp.jpg',
+        'createdOn': '$todayDay ${month[todayMonth]} $todayYear',
+        'authType': 'emailpass',
+        'uid': user.uid,
+      });
+
+      // Go to profile page
+      context.go('/profile');
+    } on FirebaseAuthException catch (e){
+      if (e.code == "weak-password") {
+        Navigator.pop(context);
+        errorText = "Veuillez insérer un mot de passe plus sécurisé!";
+        showMessage(errorText);
+      } else if (e.code == "invalid-email" || e.code == "wrong-password") {
+        Navigator.pop(context);
+        errorText = "Email ou mot de passe incorrect.";
+        showMessage(errorText);
+      } else if (e.code == "email-already-in-use") {
+        Navigator.pop(context);
+        errorText = "L'Email est déjà utilisé.";
+        showMessage(errorText);
+      } else {
+        Navigator.pop(context);
+        errorText = e.code;
+        showMessage(errorText);
+      }
+    }
+
+  }
 
   // error message to user
   void showMessage(String message) {
@@ -163,7 +195,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                     children: [
                       // Display Name field
                       MyTextField(
-                        controller: usernameController,
+                        controller: pseudoController,
                         labelText: "Pseudo",
                         obscureText: false,
                         errorMessage: "Veuillez entrer un pseudo!",
@@ -238,7 +270,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                       if (passwordController.text != passwordVerifierController.text) {
                         errorText = "Vos mots de passe ne correspondent pas";
                       } else {
-                        signUp();
+                        signUserUp();
                       }
                     }
                   },

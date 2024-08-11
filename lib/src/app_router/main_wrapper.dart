@@ -1,4 +1,5 @@
 import 'package:mymangatheque/src/provider/theme_color_provider.dart';
+import 'package:mymangatheque/src/components/my_drawer.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mymangatheque/src/const/own_icon.dart';
 import 'package:mymangatheque/src/const/theme.dart';
@@ -34,6 +35,14 @@ List<String> navTitle = [
   "Recherche",
   "Planning",
   "Profil"
+];
+
+List<String> navRoute = [
+  "/",
+  "/library",
+  "/search",
+  "/planning",
+  "/profile"
 ];
 
 class _MainWrapperState extends ConsumerState<MainWrapper> {
@@ -78,16 +87,38 @@ class _MainWrapperState extends ConsumerState<MainWrapper> {
 
     final textColor = ref.watch(themeTextColorProvider);
 
-    return Scaffold(
-      body: Stack(
-        children: [
-          widget.navigationShell,
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: navBar(textColor),
-          ),
-        ],
-      ),
+
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (constraints.maxWidth > 600) {
+          return Scaffold(
+            appBar: AppBar(),
+            drawer: MyDrawer(
+              navIcons: navIcons,
+              navTitle: navTitle,
+              navRoute: navRoute,
+            ),
+            body: Stack(
+              children: [
+                widget.navigationShell,
+              ],
+            )
+          );
+        } else {
+          return Scaffold(
+            body: Stack(
+              children: [
+                widget.navigationShell,
+                Align(
+                  alignment: Alignment.bottomCenter,
+                  child: navBar(textColor),
+                ),
+              ],
+            ),
+          );
+        }
+      },
     );
   }
 

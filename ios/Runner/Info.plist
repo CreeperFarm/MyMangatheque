@@ -41,6 +41,8 @@
 	<string>Used for the scan of barcode of the book</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Used to get the Profile Picture</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Used to get the Profile Picture</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>
