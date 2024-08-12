@@ -1,29 +1,31 @@
-import 'package:mymangatheque/src/provider/theme_color_provider.dart';
+import 'package:date_field/date_field.dart';
 import 'package:mymangatheque/src/components/my_square_tile.dart';
 import 'package:mymangatheque/src/components/my_textfield.dart';
 import 'package:mymangatheque/src/services/auth_services.dart';
 import 'package:mymangatheque/src/components/my_button.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:pocketbase/pocketbase.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 
-class SignUpPage extends ConsumerStatefulWidget {
+class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
 
   @override
-  ConsumerState<SignUpPage> createState() => _SignUpPageState();
+  State<SignUpPage> createState() => _SignUpPageState();
 }
 
-class _SignUpPageState extends ConsumerState<SignUpPage> {
+class _SignUpPageState extends State<SignUpPage> {
   // Define variable
+
   // For Sign Up
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final passwordVerifierController = TextEditingController();
   final usernameController = TextEditingController();
+  DateTime selectedBDayDate = DateTime(DateTime.now().year - 13, DateTime.now().month, DateTime.now().day);
+  final selectedGender = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
   final pb = PocketBase('https://api.mymangatheque.com');
@@ -37,6 +39,8 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
       "emailVisibility": true,
       "password": passwordController.text,
       "passwordConfirm": passwordVerifierController.text,
+      "birthday": selectedBDayDate,
+      "gender": selectedGender.text,
       "role": "user"
     };
 
@@ -94,13 +98,13 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
         context: context,
         builder: (context) {
           return AlertDialog(
-            backgroundColor: Colors.blueGrey,
+            backgroundColor: Theme.of(context).colorScheme.primaryContainer,
             title: Center(
               child: Text(
                 message,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: Colors.white,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.primary,
                 ),
               ),
             ),
@@ -112,15 +116,10 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
   @override
   void initState() {
     super.initState();
-    ref.read(themeBgColorProvider);
-    ref.read(themeTextColorProvider);
   }
 
   @override
   Widget build(BuildContext context) {
-
-    final bgColor = ref.watch(themeBgColorProvider);
-    final textColor = ref.watch(themeTextColorProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -143,7 +142,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                 SvgPicture.asset(
                     'assets/icons/locker.svg',
                     height: 75,
-                    colorFilter: ColorFilter.mode(textColor, BlendMode.srcIn)
+                    colorFilter: ColorFilter.mode(Theme.of(context).colorScheme.primary, BlendMode.srcIn)
                 ),
 
                 const SizedBox(height: 15),
@@ -152,7 +151,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                   "Inscrivez-vous pour pouvoir sauvegarder vos mangas favoris et dans votre collection",
                   textAlign: TextAlign.center,
                   style: GoogleFonts.poppins(
-                    color: textColor,
+                    color: Theme.of(context).colorScheme.primary,
                     fontSize: 17,
                   ),
                 ),
@@ -167,7 +166,6 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                         labelText: "Pseudo",
                         obscureText: false,
                         errorMessage: "Veuillez entrer un pseudo!",
-                        textColor: textColor,
                       ),
 
                       const SizedBox(height: 11),
@@ -178,7 +176,6 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                         labelText: "Votre Email",
                         obscureText: false,
                         errorMessage: "Veuillez enter votre email!",
-                        textColor: textColor,
                       ),
 
                       const SizedBox(height: 11),
@@ -189,12 +186,12 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                         labelText: "Votre mot de passe",
                         obscureText: true,
                         errorMessage: "Veuillez entrer votre mot de passe!",
-                        textColor: textColor,
                       ),
 
                       const SizedBox(height: 11),
 
                       // Password Confirm field
+
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 5.0),
                         child: TextFormField(
@@ -209,29 +206,137 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                             return null;
                           },
                           decoration: InputDecoration(
-                            enabledBorder: const OutlineInputBorder(),
-                            focusedBorder: const OutlineInputBorder(
-                              borderSide: BorderSide(),
+                            errorBorder: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                color: Theme.of(context).colorScheme.error,
+                              ),
+                            ),
+                            border: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
                             ),
                             filled: true,
                             labelStyle: TextStyle(
-                              color: textColor,
+                              color: Theme.of(context).colorScheme.onPrimary,
                             ),
                             hintText: "Confirmer le mot de passe",
                           ),
+
+
+                        ),
+                      ),
+
+                      const SizedBox(height: 11),
+
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 5.0),
+                        child: DateTimeFormField(
+                          decoration: InputDecoration(
+                            errorBorder: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                color: Theme.of(context).colorScheme.error,
+                              ),
+                            ),
+                            border: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                            ),
+                            filled: true,
+                            labelStyle: TextStyle(
+                              color: Theme.of(context).colorScheme.onPrimary,
+                            ),
+                            hintText: "Votre date de naissance",
+                          ),
+                          cupertinoDatePickerOptions: CupertinoDatePickerOptions(
+                            modalTitleText: "Sélectionnez la date",
+                            style: CupertinoDatePickerOptionsStyle(
+                              modalTitle: TextStyle(
+                                color: Theme.of(context).colorScheme.primary,
+                              )
+                            )
+                          ),
+                          mode: DateTimeFieldPickerMode.date,
+                          firstDate: DateTime(1900, 1, 1),
+                          lastDate: DateTime(DateTime.now().year - 13, DateTime.now().month, DateTime.now().day),
+                          initialPickerDateTime: DateTime(DateTime.now().year - 13, DateTime.now().month, DateTime.now().day),
+                          validator: (value) {
+                            if (value == null) {
+                              return "Veuillez entrer votre date de naissance";
+                            }
+                            return null;
+                          },
+                          onChanged: (DateTime? value) {
+                            setState(() {
+                              selectedBDayDate = value!;
+                            });
+                          },
+                        ),
+                      ),
+
+
+
+                      const SizedBox(height: 11),
+
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 5.0),
+                        child: DropdownButtonFormField(
+                          decoration: InputDecoration(
+                            errorBorder: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                color: Theme.of(context).colorScheme.error,
+                              ),
+                            ),
+                            border: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                            ),
+                            filled: true,
+                            labelStyle: TextStyle(
+                              color: Theme.of(context).colorScheme.onPrimary,
+                            ),
+                            hintText: "Votre genre",
+                          ),
+                          items: const [
+                            DropdownMenuItem(
+                              value: "men",
+                              child: Text("Homme"),
+                            ),
+                            DropdownMenuItem(
+                              value: "women",
+                              child: Text("Femme"),
+                            ),
+                            DropdownMenuItem(
+                              value: "other",
+                              child: Text("Autre"),
+                            ),
+                          ],
+                          validator: (value) {
+                            if (value == null) {
+                              return "Veuillez choisir votre genre";
+                            }
+                            return null;
+                          },
+                          onChanged: (value) {
+                            setState(() {
+                              selectedGender.text = value.toString();
+                            });
+                          }
                         ),
                       ),
                     ],
                   ),
                 ),
 
+
+
                 const SizedBox(height: 22),
 
                 // Button who create the account
                 MyButton(
                   text: "Créer un compte",
-                  bgColor: bgColor,
-                  textColor: textColor,
                   onTap: () async {
                     // Verify if all field is complete
                     if (_formKey.currentState!.validate()){
@@ -252,7 +357,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                     Expanded(
                       child: Divider(
                         thickness: 0.5,
-                        color: textColor,
+                        color: Theme.of(context).colorScheme.primary,
                       ),
                     ),
                     Padding(
@@ -260,14 +365,14 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                       child: Text(
                         "Ou continuer avec",
                         style: TextStyle(
-                          color: textColor,
+                          color: Theme.of(context).colorScheme.primary,
                         ),
                       ),
                     ),
                     Expanded(
                       child: Divider(
                         thickness: 0.5,
-                        color: textColor,
+                        color: Theme.of(context).colorScheme.primary,
                       ),
                     ),
                   ],
@@ -305,7 +410,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                       Text(
                         "J'ai déjà un compte ?",
                         style: TextStyle(
-                            color: textColor
+                            color: Theme.of(context).colorScheme.primary
                         ),
                       ),
                       const SizedBox(width: 4),

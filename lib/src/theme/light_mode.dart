@@ -6,9 +6,9 @@ ThemeData lightMode = ThemeData(
     onSurface: Colors.black87, // Color of the text of the main page
     primary: Colors.grey.shade900, // Color of the text/icon of the button and of the background of floatingActionButton
     onPrimary: Colors.grey.shade100, // Color of the text/icon of floatingActionButton
-    secondary: Colors.orange,// Colors.grey.shade200,
-    onSecondary: Colors.blue,
-    tertiary: Colors.brown,//Colors.white,
-    inversePrimary: Colors.lime,// Colors.grey.shade900,
+    secondary: Colors.grey.shade200,
+    onSecondary: Colors.blueGrey.shade900,
+    tertiary: Colors.white,
+    inversePrimary: Colors.grey.shade900,
   )
 );

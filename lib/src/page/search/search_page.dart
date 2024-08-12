@@ -6,7 +6,6 @@ import 'package:go_router/go_router.dart';
 import 'package:mymangatheque/src/components/my_line.dart';
 import 'package:mymangatheque/src/const/own_icon.dart';
 import 'package:mymangatheque/src/provider/search_filter_provider.dart';
-import 'package:mymangatheque/src/provider/theme_color_provider.dart';
 
 class SearchPage extends ConsumerStatefulWidget {
   const SearchPage({super.key});
@@ -84,8 +83,6 @@ class _SearchPageState extends ConsumerState<SearchPage> {
 
   @override
   void initState() {
-    ref.read(themeTextColorProvider);
-    ref.read(themeBgColorProvider);
     ref.read(searchFilterProvider);
     getClientStream();
     _searchController.addListener(_onSearchChanged);
@@ -95,8 +92,6 @@ class _SearchPageState extends ConsumerState<SearchPage> {
   @override
   Widget build(BuildContext context) {
     final selectedFilter = ref.watch(searchFilterProvider);
-    final textColor = ref.watch(themeTextColorProvider);
-    final bgColor = ref.watch(themeBgColorProvider);
 
     searchResultsList();
 
@@ -109,15 +104,15 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                 controller: _searchController,
                 placeholder: 'Recherche',
                 placeholderStyle: TextStyle(
-                  color: textColor,
+                  color: Theme.of(context).colorScheme.primary,
                 ),
                 style: TextStyle(
-                  color: textColor,
+                  color: Theme.of(context).colorScheme.primary,
                 ),
               ),
             ),
             PopupMenuButton<String>(
-              icon: OwnIcon(iconColor: textColor, iconName: "filter_right"),
+              icon: OwnIcon(iconColor: Theme.of(context).colorScheme.primary, iconName: "filter_right"),
               onSelected: (String result) {
                 setState(() {
                   changeFilter(result);
@@ -127,8 +122,8 @@ class _SearchPageState extends ConsumerState<SearchPage> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
               ),
-              shadowColor: textColor.withOpacity(0.5),
-              color: bgColor,
+              shadowColor: Theme.of(context).colorScheme.primary.withOpacity(0.5),
+              color: Theme.of(context).colorScheme.onPrimary,
               itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
                 PopupMenuItem<String>(
                   value: 'manga',
@@ -203,20 +198,20 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 17,
-                                  color: textColor,
+                                  color: Theme.of(context).colorScheme.primary,
                                 ),
                               ),
                               Text(
                                 textLength(_resultsList[index]['author'], 40),
                                 style: TextStyle(
-                                  color: textColor,
+                                  color: Theme.of(context).colorScheme.primary,
                                   fontSize: 14,
                                 ),
                               ),
                               Text(
                                 _resultsList[index]['releaseDate'],
                                 style: TextStyle(
-                                  color: textColor,
+                                  color: Theme.of(context).colorScheme.primary,
                                   fontSize: 14,
                                 ),
                               )
@@ -226,7 +221,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                       ),
                       Icon(
                         Icons.arrow_forward_ios,
-                        color: textColor,
+                        color: Theme.of(context).colorScheme.primary,
                       ),
                     ],
                   ),
@@ -265,13 +260,13 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 17,
-                                  color: textColor,
+                                  color: Theme.of(context).colorScheme.primary,
                                 ),
                               ),
                               Text(
                                 textLength(_resultsList[index]['manga'], 40),
                                 style: TextStyle(
-                                  color: textColor,
+                                  color: Theme.of(context).colorScheme.primary,
                                   fontSize: 14,
                                 ),
                               ),
@@ -281,7 +276,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                       ),
                       Icon(
                         Icons.arrow_forward_ios,
-                        color: textColor,
+                        color: Theme.of(context).colorScheme.primary,
                       ),
                     ],
                   ),
@@ -320,13 +315,13 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 17,
-                                  color: textColor,
+                                  color: Theme.of(context).colorScheme.primary,
                                 ),
                               ),
                               Text(
                                 textLength(_resultsList[index]['author'], 40),
                                 style: TextStyle(
-                                  color: textColor,
+                                  color: Theme.of(context).colorScheme.primary,
                                   fontSize: 14,
                                 ),
                               ),
@@ -336,7 +331,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                       ),
                       Icon(
                         Icons.arrow_forward_ios,
-                        color: textColor,
+                        color: Theme.of(context).colorScheme.primary,
                       ),
                     ],
                   ),

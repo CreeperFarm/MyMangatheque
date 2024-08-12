@@ -1,23 +1,21 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mymangatheque/src/components/my_button.dart';
 import 'package:mymangatheque/src/components/my_textfield.dart';
 import 'package:mymangatheque/src/components/my_square_tile.dart';
-import 'package:mymangatheque/src/provider/theme_color_provider.dart';
 import 'package:mymangatheque/src/services/auth_services.dart';
 
-class SignInPage extends ConsumerStatefulWidget {
+class SignInPage extends StatefulWidget {
   const SignInPage({super.key});
 
   @override
-  ConsumerState<SignInPage> createState() => _SignInPageState();
+  State<SignInPage> createState() => _SignInPageState();
 }
 
-class _SignInPageState extends ConsumerState<SignInPage> {
+class _SignInPageState extends State<SignInPage> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
 
@@ -60,35 +58,26 @@ class _SignInPageState extends ConsumerState<SignInPage> {
   // error message to user
   void showMessage(String message) {
     showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            backgroundColor: Colors.cyanAccent,
-            title: Center(
-              child: Text(
-                message,
-                style: const TextStyle(
-                  color: Colors.white,
-                ),
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+          title: Center(
+            child: Text(
+              message,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.primary,
               ),
             ),
-          );
-        });
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    ref.read(themeBgColorProvider);
-    ref.read(themeTextColorProvider);
+          ),
+        );
+      }
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-
-    final bgColor = ref.watch(themeBgColorProvider);
-    final textColor = ref.watch(themeTextColorProvider);
-
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -111,7 +100,7 @@ class _SignInPageState extends ConsumerState<SignInPage> {
                 SvgPicture.asset(
                   'assets/icons/locker.svg',
                   height: 100,
-                  colorFilter: ColorFilter.mode(textColor, BlendMode.srcIn)
+                  colorFilter: ColorFilter.mode(Theme.of(context).colorScheme.primary, BlendMode.srcIn)
                 ),
 
                 const SizedBox(height: 15),
@@ -120,7 +109,7 @@ class _SignInPageState extends ConsumerState<SignInPage> {
                   "Connectez-vous pour pouvoir sauvegarder vos mangas favoris et dans votre collection et vous éviter les doublons.",
                   textAlign: TextAlign.center,
                   style: GoogleFonts.poppins(
-                    color: textColor,
+                    color: Theme.of(context).colorScheme.primary,
                     fontSize: 17,
                   ),
                 ),
@@ -135,7 +124,6 @@ class _SignInPageState extends ConsumerState<SignInPage> {
                       labelText: "Votre Email",
                       obscureText: false,
                       errorMessage: "Veuillez enter votre email!",
-                      textColor: textColor,
                     ),
 
                     const SizedBox(height: 15),
@@ -146,7 +134,6 @@ class _SignInPageState extends ConsumerState<SignInPage> {
                       labelText: "Votre Mot de passe",
                       obscureText: true,
                       errorMessage: "Veuillez entrer votre mot de passe!",
-                      textColor: textColor,
                     ),
                   ],
                 ),
@@ -164,7 +151,7 @@ class _SignInPageState extends ConsumerState<SignInPage> {
                       textAlign: TextAlign.right,
                       style: GoogleFonts.poppins(
                         fontWeight: FontWeight.bold,
-                        color: textColor,
+                        color: Theme.of(context).colorScheme.primary,
                       ),
                     ),
                   ),
@@ -173,8 +160,6 @@ class _SignInPageState extends ConsumerState<SignInPage> {
                 // Display sign in button
                 MyButton(
                   text: "Se connecter",
-                  bgColor: bgColor,
-                  textColor: textColor,
                   onTap: () => signUserIn(context),
                 ),
                 const SizedBox(height: 35),
@@ -185,7 +170,7 @@ class _SignInPageState extends ConsumerState<SignInPage> {
                     Expanded(
                       child: Divider(
                         thickness: 0.5,
-                        color: textColor,
+                        color: Theme.of(context).colorScheme.primary,
                       ),
                     ),
                     Padding(
@@ -193,14 +178,14 @@ class _SignInPageState extends ConsumerState<SignInPage> {
                       child: Text(
                         "Ou continuer avec",
                         style: TextStyle(
-                          color: textColor,
+                          color: Theme.of(context).colorScheme.primary,
                         ),
                       ),
                     ),
                     Expanded(
                       child: Divider(
                         thickness: 0.5,
-                        color: textColor,
+                        color: Theme.of(context).colorScheme.primary,
                       ),
                     ),
                   ],
@@ -237,7 +222,7 @@ class _SignInPageState extends ConsumerState<SignInPage> {
                     children: [
                       Text(
                         "Pas encore de compte ?",
-                        style: TextStyle(color: textColor),
+                        style: TextStyle(color: Theme.of(context).colorScheme.primary),
                       ),
                       const SizedBox(width: 4),
                       TextButton(

@@ -1,22 +1,20 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mymangatheque/src/components/my_button.dart';
 import 'package:mymangatheque/src/components/my_textfield.dart';
-import 'package:mymangatheque/src/provider/theme_color_provider.dart';
 
 // ignore_for_file: use_build_context_synchronously
 
-class ModifyPasswordPage extends ConsumerStatefulWidget {
+class ModifyPasswordPage extends StatefulWidget {
   const ModifyPasswordPage({super.key});
 
   @override
-  ConsumerState<ModifyPasswordPage> createState() => _ModifyPasswordPageState();
+  State<ModifyPasswordPage> createState() => _ModifyPasswordPageState();
 }
 
-class _ModifyPasswordPageState extends ConsumerState<ModifyPasswordPage> {
+class _ModifyPasswordPageState extends State<ModifyPasswordPage> {
   // Define variable
   final oldPasswordController = TextEditingController();
   final newPasswordController = TextEditingController();
@@ -76,37 +74,26 @@ class _ModifyPasswordPageState extends ConsumerState<ModifyPasswordPage> {
   // error message to user
   void showMessage(String message) {
     showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            backgroundColor: Colors.blueGrey,
-            title: Center(
-              child: Text(
-                message,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: Colors.white,
-                ),
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+          title: Center(
+            child: Text(
+              message,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.primary,
               ),
             ),
-          );
-        }
+          ),
+        );
+      }
     );
   }
 
   @override
-  void initState() {
-    super.initState();
-    ref.read(themeBgColorProvider);
-    ref.read(themeTextColorProvider);
-  }
-
-  @override
   Widget build(BuildContext context) {
-
-    final bgColor = ref.watch(themeBgColorProvider);
-    final textColor = ref.watch(themeTextColorProvider);
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Modification du mot de passe'),
@@ -121,7 +108,7 @@ class _ModifyPasswordPageState extends ConsumerState<ModifyPasswordPage> {
                 SvgPicture.asset(
                     'assets/icons/locker.svg',
                     height: 200,
-                    colorFilter: ColorFilter.mode(textColor, BlendMode.srcIn)
+                    colorFilter: ColorFilter.mode(Theme.of(context).colorScheme.primary, BlendMode.srcIn)
                 ),
 
                 const SizedBox(height: 11),
@@ -135,7 +122,6 @@ class _ModifyPasswordPageState extends ConsumerState<ModifyPasswordPage> {
                         labelText: "Ancien mot de passe",
                         obscureText: true,
                         errorMessage: "Veuillez enter votre ancien mot de passe!",
-                        textColor: textColor,
                       ),
 
                       const SizedBox(height: 11),
@@ -145,7 +131,6 @@ class _ModifyPasswordPageState extends ConsumerState<ModifyPasswordPage> {
                         labelText: "Nouveau mot de passe",
                         obscureText: true,
                         errorMessage: "Veuillez enter votre nouveau mot de passe!",
-                        textColor: textColor
                       ),
 
                       const SizedBox(height: 11),
@@ -155,7 +140,6 @@ class _ModifyPasswordPageState extends ConsumerState<ModifyPasswordPage> {
                         labelText: "Confirmer le mot de passe",
                         obscureText: true,
                         errorMessage: "Veuillez enter votre nouveau mot de passe!",
-                          textColor: textColor
                       ),
                     ],
                   ),
@@ -165,8 +149,6 @@ class _ModifyPasswordPageState extends ConsumerState<ModifyPasswordPage> {
 
                 MyButton(
                   text: "Changer le mot de passe",
-                  bgColor: bgColor,
-                  textColor: textColor,
                   onTap: () => {
                     // Verify if all field is complete
                     if (_formKey.currentState!.validate()) {

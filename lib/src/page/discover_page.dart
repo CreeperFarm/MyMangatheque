@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mymangatheque/src/const/own_icon.dart';
 import 'package:mymangatheque/src/provider/search_filter_provider.dart';
-import 'package:mymangatheque/src/provider/theme_color_provider.dart';
 
 class DiscoverPage extends ConsumerStatefulWidget {
   const DiscoverPage({super.key});
@@ -40,16 +39,11 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage> {
 
   @override
   void initState() {
-    ref.read(themeBgColorProvider);
-    ref.read(searchFilterProvider);
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-
-    final textColor = ref.watch(themeTextColorProvider);
-    final bgColor = ref.watch(themeBgColorProvider);
     final selectedFilter = ref.watch(searchFilterProvider);
 
     return Scaffold(
@@ -59,7 +53,7 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage> {
           children: [
             const Text("Découvrir"),
             PopupMenuButton<String>(
-              icon: OwnIcon(iconColor: textColor, iconName: "filter_right"),
+              icon: OwnIcon(iconColor: Theme.of(context).colorScheme.primary, iconName: "filter_right"),
               onSelected: (String result) {
                 setState(() {
                   changeFilter(result);
@@ -69,8 +63,8 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
               ),
-              shadowColor: textColor.withOpacity(0.5),
-              color: bgColor,
+              shadowColor: Theme.of(context).colorScheme.primary.withOpacity(0.5),
+              color: Theme.of(context).colorScheme.onPrimary,
               itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
                 PopupMenuItem<String>(
                   value: 'manga',

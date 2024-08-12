@@ -2,26 +2,24 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dart_date/dart_date.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mymangatheque/src/components/my_button.dart';
 import 'package:mymangatheque/src/components/my_textfield.dart';
 import 'package:mymangatheque/src/components/my_square_tile.dart';
-import 'package:mymangatheque/src/provider/theme_color_provider.dart';
 import 'package:mymangatheque/src/services/auth_services.dart';
 
 // ignore_for_file: use_build_context_synchronously
 
-class SignUpPage extends ConsumerStatefulWidget {
+class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
 
   @override
-  ConsumerState<SignUpPage> createState() => _SignUpPageState();
+  State<SignUpPage> createState() => _SignUpPageState();
 }
 
-class _SignUpPageState extends ConsumerState<SignUpPage> {
+class _SignUpPageState extends State<SignUpPage> {
   // Define variable
   // For Sign Up
   final emailController = TextEditingController();
@@ -144,15 +142,10 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
   @override
   void initState() {
     super.initState();
-    ref.read(themeBgColorProvider);
-    ref.read(themeTextColorProvider);
   }
 
   @override
   Widget build(BuildContext context) {
-
-    final bgColor = ref.watch(themeBgColorProvider);
-    final textColor = ref.watch(themeTextColorProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -175,7 +168,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                 SvgPicture.asset(
                     'assets/icons/locker.svg',
                     height: 75,
-                    colorFilter: ColorFilter.mode(textColor, BlendMode.srcIn)
+                    colorFilter: ColorFilter.mode(Theme.of(context).colorScheme.primary, BlendMode.srcIn)
                 ),
 
                 const SizedBox(height: 15),
@@ -184,7 +177,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                   "Inscrivez-vous pour pouvoir sauvegarder vos mangas favoris et dans votre collection",
                   textAlign: TextAlign.center,
                   style: GoogleFonts.poppins(
-                    color: textColor,
+                    color: Theme.of(context).colorScheme.primary,
                     fontSize: 17,
                   ),
                 ),
@@ -199,7 +192,6 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                         labelText: "Pseudo",
                         obscureText: false,
                         errorMessage: "Veuillez entrer un pseudo!",
-                        textColor: textColor,
                       ),
 
                       const SizedBox(height: 11),
@@ -210,7 +202,6 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                         labelText: "Votre Email",
                         obscureText: false,
                         errorMessage: "Veuillez enter votre email!",
-                        textColor: textColor,
                       ),
 
                       const SizedBox(height: 11),
@@ -221,7 +212,6 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                         labelText: "Votre mot de passe",
                         obscureText: true,
                         errorMessage: "Veuillez entrer votre mot de passe!",
-                        textColor: textColor,
                       ),
 
                       const SizedBox(height: 11),
@@ -247,7 +237,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                             ),
                             filled: true,
                             labelStyle: TextStyle(
-                              color: textColor,
+                              color: Theme.of(context).colorScheme.primary,
                             ),
                             hintText: "Confirmer le mot de passe",
                           ),
@@ -262,8 +252,6 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                 // Button who create the account
                 MyButton(
                   text: "Créer un compte",
-                  bgColor: bgColor,
-                  textColor: textColor,
                   onTap: () async {
                     // Verify if all field is complete
                     if (_formKey.currentState!.validate()){
@@ -284,7 +272,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                     Expanded(
                       child: Divider(
                         thickness: 0.5,
-                        color: textColor,
+                        color: Theme.of(context).colorScheme.primary,
                       ),
                     ),
                     Padding(
@@ -292,14 +280,14 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                       child: Text(
                         "Ou continuer avec",
                         style: TextStyle(
-                          color: textColor,
+                          color: Theme.of(context).colorScheme.primary,
                         ),
                       ),
                     ),
                     Expanded(
                       child: Divider(
                         thickness: 0.5,
-                        color: textColor,
+                        color: Theme.of(context).colorScheme.primary,
                       ),
                     ),
                   ],
@@ -337,7 +325,7 @@ class _SignUpPageState extends ConsumerState<SignUpPage> {
                       Text(
                         "J'ai déjà un compte ?",
                         style: TextStyle(
-                            color: textColor
+                            color: Theme.of(context).colorScheme.primary
                         ),
                       ),
                       const SizedBox(width: 4),

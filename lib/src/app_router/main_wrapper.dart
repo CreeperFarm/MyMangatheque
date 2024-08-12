@@ -1,13 +1,10 @@
-import 'package:mymangatheque/src/provider/theme_color_provider.dart';
 import 'package:mymangatheque/src/components/my_drawer.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mymangatheque/src/const/own_icon.dart';
-import 'package:mymangatheque/src/const/theme.dart';
-import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:glass_kit/glass_kit.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
-import 'dart:async';
+import 'package:mymangatheque/src/theme/light_mode.dart';
 
 class MainWrapper extends ConsumerStatefulWidget {
   final StatefulNavigationShell navigationShell;
@@ -57,20 +54,9 @@ class _MainWrapperState extends ConsumerState<MainWrapper> {
   }
 
   @override
-  void initState() {
-    super.initState();
-    ref.read(themeTextColorProvider);
-  }
-
-  // Change the color of the app
-  void changeThemeColor(Color colorBg, Color colorText, WidgetRef ref) {
-    ref.read(themeTextColorProvider.notifier).changeThemeTextColor(colorText);
-  }
-
-  @override
   Widget build(BuildContext context) {
     // This is to change color when starting the app
-    Timer(const Duration(milliseconds: 50), () {
+    /*Timer(const Duration(milliseconds: 50), () {
       if (AdaptiveTheme.of(context).mode.isSystem) {
         final brightness = WidgetsBinding.instance.platformDispatcher.platformBrightness;
         if (brightness == Brightness.dark) {
@@ -83,12 +69,7 @@ class _MainWrapperState extends ConsumerState<MainWrapper> {
       } else {
         changeThemeColor(lightBgColor, lightTextColor, ref);
       }
-    });
-
-    final textColor = ref.watch(themeTextColorProvider);
-
-
-
+    });*/
     return LayoutBuilder(
       builder: (context, constraints) {
         if (constraints.maxWidth > 600) {
@@ -112,7 +93,7 @@ class _MainWrapperState extends ConsumerState<MainWrapper> {
                 widget.navigationShell,
                 Align(
                   alignment: Alignment.bottomCenter,
-                  child: navBar(textColor),
+                  child: navBar(Theme.of(context).colorScheme.primary),
                 ),
               ],
             ),
@@ -124,7 +105,7 @@ class _MainWrapperState extends ConsumerState<MainWrapper> {
 
   Widget navBar(unSelectedColor) {
     Color? selectedColor = Colors.cyanAccent;
-    if (unSelectedColor == const Color(0xFF1c1b1f)) {
+    if (unSelectedColor == lightMode.colorScheme.primary) {
       selectedColor = Colors.blueAccent[700];
     } else {
       selectedColor = Colors.cyanAccent;
@@ -132,8 +113,8 @@ class _MainWrapperState extends ConsumerState<MainWrapper> {
     return GlassContainer.clearGlass(
       gradient: LinearGradient(
         colors: [
-          Colors.white.withOpacity(0.1),
-          Colors.white.withOpacity(0.1),
+          Theme.of(context).colorScheme.primary.withOpacity(0.1),
+          Theme.of(context).colorScheme.primary.withOpacity(0.1),
         ],
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,

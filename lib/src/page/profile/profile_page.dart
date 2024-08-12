@@ -1,8 +1,6 @@
 import 'package:mymangatheque/src/const/own_icon.dart';
-import 'package:mymangatheque/src/provider/theme_color_provider.dart';
 import 'package:mymangatheque/src/get_data/get_user_information.dart';
 import 'package:mymangatheque/src/components/my_line.dart';
-import 'package:mymangatheque/src/const/theme.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -58,53 +56,14 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     ref.getDownloadURL().then((value) => {modifyImg(value)});
   }
 
-  // Change the color of the app
-  void changeThemeColor(Color colorBg, Color colorText, WidgetRef ref) {
-    ref.read(themeBgColorProvider.notifier).changeThemeBgColor(colorBg);
-    ref.read(themeTextColorProvider.notifier).changeThemeTextColor(colorText);
-  }
-
   // Get the theme
   @override
   void initState() {
     super.initState();
-    getCurrentTheme();
-    ref.read(themeBgColorProvider);
-    ref.read(themeTextColorProvider);
-  }
-
-  // Set a string to the current theme
-  getCurrentTheme() async {
-    final savedThemeMode = await AdaptiveTheme.getThemeMode();
-    setState(() {
-      if (savedThemeMode == AdaptiveThemeMode.light) {
-        theme = 'light';
-        changeThemeColor(lightBgColor, lightTextColor, ref);
-      } else if (savedThemeMode == AdaptiveThemeMode.dark) {
-        theme = 'dark';
-        changeThemeColor(darkBgColor, darkTextColor, ref);
-      } else if (savedThemeMode == AdaptiveThemeMode.system) {
-        theme = 'system';
-        final brightness =
-            WidgetsBinding.instance.platformDispatcher.platformBrightness;
-        if (brightness == Brightness.dark) {
-          changeThemeColor(darkBgColor, darkTextColor, ref);
-        } else {
-          changeThemeColor(lightBgColor, lightTextColor, ref);
-        }
-      } else {
-        theme = 'light';
-        changeThemeColor(lightBgColor, lightTextColor, ref);
-      }
-    });
   }
 
   @override
   Widget build(BuildContext context) {
-
-    final bgColor = ref.watch(themeBgColorProvider);
-    final textColor = ref.watch(themeTextColorProvider);
-
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
@@ -206,13 +165,16 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                             ],
                           ),
                         ),
-                        const DropdownMenuItem(
+                        DropdownMenuItem(
                           value: 'system',
                           child: Row(
                             children: [
-                              Icon(Icons.settings_suggest),
-                              Padding(padding: EdgeInsets.only(right: 10)),
-                              Text('Thème du système')
+                              Image.asset(
+                                'assets/images/theme/auto-icon.png',
+                                width: 20,
+                              ),
+                              const Padding(padding: EdgeInsets.only(right: 10)),
+                              const Text('Thème du système')
                             ],
                           ),
                         ),
@@ -227,31 +189,21 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                           setState(() {
                             savedThemeMode = AdaptiveThemeMode.light;
                           });
-                          changeThemeColor(lightBgColor, lightTextColor, ref);
                         } else if (value == 'dark') {
                           AdaptiveTheme.of(context).setDark();
                           setState(() {
                             savedThemeMode = AdaptiveThemeMode.dark;
                           });
-                          changeThemeColor(darkBgColor, darkTextColor, ref);
                         } else if (value == 'system') {
                           AdaptiveTheme.of(context).setSystem();
                           setState(() {
                             savedThemeMode = AdaptiveThemeMode.system;
                           });
-                          final brightness = WidgetsBinding
-                              .instance.platformDispatcher.platformBrightness;
-                          if (brightness == Brightness.dark) {
-                            changeThemeColor(darkBgColor, darkTextColor, ref);
-                          } else {
-                            changeThemeColor(lightBgColor, lightTextColor, ref);
-                          }
                         } else {
                           AdaptiveTheme.of(context).setLight();
                           setState(() {
                             savedThemeMode = AdaptiveThemeMode.light;
                           });
-                          changeThemeColor(lightBgColor, lightTextColor, ref);
                         }
                       }),
                 ),
@@ -263,7 +215,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                     child: Row(
                       children: [
                         const Padding(padding: EdgeInsets.only(right: 16)),
-                        OwnIcon(iconColor: textColor, iconName: 'lock'),
+                        OwnIcon(iconColor: Theme.of(context).colorScheme.primary, iconName: 'lock'),
                         const Padding(padding: EdgeInsets.only(right: 9)),
                         const Text('Changer de mot de passe'),
                       ],
