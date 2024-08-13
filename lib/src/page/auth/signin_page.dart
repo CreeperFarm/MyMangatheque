@@ -22,7 +22,7 @@ class _SignInPageState extends State<SignInPage> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
 
-  final pb = PocketBase('https://api.mymangatheque.com');
+  final pb = PocketBase('https://api.mymangatheque.com', lang: "fr-FR");
 
   Future<RecordAuth> signIn(context) async {
     try {

@@ -1,3 +1,4 @@
+import 'package:mymangatheque/src/function/show_message_function.dart';
 import 'package:mymangatheque/src/get_data/get_user_information.dart';
 import 'package:mymangatheque/src/components/my_line.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -8,8 +9,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:go_router/go_router.dart';
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'dart:io';
+
+import 'package:pocketbase/pocketbase.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -22,17 +26,19 @@ class _ProfilePageState extends State<ProfilePage> {
   dynamic savedThemeMode;
   dynamic theme;
 
-  final user = FirebaseAuth.instance.currentUser!;
+  final pb = PocketBase('https://api.mymangatheque.com', lang: 'fr-FR');
 
   // Modify the profile picture of the user
-  void modifyImg(image) async {
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc(user.uid)
-        .update({'imageUrl': image}).then((query) {
-      setState(() {});
-    }).catchError((e) {
+  void modifyImg(path, name) async {
+    await pb.collection('users').update(pb.authStore.model.id, files: [
+      http.MultipartFile.fromBytes(
+        'avatar',
+        File(path!).readAsBytesSync(),
+        filename: name,
+      )
+    ]).catchError((e) {
       print(e);
+      showMessage('Une erreur est arrivé', context);
     });
   }
 
@@ -51,10 +57,7 @@ class _ProfilePageState extends State<ProfilePage> {
       imageQuality: 75,
     );
 
-    Reference ref = FirebaseStorage.instance.ref().child('images/pdp/pdp-${user.uid}.jpg');
-
-    await ref.putFile(File(image!.path));
-    ref.getDownloadURL().then((value) => {modifyImg(value)});
+    modifyImg(image!.path, image.name);
   }
 
   @override

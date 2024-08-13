@@ -33,7 +33,7 @@ class _SignUpPageState extends State<SignUpPage> {
   final selectedGender = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
-  final pb = PocketBase('https://api.mymangatheque.com');
+  final pb = PocketBase('https://api.mymangatheque.com', lang: "fr-FR");
 
   String errorText = "";
 
