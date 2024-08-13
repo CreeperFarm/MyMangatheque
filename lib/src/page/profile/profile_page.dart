@@ -87,37 +87,41 @@ class _ProfilePageState extends State<ProfilePage> {
                   onTap: () {
                     pickUploadImage();
                   },
-                  child: GetUserProfilePicture(documentId: user.uid),
+                  child: GetUserProfilePicture(),
                 ),
                 const Padding(padding: EdgeInsets.only(bottom: 25)),
                 MyLine(width: MediaQuery.of(context).size.width, vertical: 10),
                 Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                    child: SingleChildScrollView(
-                        child: GetUserInfo(
-                            documentId: user.uid,
-                            beforeText: "L'email est : ",
-                            dataWanted: 'email',
-                            afterText: ''))),
-                MyLine(width: MediaQuery.of(context).size.width, vertical: 10),
-                Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 10.0),
                   child: SingleChildScrollView(
-                      child: GetUserInfo(
-                          documentId: user.uid,
-                          beforeText: 'Votre pseudo est : ',
-                          dataWanted: 'pseudo',
-                          afterText: '')),
+                    child: GetUserInfo(
+                      beforeText: "L'email est : ",
+                      dataWanted: 'email',
+                      afterText: ''
+                    )
+                  )
                 ),
                 MyLine(width: MediaQuery.of(context).size.width, vertical: 10),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 10.0),
                   child: SingleChildScrollView(
-                      child: GetUserInfo(
-                          documentId: user.uid,
-                          beforeText: 'Compte créer le : ',
-                          dataWanted: 'createdOn',
-                          afterText: '')),
+                    child: GetUserInfo(
+                      beforeText: 'Votre pseudo est : ',
+                      dataWanted: 'pseudo',
+                      afterText: ''
+                    )
+                  ),
+                ),
+                MyLine(width: MediaQuery.of(context).size.width, vertical: 10),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                  child: SingleChildScrollView(
+                    child: GetUserInfo(
+                      beforeText: 'Compte créer le : ',
+                      dataWanted: 'createdOn',
+                      afterText: ''
+                    )
+                  ),
                 ),
                 /*MyLine(width: MediaQuery.of(context).size.width, vertical: 10),
                 Padding(

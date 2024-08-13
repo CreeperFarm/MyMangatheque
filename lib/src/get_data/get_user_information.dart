@@ -3,33 +3,29 @@ import 'package:flutter/material.dart';
 import 'package:pocketbase/pocketbase.dart';
 
 class GetUserInfo extends StatelessWidget {
-  final String documentId;
   final String beforeText;
   final String dataWanted;
   final String afterText;
 
-  GetUserInfo(
-      {required this.documentId, required this.beforeText, required this.dataWanted, required this.afterText, super.key});
-
-  final pb = PocketBase('https://api.mymangatheque.com', lang: "fr-FR");
+  const GetUserInfo(
+      {required this.beforeText, required this.dataWanted, required this.afterText, super.key});
 
   @override
   Widget build(BuildContext context) {
 
-    // Get the collection
-    CollectionReference users = FirebaseFirestore.instance.collection("users");
+    final pb = PocketBase('https://api.mymangatheque.com', lang: "fr-FR");
 
-    return FutureBuilder<DocumentSnapshot>(
-      future: users.doc(documentId).get(),
+    return FutureBuilder(
+      future: pb.collection('users').getOne(pb.authStore.model.id),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
-          Map<String, dynamic> data = snapshot.data!.data() as Map<String, dynamic>;
+          print(snapshot.data);
           return Row(
             mainAxisSize: MainAxisSize.max,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(beforeText),
-              Text(data[dataWanted] + afterText),
+              Text(snapshot.data.toString()/*[dataWanted]*/ + afterText),
             ],
           );
         }
@@ -42,10 +38,10 @@ class GetUserInfo extends StatelessWidget {
 class GetUserProfilePicture extends StatelessWidget {
   const GetUserProfilePicture({super.key});
 
-  final pb = PocketBase('https://api.mymangatheque.com', lang: "fr-FR");
-
   @override
   Widget build(BuildContext context) {
+
+    final pb = PocketBase('https://api.mymangatheque.com', lang: "fr-FR");
 
     return FutureBuilder(
       future: pb.collection('users').getOne(pb.authStore.model.id), // Get the user collection

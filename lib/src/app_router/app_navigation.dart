@@ -1,4 +1,3 @@
-import 'package:mymangatheque/src/page/profile/profile_settings_page.dart';
 import 'package:mymangatheque/src/page/auth/forgot_password_page.dart';
 import 'package:mymangatheque/src/page/auth/modify_password_page.dart';
 import 'package:mymangatheque/src/dev_page/component_show_page.dart';
@@ -246,13 +245,6 @@ class AppNavigation {
                   return RedirectToProfile(key: state.pageKey);
                 },
                 routes: [
-                  GoRoute(
-                    path: 'settings',
-                    name: 'Settings',
-                    builder: (context, state) {
-                      return SettingsProfilePage(key: state.pageKey);
-                    }
-                  ),
                   GoRoute(
                     path: 'modify_password',
                     name: 'ModifyPassword',
