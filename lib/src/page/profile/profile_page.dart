@@ -1,8 +1,7 @@
-import 'package:mymangatheque/src/const/own_icon.dart';
 import 'package:mymangatheque/src/get_data/get_user_information.dart';
 import 'package:mymangatheque/src/components/my_line.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mymangatheque/src/const/own_icon.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -12,14 +11,14 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
 
-class ProfilePage extends ConsumerStatefulWidget {
+class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
 
   @override
-  ConsumerState<ProfilePage> createState() => _ProfilePageState();
+  State<ProfilePage> createState() => _ProfilePageState();
 }
 
-class _ProfilePageState extends ConsumerState<ProfilePage> {
+class _ProfilePageState extends State<ProfilePage> {
   dynamic savedThemeMode;
   dynamic theme;
 
@@ -32,7 +31,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         .doc(user.uid)
         .update({'imageUrl': image}).then((query) {
       setState(() {});
-    }).catchError((e) => print(e));
+    }).catchError((e) {
+      print(e);
+    });
   }
 
   // Sign Out a Connected User
@@ -56,14 +57,17 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     ref.getDownloadURL().then((value) => {modifyImg(value)});
   }
 
-  // Get the theme
-  @override
-  void initState() {
-    super.initState();
-  }
-
   @override
   Widget build(BuildContext context) {
+
+    setState(() {
+      theme = AdaptiveTheme.of(context).mode.isSystem
+          ? 'system'
+          : AdaptiveTheme.of(context).mode.isDark
+          ? 'dark'
+          : 'light';
+    });
+
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
@@ -194,15 +198,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                           setState(() {
                             savedThemeMode = AdaptiveThemeMode.dark;
                           });
-                        } else if (value == 'system') {
+                        } else {
                           AdaptiveTheme.of(context).setSystem();
                           setState(() {
                             savedThemeMode = AdaptiveThemeMode.system;
-                          });
-                        } else {
-                          AdaptiveTheme.of(context).setLight();
-                          setState(() {
-                            savedThemeMode = AdaptiveThemeMode.light;
                           });
                         }
                       }),

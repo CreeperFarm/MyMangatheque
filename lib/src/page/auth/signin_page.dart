@@ -1,4 +1,5 @@
-import 'package:firebase_auth/firebase_auth.dart';
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
@@ -6,7 +7,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:mymangatheque/src/components/my_button.dart';
 import 'package:mymangatheque/src/components/my_textfield.dart';
 import 'package:mymangatheque/src/components/my_square_tile.dart';
+import 'package:mymangatheque/src/function/show_message_function.dart';
 import 'package:mymangatheque/src/services/auth_services.dart';
+import 'package:pocketbase/pocketbase.dart';
 
 class SignInPage extends StatefulWidget {
   const SignInPage({super.key});
@@ -19,61 +22,34 @@ class _SignInPageState extends State<SignInPage> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
 
+  final pb = PocketBase('https://api.mymangatheque.com');
+
+  Future<RecordAuth> signIn(context) async {
+    try {
+      final userData = await pb.collection('users').authWithPassword(
+          emailController.text, passwordController.text);
+      print(userData);
+
+      print(pb.authStore.token);
+      print(pb.authStore);
+
+      context.go('/profile');
+      return userData;
+    } catch (e) {
+      var error = json.decode(e.toString().replaceAll('ClientException: ', ''));
+      print(error);
+      print(error['response']['message']);
+      showMessage(error['response']['message'], context);
+      rethrow;
+    }
+  }
+
   // Dispose Variable
   @override
   void dispose() {
     emailController.dispose();
     passwordController.dispose();
     super.dispose();
-  }
-
-  // sign-in user method
-  void signUserIn(context) async {
-    // show circular progress
-    showDialog(
-        context: context,
-        builder: (context) {
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
-        });
-
-    try {
-      await FirebaseAuth.instance.signInWithEmailAndPassword(email: emailController.text, password: passwordController.text);
-      GoRouter.of(context).go('/profile');
-    } on FirebaseAuthException catch (e) {
-      if (e.code == "user-not-found") {
-        Navigator.pop(context);
-        showMessage("Aucun utilisateur trouvé pour cette adresse email!");
-      } else if (e.code == "invalid-email" || e.code == "wrong-password") {
-        Navigator.pop(context);
-        showMessage("Email ou mot de passe incorrect.");
-      } else {
-        Navigator.pop(context);
-        showMessage(e.code);
-      }
-    }
-  }
-
-  // error message to user
-  void showMessage(String message) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-          title: Center(
-            child: Text(
-              message,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.primary,
-              ),
-            ),
-          ),
-        );
-      }
-    );
   }
 
   @override
@@ -160,7 +136,7 @@ class _SignInPageState extends State<SignInPage> {
                 // Display sign in button
                 MyButton(
                   text: "Se connecter",
-                  onTap: () => signUserIn(context),
+                  onTap: () => signIn(context),
                 ),
                 const SizedBox(height: 35),
 
@@ -201,7 +177,7 @@ class _SignInPageState extends State<SignInPage> {
                     SquareTile(
                       imagePath: 'assets/images/google.png',
                       onTap: () => {
-                        AuthServices().signInWithGoogle(),
+                        AuthServices().signInWithGoogle(context),
                         context.go('/profile'),
                       },
                     ),

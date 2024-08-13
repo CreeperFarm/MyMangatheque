@@ -205,7 +205,7 @@ class _SignInPageState extends State<SignInPage> {
                     SquareTile(
                       imagePath: 'assets/images/google.png',
                       onTap: () => {
-                        AuthServices().signInWithGoogle(),
+                        AuthServices().signInWithGoogle(context),
                         context.go('/profile'),
                       },
                     ),

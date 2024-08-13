@@ -303,7 +303,7 @@ class _SignUpPageState extends State<SignUpPage> {
                     SquareTile(
                       imagePath: 'assets/images/google.png',
                       onTap: () => {
-                        AuthServices().signInWithGoogle(),
+                        AuthServices().signInWithGoogle(context),
                         context.go('/profile'),
                       },
                     ),

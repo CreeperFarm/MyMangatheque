@@ -41,7 +41,7 @@ class MyApp extends ConsumerWidget {
     return AdaptiveTheme(
       light: lightMode,
       dark: darkMode,
-      initial: savedThemeMode ?? AdaptiveThemeMode.light,
+      initial: savedThemeMode ?? AdaptiveThemeMode.system,
       builder: (theme, darkTheme) => MaterialApp.router(
         routerConfig: AppNavigation.router,
         title: 'MyMangatheque',
