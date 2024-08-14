@@ -75,18 +75,3 @@ class GetUserProfilePicture extends StatelessWidget {
     }
   }
 }
-
-class GetUserProfilePicture2 extends StatelessWidget {
-  final PocketBaseFile file;
-
-  const GetUserProfilePicture2({required this.file, Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-
-    PocketBaseConnector connector = PocketBaseConnector();
-    User? user = connector.getConnectedUser();
-
-    return Text('data');
-  }
-}
