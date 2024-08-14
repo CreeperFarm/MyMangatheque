@@ -9,6 +9,7 @@ import 'package:mymangatheque/src/components/my_textfield.dart';
 import 'package:mymangatheque/src/components/my_square_tile.dart';
 import 'package:mymangatheque/src/function/show_message_function.dart';
 import 'package:mymangatheque/src/services/auth_services.dart';
+import 'package:mymangatheque/src/services/pocketbase.dart';
 import 'package:pocketbase/pocketbase.dart';
 
 class SignInPage extends StatefulWidget {
@@ -22,25 +23,24 @@ class _SignInPageState extends State<SignInPage> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
 
-  final pb = PocketBase('https://api.mymangatheque.com', lang: "fr-FR");
+  final connector = PocketBaseConnector();
 
-  Future<RecordAuth> signIn(context) async {
+  Future<User?> signIn(context) async {
     try {
-      final userData = await pb.collection('users').authWithPassword(
-          emailController.text, passwordController.text);
+      final userData = await connector.loginWithEmail(emailController.text, passwordController.text);
       print(userData);
 
-      print(pb.authStore.token);
-      print(pb.authStore);
+      print('connector id ' + connector.getConnectedUser()!.id.toString());
 
       context.go('/profile');
       return userData;
     } catch (e) {
-      var error = json.decode(e.toString().replaceAll('ClientException: ', ''));
-      print(error);
-      print(error['response']['message']);
-      showMessage(error['response']['message'], context);
-      rethrow;
+      //var error = json.decode(e.toString().replaceAll('ClientException: ', ''));
+      //print(error);
+      //print(error['response']['message']);
+      //showMessage(error['response']['message'], context);
+      var error = e.toString();
+      showMessage(error, context);
     }
   }
 
@@ -120,7 +120,7 @@ class _SignInPageState extends State<SignInPage> {
                     onPressed: () => GoRouter.of(context).go('/profile/forgot_password'),
                     style: const ButtonStyle(
                       alignment: Alignment.centerRight,
-                      padding: MaterialStatePropertyAll(EdgeInsets.all(0)),
+                      padding: WidgetStatePropertyAll(EdgeInsets.all(0)),
                     ),
                     child: Text(
                       "Mot de passe oublié ?",
@@ -136,7 +136,11 @@ class _SignInPageState extends State<SignInPage> {
                 // Display sign in button
                 MyButton(
                   text: "Se connecter",
-                  onTap: () => signIn(context),
+                  onTap: () => connector.loginWithEmail(emailController.text, passwordController.text).then((value) {
+                    context.go('/profile');
+                  }).catchError((e) {
+                    showMessage(e.toString(), context);
+                  }),
                 ),
                 const SizedBox(height: 35),
 

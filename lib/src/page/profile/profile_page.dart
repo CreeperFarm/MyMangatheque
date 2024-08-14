@@ -1,19 +1,12 @@
-import 'package:mymangatheque/src/function/show_message_function.dart';
 import 'package:mymangatheque/src/get_data/get_user_information.dart';
 import 'package:mymangatheque/src/components/my_line.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:mymangatheque/src/const/own_icon.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:adaptive_theme/adaptive_theme.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:go_router/go_router.dart';
-import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
-import 'dart:io';
-
-import 'package:pocketbase/pocketbase.dart';
+import 'package:mymangatheque/src/services/pocketbase.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -26,25 +19,11 @@ class _ProfilePageState extends State<ProfilePage> {
   dynamic savedThemeMode;
   dynamic theme;
 
-  final pb = PocketBase('https://api.mymangatheque.com', lang: 'fr-FR');
-
-  // Modify the profile picture of the user
-  void modifyImg(path, name) async {
-    await pb.collection('users').update(pb.authStore.model.id, files: [
-      http.MultipartFile.fromBytes(
-        'avatar',
-        File(path!).readAsBytesSync(),
-        filename: name,
-      )
-    ]).catchError((e) {
-      print(e);
-      showMessage('Une erreur est arrivé', context);
-    });
-  }
+  final connector = PocketBaseConnector();
 
   // Sign Out a Connected User
   void signUserOut() {
-    FirebaseAuth.instance.signOut();
+    connector.logOut();
     context.go('/profile/signin');
   }
 
@@ -57,11 +36,20 @@ class _ProfilePageState extends State<ProfilePage> {
       imageQuality: 75,
     );
 
-    modifyImg(image!.path, image.name);
+    PocketBaseConnector().updateAvatar(
+        'users',
+        connector.getConnectedUser()!.id,
+        image!.name,
+        image.path,
+        context
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+
+    PocketBaseConnector connector = PocketBaseConnector();
+    User? user = connector.getConnectedUser();
 
     setState(() {
       theme = AdaptiveTheme.of(context).mode.isSystem
@@ -87,11 +75,11 @@ class _ProfilePageState extends State<ProfilePage> {
                   onTap: () {
                     pickUploadImage();
                   },
-                  child: GetUserProfilePicture(),
+                  child: GetUserProfilePicture(file: user!.avatar!),
                 ),
                 const Padding(padding: EdgeInsets.only(bottom: 25)),
                 MyLine(width: MediaQuery.of(context).size.width, vertical: 10),
-                Padding(
+                /*Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 10.0),
                   child: SingleChildScrollView(
                     child: GetUserInfo(
@@ -100,9 +88,9 @@ class _ProfilePageState extends State<ProfilePage> {
                       afterText: ''
                     )
                   )
-                ),
+                ),*/
                 MyLine(width: MediaQuery.of(context).size.width, vertical: 10),
-                Padding(
+                /*Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 10.0),
                   child: SingleChildScrollView(
                     child: GetUserInfo(
@@ -111,11 +99,11 @@ class _ProfilePageState extends State<ProfilePage> {
                       afterText: ''
                     )
                   ),
-                ),
+                ),*/
                 MyLine(width: MediaQuery.of(context).size.width, vertical: 10),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                  child: SingleChildScrollView(
+    /*child: SingleChildScrollView(
                     child: GetUserInfo(
                       beforeText: 'Compte créer le : ',
                       dataWanted: 'createdOn',
@@ -250,7 +238,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         color: Colors.red,
                       ),
                     ),
-                  ),
+                  ),*/
                 ),
               ],
             ),

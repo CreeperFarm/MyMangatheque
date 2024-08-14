@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:mymangatheque/src/services/pocketbase.dart';
 import 'package:pocketbase/pocketbase.dart';
+import 'package:path/path.dart';
 
 class GetUserInfo extends StatelessWidget {
   final String beforeText;
@@ -36,36 +38,55 @@ class GetUserInfo extends StatelessWidget {
 }
 
 class GetUserProfilePicture extends StatelessWidget {
-  const GetUserProfilePicture({super.key});
+  final PocketBaseFile file;
+
+  const GetUserProfilePicture({required this.file, Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
 
-    final pb = PocketBase('https://api.mymangatheque.com', lang: "fr-FR");
+    PocketBaseConnector connector = PocketBaseConnector();
+    User? user = connector.getConnectedUser();
 
-    return FutureBuilder(
-      future: pb.collection('users').getOne(pb.authStore.model.id), // Get the user collection
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.done) {
+    if (user?.avatar == null || user?.avatar?.path == null) {
+      return Center(
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(150.0),
+          child: Image.asset(
+            'assets/images/unknown.webp',
+            height: 175,
+            width: 175,
+            fit: BoxFit.cover,
+          ),
+        ),
+      );
+    } else {
+      return Center(
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(150.0),
+          child: Image.network(
+            join(PocketBaseConnector().serverUrl, user!.avatar!.path),
+            height: 175,
+            width: 175,
+            fit: BoxFit.cover,
+          ),
+        ),
+      );
+    }
+  }
+}
 
-          // Retrieve the file name and the image url
-          final fileName = snapshot.data!.getListValue<String>('avatar')[0];
-          final url = pb.files.getUrl(snapshot.data!, fileName);
+class GetUserProfilePicture2 extends StatelessWidget {
+  final PocketBaseFile file;
 
-          return Center(
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(150.0),
-              child: Image.network(
-                url.toString(),
-                height: 175,
-                width: 175,
-                fit: BoxFit.cover,
-              ),
-            ),
-          );
-        }
-        return const CircularProgressIndicator();
-      },
-    );
+  const GetUserProfilePicture2({required this.file, Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+
+    PocketBaseConnector connector = PocketBaseConnector();
+    User? user = connector.getConnectedUser();
+
+    return Text('data');
   }
 }
