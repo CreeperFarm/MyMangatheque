@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:mymangatheque/src/services/pocketbase.dart';
 import 'package:pocketbase/pocketbase.dart';
 import 'package:path/path.dart';
+import 'package:http/http.dart' as http;
 
 class GetUserInfo extends StatelessWidget {
   final String beforeText;
@@ -44,34 +45,66 @@ class GetUserProfilePicture extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     PocketBaseConnector connector = PocketBaseConnector();
     User? user = connector.getConnectedUser();
 
+    return FutureBuilder(
+      future: _fetchUserProfilePicture(user),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.done) {
+          if (snapshot.hasError || snapshot.data == null) {
+            return _buildLocalImage();
+          } else {
+            return _buildNetworkImage(snapshot.data as String);
+          }
+        }
+        return const CircularProgressIndicator();
+      },
+    );
+  }
+
+  Future<String?> _fetchUserProfilePicture(User? user) async {
     if (user?.avatar == null || user?.avatar?.path == null) {
-      return Center(
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(150.0),
-          child: Image.asset(
-            'assets/images/unknown.webp',
-            height: 175,
-            width: 175,
-            fit: BoxFit.cover,
-          ),
-        ),
-      );
-    } else {
-      return Center(
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(150.0),
-          child: Image.network(
-            join(PocketBaseConnector().serverUrl, user!.avatar!.path),
-            height: 175,
-            width: 175,
-            fit: BoxFit.cover,
-          ),
-        ),
-      );
+      return null;
     }
+    try {
+      final url = join(PocketBaseConnector().serverUrl, user!.avatar!.path);
+      final response = await http.get(Uri.parse(url));
+      if (response.statusCode == 200) {
+        return url;
+      } else {
+        return null;
+      }
+    } catch (e) {
+      return null;
+    }
+  }
+
+  Widget _buildLocalImage() {
+    return Center(
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(150.0),
+        child: Image.asset(
+          'assets/images/unknown.webp',
+          height: 175,
+          width: 175,
+          fit: BoxFit.cover,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNetworkImage(String url) {
+    return Center(
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(150.0),
+        child: Image.network(
+          url,
+          height: 175,
+          width: 175,
+          fit: BoxFit.cover,
+        ),
+      ),
+    );
   }
 }
