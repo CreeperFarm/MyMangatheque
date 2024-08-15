@@ -11,6 +11,7 @@ export 'models/file.dart';
 export 'models/user.dart';
 
 class PocketBaseConnector {
+
   // Singleton
   static final PocketBaseConnector _singleton = PocketBaseConnector._internal();
 
@@ -18,7 +19,7 @@ class PocketBaseConnector {
     return _singleton;
   }
 
-  final PocketBase _pocketBase;
+  late final PocketBase _pocketBase;
   final BehaviorSubject<User?> _connectedUser = BehaviorSubject<User?>();
 
   PocketBaseConnector._internal()
@@ -26,6 +27,15 @@ class PocketBaseConnector {
     'https://api.mymangatheque.com',
     lang: 'fr_FR',
   );
+
+  Future<void> refresh() async {
+    if (!_pocketBase.authStore.isValid) {
+      // TODO: The token has expired. Ask the user to sign in again.
+      return;
+    }
+    final authData = await _pocketBase.collection('users').authRefresh();
+    print(authData);
+  }
 
   // Check if your logged-in
   bool isLoggedIn() {
@@ -50,6 +60,17 @@ class PocketBaseConnector {
     }
   }
 
+  // Update User Data
+  Future<User?> updateUserData(String email) async {
+    try {
+      _connectedUser.add(await findUser(email));
+      print(_connectedUser.value);
+      return _connectedUser.value;
+    } catch (err) {
+      return null;
+    }
+  }
+
   // Log Out
   void logOut() {
     _pocketBase.authStore.clear();
@@ -67,14 +88,45 @@ class PocketBaseConnector {
   }
 
   // Create the user in the collection of users
-  Future<String> createUser(String email, String password) {
-    assert(email.isNotEmpty);
-    assert(password.isNotEmpty);
+  Future<String> createUser(
+      String username,
+      String email,
+      String password,
+      String passwordVerifier,
+      String gender,
+      String birthday,
+      context
+    ) async {
+      assert(username.isNotEmpty);
+      assert(email.isNotEmpty);
+      assert(password.isNotEmpty);
+      assert(passwordVerifier.isNotEmpty);
+      assert(birthday.isNotEmpty);
+      assert(gender.isNotEmpty);
 
-    return _pocketBase.collection('users').create(body: {
-      'email': email,
-      'password': password,
-    }).then((value) => value.id);
+      final body = <String, dynamic> {
+        "username": username,
+        "email": email,
+        "emailVisibility": true,
+        "password": password,
+        "passwordConfirm": passwordVerifier,
+        "birthday": birthday,
+        "gender": gender,
+        "role": "user"
+      };
+
+
+      return _pocketBase.collection('users')
+          .create(body: body)
+          .catchError((e) {
+            print(e);
+            showMessage('Une erreur est arrivé $e', context);
+          })
+          .then((value) => value.id);
+  }
+
+  sendVerification(String email) {
+    return _pocketBase.collection('users').requestVerification(email);
   }
 
   // Find the user in the collection of users
@@ -88,31 +140,6 @@ class PocketBaseConnector {
           (value) => User.fromJSON(value.id, value.collectionId, value.data),
     );
   }
-
-  /*Future<RecordModel> updateAvatar(
-      String collectionId,
-      Map<String, dynamic> body, {
-        Iterable<PlatformFile>? files,
-      }) async {
-    List<MultipartFile> multipartFiles = [];
-
-    if (files != null) {
-      for (final file in files) {
-        multipartFiles.add(
-          MultipartFile.fromBytes(
-            'file',
-            await File(file.path!).readAsBytes(),
-            filename: file.name,
-          ),
-        );
-      }
-    }
-
-    return _pocketBase.collection(collectionId).create(
-      body: body,
-      files: multipartFiles,
-    );
-  }*/
 
   // Update the avatar of the user
   updateAvatar(
@@ -131,7 +158,7 @@ class PocketBaseConnector {
         )
       ]
     ).catchError((e) {
-      print(e);
+      print(e.toString());
       showMessage('Une erreur est arrivé', context);
     });
   }

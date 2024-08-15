@@ -1,12 +1,12 @@
-import 'package:mymangatheque/src/get_data/get_user_information.dart';
-import 'package:mymangatheque/src/components/my_line.dart';
-import 'package:mymangatheque/src/const/own_icon.dart';
-import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:mymangatheque/src/const/own_icon.dart';
+import 'package:mymangatheque/src/get_data/get_user_information.dart';
+import 'package:mymangatheque/src/services/pocketbase.dart';
+import 'package:mymangatheque/src/components/my_line.dart';
+import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
-import 'package:mymangatheque/src/services/pocketbase.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -36,14 +36,32 @@ class _ProfilePageState extends State<ProfilePage> {
       imageQuality: 75,
     );
 
-    PocketBaseConnector().updateAvatar(
+    connector.updateAvatar(
         'users',
         connector.getConnectedUser()!.id,
         image!.name,
         image.path,
         context
-    );
+    ).then((value) async {
+      await connector.updateUserData(connector.getConnectedUser()!.email);
+      setState(() {});
+    });
   }
+
+  Map month = {
+    '01': 'Janvier',
+    '02': 'Février',
+    '03': 'Mars',
+    '04': 'Avril',
+    '05': 'Mai',
+    '06': 'Juin',
+    '07': 'Billet',
+    '08': 'Août',
+    '09': 'Septembre',
+    '10': 'Octobre',
+    '11': 'Novembre',
+    '12': 'Décembre',
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -79,52 +97,55 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
                 const Padding(padding: EdgeInsets.only(bottom: 25)),
                 MyLine(width: MediaQuery.of(context).size.width, vertical: 10),
-                /*Padding(
+                Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 10.0),
                   child: SingleChildScrollView(
                     child: GetUserInfo(
                       beforeText: "L'email est : ",
-                      dataWanted: 'email',
-                      afterText: ''
+                      afterText: user.email
                     )
                   )
-                ),*/
+                ),
                 MyLine(width: MediaQuery.of(context).size.width, vertical: 10),
-                /*Padding(
+                Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 10.0),
                   child: SingleChildScrollView(
                     child: GetUserInfo(
                       beforeText: 'Votre pseudo est : ',
-                      dataWanted: 'pseudo',
-                      afterText: ''
+                      afterText: user.username
                     )
                   ),
-                ),*/
+                ),
                 MyLine(width: MediaQuery.of(context).size.width, vertical: 10),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 10.0),
-    /*child: SingleChildScrollView(
+                  child: SingleChildScrollView(
                     child: GetUserInfo(
                       beforeText: 'Compte créer le : ',
-                      dataWanted: 'createdOn',
-                      afterText: ''
+                      afterText: '${user.created?.day} ${month[user.created?.month]} ${user.created?.year}'
                     )
                   ),
                 ),
-                /*MyLine(width: MediaQuery.of(context).size.width, vertical: 10),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                MyLine(width: MediaQuery.of(context).size.width, vertical: 10),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 10.0),
                   child: SingleChildScrollView(
-                      child: GetUserInfo(documentId: user.uid, beforeText: 'Nombre de tome de manga possédé : ', dataWanted: 'createdOn', afterText: ' tomes') //TODO: Set the number of manga owned
+                    child: GetUserInfo(
+                      beforeText: 'Nombre de tome de manga possédé : ',
+                      afterText: ' tomes'
+                    ) //TODO: Set the number of manga owned
                   ),
                 ),
                 MyLine(width: MediaQuery.of(context).size.width, vertical: 10),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 10.0),
                   child: SingleChildScrollView(
-                      child: GetUserInfo(documentId: user.uid, beforeText: 'Nombre de tome de manga en favoris : ', dataWanted: 'createdOn', afterText: ' tomes') //TODO: Set the number of manga fav
+                    child: GetUserInfo(
+                      beforeText: 'Nombre de tome de manga en favoris : ',
+                      afterText: ' tomes'
+                    ), //TODO: Set the number of manga fav
                   ),
-                ),*/
+                ),
                 MyLine(
                     width: MediaQuery.of(context).size.width,
                     vertical: 10), // Drop Down Menu du DarkMode
@@ -238,7 +259,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         color: Colors.red,
                       ),
                     ),
-                  ),*/
+                  ),
                 ),
               ],
             ),

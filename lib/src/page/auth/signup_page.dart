@@ -1,14 +1,11 @@
-import 'dart:io';
-import 'package:flutter/services.dart';
-import 'package:http/http.dart' as http;
 import 'package:date_field/date_field.dart';
-import 'package:image_downloader/image_downloader.dart';
 import 'package:mymangatheque/src/components/my_square_tile.dart';
 import 'package:mymangatheque/src/components/my_textfield.dart';
 import 'package:mymangatheque/src/function/show_message_function.dart';
 import 'package:mymangatheque/src/services/auth_services.dart';
 import 'package:mymangatheque/src/components/my_button.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:mymangatheque/src/services/pocketbase.dart';
 import 'package:pocketbase/pocketbase.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
@@ -37,66 +34,21 @@ class _SignUpPageState extends State<SignUpPage> {
 
   String errorText = "";
 
-  void signingProcess() async {
-    final body = <String, dynamic> {
-      "username": usernameController.text,
-      "email": emailController.text,
-      "emailVisibility": true,
-      "password": passwordController.text,
-      "passwordConfirm": passwordVerifierController.text,
-      "birthday": selectedBDayDate.add(const Duration(hours: 1)).toUtc().toString(),
-      "gender": selectedGender.text,
-      "role": "user"
-    };
-    
-    print(body);
+  void signingUpProcess() async {
 
-    try {
-      try {
-        var imageId = await ImageDownloader.downloadImage('https://cdn.statically.io/gh/CreeperFarm/AppManga/main/unknown.webp');
-        if (imageId == null) {
-          return;
-        }
-        var fileName = await ImageDownloader.findName(imageId);
-        var path = await ImageDownloader.findPath(imageId);
+    PocketBaseConnector connector = PocketBaseConnector();
 
-
-        final record = await pb.collection('users').create(body: body, files: [
-          http.MultipartFile.fromBytes(
-            'avatar',
-            File(path!).readAsBytesSync(),
-            filename: fileName,
-          )
-        ]);
-
-        print(record);
-      } on PlatformException catch (e) {
-        print(e);
-
-        final record = await pb.collection('users').create(body: body);
-        print(record);
-      }
-      await pb.collection('users').requestVerification(emailController.text);
-
-      print(pb.authStore.isValid);
-      print(pb.authStore.token);
-
-      showMessage('Vérifiez vos mails pour vérifier votre compte.', context);
-      context.go('/profile');
-    } on ClientException catch (e) {
-      print(e);
-      var error = e.toString().replaceAll('ClientException: ', '');
-      if (error.contains('username: {code: validation_invalid_username, message: The username is invalid or already in use.}')) {
-        print('Username already in use');
-        showMessage('Le pseudo est déjà utilisé', context);
-      } else if (error.contains('email: {code: validation_invalid_email, message: The email is invalid or already in use.}')) {
-        print('Email is invalid or already in use');
-        showMessage("L'email est invalide ou déjà utilisé", context);
-      } else {
-        print('Unknown error : ${error}');
-        showMessage("Un problème s'est déroullé", context);
-      }
-    }
+    connector.createUser(
+        usernameController.text,
+        emailController.text,
+        passwordController.text,
+        passwordVerifierController.text,
+        selectedGender.text,
+        selectedBDayDate.add(const Duration(hours: 1)).toUtc().toString(),
+        context
+    );
+    connector.sendVerification(emailController.text);
+    context.go('/profile');
   }
 
   void signUp() async {
@@ -116,7 +68,7 @@ class _SignUpPageState extends State<SignUpPage> {
       errorText = 'Username must be at least 3 characters';
       return showMessage(errorText, context);
     } else {
-      signingProcess();
+      signingUpProcess();
     }
   }
 
@@ -131,12 +83,6 @@ class _SignUpPageState extends State<SignUpPage> {
     usernameController.dispose();
     super.dispose();
   }
-
-  /*Future userDetails() async {
-
-    await FirebaseFirestore.instance.collection('users').snapshots();
-
-  }*/
 
   @override
   Widget build(BuildContext context) {

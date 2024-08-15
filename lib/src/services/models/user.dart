@@ -2,10 +2,9 @@ import 'package:mymangatheque/src/services/models/file.dart';
 
 class User {
   final String id;
-  final String? username;
-  final String? email;
-  final String? name;
-  final String? gender;
+  final String username;
+  final String email;
+  final String gender;
   final PocketBaseFile? avatar;
   final DateTime? birthday;
   final DateTime? created;
@@ -14,7 +13,6 @@ class User {
   User.fromJSON(this.id, String collectionId, Map<dynamic, dynamic> json)
       : username = json['username'],
         email = json['email'],
-        name = json['name'],
         gender = json['gender'],
         avatar = json['avatar'] != null ? PocketBaseFile(id: id, collectionId: collectionId, fileName: json['avatar']) : null,
         birthday = json['birthday'] != null ? DateTime.parse(json['birthday']) : null,
