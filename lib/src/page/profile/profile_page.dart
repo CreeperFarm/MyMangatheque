@@ -122,7 +122,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   child: SingleChildScrollView(
                     child: GetUserInfo(
                       beforeText: 'Compte créer le : ',
-                      afterText: '${user.created?.day} ${month[user.created?.month]} ${user.created?.year}'
+                      afterText: '${user.updated} / ${month[user.created?.month]} ${user.created?.year}'
                     )
                   ),
                 ),

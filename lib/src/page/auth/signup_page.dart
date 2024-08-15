@@ -48,6 +48,7 @@ class _SignUpPageState extends State<SignUpPage> {
         context
     );
     connector.sendVerification(emailController.text);
+    await connector.updateUserData(emailController.text);
     context.go('/profile');
   }
 

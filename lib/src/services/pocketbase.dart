@@ -34,7 +34,6 @@ class PocketBaseConnector {
       return;
     }
     final authData = await _pocketBase.collection('users').authRefresh();
-    print(authData);
   }
 
   // Check if your logged-in
@@ -47,12 +46,10 @@ class PocketBaseConnector {
     try {
       await _pocketBase
           .collection('users')
-          .authWithPassword(email, password)
+          .authWithPassword(email.toLowerCase(), password)
           .then((value) => value.token.isNotEmpty);
 
-
-      _connectedUser.add(await findUser(email));
-      print(_connectedUser.value);
+      _connectedUser.add(await findUser(email.toLowerCase()));
 
       return _connectedUser.value;
     } catch (err) {
@@ -64,7 +61,6 @@ class PocketBaseConnector {
   Future<User?> updateUserData(String email) async {
     try {
       _connectedUser.add(await findUser(email));
-      print(_connectedUser.value);
       return _connectedUser.value;
     } catch (err) {
       return null;
@@ -75,6 +71,11 @@ class PocketBaseConnector {
   void logOut() {
     _pocketBase.authStore.clear();
     _connectedUser.add(null);
+  }
+
+  Future resetPassword(String email, context) async {
+    await _pocketBase.collection('users').requestPasswordReset(email);
+    return showMessage('Un lien vous as été envoyé pour la réinitialisation de votre mots de passe, vérifiez vos spams.', context);
   }
 
   // Watch if someone connect or disconnect from his account
@@ -106,7 +107,7 @@ class PocketBaseConnector {
 
       final body = <String, dynamic> {
         "username": username,
-        "email": email,
+        "email": email.toLowerCase(),
         "emailVisibility": true,
         "password": password,
         "passwordConfirm": passwordVerifier,

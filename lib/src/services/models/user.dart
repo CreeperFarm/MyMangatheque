@@ -14,8 +14,8 @@ class User {
       : username = json['username'],
         email = json['email'],
         gender = json['gender'],
-        avatar = json['avatar'] != null ? PocketBaseFile(id: id, collectionId: collectionId, fileName: json['avatar']) : null,
-        birthday = json['birthday'] != null ? DateTime.parse(json['birthday']) : null,
         created = json['created'] != null ? DateTime.parse(json['created']) : null,
-        updated = json['updated'] != null ? DateTime.parse(json['updated']) : null;
+        updated = json['updated'] != null ? DateTime.parse(json['updated']) : null,
+        avatar = json['avatar'] != null ? PocketBaseFile(id: id, collectionId: collectionId, fileName: json['avatar']) : null,
+        birthday = json['birthday'] != null ? DateTime.parse(json['birthday']) : null;
 }
