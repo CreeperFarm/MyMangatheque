@@ -12,6 +12,7 @@ class MyDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Drawer(
+      backgroundColor: Theme.of(context).colorScheme.onPrimary,
       child: SafeArea(
         right: false,
         left: false,
@@ -72,7 +73,8 @@ class MyDrawer extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    SvgPicture.asset('assets/icons/user.svg', width: 30, height: 30),
+                    SvgPicture.asset('assets/icons/user.svg', width: 30, height: 30, color: Theme.of(context).colorScheme.primary,),
+                    Text('Se Connecter', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary)),
                   ],
                 ),
               )

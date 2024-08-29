@@ -18,13 +18,7 @@ class MainWrapper extends ConsumerStatefulWidget {
   ConsumerState<MainWrapper> createState() => _MainWrapperState();
 }
 
-List<String> navIcons = [
-  "home",
-  "collection",
-  "search",
-  "calendar",
-  "user"
-];
+List<String> navIcons = ["home", "collection", "search", "calendar", "user"];
 
 List<String> navTitle = [
   "Accueil",
@@ -34,16 +28,9 @@ List<String> navTitle = [
   "Profil"
 ];
 
-List<String> navRoute = [
-  "/",
-  "/library",
-  "/search",
-  "/planning",
-  "/profile"
-];
+List<String> navRoute = ["/", "/library", "/search", "/planning", "/profile"];
 
 class _MainWrapperState extends ConsumerState<MainWrapper> {
-
   int selectedIndex = 0;
 
   void _goBranch(int index) {
@@ -72,20 +59,37 @@ class _MainWrapperState extends ConsumerState<MainWrapper> {
     });*/
     return LayoutBuilder(
       builder: (context, constraints) {
-        if (constraints.maxWidth > 600) {
+        if (constraints.maxWidth > 1200) {
           return Scaffold(
-            appBar: AppBar(),
-            drawer: MyDrawer(
-              navIcons: navIcons,
-              navTitle: navTitle,
-              navRoute: navRoute,
-            ),
-            body: Stack(
-              children: [
-                widget.navigationShell,
-              ],
-            )
+              body: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  MyDrawer(
+                    navIcons: navIcons,
+                    navTitle: navTitle,
+                    navRoute: navRoute,
+                  ),
+                  widget.navigationShell,
+                  const SizedBox(
+                    width: 0,
+                  )
+                ],
+              )
           );
+        } else if (constraints.maxWidth > 600) {
+          return Scaffold(
+              appBar: AppBar(),
+              drawer: MyDrawer(
+                navIcons: navIcons,
+                navTitle: navTitle,
+                navRoute: navRoute,
+              ),
+              body: Stack(
+                children: [
+                  widget.navigationShell,
+                ],
+              ));
         } else {
           return Scaffold(
             body: Stack(
@@ -120,9 +124,9 @@ class _MainWrapperState extends ConsumerState<MainWrapper> {
         end: Alignment.bottomCenter,
       ),
       height: 60,
-      margin: const EdgeInsets.only(bottom: 16, left: 16, right: 16),
+      margin: const EdgeInsets.only(bottom: 32, left: 16, right: 16),
       borderColor: Colors.transparent,
-      borderRadius: const BorderRadius.all(Radius.circular(20)),
+      borderRadius: const BorderRadius.all(Radius.circular(100)),
       shadowColor: Colors.black.withOpacity(0.2),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -151,17 +155,14 @@ class _MainWrapperState extends ConsumerState<MainWrapper> {
                     ),
                     child: OwnIcon(
                       iconName: iconName,
-                      iconColor: isSelected
-                          ? selectedColor
-                          : unSelectedColor,
+                      iconColor:
+                          isSelected ? selectedColor : unSelectedColor,
                     ),
                   ),
                   Text(
                     navTitle[index],
                     style: TextStyle(
-                      color: isSelected
-                          ? selectedColor
-                          : unSelectedColor,
+                      color: isSelected ? selectedColor : unSelectedColor,
                       fontSize: 12,
                     ),
                   ),
