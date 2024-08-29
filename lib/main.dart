@@ -10,6 +10,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:url_strategy/url_strategy.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
+import 'package:mymangatheque/src/local_storage/service_locator.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -23,6 +24,8 @@ void main() async {
   );
 
   setPathUrlStrategy();
+
+  setupServiceLocator();
 
   runApp(
     ProviderScope(

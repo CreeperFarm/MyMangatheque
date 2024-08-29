@@ -74,6 +74,8 @@ dependencies:
   image_downloader: ^0.31.0
   http: ^1.2.2
   rxdart: ^0.27.7
+  localstorage: ^5.0.0
+  get_it: ^7.7.0
 
 dev_dependencies:
   flutter_test:

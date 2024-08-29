@@ -8,7 +8,6 @@ import 'package:mymangatheque/src/components/my_button.dart';
 import 'package:mymangatheque/src/components/my_textfield.dart';
 import 'package:mymangatheque/src/components/my_square_tile.dart';
 import 'package:mymangatheque/src/function/show_message_function.dart';
-import 'package:mymangatheque/src/services/auth_services.dart';
 import 'package:mymangatheque/src/services/pocketbase.dart';
 import 'package:pocketbase/pocketbase.dart';
 
@@ -181,7 +180,7 @@ class _SignInPageState extends State<SignInPage> {
                     SquareTile(
                       imagePath: 'assets/images/google.png',
                       onTap: () => {
-                        AuthServices().signInWithGoogle(context),
+                        PocketBaseConnector().signInWithGoogle(context),
                         context.go('/profile'),
                       },
                     ),

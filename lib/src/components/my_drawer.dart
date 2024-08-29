@@ -73,7 +73,7 @@ class MyDrawer extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    SvgPicture.asset('assets/icons/user.svg', width: 30, height: 30, color: Theme.of(context).colorScheme.primary,),
+                    SvgPicture.asset('assets/icons/user.svg', width: 30, height: 30, colorFilter: ColorFilter.mode(Theme.of(context).colorScheme.primary, BlendMode.srcIn)),
                     Text('Se Connecter', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary)),
                   ],
                 ),

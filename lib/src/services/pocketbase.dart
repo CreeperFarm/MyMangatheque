@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:image_downloader/image_downloader.dart';
 import 'package:mymangatheque/src/function/show_message_function.dart';
+import 'package:mymangatheque/src/local_storage/local_storage.dart';
+import 'package:mymangatheque/src/local_storage/service_locator.dart';
 import 'package:mymangatheque/src/services/models/user.dart';
 import 'package:mymangatheque/src/services/utils.dart';
 import 'package:pocketbase/pocketbase.dart';
@@ -18,6 +20,31 @@ export 'models/file.dart';
 export 'models/user.dart';
 
 class PocketBaseConnector {
+  late final PocketBase _pocketBase;
+
+  Future<void> init() async {
+    final storage = getIt<LocalStorage>();
+    final token = await storage.getToken();
+
+    final customAuthStore = AsyncAuthStore(
+      initial: token,
+      save: storage.setToken,
+      clear: storage.deleteToken,
+    );
+
+    _pocketBase = PocketBase(
+      'https://api.mymangatheque.com',
+      lang: 'fr-FR',
+      authStore: customAuthStore,
+    );
+
+    if (_pocketBase.authStore.isValid) {
+      final authRecord = await _pocketBase.collection('users').authRefresh();
+      print(authRecord);
+    } else {
+    }
+  }
+
 
   // Singleton
   static final PocketBaseConnector _singleton = PocketBaseConnector._internal();
@@ -25,15 +52,10 @@ class PocketBaseConnector {
   factory PocketBaseConnector() {
     return _singleton;
   }
-
-  late final PocketBase _pocketBase;
   final BehaviorSubject<User?> _connectedUser = BehaviorSubject<User?>();
 
   PocketBaseConnector._internal()
-      : _pocketBase = PocketBase(
-    'https://api.mymangatheque.com',
-    lang: 'fr_FR',
-  );
+      : _pocketBase = PocketBase('https://api.mymangatheque.com', lang: 'fr-FR');
 
   Future<void> refresh() async {
     if (!_pocketBase.authStore.isValid) {
@@ -87,6 +109,7 @@ class PocketBaseConnector {
 
         var body = <String, dynamic>{
           "email": data['email'],
+          "birthday": DateTime.now().toString(),
         };
 
         // Upload the image of the user
@@ -109,6 +132,8 @@ class PocketBaseConnector {
     } else {
       print('User already exists');
     }
+    print(authData2['meta']['rawUser']['email']);
+    _connectedUser.add(await findUser(authData2['meta']['rawUser']['email'].toString().toLowerCase()));
     closeInAppWebView();
   }
 
@@ -208,7 +233,6 @@ class PocketBaseConnector {
   // Find the user in the collection of users
   Future<User?> findUser(String email) {
     assert(email.isNotEmpty);
-
     return _pocketBase
         .collection('users')
         .getFirstListItem('email="$email"')

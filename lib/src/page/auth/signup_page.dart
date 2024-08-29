@@ -2,7 +2,6 @@ import 'package:date_field/date_field.dart';
 import 'package:mymangatheque/src/components/my_square_tile.dart';
 import 'package:mymangatheque/src/components/my_textfield.dart';
 import 'package:mymangatheque/src/function/show_message_function.dart';
-import 'package:mymangatheque/src/services/auth_services.dart';
 import 'package:mymangatheque/src/components/my_button.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mymangatheque/src/services/pocketbase.dart';
@@ -26,7 +25,7 @@ class _SignUpPageState extends State<SignUpPage> {
   final passwordController = TextEditingController();
   final passwordVerifierController = TextEditingController();
   final usernameController = TextEditingController();
-  DateTime selectedBDayDate = DateTime(DateTime.now().year - 13, DateTime.now().month, DateTime.now().day);
+  DateTime selectedBDayDate = DateTime(DateTime.now().year - 7, DateTime.now().month, DateTime.now().day);
   final selectedGender = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
@@ -226,8 +225,8 @@ class _SignUpPageState extends State<SignUpPage> {
                           ),
                           mode: DateTimeFieldPickerMode.date,
                           firstDate: DateTime(1900, 1, 1),
-                          lastDate: DateTime(DateTime.now().year - 13, DateTime.now().month, DateTime.now().day),
-                          initialPickerDateTime: DateTime(DateTime.now().year - 13, DateTime.now().month, DateTime.now().day),
+                          lastDate: DateTime(DateTime.now().year - 7, DateTime.now().month, DateTime.now().day),
+                          initialPickerDateTime: DateTime(DateTime.now().year - 7, DateTime.now().month, DateTime.now().day),
                           validator: (value) {
                             if (value == null) {
                               return "Veuillez entrer votre date de naissance";
@@ -355,7 +354,7 @@ class _SignUpPageState extends State<SignUpPage> {
                     SquareTile(
                       imagePath: 'assets/images/google.png',
                       onTap: () => {
-                        AuthServices().signInWithGoogle(context),
+                        PocketBaseConnector().signInWithGoogle(context),
                         context.go('/profile'),
                       },
                     ),
