@@ -13,7 +13,7 @@ class RedirectToProfile extends StatelessWidget {
       body: StreamBuilder(
         stream: PocketBaseConnector().listenToUserChanges(),
         builder: (context, snapshot) {
-          print('snapshot: ' + snapshot.toString());
+          print('snapshot: $snapshot');
           //user is logged in
           if (PocketBaseConnector().isLoggedIn()) {
             return const ProfilePage();
@@ -38,7 +38,32 @@ class RedirectToLibrary extends StatelessWidget {
       body: StreamBuilder(
         stream: PocketBaseConnector().listenToUserChanges(),
         builder: (context, snapshot) {
-          print('snapshot: ' + snapshot.toString());
+          print('snapshot: $snapshot');
+          //user is logged in
+          if (PocketBaseConnector().isLoggedIn()) {
+            return const LibraryPage();
+          }
+
+          //user is NOT logged in
+          else {
+            return const SignInPage();
+          }
+        },
+      ),
+    );
+  }
+}
+
+class RedirectToDelete extends StatelessWidget {
+  const RedirectToDelete({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: StreamBuilder(
+        stream: PocketBaseConnector().listenToUserChanges(),
+        builder: (context, snapshot) {
+          print('snapshot: $snapshot');
           //user is logged in
           if (PocketBaseConnector().isLoggedIn()) {
             return const LibraryPage();

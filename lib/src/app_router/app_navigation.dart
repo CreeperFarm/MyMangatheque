@@ -97,6 +97,13 @@ class AppNavigation {
                     builder: (context, state) {
                       return MentionsLegalesPage(key: state.pageKey);
                     }
+                  ),
+                  GoRoute(
+                    path: 'delete_account',
+                    name: 'Suppression du compte',
+                    builder: (context, state) {
+                      return RedirectToDelete(key: state.pageKey);
+                    }
                   )
                 ]
               ),

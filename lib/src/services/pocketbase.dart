@@ -130,6 +130,10 @@ class PocketBaseConnector {
     return _pocketBase.collection('users').requestVerification(email);
   }
 
+  deleteUser(String recordId) {
+    return _pocketBase.collection('users').delete(recordId);
+  }
+
   // Find the user in the collection of users
   Future<User?> findUser(String email) {
     assert(email.isNotEmpty);
