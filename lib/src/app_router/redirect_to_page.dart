@@ -1,3 +1,4 @@
+import 'package:mymangatheque/src/page/auth/delete_account_page.dart';
 import 'package:mymangatheque/src/page/profile/profile_page.dart';
 import 'package:mymangatheque/src/page/library/library_page.dart';
 import 'package:mymangatheque/src/page/auth/signin_page.dart';
@@ -66,7 +67,7 @@ class RedirectToDelete extends StatelessWidget {
           print('snapshot: $snapshot');
           //user is logged in
           if (PocketBaseConnector().isLoggedIn()) {
-            return const LibraryPage();
+            return const DeleteAccountPage();
           }
 
           //user is NOT logged in
