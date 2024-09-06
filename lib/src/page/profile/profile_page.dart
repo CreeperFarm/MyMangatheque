@@ -261,6 +261,46 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                   ),
                 ),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal:10.0, vertical: 10),
+                  child: Row(
+                    children: [
+                      Container(
+                        height: 1.0,
+                        width: MediaQuery.of(context).size.width/3-12,
+                        color: Colors.grey,
+                      ),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 10),
+                        child: Text(
+                            'Zone de danger'
+                        ),
+                      ),
+                      Container(
+                        height: 1.0,
+                        width: MediaQuery.of(context).size.width/3-12.5,
+                        color: Colors.grey,
+                      ),
+                    ],
+                  )
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(left: 4.0, right: 18.0),
+                  child: TextButton.icon(
+                    onPressed: () => context.go('/delete_account'),
+                    icon: OwnIcon(
+                      iconColor: Colors.red,
+                      iconName: 'delete'),
+                    label: Text('Supprimer mon compte',
+                      style: GoogleFonts.poppins(
+                        color: Colors.red,
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  height: 50,
+                ),
               ],
             ),
           ),
