@@ -3,9 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/services.dart';
-import 'package:http/http.dart' as http;
 import 'package:http/http.dart';
-import 'package:image_downloader/image_downloader.dart';
 import 'package:mymangatheque/src/function/show_message_function.dart';
 import 'package:mymangatheque/src/local_storage/local_storage.dart';
 import 'package:mymangatheque/src/local_storage/service_locator.dart';
@@ -91,17 +89,20 @@ class PocketBaseConnector {
     print(authData2['meta']);
     print(authData2['meta']['isNew']);
 
+    var meta = authData.meta;
+    print(meta);
+
     if (authData2['meta']['isNew']) {
       var data = authData2['meta']['rawUser'];
       print('The email is ' + data['email']);
       print('The link is ' + data['picture']);
       try {
-        var imageId = await ImageDownloader.downloadImage(data['picture']);
+        /*var imageId = await ImageDownloader.downloadImage(data['picture']);
         if (imageId == null) {
           return;
         }
         var fileName = await ImageDownloader.findName(imageId);
-        var path = await ImageDownloader.findPath(imageId);
+        var path = await ImageDownloader.findPath(imageId);*/
 
         var body = <String, dynamic>{
           "email": data['email'],
@@ -112,11 +113,11 @@ class PocketBaseConnector {
         var sendImg = await _pocketBase
             .collection('users')
             .update(_pocketBase.authStore.model.id, body: body, files: [
-          http.MultipartFile.fromBytes(
+          /*http.MultipartFile.fromBytes(
             'avatar',
             File(path!).readAsBytesSync(),
             filename: fileName,
-          )
+          )*/
         ]);
         print(sendImg);
       } on PlatformException catch (e) {

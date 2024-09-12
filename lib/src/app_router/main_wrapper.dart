@@ -1,9 +1,9 @@
-import 'package:mymangatheque/src/components/my_drawer.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:mymangatheque/src/const/own_icon.dart';
 import 'package:glass_kit/glass_kit.dart';
 import 'package:go_router/go_router.dart';
-import 'package:flutter/material.dart';
+import 'package:mymangatheque/src/components/my_drawer.dart';
+import 'package:mymangatheque/src/const/own_icon.dart';
 import 'package:mymangatheque/src/theme/light_mode.dart';
 
 class MainWrapper extends ConsumerStatefulWidget {
@@ -62,21 +62,20 @@ class _MainWrapperState extends ConsumerState<MainWrapper> {
         if (constraints.maxWidth > 1200) {
           return Scaffold(
               body: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  MyDrawer(
-                    navIcons: navIcons,
-                    navTitle: navTitle,
-                    navRoute: navRoute,
-                  ),
-                  widget.navigationShell,
-                  const SizedBox(
-                    width: 0,
-                  )
-                ],
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              MyDrawer(
+                navIcons: navIcons,
+                navTitle: navTitle,
+                navRoute: navRoute,
+              ),
+              widget.navigationShell,
+              const SizedBox(
+                width: 0,
               )
-          );
+            ],
+          ));
         } else if (constraints.maxWidth > 600) {
           return Scaffold(
               appBar: AppBar(),
@@ -107,6 +106,7 @@ class _MainWrapperState extends ConsumerState<MainWrapper> {
     );
   }
 
+  //TODO: Hide this when the keyboard is activated on mobile
   Widget navBar(unSelectedColor) {
     Color? selectedColor = Colors.cyanAccent;
     if (unSelectedColor == lightMode.colorScheme.primary) {
@@ -155,8 +155,7 @@ class _MainWrapperState extends ConsumerState<MainWrapper> {
                     ),
                     child: OwnIcon(
                       iconName: iconName,
-                      iconColor:
-                          isSelected ? selectedColor : unSelectedColor,
+                      iconColor: isSelected ? selectedColor : unSelectedColor,
                     ),
                   ),
                   Text(

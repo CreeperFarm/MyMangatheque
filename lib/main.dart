@@ -1,5 +1,4 @@
 import 'package:adaptive_theme/adaptive_theme.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
@@ -72,7 +71,6 @@ class MyHomePageState extends ConsumerState<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     final compteur = ref.watch(compteurProvider);
-    final user = FirebaseAuth.instance.currentUser;
 
     return Center(
       child: SingleChildScrollView(
@@ -88,7 +86,7 @@ class MyHomePageState extends ConsumerState<MyHomePage> {
             ),
             ElevatedButton(
                 onPressed: () {
-                  if (user != null) {
+                  if (PocketBaseConnector().isLoggedIn()) {
                     context.go('/profile');
                   } else {
                     context.go('/profile/signin');
@@ -97,7 +95,7 @@ class MyHomePageState extends ConsumerState<MyHomePage> {
                 child: const Text("Go to Profile Page")),
             ElevatedButton(
                 onPressed: () {
-                  if (user != null) {
+                  if (PocketBaseConnector().isLoggedIn()) {
                     context.go('/profile/settings');
                   } else {
                     context.go('/profile/signin');

@@ -1,4 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -27,7 +26,8 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   }
 
   Future passwordReset() async {
-    try {
+    //TODO: Make the password reset
+    /*try {
       await FirebaseAuth.instance.setLanguageCode("fr");
       await FirebaseAuth.instance.sendPasswordResetEmail(email: emailController.text);
       Navigator.pop(context);
@@ -46,28 +46,27 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
         errorText = e.code;
         showMessage(errorText);
       }
-    }
+    }*/
   }
 
   // error message to user
   void showMessage(String message) {
     showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-          title: Center(
-            child: Text(
-              message,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.primary,
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+            title: Center(
+              child: Text(
+                message,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.primary,
+                ),
               ),
             ),
-          ),
-        );
-      }
-    );
+          );
+        });
   }
 
   @override
@@ -86,9 +85,9 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                 SvgPicture.asset(
                   "assets/icons/lock_forgot.svg",
                   height: 150,
-                  colorFilter: ColorFilter.mode(Theme.of(context).colorScheme.primary, BlendMode.srcIn),
+                  colorFilter: ColorFilter.mode(
+                      Theme.of(context).colorScheme.primary, BlendMode.srcIn),
                 ),
-
                 Text(
                   "Entrer votre email et nous vous enverrons un email pour avec un lien pour réinitialiser votre mot de passe.",
                   textAlign: TextAlign.center,
@@ -97,18 +96,14 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                     fontSize: 17,
                   ),
                 ),
-
                 const SizedBox(height: 11),
-
                 MyTextField(
                   controller: emailController,
                   labelText: "Email du compte",
                   obscureText: false,
                   errorMessage: "Veuillez enter votre email!",
                 ),
-
                 const SizedBox(height: 11),
-
                 MyButton(
                   onTap: passwordReset,
                   text: "Envoyer le mail",

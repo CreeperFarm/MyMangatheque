@@ -1,12 +1,12 @@
+import 'package:adaptive_theme/adaptive_theme.dart';
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:mymangatheque/src/components/my_line.dart';
 import 'package:mymangatheque/src/const/own_icon.dart';
 import 'package:mymangatheque/src/get_data/get_user_information.dart';
 import 'package:mymangatheque/src/services/pocketbase.dart';
-import 'package:mymangatheque/src/components/my_line.dart';
-import 'package:adaptive_theme/adaptive_theme.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:go_router/go_router.dart';
-import 'package:flutter/material.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -36,13 +36,10 @@ class _ProfilePageState extends State<ProfilePage> {
       imageQuality: 75,
     );
 
-    connector.updateAvatar(
-        'users',
-        connector.getConnectedUser()!.id,
-        image!.name,
-        image.path,
-        context
-    ).then((value) async {
+    connector
+        .updateAvatar('users', connector.getConnectedUser()!.id, image!.name,
+            image.path, context)
+        .then((value) async {
       await connector.updateUserData(connector.getConnectedUser()!.email);
       setState(() {});
     });
@@ -65,7 +62,6 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-
     PocketBaseConnector connector = PocketBaseConnector();
     User? user = connector.getConnectedUser();
 
@@ -73,8 +69,8 @@ class _ProfilePageState extends State<ProfilePage> {
       theme = AdaptiveTheme.of(context).mode.isSystem
           ? 'system'
           : AdaptiveTheme.of(context).mode.isDark
-          ? 'dark'
-          : 'light';
+              ? 'dark'
+              : 'light';
     });
 
     return Scaffold(
@@ -98,52 +94,46 @@ class _ProfilePageState extends State<ProfilePage> {
                 const Padding(padding: EdgeInsets.only(bottom: 25)),
                 MyLine(width: MediaQuery.of(context).size.width, vertical: 10),
                 Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                    child: SingleChildScrollView(
+                        child: GetUserInfo(
+                            beforeText: "L'email est : ",
+                            afterText: user.email))),
+                MyLine(width: MediaQuery.of(context).size.width, vertical: 10),
+                Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 10.0),
                   child: SingleChildScrollView(
-                    child: GetUserInfo(
-                      beforeText: "L'email est : ",
-                      afterText: user.email
-                    )
-                  )
+                      child: GetUserInfo(
+                          beforeText: 'Votre pseudo est : ',
+                          afterText: user.username)),
                 ),
                 MyLine(width: MediaQuery.of(context).size.width, vertical: 10),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 10.0),
                   child: SingleChildScrollView(
-                    child: GetUserInfo(
-                      beforeText: 'Votre pseudo est : ',
-                      afterText: user.username
-                    )
-                  ),
+                      child: GetUserInfo(
+                          beforeText: 'Compte créer le : ',
+                          afterText:
+                              '${user.updated} / ${month[user.created?.month]} ${user.created?.year}')),
                 ),
                 MyLine(width: MediaQuery.of(context).size.width, vertical: 10),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 10.0),
                   child: SingleChildScrollView(
-                    child: GetUserInfo(
-                      beforeText: 'Compte créer le : ',
-                      afterText: '${user.updated} / ${month[user.created?.month]} ${user.created?.year}'
-                    )
-                  ),
+                      child: GetUserInfo(
+                          beforeText: 'Nombre de tome de manga possédé : ',
+                          afterText:
+                              ' tomes') //TODO: Set the number of manga owned
+                      ),
                 ),
                 MyLine(width: MediaQuery.of(context).size.width, vertical: 10),
                 const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 10.0),
                   child: SingleChildScrollView(
                     child: GetUserInfo(
-                      beforeText: 'Nombre de tome de manga possédé : ',
-                      afterText: ' tomes'
-                    ) //TODO: Set the number of manga owned
-                  ),
-                ),
-                MyLine(width: MediaQuery.of(context).size.width, vertical: 10),
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 10.0),
-                  child: SingleChildScrollView(
-                    child: GetUserInfo(
-                      beforeText: 'Nombre de tome de manga en favoris : ',
-                      afterText: ' tomes'
-                    ), //TODO: Set the number of manga fav
+                        beforeText: 'Nombre de tome de manga en favoris : ',
+                        afterText:
+                            ' tomes'), //TODO: Set the number of manga fav
                   ),
                 ),
                 MyLine(
@@ -193,7 +183,8 @@ class _ProfilePageState extends State<ProfilePage> {
                                 'assets/images/theme/auto-icon.png',
                                 width: 20,
                               ),
-                              const Padding(padding: EdgeInsets.only(right: 10)),
+                              const Padding(
+                                  padding: EdgeInsets.only(right: 10)),
                               const Text('Thème du système')
                             ],
                           ),
@@ -230,7 +221,9 @@ class _ProfilePageState extends State<ProfilePage> {
                     child: Row(
                       children: [
                         const Padding(padding: EdgeInsets.only(right: 16)),
-                        OwnIcon(iconColor: Theme.of(context).colorScheme.primary, iconName: 'lock'),
+                        OwnIcon(
+                            iconColor: Theme.of(context).colorScheme.primary,
+                            iconName: 'lock'),
                         const Padding(padding: EdgeInsets.only(right: 9)),
                         const Text('Changer de mot de passe'),
                       ],
@@ -250,9 +243,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   padding: const EdgeInsets.only(left: 4.0, right: 18.0),
                   child: TextButton.icon(
                     onPressed: signUserOut,
-                    icon: OwnIcon(
-                      iconColor: Colors.red,
-                      iconName: 'logout'),
+                    icon: OwnIcon(iconColor: Colors.red, iconName: 'logout'),
                     label: Text(
                       'Se déconnecter',
                       style: GoogleFonts.poppins(
@@ -262,43 +253,40 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                 ),
                 Padding(
-                  padding: EdgeInsets.symmetric(horizontal:10.0, vertical: 10),
-                  child: Row(
-                    children: [
-                      Container(
-                        height: 1.0,
-                        width: MediaQuery.of(context).size.width/3-12,
-                        color: Colors.grey,
-                      ),
-                      const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 10),
-                        child: Text(
-                            'Zone de danger'
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 10.0, vertical: 10),
+                    child: Row(
+                      children: [
+                        Container(
+                          height: 1.0,
+                          width: MediaQuery.of(context).size.width / 3 - 12,
+                          color: Colors.grey,
                         ),
-                      ),
-                      Container(
-                        height: 1.0,
-                        width: MediaQuery.of(context).size.width/3-12.5,
-                        color: Colors.grey,
-                      ),
-                    ],
-                  )
-                ),
+                        const Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 10),
+                          child: Text('Zone de danger'),
+                        ),
+                        Container(
+                          height: 1.0,
+                          width: MediaQuery.of(context).size.width / 3 - 12.5,
+                          color: Colors.grey,
+                        ),
+                      ],
+                    )),
                 Padding(
                   padding: const EdgeInsets.only(left: 4.0, right: 18.0),
                   child: TextButton.icon(
                     onPressed: () => context.go('/delete_account'),
-                    icon: OwnIcon(
-                      iconColor: Colors.red,
-                      iconName: 'delete'),
-                    label: Text('Supprimer mon compte',
+                    icon: OwnIcon(iconColor: Colors.red, iconName: 'delete'),
+                    label: Text(
+                      'Supprimer mon compte',
                       style: GoogleFonts.poppins(
                         color: Colors.red,
                       ),
                     ),
                   ),
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 50,
                 ),
               ],
