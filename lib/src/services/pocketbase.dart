@@ -1,6 +1,10 @@
+import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/services.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/http.dart';
 import 'package:image_downloader/image_downloader.dart';
 import 'package:mymangatheque/src/function/show_message_function.dart';
 import 'package:mymangatheque/src/local_storage/local_storage.dart';
@@ -9,18 +13,13 @@ import 'package:mymangatheque/src/services/models/user.dart';
 import 'package:mymangatheque/src/services/utils.dart';
 import 'package:pocketbase/pocketbase.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:http/http.dart';
-import 'dart:async';
-import 'dart:io';
-import 'package:http/http.dart' as http;
-
 import 'package:url_launcher/url_launcher.dart';
 
 export 'models/file.dart';
 export 'models/user.dart';
 
 class PocketBaseConnector {
-  late final PocketBase _pocketBase;
+  late PocketBase _pocketBase;
 
   Future<void> init() async {
     final storage = getIt<LocalStorage>();
@@ -40,11 +39,10 @@ class PocketBaseConnector {
 
     if (_pocketBase.authStore.isValid) {
       final authRecord = await _pocketBase.collection('users').authRefresh();
-      print(authRecord);
-    } else {
-    }
+      final authInfo = json.decode(authRecord.toString());
+      _connectedUser.add(await findUser(authInfo['record']['email']));
+    } else {}
   }
-
 
   // Singleton
   static final PocketBaseConnector _singleton = PocketBaseConnector._internal();
@@ -52,10 +50,12 @@ class PocketBaseConnector {
   factory PocketBaseConnector() {
     return _singleton;
   }
+
   final BehaviorSubject<User?> _connectedUser = BehaviorSubject<User?>();
 
   PocketBaseConnector._internal()
-      : _pocketBase = PocketBase('https://api.mymangatheque.com', lang: 'fr-FR');
+      : _pocketBase =
+            PocketBase('https://api.mymangatheque.com', lang: 'fr-FR');
 
   Future<void> refresh() async {
     if (!_pocketBase.authStore.isValid) {
@@ -71,24 +71,20 @@ class PocketBaseConnector {
   }
 
   signInWithGoogle(context) async {
-    final authData = await _pocketBase.collection('users').authWithOAuth2(
-        'google',
-            (url) async {
-          await launchUrl(url);
-        },
-        scopes: [
-          'email',
-          'profile',
-          'https://www.googleapis.com/auth/user.gender.read',
-          'https://www.googleapis.com/auth/user.birthday.read'
-        ],
-        createData: {
-          "role": "user",
-          "emailVisibility": true,
-          "gender": "other",
-
-        }
-    );
+    final authData = await _pocketBase
+        .collection('users')
+        .authWithOAuth2('google', (url) async {
+      await launchUrl(url);
+    }, scopes: [
+      'email',
+      'profile',
+      'https://www.googleapis.com/auth/user.gender.read',
+      'https://www.googleapis.com/auth/user.birthday.read'
+    ], createData: {
+      "role": "user",
+      "emailVisibility": true,
+      "gender": "other",
+    });
 
     print(authData);
     dynamic authData2 = json.decode(authData.toString());
@@ -113,17 +109,15 @@ class PocketBaseConnector {
         };
 
         // Upload the image of the user
-        var sendImg = await _pocketBase.collection('users').update(
-            _pocketBase.authStore.model.id,
-            body: body,
-            files: [
-              http.MultipartFile.fromBytes(
-                'avatar',
-                File(path!).readAsBytesSync(),
-                filename: fileName,
-              )
-            ]
-        );
+        var sendImg = await _pocketBase
+            .collection('users')
+            .update(_pocketBase.authStore.model.id, body: body, files: [
+          http.MultipartFile.fromBytes(
+            'avatar',
+            File(path!).readAsBytesSync(),
+            filename: fileName,
+          )
+        ]);
         print(sendImg);
       } on PlatformException catch (e) {
         print(e);
@@ -133,7 +127,8 @@ class PocketBaseConnector {
       print('User already exists');
     }
     print(authData2['meta']['rawUser']['email']);
-    _connectedUser.add(await findUser(authData2['meta']['rawUser']['email'].toString().toLowerCase()));
+    _connectedUser.add(await findUser(
+        authData2['meta']['rawUser']['email'].toString().toLowerCase()));
     closeInAppWebView();
   }
 
@@ -171,7 +166,9 @@ class PocketBaseConnector {
 
   Future resetPassword(String email, context) async {
     await _pocketBase.collection('users').requestPasswordReset(email);
-    return showMessage('Un lien vous as été envoyé pour la réinitialisation de votre mots de passe, vérifiez vos spams.', context);
+    return showMessage(
+        'Un lien vous as été envoyé pour la réinitialisation de votre mots de passe, vérifiez vos spams.',
+        context);
   }
 
   // Watch if someone connect or disconnect from his account
@@ -185,41 +182,30 @@ class PocketBaseConnector {
   }
 
   // Create the user in the collection of users
-  Future<String> createUser(
-      String username,
-      String email,
-      String password,
-      String passwordVerifier,
-      String gender,
-      String birthday,
-      context
-    ) async {
-      assert(username.isNotEmpty);
-      assert(email.isNotEmpty);
-      assert(password.isNotEmpty);
-      assert(passwordVerifier.isNotEmpty);
-      assert(birthday.isNotEmpty);
-      assert(gender.isNotEmpty);
+  Future<String> createUser(String username, String email, String password,
+      String passwordVerifier, String gender, String birthday, context) async {
+    assert(username.isNotEmpty);
+    assert(email.isNotEmpty);
+    assert(password.isNotEmpty);
+    assert(passwordVerifier.isNotEmpty);
+    assert(birthday.isNotEmpty);
+    assert(gender.isNotEmpty);
 
-      final body = <String, dynamic> {
-        "username": username,
-        "email": email.toLowerCase(),
-        "emailVisibility": true,
-        "password": password,
-        "passwordConfirm": passwordVerifier,
-        "birthday": birthday,
-        "gender": gender,
-        "role": "user"
-      };
+    final body = <String, dynamic>{
+      "username": username,
+      "email": email.toLowerCase(),
+      "emailVisibility": true,
+      "password": password,
+      "passwordConfirm": passwordVerifier,
+      "birthday": birthday,
+      "gender": gender,
+      "role": "user"
+    };
 
-
-      return _pocketBase.collection('users')
-          .create(body: body)
-          .catchError((e) {
-            print(e);
-            showMessage('Une erreur est arrivé $e', context);
-          })
-          .then((value) => value.id);
+    return _pocketBase.collection('users').create(body: body).catchError((e) {
+      print(e);
+      showMessage('Une erreur est arrivé $e', context);
+    }).then((value) => value.id);
   }
 
   sendVerification(String email) {
@@ -238,26 +224,19 @@ class PocketBaseConnector {
         .getFirstListItem('email="$email"')
         .then(
           (value) => User.fromJSON(value.id, value.collectionId, value.data),
-    );
+        );
   }
 
   // Update the avatar of the user
-  updateAvatar(
-      String collectionId,
-      String userId,
-      String fileName,
-      String filePath,
-      context
-  ) {
-    return _pocketBase.collection(collectionId).update(
-      userId,
-      files: [
-        MultipartFile.fromBytes('avatar',
-          File(filePath).readAsBytesSync(),
-          filename: fileName,
-        )
-      ]
-    ).catchError((e) {
+  updateAvatar(String collectionId, String userId, String fileName,
+      String filePath, context) {
+    return _pocketBase.collection(collectionId).update(userId, files: [
+      MultipartFile.fromBytes(
+        'avatar',
+        File(filePath).readAsBytesSync(),
+        filename: fileName,
+      )
+    ]).catchError((e) {
       print(e.toString());
       showMessage('Une erreur est arrivé', context);
     });
@@ -265,9 +244,9 @@ class PocketBaseConnector {
 
   // Remove an entry from a collection
   Future<void> removeEntry(
-      String collectionId,
-      String entryId,
-      ) {
+    String collectionId,
+    String entryId,
+  ) {
     return _pocketBase.collection(collectionId).delete(entryId);
   }
 
@@ -282,10 +261,10 @@ class PocketBaseConnector {
   // Get the data from a collection and listen to the changes
   Stream<List<RecordModel>> getCollectionDataListener(String collectionId) {
     PublishSubject<List<RecordModel>> subject =
-    PublishSubject<List<RecordModel>>();
+        PublishSubject<List<RecordModel>>();
 
     StreamSubscription<RecordSubscriptionEvent> subscription =
-    listenToCollectionEvents(collectionId).listen((event) async {
+        listenToCollectionEvents(collectionId).listen((event) async {
       subject.add(await getCollectionData(collectionId));
     });
 
@@ -294,8 +273,8 @@ class PocketBaseConnector {
       subscription.cancel();
     };
     subject.onListen = () async => subject.add(
-      await getCollectionData(collectionId),
-    );
+          await getCollectionData(collectionId),
+        );
     return subject.stream;
   }
 
