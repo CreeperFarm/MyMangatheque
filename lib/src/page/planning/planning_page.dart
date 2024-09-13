@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mymangatheque/src/services/pocketbase.dart';
 
 class PlanningPage extends StatefulWidget {
   const PlanningPage({super.key});
@@ -8,26 +9,41 @@ class PlanningPage extends StatefulWidget {
 }
 
 class _PlanningPageState extends State<PlanningPage> {
+  var latestManga;
+
+  void getLatestManga() {
+    PocketBaseConnector()
+        .getCollectionDataWithFilter("manga",
+            'release >= "${DateTime.now().subtract(const Duration(days: 14)).toIso8601String()}" && release <= "${DateTime.now().add(const Duration(days: 14)).toIso8601String()}" ')
+        .then((value) {
+      setState(() {
+        latestManga = value;
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    getLatestManga();
     return Scaffold(
       appBar: AppBar(
         title: const Text("Planning"),
       ),
-      body: const Center(
+      body: Center(
         child: SingleChildScrollView(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(
+              const Text(
                 "Planning",
                 style: TextStyle(
                   fontSize: 25,
                 ),
               ),
-              Image(
+              const Image(
                 image: AssetImage("assets/images/splash_bg.png"),
               ),
+              Text(latestManga),
             ],
           ),
         ),

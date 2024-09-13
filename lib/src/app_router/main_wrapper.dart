@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:glass_kit/glass_kit.dart';
 import 'package:go_router/go_router.dart';
+import 'package:keyboard_detection/keyboard_detection.dart';
 import 'package:mymangatheque/src/components/my_drawer.dart';
 import 'package:mymangatheque/src/const/own_icon.dart';
 import 'package:mymangatheque/src/theme/light_mode.dart';
@@ -40,6 +43,42 @@ class _MainWrapperState extends ConsumerState<MainWrapper> {
     );
   }
 
+  KeyboardState keyboardState = KeyboardState.unknown;
+  late KeyboardDetectionController keyboardDetectionController;
+  bool? keyboardActive;
+
+  @override
+  void initState() {
+    keyboardDetectionController = KeyboardDetectionController(
+      onChanged: (value) {
+        setState(() {
+          keyboardActive = keyboardDetectionController.stateAsBool(true)!;
+        });
+      },
+    );
+
+    // One time callback
+    keyboardDetectionController.addCallback((state) {
+      return false;
+    });
+
+    // Looped callback
+    keyboardDetectionController.addCallback((state) {
+      return true;
+    });
+
+    // Looped with future callback
+    keyboardDetectionController.addCallback((state) async {
+      await Future.delayed(const Duration(milliseconds: 100));
+      print('Listen to onChanged with looped future Callback: $state');
+
+      // This callback will be looped
+      return true;
+    });
+
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     // This is to change color when starting the app
@@ -57,52 +96,63 @@ class _MainWrapperState extends ConsumerState<MainWrapper> {
         changeThemeColor(lightBgColor, lightTextColor, ref);
       }
     });*/
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        if (constraints.maxWidth > 1200) {
-          return Scaffold(
-              body: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              MyDrawer(
-                navIcons: navIcons,
-                navTitle: navTitle,
-                navRoute: navRoute,
-              ),
-              widget.navigationShell,
-              const SizedBox(
-                width: 0,
-              )
-            ],
-          ));
-        } else if (constraints.maxWidth > 600) {
-          return Scaffold(
-              appBar: AppBar(),
-              drawer: MyDrawer(
-                navIcons: navIcons,
-                navTitle: navTitle,
-                navRoute: navRoute,
-              ),
+    return KeyboardDetection(
+      controller: keyboardDetectionController,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          if (constraints.maxWidth > 1200) {
+            return Scaffold(
+                body: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                MyDrawer(
+                  navIcons: navIcons,
+                  navTitle: navTitle,
+                  navRoute: navRoute,
+                ),
+                widget.navigationShell,
+                const SizedBox(
+                  width: 0,
+                )
+              ],
+            ));
+          } else if (constraints.maxWidth > 600) {
+            return Scaffold(
+                appBar: AppBar(),
+                drawer: MyDrawer(
+                  navIcons: navIcons,
+                  navTitle: navTitle,
+                  navRoute: navRoute,
+                ),
+                body: Stack(
+                  children: [
+                    widget.navigationShell,
+                  ],
+                ));
+          } else if (constraints.maxWidth < 600 && keyboardActive!) {
+            return Scaffold(
               body: Stack(
                 children: [
                   widget.navigationShell,
                 ],
-              ));
-        } else {
-          return Scaffold(
-            body: Stack(
-              children: [
-                widget.navigationShell,
-                Align(
-                  alignment: Alignment.bottomCenter,
-                  child: navBar(Theme.of(context).colorScheme.primary),
-                ),
-              ],
-            ),
-          );
-        }
-      },
+              ),
+            );
+          } else {
+            return Scaffold(
+              body: Stack(
+                children: [
+                  widget.navigationShell,
+                  Align(
+                    alignment: Alignment.bottomCenter,
+                    child: navBar(Theme.of(context).colorScheme.primary),
+                  ),
+                ],
+              ),
+            );
+          }
+        },
+      ),
     );
   }
 
@@ -117,8 +167,8 @@ class _MainWrapperState extends ConsumerState<MainWrapper> {
     return GlassContainer.clearGlass(
       gradient: LinearGradient(
         colors: [
-          Theme.of(context).colorScheme.primary.withOpacity(0.1),
-          Theme.of(context).colorScheme.primary.withOpacity(0.1),
+          Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+          Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
         ],
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
@@ -127,7 +177,7 @@ class _MainWrapperState extends ConsumerState<MainWrapper> {
       margin: const EdgeInsets.only(bottom: 32, left: 16, right: 16),
       borderColor: Colors.transparent,
       borderRadius: const BorderRadius.all(Radius.circular(100)),
-      shadowColor: Colors.black.withOpacity(0.2),
+      shadowColor: Colors.black.withValues(alpha: 0.2),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.spaceAround,

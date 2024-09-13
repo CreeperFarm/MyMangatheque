@@ -259,6 +259,19 @@ class PocketBaseConnector {
         .then((value) => value.items);
   }
 
+  // Get the data from a collection with a filter
+  Future<List<RecordModel>> getCollectionDataWithFilter(
+      String collectionId, String query) {
+    return _pocketBase
+        .collection(collectionId)
+        .getList(
+          page: 1,
+          perPage: 250,
+          filter: query,
+        )
+        .then((value) => value.items);
+  }
+
   // Get the data from a collection and listen to the changes
   Stream<List<RecordModel>> getCollectionDataListener(String collectionId) {
     PublishSubject<List<RecordModel>> subject =
