@@ -1,0 +1,23 @@
+{
+  'version': 0,
+  'use-external-names': 'false',
+  'case-sensitive': 'false',
+  'roots': [{
+    'type': 'directory',
+    'name': "/Users/creeperfarm/Documents/GitHub/MyMangatheque/Flutter/Debug/iphoneos/Debug-iphoneos/FirebaseStorage/FirebaseStorage.framework/Modules"
+    'contents': [{
+      'type': 'file',
+      'name': "module.modulemap",
+      'external-contents': "/Users/creeperfarm/Documents/GitHub/MyMangatheque/Flutter/Debug/iphoneos/Pods.build/Debug-iphoneos/FirebaseStorage.build/unextended-module.modulemap",
+    }]
+    },
+    {
+    'type': 'directory',
+    'name': "/Users/creeperfarm/Documents/GitHub/MyMangatheque/Flutter/Debug/iphoneos/Debug-iphoneos/FirebaseStorage/FirebaseStorage.framework/Headers"
+    'contents': [{
+      'type': 'file',
+      'name': "FirebaseStorage-Swift.h",
+      'external-contents': "/Users/creeperfarm/Documents/GitHub/MyMangatheque/Flutter/Debug/iphoneos/Pods.build/Debug-iphoneos/FirebaseStorage.build/unextended-interface-header.h",
+    }]
+    }]
+}

@@ -103,7 +103,6 @@ class PocketBaseConnector {
         }
         var fileName = await ImageDownloader.findName(imageId);
         var path = await ImageDownloader.findPath(imageId);*/
-
         var body = <String, dynamic>{
           "email": data['email'],
           "birthday": DateTime.now().toString(),
