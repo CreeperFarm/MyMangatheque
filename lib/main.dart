@@ -1,5 +1,4 @@
 import 'package:adaptive_theme/adaptive_theme.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -12,18 +11,12 @@ import 'package:mymangatheque/src/theme/dark_mode.dart';
 import 'package:mymangatheque/src/theme/light_mode.dart';
 import 'package:url_strategy/url_strategy.dart';
 
-import 'firebase_options.dart';
-
 void main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   setupServiceLocator();
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
 
   final savedThemeMode = await AdaptiveTheme.getThemeMode();
-
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
 
   PocketBaseConnector().init();
 

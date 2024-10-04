@@ -43,7 +43,7 @@ class _PlanningPageState extends State<PlanningPage> {
               const Image(
                 image: AssetImage("assets/images/splash_bg.png"),
               ),
-              Text(latestManga),
+              Text(latestManga.toString()),
             ],
           ),
         ),

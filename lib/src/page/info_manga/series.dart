@@ -1,10 +1,8 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:mymangatheque/src/components/my_line.dart';
-import 'package:mymangatheque/src/components/my_picture_display.dart';
 
 class SeriesPages extends StatefulWidget {
   final String seriesName;
+
   const SeriesPages({required this.seriesName, super.key});
 
   @override
@@ -20,7 +18,7 @@ class _SeriesPagesState extends State<SeriesPages> {
         backgroundColor: Colors.transparent,
       ),
       body: SingleChildScrollView(
-        child: FutureBuilder(
+        child: /*FutureBuilder(
             future: FirebaseFirestore.instance.collection("manga").doc(widget.seriesName).get(),
             builder: (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
 
@@ -49,7 +47,8 @@ class _SeriesPagesState extends State<SeriesPages> {
               }
               return const Text("loading");
             },
-          ),
+          ),*/
+            Text("Soon"),
       ),
     );
   }

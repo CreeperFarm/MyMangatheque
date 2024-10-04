@@ -68,11 +68,17 @@ class PocketBaseConnector {
     return _connectedUser.valueOrNull != null;
   }
 
+  Future<void> _launchUrl(url) async {
+    if (!await launchUrl(url)) {
+      throw Exception('Could not launch $url');
+    }
+  }
+
   signInWithGoogle(context) async {
     final authData = await _pocketBase
         .collection('users')
         .authWithOAuth2('google', (url) async {
-      await launchUrl(url);
+      await _launchUrl(url);
     }, scopes: [
       'email',
       'profile',
@@ -83,7 +89,7 @@ class PocketBaseConnector {
       "emailVisibility": true,
       "gender": "other",
     });
-
+    await closeInAppWebView();
     print(authData);
     dynamic authData2 = json.decode(authData.toString());
     print(authData2['meta']);

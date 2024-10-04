@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -24,14 +23,14 @@ class _SearchPageState extends ConsumerState<SearchPage> {
   }
 
   getClientStream() async {
-    var data = await FirebaseFirestore.instance
+    /*var data = await FirebaseFirestore.instance
         .collection('manga')
         .orderBy(ref.watch(searchFilterProvider))
         .get();
 
     setState(() {
       _allResults = data.docs;
-    });
+    });*/
   }
 
   _onSearchChanged() {
@@ -112,7 +111,9 @@ class _SearchPageState extends ConsumerState<SearchPage> {
               ),
             ),
             PopupMenuButton<String>(
-              icon: OwnIcon(iconColor: Theme.of(context).colorScheme.primary, iconName: "filter_right"),
+              icon: OwnIcon(
+                  iconColor: Theme.of(context).colorScheme.primary,
+                  iconName: "filter_right"),
               onSelected: (String result) {
                 setState(() {
                   changeFilter(result);
@@ -122,7 +123,8 @@ class _SearchPageState extends ConsumerState<SearchPage> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
               ),
-              shadowColor: Theme.of(context).colorScheme.primary.withOpacity(0.5),
+              shadowColor:
+                  Theme.of(context).colorScheme.primary.withOpacity(0.5),
               color: Theme.of(context).colorScheme.onPrimary,
               itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
                 PopupMenuItem<String>(
