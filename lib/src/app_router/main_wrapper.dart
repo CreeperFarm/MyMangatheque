@@ -45,7 +45,7 @@ class _MainWrapperState extends ConsumerState<MainWrapper> {
 
   KeyboardState keyboardState = KeyboardState.unknown;
   late KeyboardDetectionController keyboardDetectionController;
-  bool? keyboardActive;
+  bool keyboardActive = false;
 
   @override
   void initState() {
