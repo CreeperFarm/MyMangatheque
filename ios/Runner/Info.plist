@@ -45,8 +45,8 @@
 		<string>Used to get the Profile Picture</string>
 		<key>LSApplicationQueriesSchemes</key>
         <array>
-          <string>sms</string>
-          <string>tel</string>
+          <string>https</string>
+          <string>http</string>
         </array>
 		<key>UIApplicationSupportsIndirectInputEvents</key>
 		<true/>
