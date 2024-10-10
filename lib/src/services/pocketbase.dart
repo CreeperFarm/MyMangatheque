@@ -68,7 +68,7 @@ class PocketBaseConnector {
     return _connectedUser.valueOrNull != null;
   }
 
-  Future<void> _launchUrl(url) async {
+  Future<void> _launchUrl(Uri url) async {
     if (!await launchUrl(url)) {
       throw Exception('Could not launch $url');
     }
@@ -77,8 +77,8 @@ class PocketBaseConnector {
   signInWithGoogle(context) async {
     final authData = await _pocketBase
         .collection('users')
-        .authWithOAuth2('google', (url) async {
-      await _launchUrl(url);
+        .authWithOAuth2('google', (Uri url) async {
+      await launchUrl(url);
     }, scopes: [
       'email',
       'profile',

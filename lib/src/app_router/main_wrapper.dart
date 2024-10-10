@@ -167,8 +167,8 @@ class _MainWrapperState extends ConsumerState<MainWrapper> {
     return GlassContainer.clearGlass(
       gradient: LinearGradient(
         colors: [
-          Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
-          Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+          Theme.of(context).colorScheme.primary.withAlpha(10),
+          Theme.of(context).colorScheme.primary.withAlpha(10),
         ],
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
@@ -177,7 +177,7 @@ class _MainWrapperState extends ConsumerState<MainWrapper> {
       margin: const EdgeInsets.only(bottom: 32, left: 16, right: 16),
       borderColor: Colors.transparent,
       borderRadius: const BorderRadius.all(Radius.circular(100)),
-      shadowColor: Colors.black.withValues(alpha: 0.2),
+      shadowColor: Colors.black.withAlpha(20),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.spaceAround,
