@@ -77,8 +77,8 @@ class PocketBaseConnector {
   signInWithGoogle(context) async {
     final authData = await _pocketBase
         .collection('users')
-        .authWithOAuth2('google', (Uri url) async {
-      await launchUrl(url);
+        .authWithOAuth2('google', (url) async {
+      await _launchUrl(url);
     }, scopes: [
       'email',
       'profile',
