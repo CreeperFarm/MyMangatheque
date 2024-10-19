@@ -1,21 +1,18 @@
+import 'package:mymangatheque/src/page/auth/forgot_password_page.dart';
+import 'package:mymangatheque/src/page/auth/modify_password_page.dart';
 import 'package:mymangatheque/src/dev_page/component_show_page.dart';
-import 'package:mymangatheque/src/screen/discover_page.dart';
-import 'package:mymangatheque/src/screen/mentions_legales_page.dart';
-import 'package:mymangatheque/src/screen/profile/profile_settings_page.dart';
 import 'package:mymangatheque/src/app_router/redirect_to_page.dart';
-import 'package:mymangatheque/src/screen/auth/forgot_password_page.dart';
-import 'package:mymangatheque/src/screen/auth/modify_password_page.dart';
-import 'package:mymangatheque/src/screen/planning/planning_page.dart';
-import 'package:mymangatheque/src/screen/library/library_page.dart';
-import 'package:mymangatheque/src/screen/info_manga/authors.dart';
-import 'package:mymangatheque/src/screen/info_manga/editors.dart';
-import 'package:mymangatheque/src/screen/scan_ean_page.dart';
-import 'package:mymangatheque/src/screen/search/search_page.dart';
-import 'package:mymangatheque/src/screen/info_manga/series.dart';
+import 'package:mymangatheque/src/page/planning/planning_page.dart';
+import 'package:mymangatheque/src/page/mentions_legales_page.dart';
+import 'package:mymangatheque/src/page/info_manga/authors.dart';
+import 'package:mymangatheque/src/page/info_manga/editors.dart';
+import 'package:mymangatheque/src/page/search/search_page.dart';
 import 'package:mymangatheque/src/app_router/main_wrapper.dart';
-import 'package:mymangatheque/src/screen/auth/signin_page.dart';
-import 'package:mymangatheque/src/screen/auth/signup_page.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:mymangatheque/src/page/info_manga/series.dart';
+import 'package:mymangatheque/src/page/auth/signin_page.dart';
+import 'package:mymangatheque/src/page/auth/signup_page.dart';
+import 'package:mymangatheque/src/page/scan_ean_page.dart';
+import 'package:mymangatheque/src/page/discover_page.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mymangatheque/main.dart';
 import 'package:flutter/cupertino.dart';
@@ -99,6 +96,13 @@ class AppNavigation {
                     name: 'Mentions Légales',
                     builder: (context, state) {
                       return MentionsLegalesPage(key: state.pageKey);
+                    }
+                  ),
+                  GoRoute(
+                    path: 'delete_account',
+                    name: 'Suppression du compte',
+                    builder: (context, state) {
+                      return RedirectToDelete(key: state.pageKey);
                     }
                   )
                 ]
@@ -248,13 +252,6 @@ class AppNavigation {
                   return RedirectToProfile(key: state.pageKey);
                 },
                 routes: [
-                  GoRoute(
-                    path: 'settings',
-                    name: 'Settings',
-                    builder: (context, state) {
-                      return SettingsProfilePage(key: state.pageKey);
-                    }
-                  ),
                   GoRoute(
                     path: 'modify_password',
                     name: 'ModifyPassword',

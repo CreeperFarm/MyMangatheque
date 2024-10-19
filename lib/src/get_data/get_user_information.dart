@@ -1,70 +1,101 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:mymangatheque/src/services/pocketbase.dart';
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:path/path.dart';
 
 class GetUserInfo extends StatelessWidget {
-  final String documentId;
   final String beforeText;
-  final String dataWanted;
   final String afterText;
 
   const GetUserInfo(
-      {required this.documentId, required this.beforeText, required this.dataWanted, required this.afterText, super.key});
+      {required this.beforeText, required this.afterText, super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Get the collection
-    CollectionReference users = FirebaseFirestore.instance.collection("users");
 
-    return FutureBuilder<DocumentSnapshot>(
-      future: users.doc(documentId).get(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.done) {
-          Map<String, dynamic> data = snapshot.data!.data() as Map<String, dynamic>;
-          return Row(
-            mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(beforeText),
-              Text(data[dataWanted] + afterText),
-            ],
-          );
-        }
-        return const Text("En chargement...");
-      },
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        mainAxisSize: MainAxisSize.max,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(beforeText),
+          Text(afterText),
+        ],
+      ),
     );
   }
 }
 
 class GetUserProfilePicture extends StatelessWidget {
-  final String documentId;
+  final PocketBaseFile file;
 
-  const GetUserProfilePicture({required this.documentId, super.key});
+  const GetUserProfilePicture({required this.file, Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    PocketBaseConnector connector = PocketBaseConnector();
+    User? user = connector.getConnectedUser();
 
-    // Get the collection
-    CollectionReference users = FirebaseFirestore.instance.collection("users");
-
-    return FutureBuilder<DocumentSnapshot>(
-      future: users.doc(documentId).get(),
+    return FutureBuilder(
+      future: _fetchUserProfilePicture(user),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
-          Map<String, dynamic> data = snapshot.data!.data() as Map<String, dynamic>;
-          return Center(
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(150.0),
-              child: Image.network(
-                "${data['imageUrl']}",
-                height: 175,
-                width: 175,
-                fit: BoxFit.cover,
-              ),
-            ),
-          );
+          if (snapshot.hasError || snapshot.data == null) {
+            return _buildLocalImage();
+          } else {
+            return _buildNetworkImage(snapshot.data as String);
+          }
         }
-        return const Text("En chargement...");
+        return const Center(
+          child: CircularProgressIndicator(),
+        );
       },
+    );
+  }
+
+  Future<String?> _fetchUserProfilePicture(User? user) async {
+    if (user?.avatar == null || user?.avatar?.path == null) {
+      return null;
+    }
+    try {
+      final url = join(PocketBaseConnector().serverUrl, user!.avatar!.path);
+      final response = await http.get(Uri.parse(url));
+      if (response.statusCode == 200) {
+        return url;
+      } else {
+        return null;
+      }
+    } catch (e) {
+      return null;
+    }
+  }
+
+  Widget _buildLocalImage() {
+    return Center(
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(150.0),
+        child: Image.asset(
+          'assets/images/unknown.webp',
+          height: 175,
+          width: 175,
+          fit: BoxFit.cover,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNetworkImage(String url) {
+    return Center(
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(150.0),
+        child: Image.network(
+          url,
+          height: 175,
+          width: 175,
+          fit: BoxFit.cover,
+        ),
+      ),
     );
   }
 }

@@ -4,7 +4,7 @@ import 'package:mymangatheque/src/components/my_line.dart';
 import 'package:mymangatheque/src/components/my_picture_display.dart';
 import 'package:mymangatheque/src/components/my_textfield.dart';
 import 'package:mymangatheque/src/components/my_tome_number_show.dart';
-import 'package:mymangatheque/src/components/square_tile.dart';
+import 'package:mymangatheque/src/components/my_square_tile.dart';
 
 class ComponentShowPage extends StatelessWidget {
   const ComponentShowPage({super.key});
@@ -19,14 +19,12 @@ class ComponentShowPage extends StatelessWidget {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            const Text('My Button : (text: "text", onTap: () {}, bgColor: bgColor, textColor: textColor)'),
+            const Text('My Button : (text: "text", onTap: () {})'),
             Padding(
               padding: const EdgeInsets.all(10),
               child: MyButton(
                   text: 'text',
                   onTap: () {},
-                  bgColor: Colors.black,
-                  textColor: Colors.white
               ),
             ),
             const Text('My line (width: width, vertical: vertical int for vertical padding)'),
@@ -48,13 +46,13 @@ class ComponentShowPage extends StatelessWidget {
                 padding: EdgeInsets.symmetric(vertical: 10),
                 child: Text('MyTabBarItem(tabText: text, colorIn: colorIn, colorOut: colorOut), should be in tab bar item then tab'),
             ),
-            const Text('MyTextField(controller: controller, labelText: labelText, obscureText: obscureText boolean to show or not text, errorMessage: errorMessage to show when nothing inside, textColor: textColor)'),
+            const Text('MyTextField(controller: controller, labelText: labelText, obscureText: obscureText boolean to show or not text, errorMessage: errorMessage to show when nothing inside)'),
             Padding(
               padding: const EdgeInsets.all(10),
               child: Column(
                 children: [
-                  MyTextField(controller: controller, labelText: "labelText obscure text false", obscureText: false, errorMessage: 'errorMessage', textColor: Colors.white),
-                  MyTextField(controller: controller, labelText: "labelText obscure text true", obscureText: true, errorMessage: 'errorMessage', textColor: Colors.white)
+                  MyTextField(controller: controller, labelText: "labelText obscure text false", obscureText: false, errorMessage: 'errorMessage'),
+                  MyTextField(controller: controller, labelText: "labelText obscure text true", obscureText: true, errorMessage: 'errorMessage')
                 ],
               )
             ),
@@ -72,6 +70,7 @@ class ComponentShowPage extends StatelessWidget {
               child: SquareTile(imagePath: 'assets/images/google.png', onTap: () {}
               )
             ),
+            const Text(''),
           ],
         )
       ),

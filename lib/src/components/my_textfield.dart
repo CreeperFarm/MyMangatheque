@@ -5,14 +5,12 @@ class MyTextField extends StatelessWidget {
   final String labelText;
   final bool obscureText;
   final String errorMessage;
-  final Color textColor;
 
   const MyTextField({
     required this.controller,
     required this.labelText,
     required this.obscureText,
     required this.errorMessage,
-    required this.textColor,
     super.key,
   });
 
@@ -30,13 +28,19 @@ class MyTextField extends StatelessWidget {
           return null;
         },
         decoration: InputDecoration(
-          enabledBorder: const OutlineInputBorder(),
-          focusedBorder: const OutlineInputBorder(
-            borderSide: BorderSide(),
+          errorBorder: OutlineInputBorder(
+            borderSide: BorderSide(
+              color: Theme.of(context).colorScheme.error,
+            ),
+          ),
+          border: OutlineInputBorder(
+            borderSide: BorderSide(
+              color: Theme.of(context).colorScheme.primary,
+            ),
           ),
           filled: true,
           labelStyle: TextStyle(
-            color: textColor,
+            color: Theme.of(context).colorScheme.onPrimary,
           ),
           hintText: labelText,
         ),
