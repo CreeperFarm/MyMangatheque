@@ -1,15 +1,12 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mymangatheque/src/components/my_button.dart';
-import 'package:mymangatheque/src/components/my_textfield.dart';
 import 'package:mymangatheque/src/components/my_square_tile.dart';
+import 'package:mymangatheque/src/components/my_textfield.dart';
 import 'package:mymangatheque/src/function/show_message_function.dart';
 import 'package:mymangatheque/src/services/pocketbase.dart';
-import 'package:pocketbase/pocketbase.dart';
 
 class SignInPage extends StatefulWidget {
   const SignInPage({super.key});
@@ -26,7 +23,8 @@ class _SignInPageState extends State<SignInPage> {
 
   Future<User?> signIn(context) async {
     try {
-      final userData = await connector.loginWithEmail(emailController.text, passwordController.text);
+      final userData = await connector.loginWithEmail(
+          emailController.text, passwordController.text);
       print(userData);
 
       print('connector id ' + connector.getConnectedUser()!.id.toString());
@@ -72,11 +70,11 @@ class _SignInPageState extends State<SignInPage> {
                 const SizedBox(height: 10),
 
                 // Locker Icon
-                SvgPicture.asset(
-                  'assets/icons/locker.svg',
-                  height: 100,
-                  colorFilter: ColorFilter.mode(Theme.of(context).colorScheme.primary, BlendMode.srcIn)
-                ),
+                SvgPicture.asset('assets/icons/locker.svg',
+                    height: 100,
+                    colorFilter: ColorFilter.mode(
+                        Theme.of(context).colorScheme.primary,
+                        BlendMode.srcIn)),
 
                 const SizedBox(height: 15),
 
@@ -116,7 +114,8 @@ class _SignInPageState extends State<SignInPage> {
                 SizedBox(
                   width: MediaQuery.of(context).size.width,
                   child: TextButton(
-                    onPressed: () => GoRouter.of(context).go('/profile/forgot_password'),
+                    onPressed: () =>
+                        GoRouter.of(context).go('/profile/forgot_password'),
                     style: const ButtonStyle(
                       alignment: Alignment.centerRight,
                       padding: WidgetStatePropertyAll(EdgeInsets.all(0)),
@@ -135,7 +134,10 @@ class _SignInPageState extends State<SignInPage> {
                 // Display sign in button
                 MyButton(
                   text: "Se connecter",
-                  onTap: () => connector.loginWithEmail(emailController.text, passwordController.text).then((value) {
+                  onTap: () => connector
+                      .loginWithEmail(
+                          emailController.text, passwordController.text)
+                      .then((value) {
                     context.go('/profile');
                   }).catchError((e) {
                     showMessage(e.toString(), context);
@@ -201,19 +203,19 @@ class _SignInPageState extends State<SignInPage> {
                     children: [
                       Text(
                         "Pas encore de compte ?",
-                        style: TextStyle(color: Theme.of(context).colorScheme.primary),
+                        style: TextStyle(
+                            color: Theme.of(context).colorScheme.primary),
                       ),
                       const SizedBox(width: 4),
                       TextButton(
-                          onPressed: () => GoRouter.of(context).go('/profile/signup'),
+                          onPressed: () =>
+                              GoRouter.of(context).go('/profile/signup'),
                           child: const Text(
                             "Créer en un maintenant",
                             style: TextStyle(
                                 color: Colors.blue,
-                                fontWeight: FontWeight.bold
-                            ),
-                          )
-                      ),
+                                fontWeight: FontWeight.bold),
+                          )),
                     ],
                   ),
                 ),

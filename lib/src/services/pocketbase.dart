@@ -60,7 +60,7 @@ class PocketBaseConnector {
       // TODO: The token has expired. Ask the user to sign in again.
       return;
     }
-    final authData = await _pocketBase.collection('users').authRefresh();
+    await _pocketBase.collection('users').authRefresh();
   }
 
   // Check if your logged-in
@@ -89,19 +89,12 @@ class PocketBaseConnector {
       "emailVisibility": true,
       "gender": "other",
     });
-    await closeInAppWebView();
-    print(authData);
     dynamic authData2 = json.decode(authData.toString());
-    print(authData2['meta']);
-    print(authData2['meta']['isNew']);
 
     var meta = authData.meta;
-    print(meta);
 
     if (authData2['meta']['isNew']) {
       var data = authData2['meta']['rawUser'];
-      print('The email is ' + data['email']);
-      print('The link is ' + data['picture']);
       try {
         /*var imageId = await ImageDownloader.downloadImage(data['picture']);
         if (imageId == null) {
@@ -115,7 +108,7 @@ class PocketBaseConnector {
         };
 
         // Upload the image of the user
-        var sendImg = await _pocketBase
+        await _pocketBase
             .collection('users')
             .update(_pocketBase.authStore.model.id, body: body, files: [
           /*http.MultipartFile.fromBytes(
@@ -124,7 +117,8 @@ class PocketBaseConnector {
             filename: fileName,
           )*/
         ]);
-        print(sendImg);
+
+        await sendVerification(data['email']);
       } on PlatformException catch (e) {
         print(e);
         showMessage("Un erreur s'est déroullé", context);
@@ -132,10 +126,9 @@ class PocketBaseConnector {
     } else {
       print('User already exists');
     }
-    print(authData2['meta']['rawUser']['email']);
     _connectedUser.add(await findUser(
         authData2['meta']['rawUser']['email'].toString().toLowerCase()));
-    closeInAppWebView();
+    await closeInAppWebView();
   }
 
   // Login the user with email and password
@@ -208,10 +201,19 @@ class PocketBaseConnector {
       "role": "user"
     };
 
-    return _pocketBase.collection('users').create(body: body).catchError((e) {
-      print(e);
-      showMessage('Une erreur est arrivé $e', context);
-    }).then((value) => value.id);
+    return _pocketBase
+        .collection('users')
+        .create(body: body)
+        .catchError((e) {
+          print(e);
+          showMessage('Une erreur est arrivé $e', context);
+          return e;
+        })
+        .then((value) => value.id)
+        .then((id) async {
+          await sendVerification(email);
+          return id;
+        });
   }
 
   sendVerification(String email) {
@@ -223,8 +225,13 @@ class PocketBaseConnector {
   }
 
   // Find the user in the collection of users
-  Future<User?> findUser(String email) {
+  Future<User?> findUser(String email) async {
     assert(email.isNotEmpty);
+    var value2 = await _pocketBase
+        .collection('users')
+        .getFirstListItem('email="$email"');
+    print(value2.collectionId);
+    print(value2.data);
     return _pocketBase
         .collection('users')
         .getFirstListItem('email="$email"')

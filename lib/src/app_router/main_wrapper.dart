@@ -8,6 +8,7 @@ import 'package:keyboard_detection/keyboard_detection.dart';
 import 'package:mymangatheque/src/components/my_drawer.dart';
 import 'package:mymangatheque/src/const/own_icon.dart';
 import 'package:mymangatheque/src/theme/light_mode.dart';
+import 'package:url_launcher/link.dart';
 
 class MainWrapper extends ConsumerStatefulWidget {
   final StatefulNavigationShell navigationShell;
@@ -111,9 +112,36 @@ class _MainWrapperState extends ConsumerState<MainWrapper> {
                   navTitle: navTitle,
                   navRoute: navRoute,
                 ),
-                widget.navigationShell,
-                const SizedBox(
-                  width: 0,
+                Align(
+                  alignment: Alignment.center,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      widget.navigationShell,
+                      SizedBox(
+                        height: 25,
+                        child: Link(
+                            uri: Uri.parse(
+                                "https://mymangatheque.com/mentions_legales"),
+                            builder: (context, link) {
+                              return InkWell(
+                                onTap: link,
+                                child: Text(
+                                  "Mentions légales",
+                                  style: TextStyle(
+                                    color:
+                                        Theme.of(context).colorScheme.primary,
+                                  ),
+                                ),
+                              );
+                            }),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(
+                  width:
+                      0, // This sized box  make you set the content of the page centered
                 )
               ],
             ));
@@ -130,7 +158,7 @@ class _MainWrapperState extends ConsumerState<MainWrapper> {
                     widget.navigationShell,
                   ],
                 ));
-          } else if (constraints.maxWidth < 600 && keyboardActive!) {
+          } else if (constraints.maxWidth < 600 && keyboardActive) {
             return Scaffold(
               body: Stack(
                 children: [
