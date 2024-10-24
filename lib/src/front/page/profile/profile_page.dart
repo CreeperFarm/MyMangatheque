@@ -60,27 +60,42 @@ class _ProfilePageState extends State<ProfilePage> {
     '12': 'Décembre',
   };
 
-  getNumberOfManga() async {
-    int countMangaOwned = await connector.getNumberOwnedManga();
-    setState(() {
-      numberMangaOwned = countMangaOwned;
-    });
+  // Get the number of owned manga
+  getNumberOfMangaOwned() async {
+    try {
+      int countMangaOwned = await connector.getNumberOwnedManga();
+      setState(() {
+        numberMangaOwned = countMangaOwned;
+      });
+    } catch (e) {
+      print(e);
+    }
+  }
 
-    //TODO: Set the number of manga fav
+  // Get the number of favorite series
+  getNumberOfSeriesFav() async {
+    try {
+      int countSerieFav = await connector.getNumberFavSerie();
+      setState(() {
+        numberSerieFav = countSerieFav;
+      });
+    } catch (e) {
+      print(e);
+    }
   }
 
   DateTime selectedBDayDate = DateTime(DateTime.now().year - 7, DateTime.now().month, DateTime.now().day);
 
+  @override
   void initState() {
     super.initState();
-    getNumberOfManga();
+    getNumberOfMangaOwned();
+    getNumberOfSeriesFav();
   }
 
   @override
   Widget build(BuildContext context) {
     PocketBaseConnector connector = PocketBaseConnector();
-
-    print(numberMangaOwned);
     User? user = connector.getConnectedUser();
 
     setState(() {
