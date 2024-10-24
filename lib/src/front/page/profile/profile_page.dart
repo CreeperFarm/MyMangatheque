@@ -93,12 +93,14 @@ class _ProfilePageState extends State<ProfilePage> {
               child: GetUserProfilePicture(file: user!.avatar!),
             ),
             const Padding(padding: EdgeInsets.only(bottom: 25)),
+
             MyLine(width: MediaQuery.of(context).size.width, vertical: 10),
             Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 10.0),
                 child: SingleChildScrollView(
                     child: GetUserInfo(
                         beforeText: "L'email est : ", afterText: user.email))),
+
             MyLine(width: MediaQuery.of(context).size.width, vertical: 10),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10.0),
@@ -258,26 +260,34 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
             ),
             Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10),
-                child: Row(
-                  children: [
-                    Container(
-                      height: 1.0,
-                      width: MediaQuery.of(context).size.width / 3 - 12,
-                      color: Colors.grey,
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Divider(
+                      thickness: 0.5,
+                      color: Theme.of(context).colorScheme.primary,
                     ),
-                    const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 10),
-                      child: Text('Zone de danger'),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Text(
+                      "Zone de danger",
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
                     ),
-                    Container(
-                      height: 1.0,
-                      width: MediaQuery.of(context).size.width / 3 - 12.5,
-                      color: Colors.grey,
+                  ),
+                  Expanded(
+                    child: Divider(
+                      thickness: 0.5,
+                      color: Theme.of(context).colorScheme.primary,
                     ),
-                  ],
-                )),
+                  ),
+                ],
+              ),
+            ),
             Padding(
               padding: const EdgeInsets.only(left: 4.0, right: 18.0),
               child: TextButton.icon(
