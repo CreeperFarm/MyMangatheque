@@ -307,6 +307,30 @@ class PocketBaseConnector {
     return subject.stream;
   }
 
+  Future<int> getNumberOwnedManga() async {
+    int count = 0;
+
+    // Get the data from the collection owned (The API send only the one that are created by the user)
+    final result = await _pocketBase.collection('owned').getFullList();
+
+    // Get the number of manga owned by the user
+    count = result.length;
+
+    return count; // Return the number of manga owned by the user
+  }
+
+  Future<int> getNumberFavManga() async {
+    int count = 0;
+
+    // Get the data from the collection fav (The API send only the one that are created by the user)
+    final result = await _pocketBase.collection('followed').getFullList();
+
+    // Get the number of manga fav by the user
+    count = result.length;
+
+    return count; // Return the number of manga fav by the user
+  }
+
   // Listen to the changes of a collection
   Stream<RecordSubscriptionEvent> listenToCollectionEvents(String collectionId) {
     return _pocketBase.collection(collectionId).listen();

@@ -19,6 +19,8 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   dynamic savedThemeMode;
   dynamic theme;
+  int numberMangaOwned = 0;
+  int numberSerieFav = 0;
 
   final connector = PocketBaseConnector();
 
@@ -37,10 +39,7 @@ class _ProfilePageState extends State<ProfilePage> {
       imageQuality: 75,
     );
 
-    connector
-        .updateAvatar('users', connector.getConnectedUser()!.id, image!.name,
-            image.path, context)
-        .then((value) async {
+    connector.updateAvatar('users', connector.getConnectedUser()!.id, image!.name, image.path, context).then((value) async {
       await connector.updateUserData(connector.getConnectedUser()!.email);
       setState(() {});
     });
@@ -61,12 +60,27 @@ class _ProfilePageState extends State<ProfilePage> {
     '12': 'Décembre',
   };
 
-  DateTime selectedBDayDate = DateTime(
-      DateTime.now().year - 7, DateTime.now().month, DateTime.now().day);
+  getNumberOfManga() async {
+    int countMangaOwned = await connector.getNumberOwnedManga();
+    setState(() {
+      numberMangaOwned = countMangaOwned;
+    });
+
+    //TODO: Set the number of manga fav
+  }
+
+  DateTime selectedBDayDate = DateTime(DateTime.now().year - 7, DateTime.now().month, DateTime.now().day);
+
+  void initState() {
+    super.initState();
+    getNumberOfManga();
+  }
 
   @override
   Widget build(BuildContext context) {
     PocketBaseConnector connector = PocketBaseConnector();
+
+    print(numberMangaOwned);
     User? user = connector.getConnectedUser();
 
     setState(() {
@@ -97,17 +111,12 @@ class _ProfilePageState extends State<ProfilePage> {
             MyLine(width: MediaQuery.of(context).size.width, vertical: 10),
             Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                child: SingleChildScrollView(
-                    child: GetUserInfo(
-                        beforeText: "L'email est : ", afterText: user.email))),
+                child: SingleChildScrollView(child: GetUserInfo(beforeText: "L'email est : ", afterText: user.email))),
 
             MyLine(width: MediaQuery.of(context).size.width, vertical: 10),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10.0),
-              child: SingleChildScrollView(
-                  child: GetUserInfo(
-                      beforeText: 'Votre pseudo est : ',
-                      afterText: user.username)),
+              child: SingleChildScrollView(child: GetUserInfo(beforeText: 'Votre pseudo est : ', afterText: user.username)),
             ),
             MyLine(width: MediaQuery.of(context).size.width, vertical: 10),
             Padding(
@@ -117,8 +126,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   child: SingleChildScrollView(
                       child: GetUserInfo(
                           beforeText: 'Compte créer le : ',
-                          afterText:
-                              '${user.created.day} ${month[user.created.month.toString()]} ${user.created.year}')),
+                          afterText: '${user.created.day} ${month[user.created.month.toString()]} ${user.created.year}')),
                 )),
             MyLine(width: MediaQuery.of(context).size.width, vertical: 10),
             Padding(
@@ -126,29 +134,26 @@ class _ProfilePageState extends State<ProfilePage> {
                 child: SingleChildScrollView(
                     child: GetUserInfo(
                         beforeText: 'Date de naissance : ',
-                        afterText:
-                            '${user.birthday.day} ${month[user.birthday.month.toString()]} ${user.birthday.year}'))),
+                        afterText: '${user.birthday.day} ${month[user.birthday.month.toString()]} ${user.birthday.year}'))),
             MyLine(width: MediaQuery.of(context).size.width, vertical: 10),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 10.0),
-              child: SingleChildScrollView(
-                  child: GetUserInfo(
-                      beforeText: 'Nombre de tome de manga possédé : ',
-                      afterText: ' tomes') //TODO: Set the number of manga owned
-                  ),
-            ),
-            MyLine(width: MediaQuery.of(context).size.width, vertical: 10),
-            const Padding(
+            Padding(
               padding: EdgeInsets.symmetric(horizontal: 10.0),
               child: SingleChildScrollView(
                 child: GetUserInfo(
-                    beforeText: 'Nombre de tome de manga en favoris : ',
-                    afterText: ' tomes'), //TODO: Set the number of manga fav
+                    beforeText: numberMangaOwned < 1 ? 'Nombre de tome de manga possédé : ' : 'Nombre de tomes de manga possédé : ',
+                    afterText: numberMangaOwned < 1 ? '$numberMangaOwned tome' : '$numberMangaOwned tomes'),
               ),
             ),
-            MyLine(
-                width: MediaQuery.of(context).size.width,
-                vertical: 10), // Drop Down Menu du DarkMode
+            MyLine(width: MediaQuery.of(context).size.width, vertical: 10),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 10.0),
+              child: SingleChildScrollView(
+                child: GetUserInfo(
+                    beforeText: numberSerieFav < 1 ? 'Nombre de série en favoris : ' : 'Nombre de séries en favoris : ',
+                    afterText: numberSerieFav < 1 ? '$numberSerieFav série' : '$numberSerieFav séries'),
+              ),
+            ),
+            MyLine(width: MediaQuery.of(context).size.width, vertical: 10), // Drop Down Menu du DarkMode
             Container(
               padding: const EdgeInsets.all(10),
               margin: const EdgeInsets.symmetric(horizontal: 5),
@@ -223,14 +228,11 @@ class _ProfilePageState extends State<ProfilePage> {
             MyLine(width: MediaQuery.of(context).size.width, vertical: 10),
             SingleChildScrollView(
               child: GestureDetector(
-                onTap: () =>
-                    GoRouter.of(context).go('/profile/modify_password'),
+                onTap: () => GoRouter.of(context).go('/profile/modify_password'),
                 child: Row(
                   children: [
                     const Padding(padding: EdgeInsets.only(right: 16)),
-                    OwnIcon(
-                        iconColor: Theme.of(context).colorScheme.primary,
-                        iconName: 'lock'),
+                    OwnIcon(iconColor: Theme.of(context).colorScheme.primary, iconName: 'lock'),
                     const Padding(padding: EdgeInsets.only(right: 9)),
                     const Text('Changer de mot de passe'),
                   ],
@@ -238,8 +240,7 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
             ),
             Padding(
-              padding:
-                  const EdgeInsets.only(left: 10.0, right: 10.0, top: 10.0),
+              padding: const EdgeInsets.only(left: 10.0, right: 10.0, top: 10.0),
               child: Container(
                 height: 1.0,
                 width: MediaQuery.of(context).size.width,
@@ -260,8 +261,7 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
             ),
             Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10),
               child: Row(
                 children: [
                   Expanded(
