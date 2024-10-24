@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:mymangatheque/src/back/services/pocketbase.dart';
 import 'package:mymangatheque/src/const/own_icon.dart';
 import 'package:mymangatheque/src/front/components/my_line.dart';
+import 'package:mymangatheque/src/front/components/my_scroll_column.dart';
 import 'package:mymangatheque/src/models/get_user_information.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -81,232 +82,218 @@ class _ProfilePageState extends State<ProfilePage> {
         elevation: 0,
         title: const Text('Page de profile et de réglage'),
       ),
-      body: Center(child: LayoutBuilder(builder: (context, constraints) {
-        return SingleChildScrollView(
-          child: Container(
-            margin: const EdgeInsets.symmetric(horizontal: 10),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                GestureDetector(
-                  onTap: () {
-                    pickUploadImage();
-                  },
-                  child: GetUserProfilePicture(file: user!.avatar!),
-                ),
-                const Padding(padding: EdgeInsets.only(bottom: 25)),
-                MyLine(width: MediaQuery.of(context).size.width, vertical: 10),
-                Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                    child: SingleChildScrollView(
-                        child: GetUserInfo(
-                            beforeText: "L'email est : ",
-                            afterText: user.email))),
-                MyLine(width: MediaQuery.of(context).size.width, vertical: 10),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                  child: SingleChildScrollView(
-                      child: GetUserInfo(
-                          beforeText: 'Votre pseudo est : ',
-                          afterText: user.username)),
-                ),
-                MyLine(width: MediaQuery.of(context).size.width, vertical: 10),
-                Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                    child: GestureDetector(
-                      onTap: () {},
-                      child: SingleChildScrollView(
-                          child: GetUserInfo(
-                              beforeText: 'Compte créer le : ',
-                              afterText:
-                                  '${user.created.day} ${month[user.created.month.toString()]} ${user.created.year}')),
-                    )),
-                MyLine(width: MediaQuery.of(context).size.width, vertical: 10),
-                Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                    child: SingleChildScrollView(
-                        child: GetUserInfo(
-                            beforeText: 'Date de naissance : ',
-                            afterText:
-                                '${user.birthday.day} ${month[user.birthday.month.toString()]} ${user.birthday.year}'))),
-                MyLine(width: MediaQuery.of(context).size.width, vertical: 10),
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 10.0),
-                  child: SingleChildScrollView(
-                      child: GetUserInfo(
-                          beforeText: 'Nombre de tome de manga possédé : ',
-                          afterText:
-                              ' tomes') //TODO: Set the number of manga owned
-                      ),
-                ),
-                MyLine(width: MediaQuery.of(context).size.width, vertical: 10),
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 10.0),
-                  child: SingleChildScrollView(
-                    child: GetUserInfo(
-                        beforeText: 'Nombre de tome de manga en favoris : ',
-                        afterText:
-                            ' tomes'), //TODO: Set the number of manga fav
-                  ),
-                ),
-                MyLine(
-                    width: MediaQuery.of(context).size.width,
-                    vertical: 10), // Drop Down Menu du DarkMode
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  margin: const EdgeInsets.symmetric(horizontal: 5),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: DropdownButtonFormField(
-                      items: [
-                        DropdownMenuItem(
-                          value: 'light',
-                          child: Row(
-                            children: [
-                              Image.asset(
-                                'assets/images/theme/light-icon.png',
-                                width: 20,
-                              ),
-                              const Padding(
-                                  padding: EdgeInsets.only(right: 10)),
-                              const Text('Thème clair')
-                            ],
-                          ),
-                        ),
-                        DropdownMenuItem(
-                          value: 'dark',
-                          child: Row(
-                            children: [
-                              Image.asset(
-                                'assets/images/theme/dark-icon.png',
-                                width: 20,
-                              ),
-                              const Padding(
-                                  padding: EdgeInsets.only(right: 10)),
-                              const Text('Thème sombre')
-                            ],
-                          ),
-                        ),
-                        DropdownMenuItem(
-                          value: 'system',
-                          child: Row(
-                            children: [
-                              Image.asset(
-                                'assets/images/theme/auto-icon.png',
-                                width: 20,
-                              ),
-                              const Padding(
-                                  padding: EdgeInsets.only(right: 10)),
-                              const Text('Thème du système')
-                            ],
-                          ),
-                        ),
-                      ],
-                      decoration: const InputDecoration(
-                        border: OutlineInputBorder(),
-                      ),
-                      value: theme,
-                      onChanged: (value) {
-                        if (value == 'light') {
-                          AdaptiveTheme.of(context).setLight();
-                          setState(() {
-                            savedThemeMode = AdaptiveThemeMode.light;
-                          });
-                        } else if (value == 'dark') {
-                          AdaptiveTheme.of(context).setDark();
-                          setState(() {
-                            savedThemeMode = AdaptiveThemeMode.dark;
-                          });
-                        } else {
-                          AdaptiveTheme.of(context).setSystem();
-                          setState(() {
-                            savedThemeMode = AdaptiveThemeMode.system;
-                          });
-                        }
-                      }),
-                ),
-                MyLine(width: MediaQuery.of(context).size.width, vertical: 10),
-                SingleChildScrollView(
-                  child: GestureDetector(
-                    onTap: () =>
-                        GoRouter.of(context).go('/profile/modify_password'),
-                    child: Row(
-                      children: [
-                        const Padding(padding: EdgeInsets.only(right: 16)),
-                        OwnIcon(
-                            iconColor: Theme.of(context).colorScheme.primary,
-                            iconName: 'lock'),
-                        const Padding(padding: EdgeInsets.only(right: 9)),
-                        const Text('Changer de mot de passe'),
-                      ],
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding:
-                      const EdgeInsets.only(left: 10.0, right: 10.0, top: 10.0),
-                  child: Container(
-                    height: 1.0,
-                    width: MediaQuery.of(context).size.width,
-                    color: Colors.grey,
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(left: 4.0, right: 18.0),
-                  child: TextButton.icon(
-                    onPressed: signUserOut,
-                    icon: OwnIcon(iconColor: Colors.red, iconName: 'logout'),
-                    label: Text(
-                      'Se déconnecter',
-                      style: GoogleFonts.poppins(
-                        color: Colors.red,
-                      ),
-                    ),
-                  ),
-                ),
-                Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 10.0, vertical: 10),
-                    child: Row(
-                      children: [
-                        Container(
-                          height: 1.0,
-                          width: MediaQuery.of(context).size.width / 3 - 12,
-                          color: Colors.grey,
-                        ),
-                        const Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 10),
-                          child: Text('Zone de danger'),
-                        ),
-                        Container(
-                          height: 1.0,
-                          width: MediaQuery.of(context).size.width / 3 - 12.5,
-                          color: Colors.grey,
-                        ),
-                      ],
-                    )),
-                Padding(
-                  padding: const EdgeInsets.only(left: 4.0, right: 18.0),
-                  child: TextButton.icon(
-                    onPressed: () => context.go('/delete_account'),
-                    icon: OwnIcon(iconColor: Colors.red, iconName: 'delete'),
-                    label: Text(
-                      'Supprimer mon compte',
-                      style: GoogleFonts.poppins(
-                        color: Colors.red,
-                      ),
-                    ),
-                  ),
-                ),
-                (constraints.maxWidth < 600)
-                    ? SizedBox(height: 92)
-                    : SizedBox(height: 0)
-              ],
+      body: Center(
+        child: MyScrollColumn(
+          scrollPadding: const EdgeInsets.symmetric(horizontal: 10),
+          children: [
+            GestureDetector(
+              onTap: () {
+                pickUploadImage();
+              },
+              child: GetUserProfilePicture(file: user!.avatar!),
             ),
-          ),
-        );
-      })),
+            const Padding(padding: EdgeInsets.only(bottom: 25)),
+            MyLine(width: MediaQuery.of(context).size.width, vertical: 10),
+            Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                child: SingleChildScrollView(
+                    child: GetUserInfo(
+                        beforeText: "L'email est : ", afterText: user.email))),
+            MyLine(width: MediaQuery.of(context).size.width, vertical: 10),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10.0),
+              child: SingleChildScrollView(
+                  child: GetUserInfo(
+                      beforeText: 'Votre pseudo est : ',
+                      afterText: user.username)),
+            ),
+            MyLine(width: MediaQuery.of(context).size.width, vertical: 10),
+            Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                child: GestureDetector(
+                  onTap: () {},
+                  child: SingleChildScrollView(
+                      child: GetUserInfo(
+                          beforeText: 'Compte créer le : ',
+                          afterText:
+                              '${user.created.day} ${month[user.created.month.toString()]} ${user.created.year}')),
+                )),
+            MyLine(width: MediaQuery.of(context).size.width, vertical: 10),
+            Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                child: SingleChildScrollView(
+                    child: GetUserInfo(
+                        beforeText: 'Date de naissance : ',
+                        afterText:
+                            '${user.birthday.day} ${month[user.birthday.month.toString()]} ${user.birthday.year}'))),
+            MyLine(width: MediaQuery.of(context).size.width, vertical: 10),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 10.0),
+              child: SingleChildScrollView(
+                  child: GetUserInfo(
+                      beforeText: 'Nombre de tome de manga possédé : ',
+                      afterText: ' tomes') //TODO: Set the number of manga owned
+                  ),
+            ),
+            MyLine(width: MediaQuery.of(context).size.width, vertical: 10),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 10.0),
+              child: SingleChildScrollView(
+                child: GetUserInfo(
+                    beforeText: 'Nombre de tome de manga en favoris : ',
+                    afterText: ' tomes'), //TODO: Set the number of manga fav
+              ),
+            ),
+            MyLine(
+                width: MediaQuery.of(context).size.width,
+                vertical: 10), // Drop Down Menu du DarkMode
+            Container(
+              padding: const EdgeInsets.all(10),
+              margin: const EdgeInsets.symmetric(horizontal: 5),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: DropdownButtonFormField(
+                  items: [
+                    DropdownMenuItem(
+                      value: 'light',
+                      child: Row(
+                        children: [
+                          Image.asset(
+                            'assets/images/theme/light-icon.png',
+                            width: 20,
+                          ),
+                          const Padding(padding: EdgeInsets.only(right: 10)),
+                          const Text('Thème clair')
+                        ],
+                      ),
+                    ),
+                    DropdownMenuItem(
+                      value: 'dark',
+                      child: Row(
+                        children: [
+                          Image.asset(
+                            'assets/images/theme/dark-icon.png',
+                            width: 20,
+                          ),
+                          const Padding(padding: EdgeInsets.only(right: 10)),
+                          const Text('Thème sombre')
+                        ],
+                      ),
+                    ),
+                    DropdownMenuItem(
+                      value: 'system',
+                      child: Row(
+                        children: [
+                          Image.asset(
+                            'assets/images/theme/auto-icon.png',
+                            width: 20,
+                          ),
+                          const Padding(padding: EdgeInsets.only(right: 10)),
+                          const Text('Thème du système')
+                        ],
+                      ),
+                    ),
+                  ],
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                  ),
+                  value: theme,
+                  onChanged: (value) {
+                    if (value == 'light') {
+                      AdaptiveTheme.of(context).setLight();
+                      setState(() {
+                        savedThemeMode = AdaptiveThemeMode.light;
+                      });
+                    } else if (value == 'dark') {
+                      AdaptiveTheme.of(context).setDark();
+                      setState(() {
+                        savedThemeMode = AdaptiveThemeMode.dark;
+                      });
+                    } else {
+                      AdaptiveTheme.of(context).setSystem();
+                      setState(() {
+                        savedThemeMode = AdaptiveThemeMode.system;
+                      });
+                    }
+                  }),
+            ),
+            MyLine(width: MediaQuery.of(context).size.width, vertical: 10),
+            SingleChildScrollView(
+              child: GestureDetector(
+                onTap: () =>
+                    GoRouter.of(context).go('/profile/modify_password'),
+                child: Row(
+                  children: [
+                    const Padding(padding: EdgeInsets.only(right: 16)),
+                    OwnIcon(
+                        iconColor: Theme.of(context).colorScheme.primary,
+                        iconName: 'lock'),
+                    const Padding(padding: EdgeInsets.only(right: 9)),
+                    const Text('Changer de mot de passe'),
+                  ],
+                ),
+              ),
+            ),
+            Padding(
+              padding:
+                  const EdgeInsets.only(left: 10.0, right: 10.0, top: 10.0),
+              child: Container(
+                height: 1.0,
+                width: MediaQuery.of(context).size.width,
+                color: Colors.grey,
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(left: 4.0, right: 18.0),
+              child: TextButton.icon(
+                onPressed: signUserOut,
+                icon: OwnIcon(iconColor: Colors.red, iconName: 'logout'),
+                label: Text(
+                  'Se déconnecter',
+                  style: GoogleFonts.poppins(
+                    color: Colors.red,
+                  ),
+                ),
+              ),
+            ),
+            Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10),
+                child: Row(
+                  children: [
+                    Container(
+                      height: 1.0,
+                      width: MediaQuery.of(context).size.width / 3 - 12,
+                      color: Colors.grey,
+                    ),
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 10),
+                      child: Text('Zone de danger'),
+                    ),
+                    Container(
+                      height: 1.0,
+                      width: MediaQuery.of(context).size.width / 3 - 12.5,
+                      color: Colors.grey,
+                    ),
+                  ],
+                )),
+            Padding(
+              padding: const EdgeInsets.only(left: 4.0, right: 18.0),
+              child: TextButton.icon(
+                onPressed: () => context.go('/delete_account'),
+                icon: OwnIcon(iconColor: Colors.red, iconName: 'delete'),
+                label: Text(
+                  'Supprimer mon compte',
+                  style: GoogleFonts.poppins(
+                    color: Colors.red,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
