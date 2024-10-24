@@ -5,9 +5,11 @@ import 'package:go_router/go_router.dart';
 import 'package:mymangatheque/src/back/provider/search_filter_provider.dart';
 import 'package:mymangatheque/src/back/provider/search_order_provider.dart';
 import 'package:mymangatheque/src/const/own_icon.dart';
-import 'package:mymangatheque/src/front/components/my_line.dart';
 import 'package:mymangatheque/src/front/components/my_tab_bar_item.dart';
-import 'package:mymangatheque/src/front/components/my_tome_number_show.dart';
+import 'package:mymangatheque/src/front/page/library/tab_page/collection_tab.dart';
+import 'package:mymangatheque/src/front/page/library/tab_page/complete_lib_tab.dart';
+import 'package:mymangatheque/src/front/page/library/tab_page/envy_tab.dart';
+import 'package:mymangatheque/src/front/page/library/tab_page/read_pile_tab.dart';
 
 class LibraryPage extends ConsumerStatefulWidget {
   const LibraryPage({super.key});
@@ -39,14 +41,6 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
 
   _onSearchChanged() {
     searchResultsList();
-  }
-
-  String textLength(text, length) {
-    if (text.length > length) {
-      return text.substring(0, length) + "...";
-    } else {
-      return text;
-    }
   }
 
   searchResultsList() {
@@ -119,9 +113,7 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
               SizedBox(
                 width: 50,
                 child: PopupMenuButton(
-                  icon: OwnIcon(
-                      iconColor: Theme.of(context).colorScheme.primary,
-                      iconName: "filter_right"),
+                  icon: OwnIcon(iconColor: Theme.of(context).colorScheme.primary, iconName: "filter_right"),
                   onSelected: (String result) {
                     setState(() {
                       changeOrder(result);
@@ -131,11 +123,9 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  shadowColor:
-                      Theme.of(context).colorScheme.primary.withOpacity(0.5),
+                  shadowColor: Theme.of(context).colorScheme.primary.withOpacity(0.5),
                   color: Theme.of(context).colorScheme.onPrimary,
-                  itemBuilder: (BuildContext context) =>
-                      <PopupMenuEntry<String>>[
+                  itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
                     PopupMenuItem<String>(
                       value: 'manga',
                       child: SizedBox(
@@ -143,10 +133,7 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            if (selectedOrder == 'manga')
-                              const Icon(Icons.check)
-                            else
-                              const Padding(padding: EdgeInsets.only(right: 0)),
+                            if (selectedOrder == 'manga') const Icon(Icons.check) else const Padding(padding: EdgeInsets.only(right: 0)),
                             const Text(
                               'Ordre Alphabétique',
                               textAlign: TextAlign.right,
@@ -162,11 +149,7 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              if (selectedOrder == 'releaseDate')
-                                const Icon(Icons.check)
-                              else
-                                const Padding(
-                                    padding: EdgeInsets.only(right: 0)),
+                              if (selectedOrder == 'releaseDate') const Icon(Icons.check) else const Padding(padding: EdgeInsets.only(right: 0)),
                               const Text('Dernière Sortie'),
                             ],
                           ),
@@ -179,8 +162,7 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
           bottom: TabBar(
               mouseCursor: SystemMouseCursors.click,
               indicatorSize: TabBarIndicatorSize.label,
-              indicatorPadding:
-                  const EdgeInsets.symmetric(vertical: 5, horizontal: 0),
+              indicatorPadding: const EdgeInsets.symmetric(vertical: 5, horizontal: 0),
               indicatorWeight: 1,
               indicator: BoxDecoration(
                 borderRadius: BorderRadius.circular(360),
@@ -223,128 +205,10 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
         body: TabBarView(
           physics: const NeverScrollableScrollPhysics(),
           children: [
-            const Padding(
-              padding: EdgeInsets.all(10),
-              child: Column(
-                children: [
-                  Text('Tab1'),
-                  Text('data'),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(10),
-              child: Column(
-                children: [
-                  const MyTomeNumberShow(tomeTotal: "10", editionTotal: "5"),
-                  Expanded(
-                    child: ListView.builder(
-                      itemCount: _resultsList.length,
-                      itemBuilder: (BuildContext context, int index) {
-                        return Column(
-                          children: [
-                            ListTile(
-                              title: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Row(
-                                    children: [
-                                      Padding(
-                                        padding:
-                                            const EdgeInsets.only(right: 10),
-                                        child: SizedBox(
-                                          width: 50,
-                                          child: Image.network(
-                                            'https://cdn.statically.io/gh/CreeperFarm/AppManga/main/${_resultsList[index]['img']}.jpg',
-                                            width: 50,
-                                          ),
-                                        ),
-                                      ),
-                                      Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            textLength(
-                                                _resultsList[index]['manga'],
-                                                27),
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 17,
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .primary,
-                                            ),
-                                          ),
-                                          Text(
-                                            textLength(
-                                                _resultsList[index]['author'],
-                                                40),
-                                            style: TextStyle(
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .primary,
-                                              fontSize: 14,
-                                            ),
-                                          ),
-                                          Text(
-                                            _resultsList[index]['releaseDate'],
-                                            style: TextStyle(
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .primary,
-                                              fontSize: 14,
-                                            ),
-                                          )
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                  Icon(
-                                    Icons.arrow_forward_ios,
-                                    color:
-                                        Theme.of(context).colorScheme.primary,
-                                  ),
-                                ],
-                              ),
-                              onTap: () {
-                                context.go(
-                                    '/library/series/${_resultsList[index]['manga']}');
-                              },
-                            ),
-                            MyLine(
-                              width: MediaQuery.of(context).size.width,
-                              vertical: 0,
-                            ),
-                          ],
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const Padding(
-              padding: EdgeInsets.all(10),
-              child: Column(
-                children: [
-                  MyTomeNumberShow(tomeTotal: "10", editionTotal: "5"),
-                  Text('Tab3'),
-                  Text('data'),
-                ],
-              ),
-            ),
-            const Padding(
-              padding: EdgeInsets.all(10),
-              child: Column(
-                children: [
-                  MyTomeNumberShow(tomeTotal: "10", editionTotal: "5"),
-                  Text('Tab4'),
-                  Text('data'),
-                ],
-              ),
-            ),
+            ReadPileTab(),
+            CollectionTab(),
+            CompleteLibTab(),
+            EnvyTab(),
           ],
         ),
         floatingActionButton: Container(

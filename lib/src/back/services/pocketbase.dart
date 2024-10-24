@@ -277,13 +277,17 @@ class PocketBaseConnector {
     return _pocketBase.collection(collectionId).getList().then((value) => value.items);
   }
 
+  Future<List<RecordModel>> getCollectionFullList(String collectionId) {
+    return _pocketBase.collection(collectionId).getFullList();
+  }
+
   // Get the data from a collection with a filter
   Future<List<RecordModel>> getCollectionDataWithFilter(String collectionId, String query) {
     return _pocketBase
         .collection(collectionId)
         .getList(
           page: 1,
-          perPage: 250,
+          perPage: 500,
           filter: query,
         )
         .then((value) => value.items);
@@ -329,8 +333,6 @@ class PocketBaseConnector {
     try {
       // Get the data from the collection fav (The API send only the one that are created by the user)
       final result = await _pocketBase.collection('followed').getFullList();
-
-      print(result);
       // Get the number of manga fav by the user
       count = result.length;
     } catch (e) {

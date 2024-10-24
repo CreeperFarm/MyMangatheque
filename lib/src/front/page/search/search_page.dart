@@ -1,8 +1,11 @@
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mymangatheque/src/back/provider/search_filter_provider.dart';
+import 'package:mymangatheque/src/back/services/pocketbase.dart';
 import 'package:mymangatheque/src/const/own_icon.dart';
 import 'package:mymangatheque/src/front/components/my_line.dart';
 
@@ -18,19 +21,15 @@ class _SearchPageState extends ConsumerState<SearchPage> {
   List _resultsList = [];
   final TextEditingController _searchController = TextEditingController();
 
-  void changeFilter(String filter) {
-    ref.read(searchFilterProvider.notifier).changeSearchFilter(filter);
-  }
-
   getClientStream() async {
+    var data = await PocketBaseConnector().getCollectionFullList('series');
     /*var data = await FirebaseFirestore.instance
         .collection('manga')
         .orderBy(ref.watch(searchFilterProvider))
-        .get();
-
+        .get();*/
     setState(() {
-      _allResults = data.docs;
-    });*/
+      _allResults = data;
+    });
   }
 
   _onSearchChanged() {
@@ -48,14 +47,14 @@ class _SearchPageState extends ConsumerState<SearchPage> {
   searchResultsList() {
     getClientStream();
     var showResults = [];
-    var filter = ref.watch(searchFilterProvider);
+    //var filter = ref.watch(searchFilterProvider); // TODO: Create searchFilterProvider
 
     if (_searchController.text != "") {
       for (var clientSnapshot in _allResults) {
-        var name = clientSnapshot[filter].toString().toLowerCase();
+        var name = json.decode(clientSnapshot.toString())["title"].toString().toLowerCase();
 
         if (name.contains(_searchController.text.toLowerCase())) {
-          showResults.add(clientSnapshot);
+          showResults.add(json.decode(clientSnapshot.toString()));
         }
       }
     } else {
@@ -111,20 +110,17 @@ class _SearchPageState extends ConsumerState<SearchPage> {
               ),
             ),
             PopupMenuButton<String>(
-              icon: OwnIcon(
-                  iconColor: Theme.of(context).colorScheme.primary,
-                  iconName: "filter_right"),
+              icon: OwnIcon(iconColor: Theme.of(context).colorScheme.primary, iconName: "filter_right"),
               onSelected: (String result) {
                 setState(() {
-                  changeFilter(result);
+                  //changeFilter(result); // TODO: Create changeFilter function
                 });
               },
               offset: const Offset(0, 50),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
               ),
-              shadowColor:
-                  Theme.of(context).colorScheme.primary.withOpacity(0.5),
+              shadowColor: Theme.of(context).colorScheme.primary.withOpacity(0.5),
               color: Theme.of(context).colorScheme.onPrimary,
               itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
                 PopupMenuItem<String>(
@@ -132,10 +128,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      if (selectedFilter == 'manga')
-                        const Icon(Icons.check)
-                      else
-                        const Padding(padding: EdgeInsets.only(right: 0)),
+                      if (selectedFilter == 'manga') const Icon(Icons.check) else const Padding(padding: EdgeInsets.only(right: 0)),
                       const Text('Manga'),
                     ],
                   ),
@@ -145,10 +138,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        if (selectedFilter == 'editor')
-                          const Icon(Icons.check)
-                        else
-                          const Padding(padding: EdgeInsets.only(right: 0)),
+                        if (selectedFilter == 'editor') const Icon(Icons.check) else const Padding(padding: EdgeInsets.only(right: 0)),
                         const Text('Éditeur'),
                       ],
                     )),
@@ -157,10 +147,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      if (selectedFilter == 'author')
-                        const Icon(Icons.check)
-                      else
-                        const Padding(padding: EdgeInsets.only(right: 0)),
+                      if (selectedFilter == 'author') const Icon(Icons.check) else const Padding(padding: EdgeInsets.only(right: 0)),
                       const Text('Auteur'),
                     ],
                   ),
@@ -228,8 +215,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                     ],
                   ),
                   onTap: () {
-                    context
-                        .go('/search/series/${_resultsList[index]['manga']}');
+                    context.go('/search/series/${_resultsList[index]['manga']}');
                   },
                 ),
                 MyLine(
@@ -283,8 +269,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                     ],
                   ),
                   onTap: () {
-                    context
-                        .go('/search/author/${_resultsList[index]['author']}');
+                    context.go('/search/author/${_resultsList[index]['author']}');
                   },
                 ),
                 MyLine(
@@ -338,8 +323,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                     ],
                   ),
                   onTap: () {
-                    context
-                        .go('/search/editor/${_resultsList[index]['editor']}');
+                    context.go('/search/editor/${_resultsList[index]['editor']}');
                   },
                 ),
                 MyLine(
