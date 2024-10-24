@@ -24,8 +24,11 @@ class MyTextField extends StatelessWidget {
         validator: (value) {
           if (value == null || value.isEmpty) {
             return errorMessage;
+          } else if (value.length < 6 && obscureText) {
+            return "Votre mot de passe doit contenir au moins 6 caractères!";
+          } else {
+            return null;
           }
-          return null;
         },
         decoration: InputDecoration(
           errorBorder: OutlineInputBorder(

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:mymangatheque/src/back/services/pocketbase.dart';
 import 'package:mymangatheque/src/front/components/my_button.dart';
 import 'package:mymangatheque/src/front/components/my_scroll_column.dart';
 import 'package:mymangatheque/src/front/components/my_textfield.dart';
+import 'package:mymangatheque/src/function/show_message_function.dart';
 
 // ignore_for_file: use_build_context_synchronously
 
@@ -67,6 +69,15 @@ class _ModifyPasswordPageState extends State<ModifyPasswordPage> {
         showMessage(errorText);
       }
     }*/
+    try {
+      await PocketBaseConnector()
+          .modifyPassword(PocketBaseConnector().getConnectedUser()!.email, oldPasswordController.text, newPasswordController.text, context);
+      Navigator.pop(context);
+    } catch (e) {
+      Navigator.pop(context);
+      errorText = e.toString();
+      showMessage(errorText, context);
+    }
   }
 
   @override
@@ -76,59 +87,97 @@ class _ModifyPasswordPageState extends State<ModifyPasswordPage> {
         title: const Text('Modification du mot de passe'),
         elevation: 0,
       ),
-      body: Center(
-        child: MyScrollColumn(
-          scrollPadding: const EdgeInsets.symmetric(horizontal: 10),
-          children: [
-            SvgPicture.asset('assets/icons/locker.svg',
-                height: 200,
-                colorFilter: ColorFilter.mode(
-                    Theme.of(context).colorScheme.primary, BlendMode.srcIn)),
-            const SizedBox(height: 11),
-            Form(
-              key: _formKey,
-              child: Column(
-                children: [
-                  MyTextField(
-                    controller: oldPasswordController,
-                    labelText: "Ancien mot de passe",
-                    obscureText: true,
-                    errorMessage: "Veuillez enter votre ancien mot de passe!",
+      body: MyScrollColumn(
+        scrollPadding: const EdgeInsets.symmetric(horizontal: 10),
+        children: [
+          Center(
+            child: Column(
+              children: [
+                SvgPicture.asset('assets/icons/locker.svg',
+                    height: 200, colorFilter: ColorFilter.mode(Theme.of(context).colorScheme.primary, BlendMode.srcIn)),
+                const SizedBox(height: 11),
+                Text(
+                  "Modification du mot de passe",
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.primary,
+                    fontSize: 20,
                   ),
-                  const SizedBox(height: 11),
-                  MyTextField(
-                    controller: newPasswordController,
-                    labelText: "Nouveau mot de passe",
-                    obscureText: true,
-                    errorMessage: "Veuillez enter votre nouveau mot de passe!",
+                ),
+                const SizedBox(height: 11),
+                Form(
+                  key: _formKey,
+                  child: Column(
+                    children: [
+                      MyTextField(
+                        controller: oldPasswordController,
+                        labelText: "Ancien mot de passe",
+                        obscureText: true,
+                        errorMessage: "Veuillez entrer votre ancien mot de passe!",
+                      ),
+                      const SizedBox(height: 11),
+                      MyTextField(
+                        controller: newPasswordController,
+                        labelText: "Nouveau mot de passe",
+                        obscureText: true,
+                        errorMessage: "Veuillez entrer votre nouveau mot de passe!",
+                      ),
+                      const SizedBox(height: 11),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 5.0),
+                        child: TextFormField(
+                          controller: newPasswordVerifierController,
+                          obscureText: true,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return "Veuillez entrer votre confirmer votre nouveau mot de passe!";
+                            } else if (value.length < 6) {
+                              return "Votre mot de passe doit contenir au moins 6 caractères!";
+                            } else if (value != newPasswordController.text) {
+                              return "Vos mots de passe ne correspondent pas!";
+                            } else {
+                              return null;
+                            }
+                          },
+                          decoration: InputDecoration(
+                            errorBorder: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                color: Theme.of(context).colorScheme.error,
+                              ),
+                            ),
+                            border: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                            ),
+                            filled: true,
+                            labelStyle: TextStyle(
+                              color: Theme.of(context).colorScheme.onPrimary,
+                            ),
+                            hintText: "Confirmer le mot de passe",
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 11),
-                  MyTextField(
-                    controller: newPasswordController,
-                    labelText: "Confirmer le mot de passe",
-                    obscureText: true,
-                    errorMessage: "Veuillez enter votre nouveau mot de passe!",
-                  ),
-                ],
-              ),
+                ),
+                const SizedBox(height: 11),
+                MyButton(
+                  text: "Changer le mot de passe",
+                  onTap: () {
+                    // Verify if all field is complete
+                    if (_formKey.currentState!.validate()) {
+                      if (newPasswordController.text != newPasswordVerifierController.text) {
+                        errorText = "Vos mots de passe ne correspondent pas";
+                      } else {
+                        passwordModify();
+                      }
+                    }
+                  },
+                ),
+              ],
             ),
-            const SizedBox(height: 11),
-            MyButton(
-              text: "Changer le mot de passe",
-              onTap: () => {
-                // Verify if all field is complete
-                if (_formKey.currentState!.validate())
-                  {
-                    if (newPasswordController.text !=
-                        newPasswordVerifierController.text)
-                      {errorText = "Vos mots de passe ne correspondent pas"}
-                    else
-                      {signIn()}
-                  }
-              },
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
