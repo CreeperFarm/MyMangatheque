@@ -19,6 +19,7 @@ export 'package:mymangatheque/src/models/user.dart';
 
 class PocketBaseConnector {
   late PocketBase _pocketBase;
+  final String appVersion = '0.0.1 - bêta';
 
   Future<void> init() async {
     final storage = getIt<LocalStorage>();
@@ -272,13 +273,25 @@ class PocketBaseConnector {
     return _pocketBase.collection(collectionId).delete(entryId);
   }
 
+  // Get the data from one field of a collection
+  Future<List<RecordModel>> getOne(String collectionId, String recordId) {
+    return _pocketBase.collection(collectionId).getOne(recordId).then((value) => [value]);
+  }
+
   // Get the data from a collection
   Future<List<RecordModel>> getCollectionData(String collectionId) {
     return _pocketBase.collection(collectionId).getList().then((value) => value.items);
   }
 
+  // Get all the data from a collection
   Future<List<RecordModel>> getCollectionFullList(String collectionId) {
     return _pocketBase.collection(collectionId).getFullList();
+  }
+
+  Future<List<RecordModel>> getCollectionFullListOrder(String collectionId, String order) {
+    return _pocketBase.collection(collectionId).getFullList(
+          sort: order,
+        );
   }
 
   // Get the data from a collection with a filter
@@ -311,12 +324,14 @@ class PocketBaseConnector {
     return subject.stream;
   }
 
-  Future<int> getNumberOwnedManga() async {
+  Future<int> getNumberOwnedManga(String id) async {
     int count = 0;
 
     try {
       // Get the data from the collection owned (The API send only the one that are created by the user)
-      final result = await _pocketBase.collection('owned').getFullList();
+      final result = await _pocketBase.collection('owned').getFullList(
+            filter: "user='$id'",
+          );
 
       // Get the number of manga owned by the user
       count = result.length;
@@ -327,12 +342,14 @@ class PocketBaseConnector {
     return count; // Return the number of manga owned by the user
   }
 
-  Future<int> getNumberFavSerie() async {
+  Future<int> getNumberFavSerie(String id) async {
     int count = 0;
 
     try {
       // Get the data from the collection fav (The API send only the one that are created by the user)
-      final result = await _pocketBase.collection('followed').getFullList();
+      final result = await _pocketBase.collection('followed').getFullList(
+            filter: "user='$id'",
+          );
       // Get the number of manga fav by the user
       count = result.length;
     } catch (e) {
@@ -345,6 +362,11 @@ class PocketBaseConnector {
   // Listen to the changes of a collection
   Stream<RecordSubscriptionEvent> listenToCollectionEvents(String collectionId) {
     return _pocketBase.collection(collectionId).listen();
+  }
+
+  // Get the app version
+  String getAppVersion() {
+    return appVersion;
   }
 
   String get serverUrl => _pocketBase.baseUrl;

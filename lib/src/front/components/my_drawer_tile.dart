@@ -1,12 +1,14 @@
-import 'package:mymangatheque/src/const/own_icon.dart';
-import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:mymangatheque/src/const/own_icon.dart';
 
 class MyDrawerTile extends StatelessWidget {
   final String title;
   final String icon;
   final String goTo;
-  const MyDrawerTile({required this.title, required this.icon, required this.goTo, super.key});
+  final bool pop;
+
+  MyDrawerTile({required this.title, required this.icon, required this.goTo, required this.pop, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +19,9 @@ class MyDrawerTile extends StatelessWidget {
         iconColor: Theme.of(context).colorScheme.primary,
       ),
       onTap: () {
-        Navigator.pop(context);
+        if (pop) {
+          Navigator.pop(context);
+        } else {}
         context.go(goTo);
       },
     );

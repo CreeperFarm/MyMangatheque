@@ -22,7 +22,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
   final TextEditingController _searchController = TextEditingController();
 
   getClientStream() async {
-    var data = await PocketBaseConnector().getCollectionFullList('series');
+    var data = await PocketBaseConnector().getCollectionFullListOrder('series', 'title');
     /*var data = await FirebaseFirestore.instance
         .collection('manga')
         .orderBy(ref.watch(searchFilterProvider))
@@ -30,6 +30,19 @@ class _SearchPageState extends ConsumerState<SearchPage> {
     setState(() {
       _allResults = data;
     });
+  }
+
+  Future<String> getAuthorName(String authorId) async {
+    var author = await PocketBaseConnector().getOne('authors', authorId);
+    return json.decode(author[0].toString())['name'].toString();
+  }
+
+  Future<String> getAllAuthorsName(List authorsId) async {
+    var authors = [];
+    for (var authorId in authorsId) {
+      authors.add(await getAuthorName(authorId));
+    }
+    return authors.join(" et ");
   }
 
   _onSearchChanged() {
@@ -45,16 +58,14 @@ class _SearchPageState extends ConsumerState<SearchPage> {
   }
 
   searchResultsList() {
-    getClientStream();
     var showResults = [];
     //var filter = ref.watch(searchFilterProvider); // TODO: Create searchFilterProvider
 
     if (_searchController.text != "") {
       for (var clientSnapshot in _allResults) {
         var name = json.decode(clientSnapshot.toString())["title"].toString().toLowerCase();
-
         if (name.contains(_searchController.text.toLowerCase())) {
-          showResults.add(json.decode(clientSnapshot.toString()));
+          showResults.add(clientSnapshot);
         }
       }
     } else {
@@ -157,184 +168,216 @@ class _SearchPageState extends ConsumerState<SearchPage> {
           ],
         ),
       ),
-      body: ListView.builder(
-        itemCount: _resultsList.length,
-        itemBuilder: (context, index) {
-          if (selectedFilter == 'manga') {
-            return Column(
-              children: [
-                ListTile(
-                  title: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
+      body: (_searchController.text.toLowerCase() == 'bad apple')
+          ? Center(
+              child: Text('Bad Apple'),
+            ) // TODO: Add the bad apple video
+          : (_resultsList.isEmpty)
+              ? Center(
+                  child: Text(
+                  'Aucun résultat',
+                  style: TextStyle(fontSize: 20, color: Theme.of(context).colorScheme.primary),
+                ))
+              : ListView.builder(
+                  itemCount: _resultsList.length,
+                  itemBuilder: (context, index) {
+                    if (selectedFilter == 'manga') {
+                      return FutureBuilder(
+                        future: getAllAuthorsName(json.decode(_resultsList[index].toString())['authors']),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState == ConnectionState.waiting) {
+                            return const Center(
+                              child: Padding(
+                                padding: EdgeInsets.all(8.0),
+                                child: CircularProgressIndicator(),
+                              ),
+                            );
+                          } else if (snapshot.hasError) {
+                            return const Center(
+                              child: Text('Error'),
+                            );
+                          } else {
+                            return Column(
+                              children: [
+                                ListTile(
+                                  title: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Padding(
+                                            padding: const EdgeInsets.only(right: 10),
+                                            child: SizedBox(
+                                              width: 50,
+                                              child: Image.network(
+                                                'https://api.mymangatheque.com/api/files/utbujxtz8wtq0ar/${json.decode(_resultsList[index].toString())['id'].toString()}/${json.decode(_resultsList[index].toString())['image'].toString()}',
+                                                width: 50,
+                                              ),
+                                            ),
+                                          ),
+                                          Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                textLength(json.decode(_resultsList[index].toString())['title'], 30),
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 17,
+                                                  color: Theme.of(context).colorScheme.primary,
+                                                ),
+                                              ),
+                                              // json.decode(_resultsList[index].toString())['author'].toString()
+
+                                              Text(
+                                                textLength(snapshot.data, 35),
+                                                style: TextStyle(
+                                                  color: Theme.of(context).colorScheme.primary,
+                                                  fontSize: 14,
+                                                ),
+                                              ),
+                                              Text(
+                                                DateTime.parse(json.decode(_resultsList[index].toString())['first_publication']).year.toString(),
+                                                style: TextStyle(
+                                                  color: Theme.of(context).colorScheme.primary,
+                                                  fontSize: 14,
+                                                ),
+                                              )
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                      Icon(
+                                        Icons.arrow_forward_ios,
+                                        color: Theme.of(context).colorScheme.primary,
+                                      ),
+                                    ],
+                                  ),
+                                  onTap: () {
+                                    context.go('/search/series/${json.decode(_resultsList[index].toString())['manga']}');
+                                  },
+                                ),
+                                MyLine(
+                                  width: MediaQuery.of(context).size.width,
+                                  vertical: 0,
+                                ),
+                              ],
+                            );
+                          }
+                        },
+                      );
+                    } else if (selectedFilter == 'author') {
+                      return Column(
                         children: [
-                          Padding(
-                            padding: const EdgeInsets.only(right: 10),
-                            child: SizedBox(
-                              width: 50,
-                              child: Image.network(
-                                'https://cdn.statically.io/gh/CreeperFarm/AppManga/main/${_resultsList[index]['img']}.jpg',
-                                width: 50,
-                              ),
+                          ListTile(
+                            title: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Row(
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.only(right: 10),
+                                      child: Image.network(
+                                        //TODO: Change the URL just after the 'api/files/' part to match with the real one
+                                        'https://api.mymangatheque.com/api/files/utbujxtz8wtq0ar/${json.decode(_resultsList[index].toString())['id'].toString()}/${json.decode(_resultsList[index].toString())['image'].toString()}',
+                                        width: 50,
+                                      ),
+                                    ),
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          textLength(json.decode(_resultsList[index].toString())['author'], 27),
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 17,
+                                            color: Theme.of(context).colorScheme.primary,
+                                          ),
+                                        ),
+                                        Text(
+                                          textLength(json.decode(_resultsList[index].toString())['manga'], 40),
+                                          style: TextStyle(
+                                            color: Theme.of(context).colorScheme.primary,
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                                Icon(
+                                  Icons.arrow_forward_ios,
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
+                              ],
                             ),
+                            onTap: () {
+                              context.go('/search/author/${json.decode(_resultsList[index].toString())['author']}');
+                            },
                           ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                textLength(_resultsList[index]['manga'], 27),
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 17,
-                                  color: Theme.of(context).colorScheme.primary,
-                                ),
-                              ),
-                              Text(
-                                textLength(_resultsList[index]['author'], 40),
-                                style: TextStyle(
-                                  color: Theme.of(context).colorScheme.primary,
-                                  fontSize: 14,
-                                ),
-                              ),
-                              Text(
-                                _resultsList[index]['releaseDate'],
-                                style: TextStyle(
-                                  color: Theme.of(context).colorScheme.primary,
-                                  fontSize: 14,
-                                ),
-                              )
-                            ],
+                          MyLine(
+                            width: MediaQuery.of(context).size.width,
+                            vertical: 0,
                           ),
                         ],
-                      ),
-                      Icon(
-                        Icons.arrow_forward_ios,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                    ],
-                  ),
-                  onTap: () {
-                    context.go('/search/series/${_resultsList[index]['manga']}');
-                  },
-                ),
-                MyLine(
-                  width: MediaQuery.of(context).size.width,
-                  vertical: 0,
-                ),
-              ],
-            );
-          } else if (selectedFilter == 'author') {
-            return Column(
-              children: [
-                ListTile(
-                  title: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
+                      );
+                    } else {
+                      return Column(
                         children: [
-                          Padding(
-                            padding: const EdgeInsets.only(right: 10),
-                            child: Image.network(
-                              'https://cdn.statically.io/gh/CreeperFarm/AppManga/main/author/${_resultsList[index]['author']}.jpg',
-                              width: 50,
+                          ListTile(
+                            title: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Row(
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.only(right: 10),
+                                      child: Image.network(
+                                        //TODO: Change the URL just after the 'api/files/' part to match with the real one
+                                        'https://api.mymangatheque.com/api/files/utbujxtz8wtq0ar/${json.decode(_resultsList[index].toString())['id'].toString()}/${json.decode(_resultsList[index].toString())['image'].toString()}',
+                                        width: 50,
+                                      ),
+                                    ),
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          textLength(json.decode(_resultsList[index].toString())['editor'], 27),
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 17,
+                                            color: Theme.of(context).colorScheme.primary,
+                                          ),
+                                        ),
+                                        Text(
+                                          textLength(json.decode(_resultsList[index].toString())['author'], 40),
+                                          style: TextStyle(
+                                            color: Theme.of(context).colorScheme.primary,
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                                Icon(
+                                  Icons.arrow_forward_ios,
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
+                              ],
                             ),
+                            onTap: () {
+                              context.go('/search/editor/${json.decode(_resultsList[index].toString())['editor']}');
+                            },
                           ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                textLength(_resultsList[index]['author'], 27),
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 17,
-                                  color: Theme.of(context).colorScheme.primary,
-                                ),
-                              ),
-                              Text(
-                                textLength(_resultsList[index]['manga'], 40),
-                                style: TextStyle(
-                                  color: Theme.of(context).colorScheme.primary,
-                                  fontSize: 14,
-                                ),
-                              ),
-                            ],
+                          MyLine(
+                            width: MediaQuery.of(context).size.width,
+                            vertical: 0,
                           ),
                         ],
-                      ),
-                      Icon(
-                        Icons.arrow_forward_ios,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                    ],
-                  ),
-                  onTap: () {
-                    context.go('/search/author/${_resultsList[index]['author']}');
+                      );
+                    }
                   },
                 ),
-                MyLine(
-                  width: MediaQuery.of(context).size.width,
-                  vertical: 0,
-                ),
-              ],
-            );
-          } else {
-            return Column(
-              children: [
-                ListTile(
-                  title: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.only(right: 10),
-                            child: Image.network(
-                              'https://cdn.statically.io/gh/CreeperFarm/AppManga/main/${_resultsList[index]['img']}.jpg',
-                              width: 50,
-                            ),
-                          ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                textLength(_resultsList[index]['editor'], 27),
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 17,
-                                  color: Theme.of(context).colorScheme.primary,
-                                ),
-                              ),
-                              Text(
-                                textLength(_resultsList[index]['author'], 40),
-                                style: TextStyle(
-                                  color: Theme.of(context).colorScheme.primary,
-                                  fontSize: 14,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                      Icon(
-                        Icons.arrow_forward_ios,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                    ],
-                  ),
-                  onTap: () {
-                    context.go('/search/editor/${_resultsList[index]['editor']}');
-                  },
-                ),
-                MyLine(
-                  width: MediaQuery.of(context).size.width,
-                  vertical: 0,
-                ),
-              ],
-            );
-          }
-        },
-      ),
     );
   }
 }

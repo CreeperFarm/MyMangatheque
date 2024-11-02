@@ -24,11 +24,10 @@ class _SignInPageState extends State<SignInPage> {
 
   Future<User?> signIn(context) async {
     try {
-      final userData = await connector.loginWithEmail(
-          emailController.text, passwordController.text);
-      print(userData);
+      final userData = await connector.loginWithEmail(emailController.text, passwordController.text);
+      debugPrint(userData.toString());
 
-      print('connector id ${connector.getConnectedUser()!.id}');
+      debugPrint('connector id ${connector.getConnectedUser()!.id}');
 
       context.go('/profile');
       return userData;
@@ -62,169 +61,156 @@ class _SignInPageState extends State<SignInPage> {
         ),
         elevation: 0.0,
       ),
-      body: MyScrollColumn(
-          scrollPadding: const EdgeInsets.symmetric(horizontal: 20.0),
-          children: [
-            Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+      body: MyScrollColumn(scrollPadding: const EdgeInsets.symmetric(horizontal: 20.0), children: [
+        Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const SizedBox(height: 10),
+
+              // Locker Icon
+              SvgPicture.asset('assets/icons/locker.svg',
+                  height: 100, colorFilter: ColorFilter.mode(Theme.of(context).colorScheme.primary, BlendMode.srcIn)),
+
+              const SizedBox(height: 15),
+
+              Text(
+                "Connectez-vous pour pouvoir sauvegarder vos mangas favoris et dans votre collection et vous éviter les doublons.",
+                textAlign: TextAlign.center,
+                style: GoogleFonts.poppins(
+                  color: Theme.of(context).colorScheme.primary,
+                  fontSize: 17,
+                ),
+              ),
+
+              const SizedBox(height: 15),
+
+              Column(
                 children: [
-                  const SizedBox(height: 10),
-
-                  // Locker Icon
-                  SvgPicture.asset('assets/icons/locker.svg',
-                      height: 100,
-                      colorFilter: ColorFilter.mode(
-                          Theme.of(context).colorScheme.primary,
-                          BlendMode.srcIn)),
+                  // Email field
+                  MyTextField(
+                    controller: emailController,
+                    labelText: "Votre Email",
+                    obscureText: false,
+                    errorMessage: "Veuillez enter votre email!",
+                  ),
 
                   const SizedBox(height: 15),
 
-                  Text(
-                    "Connectez-vous pour pouvoir sauvegarder vos mangas favoris et dans votre collection et vous éviter les doublons.",
-                    textAlign: TextAlign.center,
+                  // Password field
+                  MyTextField(
+                    controller: passwordController,
+                    labelText: "Votre Mot de passe",
+                    obscureText: true,
+                    errorMessage: "Veuillez entrer votre mot de passe!",
+                  ),
+                ],
+              ),
+              const SizedBox(height: 5),
+              SizedBox(
+                width: MediaQuery.of(context).size.width,
+                child: TextButton(
+                  onPressed: () => GoRouter.of(context).go('/profile/forgot_password'),
+                  style: const ButtonStyle(
+                    alignment: Alignment.centerRight,
+                    padding: WidgetStatePropertyAll(EdgeInsets.all(0)),
+                  ),
+                  child: Text(
+                    "Mot de passe oublié ?",
+                    textAlign: TextAlign.right,
                     style: GoogleFonts.poppins(
+                      fontWeight: FontWeight.bold,
                       color: Theme.of(context).colorScheme.primary,
-                      fontSize: 17,
                     ),
                   ),
+                ),
+              ),
 
-                  const SizedBox(height: 15),
+              // Display sign in button
+              MyButton(
+                text: "Se connecter",
+                onTap: () => connector.loginWithEmail(emailController.text, passwordController.text).then((value) {
+                  context.go('/profile');
+                }).catchError((e) {
+                  showMessage(e.toString(), context);
+                }),
+              ),
+              const SizedBox(height: 35),
 
-                  Column(
-                    children: [
-                      // Email field
-                      MyTextField(
-                        controller: emailController,
-                        labelText: "Votre Email",
-                        obscureText: false,
-                        errorMessage: "Veuillez enter votre email!",
-                      ),
-
-                      const SizedBox(height: 15),
-
-                      // Password field
-                      MyTextField(
-                        controller: passwordController,
-                        labelText: "Votre Mot de passe",
-                        obscureText: true,
-                        errorMessage: "Veuillez entrer votre mot de passe!",
-                      ),
-                    ],
+              // Separation between login form and other way to connect
+              Row(
+                children: [
+                  Expanded(
+                    child: Divider(
+                      thickness: 0.5,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
                   ),
-                  const SizedBox(height: 5),
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width,
-                    child: TextButton(
-                      onPressed: () =>
-                          GoRouter.of(context).go('/profile/forgot_password'),
-                      style: const ButtonStyle(
-                        alignment: Alignment.centerRight,
-                        padding: WidgetStatePropertyAll(EdgeInsets.all(0)),
-                      ),
-                      child: Text(
-                        "Mot de passe oublié ?",
-                        textAlign: TextAlign.right,
-                        style: GoogleFonts.poppins(
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Text(
+                      "Ou continuer avec",
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.primary,
                       ),
                     ),
                   ),
-
-                  // Display sign in button
-                  MyButton(
-                    text: "Se connecter",
-                    onTap: () => connector
-                        .loginWithEmail(
-                            emailController.text, passwordController.text)
-                        .then((value) {
-                      context.go('/profile');
-                    }).catchError((e) {
-                      showMessage(e.toString(), context);
-                    }),
-                  ),
-                  const SizedBox(height: 35),
-
-                  // Separation between login form and other way to connect
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Divider(
-                          thickness: 0.5,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                        child: Text(
-                          "Ou continuer avec",
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        child: Divider(
-                          thickness: 0.5,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 15),
-
-                  // Google + ??? sign in button
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      // Google Button
-                      SquareTile(
-                        imagePath: 'assets/images/google.png',
-                        onTap: () => {
-                          PocketBaseConnector().signInWithGoogle(context),
-                          context.go('/profile'),
-                        },
-                      ),
-
-                      // const SizedBox(width: 25),
-
-                      // ??? Button
-                    ],
-                  ),
-
-                  const SizedBox(height: 15),
-
-                  // Not a Member ? Register now
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          "Pas encore de compte ?",
-                          style: TextStyle(
-                              color: Theme.of(context).colorScheme.primary),
-                        ),
-                        const SizedBox(width: 4),
-                        TextButton(
-                            onPressed: () =>
-                                GoRouter.of(context).go('/profile/signup'),
-                            child: const Text(
-                              "Créer en un maintenant",
-                              style: TextStyle(
-                                  color: Colors.blue,
-                                  fontWeight: FontWeight.bold),
-                            )),
-                      ],
+                  Expanded(
+                    child: Divider(
+                      thickness: 0.5,
+                      color: Theme.of(context).colorScheme.primary,
                     ),
                   ),
                 ],
               ),
-            ),
-          ]),
+
+              const SizedBox(height: 15),
+
+              // Google + ??? sign in button
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Google Button
+                  SquareTile(
+                    imagePath: 'assets/images/google.png',
+                    onTap: () => {
+                      PocketBaseConnector().signInWithGoogle(context),
+                      context.go('/profile'),
+                    },
+                  ),
+
+                  // const SizedBox(width: 25),
+
+                  // ??? Button
+                ],
+              ),
+
+              const SizedBox(height: 15),
+
+              // Not a Member ? Register now
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      "Pas encore de compte ?",
+                      style: TextStyle(color: Theme.of(context).colorScheme.primary),
+                    ),
+                    const SizedBox(width: 4),
+                    TextButton(
+                        onPressed: () => GoRouter.of(context).go('/profile/signup'),
+                        child: const Text(
+                          "Créer en un maintenant",
+                          style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold),
+                        )),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ]),
     );
   }
 }

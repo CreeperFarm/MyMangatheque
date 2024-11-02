@@ -2,12 +2,14 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:glass_kit/glass_kit.dart';
 import 'package:go_router/go_router.dart';
 import 'package:keyboard_detection/keyboard_detection.dart';
 import 'package:mymangatheque/src/const/own_icon.dart';
 import 'package:mymangatheque/src/const/theme/light_mode.dart';
 import 'package:mymangatheque/src/front/components/my_drawer.dart';
+import 'package:mymangatheque/src/front/components/my_drawer_tile.dart';
 import 'package:url_launcher/link.dart';
 
 class MainWrapper extends ConsumerStatefulWidget {
@@ -24,13 +26,7 @@ class MainWrapper extends ConsumerStatefulWidget {
 
 List<String> navIcons = ["home", "collection", "search", "calendar", "user"];
 
-List<String> navTitle = [
-  "Accueil",
-  "Collection",
-  "Recherche",
-  "Planning",
-  "Profil"
-];
+List<String> navTitle = ["Accueil", "Collection", "Recherche", "Planning", "Profil"];
 
 List<String> navRoute = ["/", "/library", "/search", "/planning", "/profile"];
 
@@ -103,48 +99,102 @@ class _MainWrapperState extends ConsumerState<MainWrapper> {
         builder: (context, constraints) {
           if (constraints.maxWidth > 1200) {
             return Scaffold(
-                body: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                MyDrawer(
-                  navIcons: navIcons,
-                  navTitle: navTitle,
-                  navRoute: navRoute,
-                ),
-                Align(
-                  alignment: Alignment.center,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      widget.navigationShell,
-                      SizedBox(
-                        height: 25,
-                        child: Link(
-                            uri: Uri.parse(
-                                "https://mymangatheque.com/mentions_legales"),
-                            builder: (context, link) {
-                              return InkWell(
-                                onTap: link,
-                                child: Text(
-                                  "Mentions légales",
-                                  style: TextStyle(
-                                    color:
-                                        Theme.of(context).colorScheme.primary,
-                                  ),
+                bottomSheet: Row(
+                  children: [
+                    SizedBox(
+                      height: 25,
+                      child: Link(
+                          uri: Uri.parse("https://mymangatheque.com/mentions_legales"),
+                          builder: (context, link) {
+                            return InkWell(
+                              onTap: link,
+                              child: Text(
+                                "Mentions légales",
+                                style: TextStyle(
+                                  color: Theme.of(context).colorScheme.primary,
                                 ),
-                              );
-                            }),
-                      ),
-                    ],
-                  ),
+                              ),
+                            );
+                          }),
+                    ),
+                  ],
                 ),
-                SizedBox(
-                  width:
-                      0, // This sized box  make you set the content of the page centered
-                )
-              ],
-            ));
+                body: Row(
+                  children: [
+                    Drawer(
+                      backgroundColor: Theme.of(context).colorScheme.onPrimary,
+                      child: SafeArea(
+                        right: false,
+                        left: false,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Column(
+                              children: [
+                                GestureDetector(
+                                  onTap: () {
+                                    context.go('/');
+                                  },
+                                  child: Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 25),
+                                      child: SizedBox(
+                                        width: double.infinity,
+                                        child: Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                          children: [
+                                            ClipRRect(
+                                              borderRadius: BorderRadius.circular(10),
+                                              child: Image.asset('assets/images/logo_app.png', width: 50, height: 50),
+                                            ),
+                                            const Text('MyMangathèque', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                                          ],
+                                        ),
+                                      )),
+                                ),
+                                Column(
+                                  children: (navIcons).map((iconName) {
+                                    int index = navIcons.indexOf(iconName);
+                                    if (navTitle[index] == "Profil") {
+                                      return const Padding(padding: EdgeInsets.zero);
+                                    } else {
+                                      return MyDrawerTile(title: navTitle[index], icon: iconName, goTo: navRoute[index], pop: false);
+                                    }
+                                  }).toList(),
+                                ),
+                              ],
+                            ),
+                            GestureDetector(
+                                onTap: () {
+                                  context.go('/profile');
+                                },
+                                /*
+                  TODO: Check if the user is connected,
+                   if he is then show him his profile picture and the text 'Mon Compte',
+                   else show him the icon of a user and the text 'Se connecter'.
+              */
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 25),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      SvgPicture.asset('assets/icons/user.svg',
+                                          width: 30,
+                                          height: 30,
+                                          colorFilter: ColorFilter.mode(Theme.of(context).colorScheme.primary, BlendMode.srcIn)),
+                                      Text('Se Connecter',
+                                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary)),
+                                    ],
+                                  ),
+                                )),
+                          ],
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: widget.navigationShell,
+                    ),
+                  ],
+                ));
           } else if (constraints.maxWidth > 600) {
             return Scaffold(
                 appBar: AppBar(),

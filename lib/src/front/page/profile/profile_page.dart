@@ -1,12 +1,13 @@
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mymangatheque/src/back/services/pocketbase.dart';
 import 'package:mymangatheque/src/const/own_icon.dart';
+import 'package:mymangatheque/src/front/components/my_icon_text_button.dart';
 import 'package:mymangatheque/src/front/components/my_line.dart';
 import 'package:mymangatheque/src/front/components/my_scroll_column.dart';
+import 'package:mymangatheque/src/front/components/my_text_divider.dart';
 import 'package:mymangatheque/src/models/get_user_information.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -63,7 +64,7 @@ class _ProfilePageState extends State<ProfilePage> {
   // Get the number of owned manga
   getNumberOfMangaOwned() async {
     try {
-      int countMangaOwned = await connector.getNumberOwnedManga();
+      int countMangaOwned = await connector.getNumberOwnedManga(connector.getConnectedUser()!.id);
       setState(() {
         numberMangaOwned = countMangaOwned;
       });
@@ -75,7 +76,7 @@ class _ProfilePageState extends State<ProfilePage> {
   // Get the number of favorite series
   getNumberOfSeriesFav() async {
     try {
-      int countSerieFav = await connector.getNumberFavSerie();
+      int countSerieFav = await connector.getNumberFavSerie(connector.getConnectedUser()!.id);
       setState(() {
         numberSerieFav = countSerieFav;
       });
@@ -97,6 +98,11 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget build(BuildContext context) {
     PocketBaseConnector connector = PocketBaseConnector();
     User? user = connector.getConnectedUser();
+    String appVersion = connector.getAppVersion();
+
+    if (user == null) {
+      context.go('/profile/signin');
+    }
 
     setState(() {
       theme = AdaptiveTheme.of(context).mode.isSystem
@@ -254,68 +260,23 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.only(left: 10.0, right: 10.0, top: 10.0),
-              child: Container(
-                height: 1.0,
-                width: MediaQuery.of(context).size.width,
-                color: Colors.grey,
-              ),
+            MyLine(width: MediaQuery.of(context).size.width, vertical: 10.0),
+            MyIconTextButton(function: signUserOut, color: Colors.red, iconName: 'logout', text: 'Se déconnecter'),
+            MyTextDivider(text: "Zone de danger"),
+            MyIconTextButton(function: signUserOut, color: Colors.red, iconName: 'delete', text: 'Supprimer mon compte'),
+            MyLine(
+              width: MediaQuery.of(context).size.width,
+              vertical: 10.0,
             ),
-            Padding(
-              padding: const EdgeInsets.only(left: 4.0, right: 18.0),
-              child: TextButton.icon(
-                onPressed: signUserOut,
-                icon: OwnIcon(iconColor: Colors.red, iconName: 'logout'),
-                label: Text(
-                  'Se déconnecter',
-                  style: GoogleFonts.poppins(
-                    color: Colors.red,
-                  ),
-                ),
+            GestureDetector(
+              onDoubleTap: () {
+                context.go('/admin');
+              },
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20.0),
+                child: Text('Version $appVersion'),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Divider(
-                      thickness: 0.5,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: Text(
-                      "Zone de danger",
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: Divider(
-                      thickness: 0.5,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(left: 4.0, right: 18.0),
-              child: TextButton.icon(
-                onPressed: () => context.go('/delete_account'),
-                icon: OwnIcon(iconColor: Colors.red, iconName: 'delete'),
-                label: Text(
-                  'Supprimer mon compte',
-                  style: GoogleFonts.poppins(
-                    color: Colors.red,
-                  ),
-                ),
-              ),
-            ),
+            )
           ],
         ),
       ),

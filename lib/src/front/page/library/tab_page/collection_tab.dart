@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:mymangatheque/src/back/services/pocketbase.dart';
 import 'package:mymangatheque/src/front/components/my_tome_number_show.dart';
 
 class CollectionTab extends StatefulWidget {
-  CollectionTab({super.key});
+  const CollectionTab({super.key});
 
   @override
   State<CollectionTab> createState() => _CollectionTabState();
@@ -11,6 +12,7 @@ class CollectionTab extends StatefulWidget {
 
 class _CollectionTabState extends State<CollectionTab> {
   int numberMangaOwned = 0;
+  PocketBaseConnector connector = PocketBaseConnector();
 
   String textLength(text, length) {
     if (text.length > length) {
@@ -22,15 +24,16 @@ class _CollectionTabState extends State<CollectionTab> {
 
   getNumberOfMangaOwned() async {
     try {
-      int countMangaOwned = await PocketBaseConnector().getNumberOwnedManga();
+      int countMangaOwned = await connector.getNumberOwnedManga(connector.getConnectedUser()!.id);
       setState(() {
         numberMangaOwned = countMangaOwned;
       });
     } catch (e) {
-      print(e);
+      debugPrint(e.toString());
     }
   }
 
+  @override
   void initState() {
     super.initState();
     getNumberOfMangaOwned();
@@ -38,6 +41,9 @@ class _CollectionTabState extends State<CollectionTab> {
 
   @override
   Widget build(BuildContext context) {
+    if (connector.getConnectedUser() == null) {
+      context.go('/profile/signin');
+    }
     return Padding(
       padding: const EdgeInsets.all(10),
       child: Column(

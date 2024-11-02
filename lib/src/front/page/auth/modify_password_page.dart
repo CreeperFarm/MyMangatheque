@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:go_router/go_router.dart';
 import 'package:mymangatheque/src/back/services/pocketbase.dart';
 import 'package:mymangatheque/src/front/components/my_button.dart';
 import 'package:mymangatheque/src/front/components/my_scroll_column.dart';
@@ -22,6 +23,7 @@ class _ModifyPasswordPageState extends State<ModifyPasswordPage> {
   final newPasswordVerifierController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   String errorText = "";
+  PocketBaseConnector connector = PocketBaseConnector();
 
   // Dispose Variable
   @override
@@ -70,8 +72,7 @@ class _ModifyPasswordPageState extends State<ModifyPasswordPage> {
       }
     }*/
     try {
-      await PocketBaseConnector()
-          .modifyPassword(PocketBaseConnector().getConnectedUser()!.email, oldPasswordController.text, newPasswordController.text, context);
+      await connector.modifyPassword(connector.getConnectedUser()!.email, oldPasswordController.text, newPasswordController.text, context);
       Navigator.pop(context);
     } catch (e) {
       Navigator.pop(context);
@@ -82,6 +83,9 @@ class _ModifyPasswordPageState extends State<ModifyPasswordPage> {
 
   @override
   Widget build(BuildContext context) {
+    if (connector.getConnectedUser() == null) {
+      context.go('/profile/signin');
+    }
     return Scaffold(
       appBar: AppBar(
         title: const Text('Modification du mot de passe'),

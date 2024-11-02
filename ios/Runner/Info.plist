@@ -43,6 +43,8 @@
 		<string>Used to get the Profile Picture</string>
 		<key>NSPhotoLibraryAddUsageDescription</key>
 		<string>Used to get the Profile Picture</string>
+		<key>io.flutter.embedded_views_preview</key>
+        <true/>
 		<key>LSApplicationQueriesSchemes</key>
         <array>
           <string>https</string>

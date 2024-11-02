@@ -8,11 +8,7 @@ class MyDrawer extends StatelessWidget {
   final List navTitle;
   final List navRoute;
 
-  const MyDrawer(
-      {required this.navIcons,
-      required this.navTitle,
-      required this.navRoute,
-      super.key});
+  const MyDrawer({required this.navIcons, required this.navTitle, required this.navRoute, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -31,8 +27,7 @@ class MyDrawer extends StatelessWidget {
                       context.go('/');
                     },
                     child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 25, vertical: 25),
+                        padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 25),
                         child: SizedBox(
                           width: double.infinity,
                           child: Row(
@@ -40,13 +35,9 @@ class MyDrawer extends StatelessWidget {
                             children: [
                               ClipRRect(
                                 borderRadius: BorderRadius.circular(10),
-                                child: Image.asset('assets/images/logo_app.png',
-                                    width: 50, height: 50),
+                                child: Image.asset('assets/images/logo_app.png', width: 50, height: 50),
                               ),
-                              const Text('MyMangathèque',
-                                  style: TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold)),
+                              const Text('MyMangathèque', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                             ],
                           ),
                         )),
@@ -61,6 +52,7 @@ class MyDrawer extends StatelessWidget {
                           title: navTitle[index],
                           icon: iconName,
                           goTo: navRoute[index],
+                          pop: true,
                         );
                       }
                     }).toList(),
@@ -77,22 +69,14 @@ class MyDrawer extends StatelessWidget {
                    else show him the icon of a user and the text 'Se connecter'.
               */
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 25, vertical: 25),
+                    padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 25),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         SvgPicture.asset('assets/icons/user.svg',
-                            width: 30,
-                            height: 30,
-                            colorFilter: ColorFilter.mode(
-                                Theme.of(context).colorScheme.primary,
-                                BlendMode.srcIn)),
+                            width: 30, height: 30, colorFilter: ColorFilter.mode(Theme.of(context).colorScheme.primary, BlendMode.srcIn)),
                         Text('Se Connecter',
-                            style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                color: Theme.of(context).colorScheme.primary)),
+                            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary)),
                       ],
                     ),
                   )),
