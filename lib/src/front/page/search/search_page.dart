@@ -20,9 +20,10 @@ class _SearchPageState extends ConsumerState<SearchPage> {
   List _allResults = [];
   List _resultsList = [];
   final TextEditingController _searchController = TextEditingController();
+  final PocketBaseConnector connector = PocketBaseConnector();
 
   getClientStream() async {
-    var data = await PocketBaseConnector().getCollectionFullListOrder('series', 'title');
+    var data = await connector.getCollectionFullListOrder('series', 'title');
     /*var data = await FirebaseFirestore.instance
         .collection('manga')
         .orderBy(ref.watch(searchFilterProvider))
@@ -32,15 +33,10 @@ class _SearchPageState extends ConsumerState<SearchPage> {
     });
   }
 
-  Future<String> getAuthorName(String authorId) async {
-    var author = await PocketBaseConnector().getOne('authors', authorId);
-    return json.decode(author[0].toString())['name'].toString();
-  }
-
   Future<String> getAllAuthorsName(List authorsId) async {
     var authors = [];
     for (var authorId in authorsId) {
-      authors.add(await getAuthorName(authorId));
+      authors.add(await connector.getAuthorName(authorId));
     }
     return authors.join(" et ");
   }

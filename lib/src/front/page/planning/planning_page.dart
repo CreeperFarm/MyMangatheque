@@ -12,9 +12,10 @@ class PlanningPage extends StatefulWidget {
 
 class _PlanningPageState extends State<PlanningPage> {
   var latestManga;
+  final PocketBaseConnector connector = PocketBaseConnector();
 
   Future<void> getLatestManga() async {
-    await PocketBaseConnector()
+    await connector
         .getCollectionDataWithFilter("volumes",
             'release?<="${DateTime.now().add(const Duration(days: 14)).toUtc()}"&&release?>="${DateTime.now().subtract(const Duration(days: 14)).toIso8601String()}"')
         .then((value) {
@@ -27,15 +28,10 @@ class _PlanningPageState extends State<PlanningPage> {
     debugPrint(latestManga.toString());
   }
 
-  Future<String> getAuthorName(String authorId) async {
-    var author = await PocketBaseConnector().getOne('authors', authorId);
-    return json.decode(author[0].toString())['name'].toString();
-  }
-
   Future<String> getAllAuthorsName(List authorsId) async {
     var authors = [];
     for (var authorId in authorsId) {
-      authors.add(await getAuthorName(authorId));
+      authors.add(await connector.getAuthorName(authorId));
     }
     return authors.join(" et ");
   }
@@ -74,7 +70,7 @@ class _PlanningPageState extends State<PlanningPage> {
         itemCount: latestManga.length,
         itemBuilder: (context, index) {
           return FutureBuilder(
-            future: PocketBaseConnector().getCollectionDataWithFilter("volumes",
+            future: connector.getCollectionDataWithFilter("volumes",
                 'release?<="${DateTime.now().add(const Duration(days: 14)).toUtc()}"&&release?>="${DateTime.now().subtract(const Duration(days: 14)).toIso8601String()}"'),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.done && snapshot.hasData) {

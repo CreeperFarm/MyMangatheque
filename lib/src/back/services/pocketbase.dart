@@ -342,6 +342,12 @@ class PocketBaseConnector {
     return count; // Return the number of manga owned by the user
   }
 
+  // Get the author name
+  Future<String> getAuthorName(String authorId) async {
+    var author = await PocketBaseConnector().getOne('authors', authorId);
+    return json.decode(author[0].toString())['name'].toString();
+  }
+
   Future<int> getNumberFavSerie(String id) async {
     int count = 0;
 
