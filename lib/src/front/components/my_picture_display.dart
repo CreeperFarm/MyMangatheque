@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
 import 'dart:ui';
+
+import 'package:flutter/material.dart';
 
 class MyPictureDisplay extends StatelessWidget {
   final String pictureUrl;
@@ -13,11 +14,12 @@ class MyPictureDisplay extends StatelessWidget {
       child: Stack(
         alignment: AlignmentDirectional.center,
         children: [
+          // Image Background with blur effect
           SizedBox(
             height: 275,
             width: ((275 * 16.5) / 24 * 10),
             child: ClipRRect(
-              child: Column(
+              child: Wrap(
                 children: [
                   Transform.translate(
                     offset: const Offset(0, (-275 / 2)),
@@ -37,14 +39,16 @@ class MyPictureDisplay extends StatelessWidget {
               ),
             ),
           ),
+
+          // Image
           SizedBox(
             height: 275,
             width: ((275 * 16.5) / 24),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(10.0),
               child: Image.network(
-                  pictureUrl,
-                  fit: BoxFit.fill
+                pictureUrl,
+                fit: BoxFit.fill,
               ),
             ),
           ),
