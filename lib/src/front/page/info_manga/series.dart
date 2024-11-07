@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:mymangatheque/src/back/services/pocketbase.dart';
+import 'package:mymangatheque/src/const/own_icon.dart';
 import 'package:mymangatheque/src/front/components/my_line.dart';
 import 'package:mymangatheque/src/front/components/my_picture_display.dart';
 import 'package:mymangatheque/src/front/components/my_scroll_column.dart';
@@ -16,6 +17,8 @@ class SeriesPages extends StatefulWidget {
 }
 
 class _SeriesPagesState extends State<SeriesPages> {
+  final PocketBaseConnector connector = PocketBaseConnector();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -50,7 +53,7 @@ class _SeriesPagesState extends State<SeriesPages> {
 
           if (snapshot.connectionState == ConnectionState.done) {
             Map<String, dynamic> data = json.decode(snapshot.data.toString())[0];
-            print(data);
+            final subSeries = data['sub_series'];
             return MyScrollColumn(
               columnMainAxisAlignment: MainAxisAlignment.start,
               children: [
@@ -74,6 +77,94 @@ class _SeriesPagesState extends State<SeriesPages> {
                         width: MediaQuery.of(context).size.width,
                         vertical: 10,
                         horizontal: 0,
+                      ),
+                      (subSeries.length == 0)
+                          ? SizedBox()
+                          : (subSeries.length == 1)
+                              ? Text(
+                                  'Edition :',
+                                  style: const TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                )
+                              : Text(
+                                  'Editions :',
+                                  style: const TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                      for (var i = 0; i < subSeries.length; i += 1)
+                        Column(
+                          children: [
+                            FutureBuilder(
+                              future: connector.getSubSerie(subSeries[i]),
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState == ConnectionState.waiting) {
+                                  return const CircularProgressIndicator();
+                                }
+                                if (snapshot.connectionState == ConnectionState.none) {
+                                  return const Text("Aucune connexion");
+                                }
+                                if (snapshot.hasError) {
+                                  debugPrint(snapshot.error.toString());
+                                  return const Text("Une erreur est survenue");
+                                }
+                                if (snapshot.hasData && snapshot.data == null) {
+                                  return const Text("Il n'existe pas de sous-série");
+                                }
+                                if (snapshot.connectionState == ConnectionState.done) {
+                                  Map<String, dynamic> subSerie = snapshot.data!;
+                                  return Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      GestureDetector(
+                                        onTap: () {
+                                          Navigator.pushNamed(context, '/sub_series', arguments: subSerie['id']);
+                                        },
+                                        child: Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                FutureBuilder(
+                                                  future: connector.getEditorName(subSerie['editor']),
+                                                  builder: (context, snapshot) {
+                                                    if (snapshot.connectionState == ConnectionState.done) {
+                                                      return Text(
+                                                          '${subSerie['title'].toString().replaceFirst(data['title'] + ' - ', '')} • ${snapshot.data}');
+                                                    } else {
+                                                      return Text(subSerie['title'].toString().replaceFirst(data['title'] + ' - ', ''));
+                                                    }
+                                                  },
+                                                ),
+                                                Text(subSerie['type'].toString()),
+                                              ],
+                                            ),
+                                            OwnIcon(iconColor: Theme.of(context).colorScheme.primary, iconName: 'arrow-right'),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  );
+                                }
+                                return const CircularProgressIndicator();
+                              },
+                            ),
+                            if (i != subSeries.length - 1)
+                              MyLine(
+                                width: MediaQuery.of(context).size.width,
+                                vertical: 10,
+                                horizontal: 0,
+                              ),
+                          ],
+                        ),
+                      MyLine(
+                        width: MediaQuery.of(context).size.width,
+                        vertical: 10.0,
+                        horizontal: 0.0,
                       ),
                       Text(data['authors'].toString()),
                       MyLine(

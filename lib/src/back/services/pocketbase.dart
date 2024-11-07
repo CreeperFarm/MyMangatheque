@@ -342,12 +342,6 @@ class PocketBaseConnector {
     return count; // Return the number of manga owned by the user
   }
 
-  // Get the author name
-  Future<String> getAuthorName(String authorId) async {
-    var author = await PocketBaseConnector().getOne('authors', authorId);
-    return json.decode(author[0].toString())['name'].toString();
-  }
-
   Future<int> getNumberFavSerie(String id) async {
     int count = 0;
 
@@ -373,6 +367,24 @@ class PocketBaseConnector {
   // Get the app version
   String getAppVersion() {
     return appVersion;
+  }
+
+  // Get the author name
+  Future<String> getAuthorName(String authorId) async {
+    var author = await PocketBaseConnector().getOne('authors', authorId);
+    return json.decode(author[0].toString())['name'].toString();
+  }
+
+  // Get the editor name
+  Future<String> getEditorName(String editorId) async {
+    var editor = await PocketBaseConnector().getOne('editors', editorId);
+    return json.decode(editor[0].toString())['name'].toString();
+  }
+
+  // Get the information about a sub serie
+  Future<Map<String, dynamic>> getSubSerie(String id) async {
+    var subSeries = await PocketBaseConnector().getOne('sub_series', id);
+    return json.decode(subSeries[0].toString());
   }
 
   String get serverUrl => _pocketBase.baseUrl;

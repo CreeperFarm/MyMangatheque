@@ -108,7 +108,9 @@ class _PlanningPageState extends State<PlanningPage> {
                             if (snapshot.connectionState == ConnectionState.done && snapshot.hasData) {
                               return Text(
                                 textLength(snapshot.data.toString(), 34),
-                                style: const TextStyle(fontSize: 12),
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                ),
                               );
                             } else {
                               return SizedBox(
@@ -134,7 +136,6 @@ class _PlanningPageState extends State<PlanningPage> {
               }
             },
           );
-          ;
         },
       ),
     );
