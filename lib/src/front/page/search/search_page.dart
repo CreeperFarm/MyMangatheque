@@ -182,8 +182,9 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                   itemCount: _resultsList.length,
                   itemBuilder: (context, index) {
                     if (selectedFilter == 'manga') {
+                      final manga = json.decode(_resultsList[index].toString());
                       return FutureBuilder(
-                        future: getAllAuthorsName(json.decode(_resultsList[index].toString())['authors']),
+                        future: getAllAuthorsName(manga['authors']),
                         builder: (context, snapshot) {
                           if (snapshot.connectionState == ConnectionState.waiting) {
                             return const Center(
@@ -210,7 +211,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                                             child: SizedBox(
                                               width: 50,
                                               child: Image.network(
-                                                'https://api.mymangatheque.com/api/files/utbujxtz8wtq0ar/${json.decode(_resultsList[index].toString())['id'].toString()}/${json.decode(_resultsList[index].toString())['image'].toString()}',
+                                                'https://api.mymangatheque.com/api/files/utbujxtz8wtq0ar/${manga['id'].toString()}/${manga['image'].toString()}',
                                                 width: 50,
                                               ),
                                             ),
@@ -219,14 +220,14 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                                             crossAxisAlignment: CrossAxisAlignment.start,
                                             children: [
                                               Text(
-                                                textLength(json.decode(_resultsList[index].toString())['title'], 30),
+                                                textLength(manga['title'], 30),
                                                 style: TextStyle(
                                                   fontWeight: FontWeight.bold,
                                                   fontSize: 17,
                                                   color: Theme.of(context).colorScheme.primary,
                                                 ),
                                               ),
-                                              // json.decode(_resultsList[index].toString())['author'].toString()
+                                              // manga['author'].toString()
 
                                               Text(
                                                 textLength(snapshot.data, 35),
@@ -236,7 +237,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                                                 ),
                                               ),
                                               Text(
-                                                DateTime.parse(json.decode(_resultsList[index].toString())['first_publication']).year.toString(),
+                                                DateTime.parse(manga['first_publication']).year.toString(),
                                                 style: TextStyle(
                                                   color: Theme.of(context).colorScheme.primary,
                                                   fontSize: 14,
@@ -253,7 +254,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                                     ],
                                   ),
                                   onTap: () {
-                                    context.go('/search/series/${json.decode(_resultsList[index].toString())['manga']}');
+                                    context.go('/search/series/${manga['id']}');
                                   },
                                 ),
                                 MyLine(

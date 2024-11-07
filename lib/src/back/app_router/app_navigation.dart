@@ -63,13 +63,13 @@ class AppNavigation {
                       path: 'series/:name',
                       name: 'Series Home',
                       builder: (context, state) {
-                        return SeriesPages(seriesName: state.pathParameters['name']!, key: state.pageKey);
+                        return SeriesPages(seriesId: state.pathParameters['name']!, key: state.pageKey);
                       }),
                   GoRoute(
                       path: 'manga/:tomeId',
                       name: 'Manga Home',
                       builder: (context, state) {
-                        return SeriesPages(seriesName: state.pathParameters['tomeId']!, key: state.pageKey);
+                        return SeriesPages(seriesId: state.pathParameters['tomeId']!, key: state.pageKey);
                       }),
                   GoRoute(
                       path: 'discover',
@@ -145,13 +145,13 @@ class AppNavigation {
                         path: 'series/:name',
                         name: 'Series Library',
                         builder: (context, state) {
-                          return SeriesPages(seriesName: state.pathParameters['name']!, key: state.pageKey);
+                          return SeriesPages(seriesId: state.pathParameters['name']!, key: state.pageKey);
                         }),
                     GoRoute(
                         path: 'manga/:tomeId',
                         name: 'Manga Library',
                         builder: (context, state) {
-                          return SeriesPages(seriesName: state.pathParameters['tomeId']!, key: state.pageKey);
+                          return SeriesPages(seriesId: state.pathParameters['tomeId']!, key: state.pageKey);
                         }),
                     GoRoute(
                         path: 'scan',
@@ -188,13 +188,13 @@ class AppNavigation {
                       path: 'series/:name',
                       name: 'Series Search',
                       builder: (context, state) {
-                        return SeriesPages(seriesName: state.pathParameters['name']!, key: state.pageKey);
+                        return SeriesPages(seriesId: state.pathParameters['name']!, key: state.pageKey);
                       }),
                   GoRoute(
                       path: 'manga/:tomeId',
                       name: 'Manga Search',
                       builder: (context, state) {
-                        return SeriesPages(seriesName: state.pathParameters['tomeId']!, key: state.pageKey);
+                        return SeriesPages(seriesId: state.pathParameters['tomeId']!, key: state.pageKey);
                       })
                 ])
           ]),
@@ -224,13 +224,13 @@ class AppNavigation {
                       path: 'series/:name',
                       name: 'Series Planning',
                       builder: (context, state) {
-                        return SeriesPages(seriesName: state.pathParameters['name']!, key: state.pageKey);
+                        return SeriesPages(seriesId: state.pathParameters['name']!, key: state.pageKey);
                       }),
                   GoRoute(
                       path: 'manga/:tomeId',
                       name: 'Manga Planning',
                       builder: (context, state) {
-                        return SeriesPages(seriesName: state.pathParameters['tomeId']!, key: state.pageKey);
+                        return SeriesPages(seriesId: state.pathParameters['tomeId']!, key: state.pageKey);
                       })
                 ])
           ]),
