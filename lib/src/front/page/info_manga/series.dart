@@ -66,8 +66,8 @@ class _SeriesPagesState extends State<SeriesPages> {
                         data['title'].toString(),
                         textAlign: TextAlign.right,
                         style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
+                          fontSize: 25,
+                          fontWeight: FontWeight.w300,
                         ),
                       ),
                       MyLine(
