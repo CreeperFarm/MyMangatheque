@@ -16,7 +16,7 @@ class _PlanningPageState extends State<PlanningPage> {
   Future<void> getLatestManga() async {
     await PocketBaseConnector()
         .getCollectionDataWithFilter("volumes",
-            'release?>="${DateTime.now().add(const Duration(days: 14)).toUtc()}"' /* && release <= "${DateTime.now().subtract(const Duration(days: 14)).toIso8601String()}"'*/) //TODO: Remove the comment so it only show recent manga
+            'release?<="${DateTime.now().add(const Duration(days: 14)).toUtc()}"&&release?>="${DateTime.now().subtract(const Duration(days: 14)).toIso8601String()}"')
         .then((value) {
       if (value.isNotEmpty && !value[0].toString().contains("statusCode: 404")) {
         setState(() {
@@ -56,37 +56,42 @@ class _PlanningPageState extends State<PlanningPage> {
 
   @override
   Widget build(BuildContext context) {
+    int itemPerLine = (MediaQuery.of(context).size.width / 200).toInt();
+    var itemHeight = (MediaQuery.of(context).size.height - kToolbarHeight - 24) / itemPerLine;
+    var itemWidth = MediaQuery.of(context).size.width / itemPerLine;
     return Scaffold(
       appBar: AppBar(
         title: const Text("Planning"),
       ),
-      body: ListView.builder(
+      body: GridView.builder(
+        padding: const EdgeInsets.all(10),
+        gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+          maxCrossAxisExtent: itemWidth,
+          crossAxisSpacing: 5,
+          mainAxisSpacing: 5,
+          childAspectRatio: 16.5 / 25,
+        ),
         itemCount: latestManga.length,
         itemBuilder: (context, index) {
           return FutureBuilder(
             future: PocketBaseConnector().getCollectionDataWithFilter("volumes",
-                'release?>="${DateTime.now().add(const Duration(days: 14)).toUtc()}"' /* && release <= "${DateTime.now().subtract(const Duration(days: 14)).toIso8601String()}"'*/),
-            //TODO: Remove the comment so it only show recent manga
+                'release?<="${DateTime.now().add(const Duration(days: 14)).toUtc()}"&&release?>="${DateTime.now().subtract(const Duration(days: 14)).toIso8601String()}"'),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.done && snapshot.hasData) {
                 final manga = json.decode(snapshot.data![index].toString());
-                return LayoutBuilder(
-                  builder: (context, constraints) {
-                    int itemPerLine = (constraints.maxWidth / 200).toInt();
-                    print(itemPerLine);
-                    var itemHeight = (MediaQuery.of(context).size.height - kToolbarHeight - 24) / itemPerLine;
-                    var itemWidth = constraints.maxWidth / itemPerLine;
-                    print(itemHeight);
-                    print(itemWidth);
-                    return SizedBox(
-                      height: itemHeight,
-                      width: itemWidth,
-                      child: Column(
-                        children: [
-                          Center(
-                            child: SizedBox(
-                              height: itemHeight - 150,
-                              width: (itemHeight - 150) * 16.5 / 24,
+                return SizedBox(
+                  height: itemHeight,
+                  width: itemWidth,
+                  child: Container(
+                    color: Colors.pink,
+                    child: Column(
+                      children: [
+                        Center(
+                          child: SizedBox(
+                            height: itemHeight - 175,
+                            width: (itemHeight - 175) * 16.5 / 24,
+                            child: Padding(
+                              padding: const EdgeInsets.all(5.0),
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(10),
                                 child: Image.network(
@@ -96,18 +101,35 @@ class _PlanningPageState extends State<PlanningPage> {
                               ),
                             ),
                           ),
-                          Text(
-                            textLength(manga['title'], 25),
-                            style: const TextStyle(fontSize: 16),
-                          ),
-                          Text(
-                            textLength(manga['resume'], 50),
-                            style: const TextStyle(fontSize: 12),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
+                        ),
+                        Text(
+                          textLength(manga['title'], 20),
+                          style: const TextStyle(fontSize: 18),
+                        ),
+                        FutureBuilder(
+                          future: getAllAuthorsName(manga['authors']),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState == ConnectionState.done && snapshot.hasData) {
+                              return Text(
+                                textLength(snapshot.data.toString(), 34),
+                                style: const TextStyle(fontSize: 12),
+                              );
+                            } else {
+                              return SizedBox(
+                                height: 18,
+                                width: 18,
+                                child: Center(
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                ),
+                              );
+                            }
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
                 );
               } else {
                 return const Center(
@@ -116,6 +138,7 @@ class _PlanningPageState extends State<PlanningPage> {
               }
             },
           );
+          ;
         },
       ),
     );
