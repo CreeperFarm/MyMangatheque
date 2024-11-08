@@ -10,6 +10,7 @@ import 'package:mymangatheque/src/function/show_message_function.dart';
 import 'package:mymangatheque/src/models/local_storage/local_storage.dart';
 import 'package:mymangatheque/src/models/local_storage/service_locator.dart';
 import 'package:mymangatheque/src/models/user.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:pocketbase/pocketbase.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -19,7 +20,6 @@ export 'package:mymangatheque/src/models/user.dart';
 
 class PocketBaseConnector {
   late PocketBase _pocketBase;
-  final String appVersion = '0.0.1 - bêta';
 
   Future<void> init() async {
     final storage = getIt<LocalStorage>();
@@ -364,11 +364,6 @@ class PocketBaseConnector {
     return _pocketBase.collection(collectionId).listen();
   }
 
-  // Get the app version
-  String getAppVersion() {
-    return appVersion;
-  }
-
   // Get the author name
   Future<String> getAuthorName(String authorId) async {
     var author = await PocketBaseConnector().getOne('authors', authorId);
@@ -386,6 +381,14 @@ class PocketBaseConnector {
     var subSeries = await PocketBaseConnector().getOne('sub_series', id);
     return json.decode(subSeries[0].toString());
   }
+
+  Future<String> getAppVersion() async {
+    return PackageInfo.fromPlatform().then((value) => value.version).toString();
+  }
+
+  Future<String> get appVersion async => await PackageInfo.fromPlatform().then((value) => value.version);
+
+  Future<String> get buildVersion async => await PackageInfo.fromPlatform().then((value) => value.buildNumber);
 
   String get serverUrl => _pocketBase.baseUrl;
 }

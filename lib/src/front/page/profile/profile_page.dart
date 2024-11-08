@@ -98,7 +98,6 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget build(BuildContext context) {
     PocketBaseConnector connector = PocketBaseConnector();
     User? user = connector.getConnectedUser();
-    String appVersion = connector.getAppVersion();
 
     if (user == null) {
       context.go('/profile/signin');
@@ -274,7 +273,31 @@ class _ProfilePageState extends State<ProfilePage> {
               },
               child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: 20.0),
-                child: Text('Version $appVersion'),
+                child: FutureBuilder(
+                  future: connector.appVersion,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.done) {
+                      String appVersion = snapshot.data.toString();
+                      return FutureBuilder(
+                        future: connector.buildVersion,
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState == ConnectionState.done) {
+                            String buildVersion = snapshot.data.toString();
+                            return Column(
+                              children: [
+                                Text('Version de l\'application : $appVersion & Version du build : $buildVersion'),
+                              ],
+                            );
+                          } else {
+                            return SizedBox();
+                          }
+                        },
+                      );
+                    } else {
+                      return SizedBox();
+                    }
+                  },
+                ),
               ),
             )
           ],
