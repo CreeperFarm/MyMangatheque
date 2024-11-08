@@ -144,7 +144,7 @@ class AppNavigation {
                         }),
                     GoRoute(
                         path: 'serie/:id',
-                        name: 'Page de ',
+                        name: 'Page de la Série',
                         builder: (context, state) {
                           return SeriePage(serieId: state.pathParameters['id']!, key: state.pageKey);
                         }),
@@ -186,7 +186,7 @@ class AppNavigation {
                         return AuthorPage(authorName: state.pathParameters['id']!, key: state.pageKey);
                       }),
                   GoRoute(
-                      path: 'series/:id',
+                      path: 'serie/:id',
                       name: 'Series Search',
                       builder: (context, state) {
                         return SeriePage(serieId: state.pathParameters['id']!, key: state.pageKey);
