@@ -277,15 +277,15 @@ class _ProfilePageState extends State<ProfilePage> {
                   future: connector.appVersion,
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.done) {
-                      String appVersion = snapshot.data.toString();
+                      final String appVersion = snapshot.data.toString();
                       return FutureBuilder(
                         future: connector.buildVersion,
                         builder: (context, snapshot) {
                           if (snapshot.connectionState == ConnectionState.done) {
-                            String buildVersion = snapshot.data.toString();
+                            final String buildVersion = snapshot.data.toString();
                             return Column(
                               children: [
-                                Text('Version de l\'application : $appVersion & Version du build : $buildVersion'),
+                                Text('Version de l\'application : $appVersion & version du build : $buildVersion'),
                               ],
                             );
                           } else {
