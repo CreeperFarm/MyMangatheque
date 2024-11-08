@@ -376,6 +376,11 @@ class PocketBaseConnector {
     return json.decode(editor[0].toString())['name'].toString();
   }
 
+  Future<String> getVolumeImage(String volumeId) async {
+    var volumeImage = await PocketBaseConnector().getOne('volumes', volumeId);
+    return json.decode(volumeImage[0].toString())['image'].toString();
+  }
+
   // Get the information about a sub serie
   Future<Map<String, dynamic>> getSubSerie(String id) async {
     var subSeries = await PocketBaseConnector().getOne('sub_series', id);

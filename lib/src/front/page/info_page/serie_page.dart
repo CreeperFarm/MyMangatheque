@@ -140,6 +140,18 @@ class _SeriePageState extends State<SeriePage> {
                                                     }
                                                   },
                                                 ),
+                                                for (var volume in subSerie['volume'])
+                                                  FutureBuilder(
+                                                    future: connector.getVolumeImage(volume),
+                                                    builder: (context, snapshot) {
+                                                      if (snapshot.connectionState == ConnectionState.done) {
+                                                        return Image.network(
+                                                            'https://api.mymangatheque.com/api/files/utbujxtz8wtq0ar/${volume.toString()}/${snapshot.data.toString()}');
+                                                      } else {
+                                                        return SizedBox();
+                                                      }
+                                                    },
+                                                  ),
                                                 Text(subSerie['type'].toString()),
                                               ],
                                             ),
