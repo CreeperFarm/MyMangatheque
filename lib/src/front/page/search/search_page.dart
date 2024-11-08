@@ -250,7 +250,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                                     ],
                                   ),
                                   onTap: () {
-                                    context.go('/search/series/${manga['id']}');
+                                    context.go('/search/serie/${manga['id']}');
                                   },
                                 ),
                                 MyLine(

@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 
-class TomesPages extends StatefulWidget {
-  final String tomesId;
-  const TomesPages({required this.tomesId, super.key});
+class VolumePage extends StatefulWidget {
+  final String volumeId;
+
+  const VolumePage({required this.volumeId, super.key});
 
   @override
-  State<TomesPages> createState() => _TomesPagesState();
+  State<VolumePage> createState() => _VolumePageState();
 }
 
-class _TomesPagesState extends State<TomesPages> {
+class _VolumePageState extends State<VolumePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(

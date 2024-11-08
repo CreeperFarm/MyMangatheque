@@ -7,16 +7,16 @@ import 'package:mymangatheque/src/front/components/my_line.dart';
 import 'package:mymangatheque/src/front/components/my_picture_display.dart';
 import 'package:mymangatheque/src/front/components/my_scroll_column.dart';
 
-class SeriesPages extends StatefulWidget {
-  final String seriesId;
+class SeriePage extends StatefulWidget {
+  final String serieId;
 
-  const SeriesPages({required this.seriesId, super.key});
+  const SeriePage({required this.serieId, super.key});
 
   @override
-  State<SeriesPages> createState() => _SeriesPagesState();
+  State<SeriePage> createState() => _SeriePageState();
 }
 
-class _SeriesPagesState extends State<SeriesPages> {
+class _SeriePageState extends State<SeriePage> {
   final PocketBaseConnector connector = PocketBaseConnector();
 
   @override
@@ -27,7 +27,7 @@ class _SeriesPagesState extends State<SeriesPages> {
         backgroundColor: Colors.transparent,
       ),
       body: FutureBuilder(
-        future: PocketBaseConnector().getOne('series', this.widget.seriesId),
+        future: PocketBaseConnector().getOne('series', this.widget.serieId),
         builder: (BuildContext context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(
