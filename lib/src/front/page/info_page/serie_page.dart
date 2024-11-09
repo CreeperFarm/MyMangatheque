@@ -130,6 +130,33 @@ class _SeriePageState extends State<SeriePage> {
                                               crossAxisAlignment: CrossAxisAlignment.start,
                                               children: [
                                                 FutureBuilder(
+                                                    future: connector.getSubSerieVolumesImages(subSerie['id']),
+                                                    builder: (context, snapshot) {
+                                                      if (snapshot.connectionState == ConnectionState.done) {
+                                                        return SingleChildScrollView(
+                                                          scrollDirection: Axis.horizontal,
+                                                          child: Row(
+                                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                                            children: [
+                                                              for (var i = 0; i < json.decode(snapshot.data.toString()).length; i += 1)
+                                                                Padding(
+                                                                  padding: const EdgeInsets.symmetric(horizontal: 5),
+                                                                  child: SizedBox(
+                                                                    width: 75,
+                                                                    child: ClipRRect(
+                                                                      borderRadius: BorderRadius.circular(12),
+                                                                      child: Image.network(snapshot.data![i].replaceAll('"', '')),
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                            ],
+                                                          ),
+                                                        );
+                                                      } else {
+                                                        return const SizedBox();
+                                                      }
+                                                    }),
+                                                FutureBuilder(
                                                   future: connector.getEditorName(subSerie['editor']),
                                                   builder: (context, snapshot) {
                                                     if (snapshot.connectionState == ConnectionState.done) {
@@ -140,19 +167,36 @@ class _SeriePageState extends State<SeriePage> {
                                                     }
                                                   },
                                                 ),
-                                                for (var volume in subSerie['volume'])
-                                                  FutureBuilder(
-                                                    future: connector.getVolumeImage(volume),
-                                                    builder: (context, snapshot) {
-                                                      if (snapshot.connectionState == ConnectionState.done) {
-                                                        return Image.network(
-                                                            'https://api.mymangatheque.com/api/files/utbujxtz8wtq0ar/${volume.toString()}/${snapshot.data.toString()}');
-                                                      } else {
-                                                        return SizedBox();
-                                                      }
-                                                    },
+                                                SingleChildScrollView(
+                                                  scrollDirection: Axis.horizontal,
+                                                  child: Row(
+                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                    children: [
+                                                      for (var i = subSerie['volumes'].length - 1; i >= 0; i -= 1)
+                                                        FutureBuilder(
+                                                          future: connector.getOne('volumes', subSerie['volumes'][i]),
+                                                          builder: (context, snapshot) {
+                                                            if (snapshot.connectionState == ConnectionState.done) {
+                                                              Map<String, dynamic> volume = json.decode(snapshot.data.toString())[0];
+                                                              return Padding(
+                                                                padding: const EdgeInsets.symmetric(horizontal: 5),
+                                                                child: SizedBox(
+                                                                  width: 75,
+                                                                  child: ClipRRect(
+                                                                    borderRadius: BorderRadius.circular(12),
+                                                                    child: Image.network(
+                                                                      "https://api.mymangatheque.com/api/files/tnof8u6oqfepdq6/${volume['id'].toString()}/${volume['image'].toString()}",
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                              );
+                                                            }
+                                                            return const SizedBox();
+                                                          },
+                                                        ),
+                                                    ],
                                                   ),
-                                                Text(subSerie['type'].toString()),
+                                                )
                                               ],
                                             ),
                                             OwnIcon(iconColor: Theme.of(context).colorScheme.primary, iconName: 'arrow-right'),

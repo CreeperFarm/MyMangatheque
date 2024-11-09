@@ -278,6 +278,10 @@ class PocketBaseConnector {
     return _pocketBase.collection(collectionId).getOne(recordId).then((value) => [value]);
   }
 
+  Future<List<RecordModel>> getOneOrder(String collectionId, String recordId, order) {
+    return _pocketBase.collection(collectionId).getOne(recordId).then((value) => [value]);
+  }
+
   // Get the data from a collection
   Future<List<RecordModel>> getCollectionData(String collectionId) {
     return _pocketBase.collection(collectionId).getList().then((value) => value.items);
@@ -385,6 +389,19 @@ class PocketBaseConnector {
   Future<Map<String, dynamic>> getSubSerie(String id) async {
     var subSeries = await PocketBaseConnector().getOne('sub_series', id);
     return json.decode(subSeries[0].toString());
+  }
+
+  // Get the images of some volumes of a sub serie TODO: Make the image order by the volume number Idea : Use the tome Number
+  Future<List<String>> getSubSerieVolumesImages(String id) async {
+    var subSeries = await PocketBaseConnector().getOne('sub_series', id);
+    var volumes = json.decode(subSeries[0].toString())['volumes'];
+    List<String> images = [];
+    for (var volume in volumes) {
+      var volumeImage = await PocketBaseConnector().getOne('volumes', volume);
+      images.add(
+          '"https://api.mymangatheque.com/api/files/tnof8u6oqfepdq6/${json.decode(volumeImage[0].toString())['id']}/${json.decode(volumeImage[0].toString())['image']}"');
+    }
+    return images;
   }
 
   Future<String> getAppVersion() async {
