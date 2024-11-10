@@ -391,15 +391,33 @@ class PocketBaseConnector {
     return json.decode(subSeries[0].toString());
   }
 
-  // Get the images of some volumes of a sub serie TODO: Make the image order by the volume number Idea : Use the tome Number
+  // Get the images of some volumes of a sub serie
   Future<List<String>> getSubSerieVolumesImages(String id) async {
     var subSeries = await PocketBaseConnector().getOne('sub_series', id);
     var volumes = json.decode(subSeries[0].toString())['volumes'];
     List<String> images = [];
+    List<String> tomeNumbers = [];
+
+    // Get the images of the volumes
     for (var volume in volumes) {
       var volumeImage = await PocketBaseConnector().getOne('volumes', volume);
       images.add(
           '"https://api.mymangatheque.com/api/files/tnof8u6oqfepdq6/${json.decode(volumeImage[0].toString())['id']}/${json.decode(volumeImage[0].toString())['image']}"');
+      tomeNumbers.add(json.decode(volumeImage[0].toString())['tome_number'].toString());
+    }
+
+    // Sort the images by the tome number
+    for (var i = 0; i < tomeNumbers.length; i++) {
+      for (var j = i + 1; j < tomeNumbers.length; j++) {
+        if (int.parse(tomeNumbers[i]) > int.parse(tomeNumbers[j])) {
+          var temp = tomeNumbers[i];
+          tomeNumbers[i] = tomeNumbers[j];
+          tomeNumbers[j] = temp;
+          temp = images[i];
+          images[i] = images[j];
+          images[j] = temp;
+        }
+      }
     }
     return images;
   }

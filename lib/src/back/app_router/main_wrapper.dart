@@ -231,7 +231,7 @@ class _MainWrapperState extends ConsumerState<MainWrapper> {
     );
   }
 
-  //TODO: Hide this when the keyboard is activated on mobile
+  //NavBar
   Widget navBar(unSelectedColor) {
     Color? selectedColor = Colors.cyanAccent;
     if (unSelectedColor == lightMode.colorScheme.primary) {
