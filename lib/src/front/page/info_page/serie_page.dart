@@ -199,6 +199,7 @@ class _SeriePageState extends State<SeriePage> {
                                                     data,
                                                     subSerie,
                                                     context,
+                                                    constraints,
                                                   );
                                                 } else {
                                                   return pageDisplayEditor(
@@ -207,6 +208,7 @@ class _SeriePageState extends State<SeriePage> {
                                                     data,
                                                     subSerie,
                                                     context,
+                                                    constraints,
                                                   );
                                                 }
                                               },
@@ -349,11 +351,12 @@ class _SeriePageState extends State<SeriePage> {
   }
 }
 
-Widget pageDisplayEditor(PocketBaseConnector connector, double width, Map<String, dynamic> data, Map<String, dynamic> subSerie, context) {
+Widget pageDisplayEditor(
+    PocketBaseConnector connector, double width, Map<String, dynamic> data, Map<String, dynamic> subSerie, context, BoxConstraints constraints) {
   return Container(
     width: width,
     constraints: BoxConstraints(
-      maxWidth: MediaQuery.of(context).size.width - 450,
+      maxWidth: width - 450,
     ),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
