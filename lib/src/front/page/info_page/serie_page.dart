@@ -190,69 +190,26 @@ class _SeriePageState extends State<SeriePage> {
                                         child: Row(
                                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                           children: [
-                                            SizedBox(
-                                              width: MediaQuery.of(context).size.width - 50,
-                                              child: Column(
-                                                crossAxisAlignment: CrossAxisAlignment.start,
-                                                children: [
-                                                  Padding(
-                                                    padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 5),
-                                                    child: FutureBuilder(
-                                                      future: connector.getEditorName(subSerie['editor']),
-                                                      builder: (context, snapshot) {
-                                                        if (snapshot.connectionState == ConnectionState.done) {
-                                                          return Text(
-                                                            '${subSerie['title'].toString().replaceFirst(data['title'] + ' - ', '')} • ${snapshot.data}',
-                                                            softWrap: false,
-                                                            overflow: TextOverflow.ellipsis,
-                                                          );
-                                                        } else {
-                                                          return Text(
-                                                            subSerie['title'].toString().replaceFirst(data['title'] + ' - ', ''),
-                                                            softWrap: false,
-                                                            overflow: TextOverflow.ellipsis,
-                                                          );
-                                                        }
-                                                      },
-                                                    ),
-                                                  ),
-                                                  SingleChildScrollView(
-                                                    scrollDirection: Axis.horizontal,
-                                                    child: Row(
-                                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                                      children: [
-                                                        FutureBuilder(
-                                                            future: connector.getSubSerieVolumesImages(subSerie['id']),
-                                                            builder: (context, snapshot) {
-                                                              if (snapshot.connectionState == ConnectionState.done) {
-                                                                return SingleChildScrollView(
-                                                                  scrollDirection: Axis.horizontal,
-                                                                  child: Row(
-                                                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                                                    children: [
-                                                                      for (var i = 0; i < json.decode(snapshot.data.toString()).length; i += 1)
-                                                                        Padding(
-                                                                          padding: const EdgeInsets.symmetric(horizontal: 5),
-                                                                          child: SizedBox(
-                                                                            width: 75,
-                                                                            child: ClipRRect(
-                                                                              borderRadius: BorderRadius.circular(12),
-                                                                              child: Image.network(snapshot.data![i].replaceAll('"', '')),
-                                                                            ),
-                                                                          ),
-                                                                        ),
-                                                                    ],
-                                                                  ),
-                                                                );
-                                                              } else {
-                                                                return const SizedBox();
-                                                              }
-                                                            }),
-                                                      ],
-                                                    ),
-                                                  )
-                                                ],
-                                              ),
+                                            LayoutBuilder(
+                                              builder: (context, constraints) {
+                                                if (constraints.minWidth > 1200) {
+                                                  return pageDisplayEditor(
+                                                    connector,
+                                                    MediaQuery.of(context).size.width - 350,
+                                                    data,
+                                                    subSerie,
+                                                    context,
+                                                  );
+                                                } else {
+                                                  return pageDisplayEditor(
+                                                    connector,
+                                                    MediaQuery.of(context).size.width - 50,
+                                                    data,
+                                                    subSerie,
+                                                    context,
+                                                  );
+                                                }
+                                              },
                                             ),
                                             OwnIcon(
                                               iconColor: Theme.of(context).colorScheme.primary,
@@ -390,4 +347,75 @@ class _SeriePageState extends State<SeriePage> {
       ),
     );
   }
+}
+
+Widget pageDisplayEditor(PocketBaseConnector connector, double width, Map<String, dynamic> data, Map<String, dynamic> subSerie, context) {
+  return Container(
+    width: width,
+    constraints: BoxConstraints(
+      maxWidth: MediaQuery.of(context).size.width - 450,
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 5),
+          child: FutureBuilder(
+            future: connector.getEditorName(subSerie['editor']),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.done) {
+                return Text(
+                  '${subSerie['title'].toString().replaceFirst(data['title'] + ' - ', '')} • ${snapshot.data}',
+                  softWrap: false,
+                  overflow: TextOverflow.ellipsis,
+                );
+              } else {
+                return Text(
+                  subSerie['title'].toString().replaceFirst(data['title'] + ' - ', ''),
+                  softWrap: false,
+                  overflow: TextOverflow.ellipsis,
+                );
+              }
+            },
+          ),
+        ),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              FutureBuilder(
+                future: connector.getSubSerieVolumesImages(subSerie['id']),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.done) {
+                    return SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          for (var i = 0; i < json.decode(snapshot.data.toString()).length; i += 1)
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 5),
+                              child: SizedBox(
+                                width: 75,
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: Image.network(snapshot.data![i].replaceAll('"', '')),
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    );
+                  } else {
+                    return const SizedBox();
+                  }
+                },
+              ),
+            ],
+          ),
+        )
+      ],
+    ),
+  );
 }

@@ -17,7 +17,7 @@ class MyPictureDisplay extends StatelessWidget {
           // Image Background with blur effect
           SizedBox(
             height: 275,
-            width: ((275 * 16.5) / 24 * 10),
+            width: ((MediaQuery.of(context).size.width * 16.5) / 24 * 10),
             child: ClipRRect(
               child: Wrap(
                 children: [
