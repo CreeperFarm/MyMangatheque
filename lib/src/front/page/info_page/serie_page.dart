@@ -28,7 +28,7 @@ class _SeriePageState extends State<SeriePage> {
         backgroundColor: Colors.transparent,
       ),
       body: FutureBuilder(
-        future: PocketBaseConnector().getOne('series', this.widget.serieId),
+        future: connector.getOne('series', widget.serieId),
         builder: (BuildContext context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(
@@ -69,10 +69,69 @@ class _SeriePageState extends State<SeriePage> {
                     children: [
                       Text(
                         data['title'].toString(),
-                        textAlign: TextAlign.right,
+                        textAlign: TextAlign.left,
                         style: const TextStyle(
                           fontSize: 35,
                           fontWeight: FontWeight.w300,
+                        ),
+                        softWrap: false,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      MyLine(
+                        width: MediaQuery.of(context).size.width,
+                        vertical: 10,
+                        horizontal: 0,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 5),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Genres :',
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 5),
+                                child: Row(
+                                  children: [
+                                    for (var i = 0; i < data['genres'].length; i += 1)
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(horizontal: 5),
+                                        child: ClipRRect(
+                                          borderRadius: BorderRadius.circular(12),
+                                          child: Container(
+                                            color: Theme.of(context).colorScheme.onSecondary,
+                                            child: Padding(
+                                              padding: const EdgeInsets.all(5),
+                                              child: FutureBuilder(
+                                                future: connector.getOne('genres', data['genres'][i]),
+                                                builder: (context, snapshot) {
+                                                  if (snapshot.connectionState == ConnectionState.done) {
+                                                    return Text(
+                                                      jsonDecode(snapshot.data![0].toString())['name'].toString(),
+                                                      style: TextStyle(
+                                                        color: Theme.of(context).colorScheme.secondary,
+                                                      ),
+                                                    );
+                                                  }
+                                                  return const SizedBox();
+                                                },
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                       MyLine(
@@ -131,59 +190,69 @@ class _SeriePageState extends State<SeriePage> {
                                         child: Row(
                                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                           children: [
-                                            Column(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                              children: [
-                                                Padding(
-                                                  padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 5),
-                                                  child: FutureBuilder(
-                                                    future: connector.getEditorName(subSerie['editor']),
-                                                    builder: (context, snapshot) {
-                                                      if (snapshot.connectionState == ConnectionState.done) {
-                                                        return Text(
-                                                            '${subSerie['title'].toString().replaceFirst(data['title'] + ' - ', '')} • ${snapshot.data}');
-                                                      } else {
-                                                        return Text(subSerie['title'].toString().replaceFirst(data['title'] + ' - ', ''));
-                                                      }
-                                                    },
+                                            SizedBox(
+                                              width: MediaQuery.of(context).size.width - 50,
+                                              child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  Padding(
+                                                    padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 5),
+                                                    child: FutureBuilder(
+                                                      future: connector.getEditorName(subSerie['editor']),
+                                                      builder: (context, snapshot) {
+                                                        if (snapshot.connectionState == ConnectionState.done) {
+                                                          return Text(
+                                                            '${subSerie['title'].toString().replaceFirst(data['title'] + ' - ', '')} • ${snapshot.data}',
+                                                            softWrap: false,
+                                                            overflow: TextOverflow.ellipsis,
+                                                          );
+                                                        } else {
+                                                          return Text(
+                                                            subSerie['title'].toString().replaceFirst(data['title'] + ' - ', ''),
+                                                            softWrap: false,
+                                                            overflow: TextOverflow.ellipsis,
+                                                          );
+                                                        }
+                                                      },
+                                                    ),
                                                   ),
-                                                ),
-                                                SingleChildScrollView(
-                                                  scrollDirection: Axis.horizontal,
-                                                  child: Row(
-                                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                                    children: [
-                                                      FutureBuilder(
-                                                          future: connector.getSubSerieVolumesImages(subSerie['id']),
-                                                          builder: (context, snapshot) {
-                                                            if (snapshot.connectionState == ConnectionState.done) {
-                                                              return SingleChildScrollView(
-                                                                scrollDirection: Axis.horizontal,
-                                                                child: Row(
-                                                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                                                  children: [
-                                                                    for (var i = 0; i < json.decode(snapshot.data.toString()).length; i += 1)
-                                                                      Padding(
-                                                                        padding: const EdgeInsets.symmetric(horizontal: 5),
-                                                                        child: SizedBox(
-                                                                          width: 75,
-                                                                          child: ClipRRect(
-                                                                            borderRadius: BorderRadius.circular(12),
-                                                                            child: Image.network(snapshot.data![i].replaceAll('"', '')),
+                                                  SingleChildScrollView(
+                                                    scrollDirection: Axis.horizontal,
+                                                    child: Row(
+                                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                                      children: [
+                                                        FutureBuilder(
+                                                            future: connector.getSubSerieVolumesImages(subSerie['id']),
+                                                            builder: (context, snapshot) {
+                                                              if (snapshot.connectionState == ConnectionState.done) {
+                                                                return SingleChildScrollView(
+                                                                  scrollDirection: Axis.horizontal,
+                                                                  child: Row(
+                                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                                    children: [
+                                                                      for (var i = 0; i < json.decode(snapshot.data.toString()).length; i += 1)
+                                                                        Padding(
+                                                                          padding: const EdgeInsets.symmetric(horizontal: 5),
+                                                                          child: SizedBox(
+                                                                            width: 75,
+                                                                            child: ClipRRect(
+                                                                              borderRadius: BorderRadius.circular(12),
+                                                                              child: Image.network(snapshot.data![i].replaceAll('"', '')),
+                                                                            ),
                                                                           ),
                                                                         ),
-                                                                      ),
-                                                                  ],
-                                                                ),
-                                                              );
-                                                            } else {
-                                                              return const SizedBox();
-                                                            }
-                                                          }),
-                                                    ],
-                                                  ),
-                                                )
-                                              ],
+                                                                    ],
+                                                                  ),
+                                                                );
+                                                              } else {
+                                                                return const SizedBox();
+                                                              }
+                                                            }),
+                                                      ],
+                                                    ),
+                                                  )
+                                                ],
+                                              ),
                                             ),
                                             OwnIcon(
                                               iconColor: Theme.of(context).colorScheme.primary,
@@ -261,23 +330,30 @@ class _SeriePageState extends State<SeriePage> {
                                                 ),
                                               ),
                                             ),
-                                            Column(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                              children: [
-                                                Text(
-                                                  authorData['name'].toString(),
-                                                  style: const TextStyle(
-                                                    fontSize: 18,
-                                                    fontWeight: FontWeight.bold,
+                                            Padding(
+                                              padding: const EdgeInsets.only(left: 8.0),
+                                              child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    authorData['name'].toString(),
+                                                    style: const TextStyle(
+                                                      fontSize: 18,
+                                                      fontWeight: FontWeight.bold,
+                                                    ),
+                                                    softWrap: false,
+                                                    overflow: TextOverflow.ellipsis,
                                                   ),
-                                                ),
-                                                Text(
-                                                  authorData['job'].toString(),
-                                                  style: const TextStyle(
-                                                    fontSize: 13,
+                                                  Text(
+                                                    authorData['job'].toString(),
+                                                    style: const TextStyle(
+                                                      fontSize: 13,
+                                                    ),
+                                                    softWrap: false,
+                                                    overflow: TextOverflow.ellipsis,
                                                   ),
-                                                ),
-                                              ],
+                                                ],
+                                              ),
                                             ),
                                           ],
                                         ),
@@ -301,12 +377,6 @@ class _SeriePageState extends State<SeriePage> {
                                 : SizedBox(),
                           ],
                         ),
-                      MyLine(
-                        width: MediaQuery.of(context).size.width,
-                        vertical: 10,
-                        horizontal: 0,
-                      ),
-                      Text(data['type'].toString()),
                     ],
                   ),
                 )

@@ -253,125 +253,23 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                                     context.go('/search/serie/${manga['id']}');
                                   },
                                 ),
-                                MyLine(
-                                  width: MediaQuery.of(context).size.width,
-                                  vertical: 0,
-                                ),
+                                (index != _resultsList.length - 1)
+                                    ? MyLine(
+                                        width: MediaQuery.of(context).size.width,
+                                        vertical: 0,
+                                      )
+                                    : const Padding(
+                                        padding: EdgeInsets.only(bottom: 0),
+                                      ),
                               ],
                             );
                           }
                         },
                       );
                     } else if (selectedFilter == 'author') {
-                      return Column(
-                        children: [
-                          ListTile(
-                            title: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Row(
-                                  children: [
-                                    Padding(
-                                      padding: const EdgeInsets.only(right: 10),
-                                      child: Image.network(
-                                        //TODO: Change the URL just after the 'api/files/' part to match with the real one
-                                        'https://api.mymangatheque.com/api/files/utbujxtz8wtq0ar/${json.decode(_resultsList[index].toString())['id'].toString()}/${json.decode(_resultsList[index].toString())['image'].toString()}',
-                                        width: 50,
-                                      ),
-                                    ),
-                                    Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          textLength(json.decode(_resultsList[index].toString())['author'], 27),
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 17,
-                                            color: Theme.of(context).colorScheme.primary,
-                                          ),
-                                        ),
-                                        Text(
-                                          textLength(json.decode(_resultsList[index].toString())['manga'], 40),
-                                          style: TextStyle(
-                                            color: Theme.of(context).colorScheme.primary,
-                                            fontSize: 14,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                                Icon(
-                                  Icons.arrow_forward_ios,
-                                  color: Theme.of(context).colorScheme.primary,
-                                ),
-                              ],
-                            ),
-                            onTap: () {
-                              context.go('/search/author/${json.decode(_resultsList[index].toString())['author']}');
-                            },
-                          ),
-                          MyLine(
-                            width: MediaQuery.of(context).size.width,
-                            vertical: 0,
-                          ),
-                        ],
-                      );
+                      return Text("Author" "WIP");
                     } else {
-                      return Column(
-                        children: [
-                          ListTile(
-                            title: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Row(
-                                  children: [
-                                    Padding(
-                                      padding: const EdgeInsets.only(right: 10),
-                                      child: Image.network(
-                                        //TODO: Change the URL just after the 'api/files/' part to match with the real one
-                                        'https://api.mymangatheque.com/api/files/utbujxtz8wtq0ar/${json.decode(_resultsList[index].toString())['id'].toString()}/${json.decode(_resultsList[index].toString())['image'].toString()}',
-                                        width: 50,
-                                      ),
-                                    ),
-                                    Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          textLength(json.decode(_resultsList[index].toString())['editor'], 27),
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 17,
-                                            color: Theme.of(context).colorScheme.primary,
-                                          ),
-                                        ),
-                                        Text(
-                                          textLength(json.decode(_resultsList[index].toString())['author'], 40),
-                                          style: TextStyle(
-                                            color: Theme.of(context).colorScheme.primary,
-                                            fontSize: 14,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                                Icon(
-                                  Icons.arrow_forward_ios,
-                                  color: Theme.of(context).colorScheme.primary,
-                                ),
-                              ],
-                            ),
-                            onTap: () {
-                              context.go('/search/editor/${json.decode(_resultsList[index].toString())['editor']}');
-                            },
-                          ),
-                          MyLine(
-                            width: MediaQuery.of(context).size.width,
-                            vertical: 0,
-                          ),
-                        ],
-                      );
+                      return Text("Author" "WIP");
                     }
                   },
                 ),
