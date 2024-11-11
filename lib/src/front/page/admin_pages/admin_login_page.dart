@@ -81,8 +81,11 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
             text: "Se connecter",
             onTap: () async {
               try {
-                await connector.loginAsAdmin(emailController.text, passwordController.text, context);
-                context.go('/admin');
+                await connector.loginAsAdmin(emailController.text, passwordController.text, context).then((value) {
+                  if (value) {
+                    GoRouter.of(context).go('/admin');
+                  }
+                });
               } catch (e) {
                 var error = e.toString();
                 showMessage(error, context);

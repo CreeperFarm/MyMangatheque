@@ -25,9 +25,8 @@ class PocketBaseAdminConnector {
 
   Future<bool> loginAsAdmin(String email, String password, context) async {
     try {
-      print('Admin connecting');
       await _pocketBase.admins.authWithPassword(email.toString(), password);
-      print('Admin connected');
+      _isConnected = _pocketBase.authStore.isValid;
       return _isConnected = _pocketBase.authStore.isValid;
     } catch (err) {
       if (err.toString().contains('Failed to authenticate')) {

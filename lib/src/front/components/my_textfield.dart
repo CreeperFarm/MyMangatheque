@@ -3,28 +3,33 @@ import 'package:flutter/material.dart';
 class MyTextField extends StatelessWidget {
   final TextEditingController controller;
   final String labelText;
-  final bool obscureText;
+  final bool? obscureText;
   final String errorMessage;
+  final TextInputType? keyboardType;
+  final double? verticalPadding;
 
   const MyTextField({
     required this.controller,
     required this.labelText,
-    required this.obscureText,
     required this.errorMessage,
+    this.obscureText,
+    this.keyboardType,
+    this.verticalPadding,
     super.key,
   });
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 5.0),
+      padding: EdgeInsets.symmetric(horizontal: 5.0, vertical: verticalPadding ?? 0.0),
       child: TextFormField(
         controller: controller,
-        obscureText: obscureText,
+        obscureText: obscureText ?? false,
+        keyboardType: keyboardType ?? TextInputType.text,
         validator: (value) {
           if (value == null || value.isEmpty) {
             return errorMessage;
-          } else if (value.length < 6 && obscureText) {
+          } else if (value.length < 6 && obscureText!) {
             return "Votre mot de passe doit contenir au moins 6 caractères!";
           } else {
             return null;

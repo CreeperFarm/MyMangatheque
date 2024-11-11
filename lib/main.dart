@@ -66,43 +66,49 @@ class MyHomePageState extends ConsumerState<MyHomePage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             ElevatedButton(
-                onPressed: () {
-                  if (PocketBaseConnector().isLoggedIn()) {
-                    context.go('/profile');
-                  } else {
-                    context.go('/profile/signin');
-                  }
-                },
-                child: const Text("Go to Profile Page")),
+              onPressed: () {
+                if (PocketBaseConnector().isLoggedIn()) {
+                  context.go('/profile');
+                } else {
+                  context.go('/profile/signin');
+                }
+              },
+              child: const Text("Go to Profile Page"),
+            ),
             ElevatedButton(
-                onPressed: () {
-                  if (PocketBaseConnector().isLoggedIn()) {
-                    context.go('/profile/settings');
-                  } else {
-                    context.go('/profile/signin');
-                  }
-                },
-                child: const Text("Go to Setting Profile Page")),
+              onPressed: () {
+                if (PocketBaseConnector().isLoggedIn()) {
+                  context.go('/profile/settings');
+                } else {
+                  context.go('/profile/signin');
+                }
+              },
+              child: const Text("Go to Setting Profile Page"),
+            ),
             ElevatedButton(
-                onPressed: () {
-                  context.go('/library/scan');
-                },
-                child: const Text("Go to Scan Page")),
+              onPressed: () {
+                context.go('/library/scan');
+              },
+              child: const Text("Go to Scan Page"),
+            ),
             ElevatedButton(
-                onPressed: () {
-                  context.go('/discover');
-                },
-                child: const Text("Go to Discover Page")),
+              onPressed: () {
+                context.go('/discover');
+              },
+              child: const Text("Go to Discover Page"),
+            ),
             ElevatedButton(
-                onPressed: () {
-                  context.go('/devpage');
-                },
-                child: const Text("Go to Dev Compo Show Page")),
+              onPressed: () {
+                context.go('/devpage');
+              },
+              child: const Text("Go to Dev Compo Show Page"),
+            ),
             ElevatedButton(
-                onPressed: () {
-                  context.go('/mentions_legales');
-                },
-                child: const Text("Go to Mentions Légales Page")),
+              onPressed: () {
+                context.go('/mentions_legales');
+              },
+              child: const Text("Go to Mentions Légales Page"),
+            ),
           ],
         ),
       ),
