@@ -5,7 +5,7 @@ void showMessage(String message, context) {
       context: context,
       builder: (context) {
         return AlertDialog(
-          backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+          backgroundColor: Theme.of(context).colorScheme.onPrimary,
           title: Center(
             child: Text(
               message,
@@ -16,6 +16,5 @@ void showMessage(String message, context) {
             ),
           ),
         );
-      }
-  );
+      });
 }
