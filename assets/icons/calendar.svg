@@ -1,14 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-    <path d="M8 2V5" stroke="#292D32" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="M16 2V5" stroke="#292D32" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="M3.5 9.08997H20.5" stroke="#292D32" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="M21 8.5V17C21 20 19.5 22 16 22H8C4.5 22 3 20 3 17V8.5C3 5.5 4.5 3.5 8 3.5H16C19.5 3.5 21 5.5 21 8.5Z" stroke="#292D32" stroke-width="1.5" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="M15.6947 12.7H15.7037" stroke="#292D32" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="M15.6947 15.7H15.7037" stroke="#292D32" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="M11.9955 12.7H12.0045" stroke="#292D32" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="M11.9955 15.7H12.0045" stroke="#292D32" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="M11.9955 18.7H12.0045" stroke="#292D32" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="M8.29431 12.7H8.30329" stroke="#292D32" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="M8.29431 15.7H8.30329" stroke="#292D32" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="M8.29431 18.7H8.30329" stroke="#292D32" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>
+<svg fill="none" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><g stroke="#292d32" stroke-linecap="round" stroke-linejoin="round"><g stroke-miterlimit="10" stroke-width="1.5"><path d="m8 2v3"/><path d="m16 2v3"/><path d="m3.5 9.08997h17"/><path d="m21 8.5v8.5c0 3-1.5 5-5 5h-8c-3.5 0-5-2-5-5v-8.5c0-3 1.5-5 5-5h8c3.5 0 5 2 5 5z"/></g><g stroke-width="2"><path d="m15.6947 12.7h.009"/><path d="m15.6947 15.7h.009"/><path d="m11.9955 12.7h.009"/><path d="m11.9955 15.7h.009"/><path d="m11.9955 18.7h.009"/><path d="m8.29431 12.7h.00898"/><path d="m8.29431 15.7h.00898"/><path d="m8.29431 18.7h.00898"/></g></g></svg>
