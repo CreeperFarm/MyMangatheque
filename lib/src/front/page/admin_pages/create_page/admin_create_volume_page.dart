@@ -1,4 +1,7 @@
+import 'package:date_field/date_field.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:mymangatheque/src/front/components/my_scroll_column.dart';
 import 'package:mymangatheque/src/front/components/my_textfield.dart';
 import 'package:simple_barcode_scanner/enum.dart';
@@ -20,6 +23,49 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
   final TextEditingController languageVolumeController = TextEditingController();
   final TextEditingController supportVolumeController = TextEditingController();
   final TextEditingController genreJapVolumeController = TextEditingController();
+  final TextEditingController resumeVolumeController = TextEditingController();
+  final TextEditingController imagePathVolumeController = TextEditingController();
+  final TextEditingController imageNameVolumeController = TextEditingController();
+  final TextEditingController bookLinkVolumeController = TextEditingController();
+  final TextEditingController infoVolumeController = TextEditingController();
+  DateTime release = DateTime.now();
+
+  void uploadImage() async {
+    final image = await ImagePicker().pickImage(
+      source: ImageSource.gallery,
+      maxHeight: 512,
+      maxWidth: 512,
+      imageQuality: 75,
+    );
+
+    imagePathVolumeController.text = image!.path;
+    imageNameVolumeController.text = image.name;
+  }
+
+  @override
+  void initState() {
+    bookLinkVolumeController.text =
+        '[{"available": "En Stock","seller": "amazon", "url": ""},{"available": "En Stock","seller": "bdfugue", "url": "https://www.bdfugue.com/a/?ean=${eanVolumeController.text}&ref=W0WZrth4"}]';
+    infoVolumeController.text = '{"pageNumber": }';
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    titleVolumeController.dispose();
+    numberVolumeController.dispose();
+    eanVolumeController.dispose();
+    priceVolumeController.dispose();
+    languageVolumeController.dispose();
+    supportVolumeController.dispose();
+    genreJapVolumeController.dispose();
+    resumeVolumeController.dispose();
+    imagePathVolumeController.dispose();
+    imageNameVolumeController.dispose();
+    bookLinkVolumeController.dispose();
+    infoVolumeController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,6 +85,38 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
         Form(
           child: Column(
             children: [
+              Stack(
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      uploadImage();
+                      setState(() {});
+                    },
+                    child: Center(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(20.0),
+                        child: Image.asset(
+                          imagePathVolumeController.text != "" ? imagePathVolumeController.text : 'assets/images/unknown.webp',
+                          width: MediaQuery.of(context).size.width * 0.4,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    right: MediaQuery.of(context).size.width * 0.15,
+                    bottom: 0,
+                    child: IconButton(
+                      onPressed: () {
+                        imagePathVolumeController.text = "";
+                        imageNameVolumeController.text = "";
+                        setState(() {});
+                      },
+                      icon: Icon(CupertinoIcons.delete_left_fill),
+                    ),
+                  ),
+                ],
+              ),
               MyTextField(
                 controller: titleVolumeController,
                 labelText: "Nom du Volume",
@@ -88,6 +166,24 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
                 labelText: "Prix du Volume",
                 errorMessage: "Veuillez entrer le prix du volume!",
                 keyboardType: TextInputType.number,
+                verticalPadding: 5,
+              ),
+              MyTextField(
+                controller: resumeVolumeController,
+                labelText: "Résumé du Volume",
+                errorMessage: "Veuillez entrer le résumé du volume!",
+                verticalPadding: 5,
+              ),
+              MyTextField(
+                controller: bookLinkVolumeController,
+                labelText: "Lien du Volume",
+                errorMessage: "Veuillez entrer le lien du volume!",
+                verticalPadding: 5,
+              ),
+              MyTextField(
+                controller: infoVolumeController,
+                labelText: "Informations du Volume",
+                errorMessage: "Veuillez entrer les informations du volume!",
                 verticalPadding: 5,
               ),
               Row(
@@ -250,6 +346,49 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
                     ),
                     hintText: "Genre du Volume",
                   ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 5.0),
+                child: DateTimeFormField(
+                  decoration: InputDecoration(
+                    errorBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Theme.of(context).colorScheme.error,
+                      ),
+                    ),
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
+                    filled: true,
+                    labelStyle: TextStyle(
+                      color: Theme.of(context).colorScheme.onPrimary,
+                    ),
+                    hintText: "Date de publication",
+                  ),
+                  cupertinoDatePickerOptions: CupertinoDatePickerOptions(
+                    modalTitleText: "Sélectionnez la date",
+                    style: CupertinoDatePickerOptionsStyle(
+                      modalTitle: TextStyle(
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
+                  ),
+                  mode: DateTimeFieldPickerMode.date,
+                  initialPickerDateTime: DateTime.now(),
+                  validator: (value) {
+                    if (value == null) {
+                      return "Veuillez entrer la date de publication!";
+                    }
+                    return null;
+                  },
+                  onChanged: (DateTime? value) {
+                    setState(() {
+                      release = value!;
+                    });
+                  },
                 ),
               ),
             ],

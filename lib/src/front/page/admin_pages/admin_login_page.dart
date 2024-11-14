@@ -83,6 +83,7 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
               try {
                 await connector.loginAsAdmin(emailController.text, passwordController.text, context).then((value) {
                   if (value) {
+                    setState(() {});
                     GoRouter.of(context).go('/admin');
                   }
                 });
