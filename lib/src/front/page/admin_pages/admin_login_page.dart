@@ -19,8 +19,6 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
   final passwordController = TextEditingController();
   final connector = PocketBaseAdminConnector();
 
-  Future<void> signIn(context) async {}
-
   // Dispose Variable
   @override
   void dispose() {

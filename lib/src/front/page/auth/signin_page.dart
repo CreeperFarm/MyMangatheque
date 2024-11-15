@@ -24,7 +24,7 @@ class _SignInPageState extends State<SignInPage> {
 
   Future<User?> signIn(context) async {
     try {
-      final userData = await connector.loginWithEmail(emailController.text, passwordController.text);
+      final userData = await connector.loginWithEmail(emailController.text, passwordController.text, context);
       debugPrint(userData.toString());
 
       debugPrint('connector id ${connector.getConnectedUser()!.id}');
@@ -129,7 +129,7 @@ class _SignInPageState extends State<SignInPage> {
               // Display sign in button
               MyButton(
                 text: "Se connecter",
-                onTap: () => connector.loginWithEmail(emailController.text, passwordController.text).then((value) {
+                onTap: () => connector.loginWithEmail(emailController.text, passwordController.text, context).then((value) {
                   context.go('/profile');
                 }).catchError((e) {
                   showMessage(e.toString(), context);

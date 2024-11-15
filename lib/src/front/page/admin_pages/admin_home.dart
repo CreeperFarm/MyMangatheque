@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:mymangatheque/src/back/services/pocketbaseadmin.dart';
 import 'package:mymangatheque/src/front/components/my_scroll_column.dart';
 import 'package:mymangatheque/src/front/page/admin_pages/admin_login_page.dart';
+import 'package:mymangatheque/src/function/show_message_function.dart';
 
 class AdminHomePage extends StatelessWidget {
   const AdminHomePage({super.key});

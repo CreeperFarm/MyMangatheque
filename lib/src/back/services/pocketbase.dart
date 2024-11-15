@@ -127,14 +127,17 @@ class PocketBaseConnector {
   }
 
   // Login the user with email and password
-  Future<User?> loginWithEmail(String email, String password) async {
+  Future<User?> loginWithEmail(String email, String password, context) async {
     try {
       await _pocketBase.collection('users').authWithPassword(email.toLowerCase(), password).then((value) => value.token.isNotEmpty);
 
       _connectedUser.add(await findUser(email.toLowerCase()));
 
+      showMessage("Vous êtes connecté(e).", context);
+
       return _connectedUser.value;
-    } catch (err) {
+    } catch (err, context) {
+      showMessage(err.toString(), context);
       return null;
     }
   }
@@ -175,7 +178,7 @@ class PocketBaseConnector {
   Future modifyPassword(String email, String oldPassword, String newPassword, context) async {
     try {
       _pocketBase.authStore.clear();
-      loginWithEmail(email, oldPassword);
+      loginWithEmail(email, oldPassword, context);
       await _pocketBase.collection('users').confirmPasswordReset(_pocketBase.authStore.token, newPassword, newPassword);
       return showMessage('Votre mots de passe a bien été modifié.', context);
     } catch (e) {
