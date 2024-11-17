@@ -7,7 +7,6 @@ import 'package:glass_kit/glass_kit.dart';
 import 'package:go_router/go_router.dart';
 import 'package:keyboard_detection/keyboard_detection.dart';
 import 'package:mymangatheque/src/const/own_icon.dart';
-import 'package:mymangatheque/src/const/theme/light_mode.dart';
 import 'package:mymangatheque/src/front/components/my_drawer.dart';
 import 'package:mymangatheque/src/front/components/my_drawer_tile.dart';
 import 'package:url_launcher/link.dart';
@@ -220,7 +219,7 @@ class _MainWrapperState extends ConsumerState<MainWrapper> {
                   widget.navigationShell,
                   Align(
                     alignment: Alignment.bottomCenter,
-                    child: navBar(Theme.of(context).colorScheme.primary),
+                    child: navBar(),
                   ),
                 ],
               ),
@@ -232,13 +231,7 @@ class _MainWrapperState extends ConsumerState<MainWrapper> {
   }
 
   //NavBar
-  Widget navBar(unSelectedColor) {
-    Color? selectedColor = Colors.cyanAccent;
-    if (unSelectedColor == lightMode.colorScheme.primary) {
-      selectedColor = Colors.blueAccent[700];
-    } else {
-      selectedColor = Colors.cyanAccent;
-    }
+  Widget navBar() {
     return GlassContainer.clearGlass(
       gradient: LinearGradient(
         colors: [
@@ -279,14 +272,15 @@ class _MainWrapperState extends ConsumerState<MainWrapper> {
                       left: 22,
                     ),
                     child: OwnIcon(
-                      iconName: iconName,
-                      iconColor: isSelected ? selectedColor : unSelectedColor,
+                      iconName: isSelected ? '$iconName-active' : iconName,
+                      iconColor: Theme.of(context).colorScheme.primary,
                     ),
                   ),
                   Text(
                     navTitle[index],
                     style: TextStyle(
-                      color: isSelected ? selectedColor : unSelectedColor,
+                      color: Theme.of(context).colorScheme.primary,
+                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                       fontSize: 12,
                     ),
                   ),

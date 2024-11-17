@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/services.dart';
 import 'package:http/http.dart';
 import 'package:mymangatheque/src/back/services/utils.dart';
 import 'package:mymangatheque/src/function/show_message_function.dart';
@@ -75,55 +74,60 @@ class PocketBaseConnector {
   }
 
   signInWithGoogle(context) async {
-    final authData = await _pocketBase.collection('users').authWithOAuth2('google', (url) async {
-      await _launchUrl(url);
-    }, scopes: [
-      'email',
-      'profile',
-      'https://www.googleapis.com/auth/user.gender.read',
-      'https://www.googleapis.com/auth/user.birthday.read'
-    ], createData: {
-      "role": "user",
-      "emailVisibility": true,
-      "gender": "other",
-    });
-    dynamic authData2 = json.decode(authData.toString());
+    try {
+      final authData = await _pocketBase.collection('users').authWithOAuth2('google', (url) async {
+        await _launchUrl(url);
+      }, scopes: [
+        'email',
+        'profile',
+        'https://www.googleapis.com/auth/user.gender.read',
+        'https://www.googleapis.com/auth/user.birthday.read'
+      ], createData: {
+        "role": "user",
+        "emailVisibility": true,
+        "gender": "other",
+      });
+      print(authData);
+      dynamic authData2 = await json.decode(authData.toString());
+      print(authData2);
 
-    var meta = authData.meta;
+      var meta = authData.meta;
 
-    if (authData2['meta']['isNew']) {
-      var data = authData2['meta']['rawUser'];
-      try {
-        /*var imageId = await ImageDownloader.downloadImage(data['picture']);
+      if (authData2['meta']['isNew']) {
+        var data = authData2['meta']['rawUser'];
+        try {
+          /*var imageId = await ImageDownloader.downloadImage(data['picture']);
         if (imageId == null) {
           return;
         }
         var fileName = await ImageDownloader.findName(imageId);
         var path = await ImageDownloader.findPath(imageId);*/
-        var body = <String, dynamic>{
-          "email": data['email'],
-          "birthday": DateTime.now().toString(),
-        };
+          var body = <String, dynamic>{
+            "email": data['email'],
+            "birthday": DateTime.now().toString(),
+          };
 
-        // Upload the image of the user
-        await _pocketBase.collection('users').update(_pocketBase.authStore.model.id, body: body, files: [
-          /*http.MultipartFile.fromBytes(
+          // Upload the image of the user
+          await _pocketBase.collection('users').update(_pocketBase.authStore.model.id, body: body, files: [
+            /*http.MultipartFile.fromBytes(
             'avatar',
             File(path!).readAsBytesSync(),
             filename: fileName,
           )*/
-        ]);
+          ]);
 
-        await sendVerification(data['email']);
-      } on PlatformException catch (e) {
-        print(e);
-        showMessage("Un erreur s'est déroullé", context);
+          await sendVerification(data['email']);
+        } catch (e) {
+          debugPrint(e.toString());
+          showMessage("Un erreur est survenue.", context);
+        }
+      } else {
+        debugPrint('User already exists');
       }
-    } else {
-      print('User already exists');
+      _connectedUser.add(await findUser(authData2['meta']['rawUser']['email'].toString().toLowerCase()));
+    } catch (e) {
+      showMessage(e.toString(), context);
     }
-    _connectedUser.add(await findUser(authData2['meta']['rawUser']['email'].toString().toLowerCase()));
-    await closeInAppWebView();
   }
 
   // Login the user with email and password
