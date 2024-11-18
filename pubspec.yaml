@@ -64,12 +64,10 @@ dependencies:
   go_router: ^14.2.0
   auto_route: ^9.2.0
   riverpod: ^2.5.0
-  url_strategy: ^0.3.0
 
   # For the barcode scanner
 
   # To auth the user
-  pocketbase: ^0.18.1
   dart_date: ^1.3.2
 
   # To store the token
@@ -82,6 +80,8 @@ dependencies:
   keyboard_detection: ^0.7.3
   simple_barcode_scanner: ^0.2.4
   package_info_plus: ^8.1.1
+  fetch_client: ^1.1.2
+  pocketbase: ^0.18.1
 
   # Need triage
 
