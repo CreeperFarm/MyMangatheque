@@ -24,16 +24,16 @@ class PocketBaseConnector {
     final storage = getIt<LocalStorage>();
     final token = await storage.getToken();
 
-    final customAuthStore = AsyncAuthStore(
+    /*final customAuthStore = AsyncAuthStore(
       initial: token,
       save: storage.setToken,
       clear: storage.deleteToken,
-    );
+    );*/
 
     _pocketBase = PocketBase(
       'https://api.mymangatheque.com',
       lang: 'fr-FR',
-      authStore: customAuthStore,
+      //authStore: customAuthStore,
     );
 
     if (_pocketBase.authStore.isValid) {
@@ -70,6 +70,7 @@ class PocketBaseConnector {
   }
 
   Future<void> _launchUrl(Uri url) async {
+    debugPrint("Launching url : $url");
     if (!await launchUrl(url)) {
       throw Exception('Could not launch $url');
     }
@@ -97,39 +98,49 @@ class PocketBaseConnector {
       print(authData2);
 
       var meta = authData.meta;
-
-      if (authData2['meta']['isNew']) {
-        var data = authData2['meta']['rawUser'];
-        try {
-          /*var imageId = await ImageDownloader.downloadImage(data['picture']);
+      if (_pocketBase.authStore.isValid) {
+        if (authData2['meta']['isNew']) {
+          var data = authData2['meta']['rawUser'];
+          try {
+            /*var imageId = await ImageDownloader.downloadImage(data['picture']);
         if (imageId == null) {
           return;
         }
         var fileName = await ImageDownloader.findName(imageId);
         var path = await ImageDownloader.findPath(imageId);*/
-          var body = <String, dynamic>{
-            "email": data['email'],
-            "birthday": DateTime.now().toString(),
-          };
+            var body = <String, dynamic>{
+              "email": data['email'],
+              "birthday": DateTime.now().toString(),
+            };
 
+<<<<<<< Updated upstream
           // Upload the image of the user
           await _pocketBase
               .collection('users')
               .update(_pocketBase.authStore.model.id, body: body, files: [
             /*http.MultipartFile.fromBytes(
+=======
+            // Upload the image of the user
+            await _pocketBase.collection('users').update(_pocketBase.authStore.model.id, body: body, files: [
+              /*http.MultipartFile.fromBytes(
+>>>>>>> Stashed changes
             'avatar',
             File(path!).readAsBytesSync(),
             filename: fileName,
           )*/
-          ]);
+            ]);
 
-          await sendVerification(data['email']);
-        } catch (e) {
-          debugPrint(e.toString());
-          showMessage("Un erreur est survenue.", context);
+            await sendVerification(data['email']);
+          } catch (e) {
+            debugPrint(e.toString());
+            showMessage("Un erreur est survenue.", context);
+          }
+        } else {
+          debugPrint('User already exists');
         }
       } else {
-        debugPrint('User already exists');
+        debugPrint('User isn\'t connected');
+        showMessage('Une erreur est survenue', context);
       }
       _connectedUser.add(await findUser(
           authData2['meta']['rawUser']['email'].toString().toLowerCase()));

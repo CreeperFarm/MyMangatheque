@@ -174,7 +174,8 @@ class _SignInPageState extends State<SignInPage> {
                   SquareTile(
                     imagePath: 'assets/images/google.png',
                     onTap: () => {
-                      PocketBaseConnector().signInWithGoogle(context),
+                      debugPrint("Google Sign In got clicked"),
+                      connector.signInWithGoogle(context),
                       context.go('/profile'),
                     },
                   ),

@@ -27,8 +27,7 @@ class _SignUpPageState extends State<SignUpPage> {
   final passwordController = TextEditingController();
   final passwordVerifierController = TextEditingController();
   final usernameController = TextEditingController();
-  DateTime selectedBDayDate = DateTime(
-      DateTime.now().year - 7, DateTime.now().month, DateTime.now().day);
+  DateTime selectedBDayDate = DateTime(DateTime.now().year - 7, DateTime.now().month, DateTime.now().day);
   final selectedGender = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
@@ -39,14 +38,8 @@ class _SignUpPageState extends State<SignUpPage> {
   void signingUpProcess() async {
     PocketBaseConnector connector = PocketBaseConnector();
 
-    connector.createUser(
-        usernameController.text,
-        emailController.text,
-        passwordController.text,
-        passwordVerifierController.text,
-        selectedGender.text,
-        selectedBDayDate.add(const Duration(hours: 1)).toUtc().toString(),
-        context);
+    connector.createUser(usernameController.text, emailController.text, passwordController.text, passwordVerifierController.text, selectedGender.text,
+        selectedBDayDate.add(const Duration(hours: 1)).toUtc().toString(), context);
     connector.sendVerification(emailController.text);
     await connector.updateUserData(emailController.text);
     context.go('/profile');
@@ -84,6 +77,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
   @override
   Widget build(BuildContext context) {
+    final PocketBaseConnector connector = PocketBaseConnector();
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -103,10 +97,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
                 // Locker Icon
                 SvgPicture.asset('assets/icons/locker.svg',
-                    height: 75,
-                    colorFilter: ColorFilter.mode(
-                        Theme.of(context).colorScheme.primary,
-                        BlendMode.srcIn)),
+                    height: 75, colorFilter: ColorFilter.mode(Theme.of(context).colorScheme.primary, BlendMode.srcIn)),
 
                 const SizedBox(height: 15),
 
@@ -211,22 +202,16 @@ class _SignUpPageState extends State<SignUpPage> {
                             ),
                             hintText: "Votre date de naissance",
                           ),
-                          cupertinoDatePickerOptions:
-                              CupertinoDatePickerOptions(
-                                  modalTitleText: "Sélectionnez la date",
-                                  style: CupertinoDatePickerOptionsStyle(
-                                      modalTitle: TextStyle(
-                                    color:
-                                        Theme.of(context).colorScheme.primary,
-                                  ))),
+                          cupertinoDatePickerOptions: CupertinoDatePickerOptions(
+                              modalTitleText: "Sélectionnez la date",
+                              style: CupertinoDatePickerOptionsStyle(
+                                  modalTitle: TextStyle(
+                                color: Theme.of(context).colorScheme.primary,
+                              ))),
                           mode: DateTimeFieldPickerMode.date,
                           firstDate: DateTime(1900, 1, 1),
-                          lastDate: DateTime(DateTime.now().year - 7,
-                              DateTime.now().month, DateTime.now().day),
-                          initialPickerDateTime: DateTime(
-                              DateTime.now().year - 7,
-                              DateTime.now().month,
-                              DateTime.now().day),
+                          lastDate: DateTime(DateTime.now().year - 7, DateTime.now().month, DateTime.now().day),
+                          initialPickerDateTime: DateTime(DateTime.now().year - 7, DateTime.now().month, DateTime.now().day),
                           validator: (value) {
                             if (value == null) {
                               return "Veuillez entrer votre date de naissance";
@@ -275,9 +260,7 @@ class _SignUpPageState extends State<SignUpPage> {
                               child: Text("Autre"),
                             ),
                           ],
-                          icon: OwnIcon(
-                              iconColor: Theme.of(context).colorScheme.primary,
-                              iconName: 'arrow-down'),
+                          icon: OwnIcon(iconColor: Theme.of(context).colorScheme.primary, iconName: 'arrow-down'),
                           validator: (value) {
                             if (value == null) {
                               return "Veuillez choisir votre genre";
@@ -301,8 +284,7 @@ class _SignUpPageState extends State<SignUpPage> {
                   onTap: () async {
                     // Verify if all field is complete
                     if (_formKey.currentState!.validate()) {
-                      if (passwordController.text !=
-                          passwordVerifierController.text) {
+                      if (passwordController.text != passwordVerifierController.text) {
                         errorText = "Vos mots de passe ne correspondent pas";
                       } else {
                         signUp();
@@ -350,7 +332,7 @@ class _SignUpPageState extends State<SignUpPage> {
                     SquareTile(
                       imagePath: 'assets/images/google.png',
                       onTap: () => {
-                        PocketBaseConnector().signInWithGoogle(context),
+                        connector.signInWithGoogle(context),
                         context.go('/profile'),
                       },
                     ),
@@ -371,18 +353,16 @@ class _SignUpPageState extends State<SignUpPage> {
                     children: [
                       Text(
                         "J'ai déjà un compte ?",
-                        style: TextStyle(
-                            color: Theme.of(context).colorScheme.primary),
+                        style: TextStyle(color: Theme.of(context).colorScheme.primary),
                       ),
                       const SizedBox(width: 4),
                       TextButton(
-                          onPressed: () => context.go('/profile/signin'),
-                          child: const Text(
-                            "Se connecter",
-                            style: TextStyle(
-                                color: Colors.blue,
-                                fontWeight: FontWeight.bold),
-                          )),
+                        onPressed: () => context.go('/profile/signin'),
+                        child: const Text(
+                          "Se connecter",
+                          style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold),
+                        ),
+                      ),
                     ],
                   ),
                 ),
