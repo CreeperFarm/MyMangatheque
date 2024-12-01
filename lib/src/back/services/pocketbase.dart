@@ -1,10 +1,13 @@
+// Importing dart libraries
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+// Importing other libraries
 import 'package:fetch_client/fetch_client.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_custom_tabs/flutter_custom_tabs.dart';
 import 'package:http/http.dart';
 import 'package:mymangatheque/src/back/services/utils.dart';
 import 'package:mymangatheque/src/function/show_message_function.dart';
@@ -14,8 +17,8 @@ import 'package:mymangatheque/src/models/user.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:pocketbase/pocketbase.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:url_launcher/url_launcher.dart';
 
+// Exporting the classes
 export 'package:mymangatheque/src/models/file.dart';
 export 'package:mymangatheque/src/models/user.dart';
 
@@ -55,7 +58,9 @@ class PocketBaseConnector {
 
   final BehaviorSubject<User?> _connectedUser = BehaviorSubject<User?>();
 
-  PocketBaseConnector._internal() : _pocketBase = PocketBase('https://api.mymangatheque.com', lang: 'fr-FR');
+  PocketBaseConnector._internal()
+      : _pocketBase =
+            PocketBase('https://api.mymangatheque.com', httpClientFactory: kIsWeb ? () => FetchClient(mode: RequestMode.cors) : null, lang: 'fr-FR');
 
   Future<void> refresh() async {
     if (!_pocketBase.authStore.isValid) {
@@ -70,40 +75,52 @@ class PocketBaseConnector {
     return _connectedUser.valueOrNull != null;
   }
 
-  Future<void> _launchUrl(Uri url) async {
+  Future<void> _launchUrl(Uri url, context) async {
     debugPrint("Launching url : $url");
-    if (!await launchUrl(url)) {
-      throw Exception('Could not launch $url');
+    try {
+      await launchUrl(
+        url,
+        customTabsOptions: CustomTabsOptions(
+          showTitle: true,
+          shareState: CustomTabsShareState.on,
+          urlBarHidingEnabled: true,
+          closeButton: CustomTabsCloseButton(
+            icon: CustomTabsCloseButtonIcons.back,
+          ),
+        ),
+        safariVCOptions: SafariViewControllerOptions(
+          preferredBarTintColor: Theme.of(context).colorScheme.surface,
+          preferredControlTintColor: Theme.of(context).colorScheme.onSurface,
+          barCollapsingEnabled: true,
+          dismissButtonStyle: SafariViewControllerDismissButtonStyle.close,
+        ),
+      );
+    } catch (e) {
+      debugPrint(e.toString());
     }
   }
 
+  // Sign in with Google (all-in-one)
   signInWithGoogle(context) async {
     try {
       PocketBaseConnector().logOut();
-      print(_pocketBase.authStore.model);
       final authData = await _pocketBase.collection('users').authWithOAuth2(
         'google',
         (url) async {
-          await _launchUrl(url);
+          await _launchUrl(url, context);
         },
         scopes: [
-          'email',
-          'profile',
+          'https://www.googleapis.com/auth/userinfo.email',
+          'https://www.googleapis.com/auth/userinfo.profile',
           //'https://www.googleapis.com/auth/user.gender.read',
           //'https://www.googleapis.com/auth/user.birthday.read',
         ],
         createData: {
-          "role": "user",
-          "emailVisibility": true,
-          "gender": "other",
-          "birthday": DateTime.now().toString(),
+          "email": true,
         },
       );
-      print(_pocketBase.authStore.isValid);
-      print(_pocketBase.authStore);
-      print(authData);
+      debugPrint(authData.toString());
       dynamic authData2 = await json.decode(authData.toString());
-      print(authData2);
 
       var meta = authData.meta;
       if (_pocketBase.authStore.isValid) {
@@ -118,7 +135,7 @@ class PocketBaseConnector {
         var path = await ImageDownloader.findPath(imageId);*/
             var body = <String, dynamic>{
               "email": data['email'],
-              "birthday": DateTime.now().toString(),
+              //"birthday": DateTime.now().toString(),
             };
 
             // Upload the image of the user
@@ -148,7 +165,9 @@ class PocketBaseConnector {
       _connectedUser.add(await findUser(authData2['meta']['rawUser']['email'].toString().toLowerCase()));
     } catch (e) {
       showMessage(e.toString(), context);
+      debugPrint(e.toString());
     }
+    await closeCustomTabs();
   }
 
   // Login the user with email and password

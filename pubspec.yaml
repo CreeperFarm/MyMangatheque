@@ -81,7 +81,8 @@ dependencies:
   simple_barcode_scanner: ^0.2.4
   package_info_plus: ^8.1.1
   fetch_client: ^1.1.2
-  pocketbase: ^0.18.1
+  pocketbase: ^0.19.1
+  flutter_custom_tabs: ^2.1.0
 
   # Need triage
 

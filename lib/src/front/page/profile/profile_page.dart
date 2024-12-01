@@ -40,7 +40,7 @@ class _ProfilePageState extends State<ProfilePage> {
       imageQuality: 75,
     );
 
-    connector.updateAvatar('users', connector.getConnectedUser()!.id, image!.name, image.path, context).then((value) async {
+    await connector.updateAvatar('users', connector.getConnectedUser()!.id, image!.name, image.path, context).then((value) async {
       await connector.updateUserData(connector.getConnectedUser()!.email);
       setState(() {});
     });
