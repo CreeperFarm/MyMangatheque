@@ -79,10 +79,12 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
             text: "Se connecter",
             onTap: () async {
               try {
-                await connector.loginAsAdmin(emailController.text, passwordController.text, context).then((value) {
+                await connector.loginAsAdmin(emailController.text, passwordController.text, context).then((value) async {
                   if (value) {
                     setState(() {});
+                    await Future.delayed(Duration(milliseconds: 250));
                     GoRouter.of(context).go('/admin');
+                    showMessage("You're successfully connected to admins' pages", context);
                   }
                 });
               } catch (e) {

@@ -104,21 +104,17 @@ class PocketBaseConnector {
   signInWithGoogle(context) async {
     try {
       PocketBaseConnector().logOut();
-      final authData = await _pocketBase.collection('users').authWithOAuth2(
-        'google',
-        (url) async {
-          await _launchUrl(url, context);
-        },
-        scopes: [
-          'https://www.googleapis.com/auth/userinfo.email',
-          'https://www.googleapis.com/auth/userinfo.profile',
-          //'https://www.googleapis.com/auth/user.gender.read',
-          //'https://www.googleapis.com/auth/user.birthday.read',
-        ],
-        createData: {
-          "email": true,
-        },
-      );
+      _pocketBase.authStore.clear();
+      final authData = await _pocketBase.collection('users').authWithOAuth2('google', (url) async {
+        await _launchUrl(url, context);
+      }, scopes: [
+        'https://www.googleapis.com/auth/userinfo.email',
+        'https://www.googleapis.com/auth/userinfo.profile',
+        //'https://www.googleapis.com/auth/user.gender.read',
+        //'https://www.googleapis.com/auth/user.birthday.read',
+      ], createData: {
+        "role": "user",
+      });
       debugPrint(authData.toString());
       dynamic authData2 = await json.decode(authData.toString());
 
