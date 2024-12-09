@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'dart:io';
 
 // Importing other libraries
+import 'package:dart_date/dart_date.dart';
 import 'package:fetch_client/fetch_client.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -105,22 +106,17 @@ class PocketBaseConnector {
     try {
       PocketBaseConnector().logOut();
       _pocketBase.authStore.clear();
-      final authData = await _pocketBase.collection('users').authWithOAuth2('google', (url) async {
-        await _launchUrl(url, context);
-      }, scopes: [
-        'https://www.googleapis.com/auth/userinfo.email',
-        'https://www.googleapis.com/auth/userinfo.profile',
-        //'https://www.googleapis.com/auth/user.gender.read',
-        //'https://www.googleapis.com/auth/user.birthday.read',
-      ], createData: {
-        "role": "user",
-      });
+      final authData = await _pocketBase.collection('users').authWithOAuth2(
+        'google',
+        (url) async {
+          await _launchUrl(url, context);
+        },
+      );
       debugPrint(authData.toString());
       dynamic authData2 = await json.decode(authData.toString());
 
-      var meta = authData.meta;
       if (_pocketBase.authStore.isValid) {
-        if (authData2['meta']['isNew']) {
+        if (DateTime.parse(authData2['record']['created']) >= DateTime.now().subtract(const Duration(minutes: 1))) {
           var data = authData2['meta']['rawUser'];
           try {
             /*var imageId = await ImageDownloader.downloadImage(data['picture']);
@@ -131,21 +127,18 @@ class PocketBaseConnector {
         var path = await ImageDownloader.findPath(imageId);*/
             var body = <String, dynamic>{
               "email": data['email'],
-              //"birthday": DateTime.now().toString(),
+              "username": data['name'],
+              "birthday": DateTime.now().toString(),
+              "gender": "other",
+              "role": "user",
+              "emailVisibility": true,
             };
 
             // Upload the image of the user
             await _pocketBase.collection('users').update(
-                  _pocketBase.authStore.model.id, body: body, //files: [
-                  // Upload the image of the user
-                  /*http.MultipartFile.fromBytes(
-            'avatar',
-            File(path!).readAsBytesSync(),
-            filename: fileName,
-          )
-            ]*/
+                  authData2['record']['id'],
+                  body: body,
                 );
-
             await sendVerification(data['email']);
           } catch (e) {
             debugPrint(e.toString());
@@ -154,11 +147,11 @@ class PocketBaseConnector {
         } else {
           debugPrint('User already exists');
         }
+        _connectedUser.add(await findUser(authData2['meta']['rawUser']['email'].toString().toLowerCase()));
       } else {
         debugPrint('User isn\'t connected');
         showMessage('Une erreur est survenue', context);
       }
-      _connectedUser.add(await findUser(authData2['meta']['rawUser']['email'].toString().toLowerCase()));
     } catch (e) {
       showMessage(e.toString(), context);
       debugPrint(e.toString());
@@ -287,8 +280,10 @@ class PocketBaseConnector {
   // Find the user in the collection of users
   Future<User?> findUser(String email) async {
     assert(email.isNotEmpty);
+    debugPrint('Finding user with email $email');
     var value2 = await _pocketBase.collection('users').getFirstListItem('email="$email"');
     print(value2.data);
+    debugPrint('User found with email $email');
     return _pocketBase.collection('users').getFirstListItem('email="$email"').then(
           (value) => User.fromJSON(value.id, value.collectionId, value.data, value.created, value.updated, value.data['birthday']),
         );
