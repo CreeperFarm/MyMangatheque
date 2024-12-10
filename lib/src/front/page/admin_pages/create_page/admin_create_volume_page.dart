@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mymangatheque/src/front/components/my_scroll_column.dart';
 import 'package:mymangatheque/src/front/components/my_textfield.dart';
-import 'package:simple_barcode_scanner/enum.dart';
 import 'package:simple_barcode_scanner/simple_barcode_scanner.dart';
 
 class AdminCreateVolumePage extends StatefulWidget {
@@ -40,6 +39,10 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
 
     imagePathVolumeController.text = image!.path;
     imageNameVolumeController.text = image.name;
+
+    Future.delayed(Duration(milliseconds: 200), () {
+      setState(() {});
+    });
   }
 
   @override
@@ -90,7 +93,6 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
                   GestureDetector(
                     onTap: () {
                       uploadImage();
-                      setState(() {});
                     },
                     child: Center(
                       child: ClipRRect(

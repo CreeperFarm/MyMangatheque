@@ -19,7 +19,6 @@ class SignInPage extends StatefulWidget {
 class _SignInPageState extends State<SignInPage> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
-
   final connector = PocketBaseConnector();
 
   Future<User?> signIn(context) async {

@@ -77,7 +77,6 @@ class PocketBaseConnector {
   }
 
   Future<void> _launchUrl(Uri url, context) async {
-    debugPrint("Launching url : $url");
     try {
       await launchUrl(
         url,
@@ -139,6 +138,7 @@ class PocketBaseConnector {
                   authData2['record']['id'],
                   body: body,
                 );
+            _pocketBase.realtime.unsubscribe('users');
             await sendVerification(data['email']);
           } catch (e) {
             debugPrint(e.toString());
@@ -148,6 +148,7 @@ class PocketBaseConnector {
           debugPrint('User already exists');
         }
         _connectedUser.add(await findUser(authData2['meta']['rawUser']['email'].toString().toLowerCase()));
+        _pocketBase.realtime.unsubscribe('users');
       } else {
         debugPrint('User isn\'t connected');
         showMessage('Une erreur est survenue', context);

@@ -25,7 +25,7 @@ class PocketBaseAdminConnector {
 
   Future<bool> loginAsAdmin(String email, String password, context) async {
     try {
-      await _pocketBase.collection('_superusers').authWithPassword(email.toString(), password);
+      await _pocketBase.collection('_superusers').authWithPassword(email.toString().toLowerCase(), password);
       _isConnected = _pocketBase.authStore.isValid;
       return _isConnected = _pocketBase.authStore.isValid;
     } catch (err) {
@@ -106,5 +106,11 @@ class PocketBaseAdminConnector {
     return _pocketBase.collection(collectionId).listen();
   }
 
-  String get serverUrl => _pocketBase.baseUrl;
+  void createGenre(String genreName) {
+    _pocketBase.collection('genres').create(
+      body: {'name': genreName},
+    );
+  }
+
+  String get serverUrl => _pocketBase.baseURL;
 }

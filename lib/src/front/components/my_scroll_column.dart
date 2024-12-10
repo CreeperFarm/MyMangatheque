@@ -29,7 +29,7 @@ class MyScrollColumn extends StatelessWidget {
           crossAxisAlignment: columnCrossAxisAlignment != null ? columnCrossAxisAlignment! : CrossAxisAlignment.start,
           children: [
             for (var child in children) child,
-            (constraints.maxWidth < 600 ? const SizedBox(height: 92) : const SizedBox(height: 0)),
+            (constraints.maxWidth < 600 ? const SizedBox(height: 92) : const SizedBox(height: 15)),
           ],
         ),
       ),

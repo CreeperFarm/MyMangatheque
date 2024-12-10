@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:mymangatheque/src/back/services/pocketbaseadmin.dart';
 import 'package:mymangatheque/src/front/page/admin_pages/admin_login_page.dart';
+import 'package:mymangatheque/src/front/page/admin_pages/create_page/admin_create_author.dart';
+import 'package:mymangatheque/src/front/page/admin_pages/create_page/admin_create_genre.dart';
 import 'package:mymangatheque/src/front/page/admin_pages/create_page/admin_create_volume_page.dart';
 
 class AdminCreatePage extends StatelessWidget {
@@ -32,9 +34,9 @@ class AdminCreatePage extends StatelessWidget {
               //AdminCreateSeriePage(),
               //AdminCreateSubSeriePage(),
               AdminCreateVolumePage(),
-              //AdminCreateAuteurPage(),
+              AdminCreateAuthorPage(),
               //AdminCreateEditeurPage(),
-              //AdminCreateGenrePage(),
+              AdminCreateGenrePage(),
             ],
           ),
         ),
