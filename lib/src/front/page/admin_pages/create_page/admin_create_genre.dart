@@ -71,7 +71,6 @@ class _AdminCreateGenrePageState extends State<AdminCreateGenrePage> {
                     } else {
                       showMessage('Ce genre existe déjà', context);
                     }
-                    ;
                   },
                 ),
               ),

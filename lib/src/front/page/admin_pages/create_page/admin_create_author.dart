@@ -1,9 +1,13 @@
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mymangatheque/src/back/services/pocketbaseadmin.dart';
+import 'package:mymangatheque/src/front/components/my_button.dart';
 import 'package:mymangatheque/src/front/components/my_scroll_column.dart';
 import 'package:mymangatheque/src/front/components/my_textfield.dart';
+import 'package:mymangatheque/src/function/show_message_function.dart';
 
 class AdminCreateAuthorPage extends StatefulWidget {
   const AdminCreateAuthorPage({super.key});
@@ -15,8 +19,9 @@ class AdminCreateAuthorPage extends StatefulWidget {
 class _AdminCreateAuthorPageState extends State<AdminCreateAuthorPage> {
   final TextEditingController authorNameController = TextEditingController();
   final TextEditingController authorJobController = TextEditingController();
-  final TextEditingController imagePathVolumeController = TextEditingController();
-  final TextEditingController imageNameVolumeController = TextEditingController();
+  final TextEditingController imagePathAuthorController = TextEditingController();
+  final TextEditingController imageNameAuthorController = TextEditingController();
+  final TextEditingController seriesIdController = TextEditingController();
 
   void uploadImage() async {
     final image = await ImagePicker().pickImage(
@@ -26,8 +31,8 @@ class _AdminCreateAuthorPageState extends State<AdminCreateAuthorPage> {
       imageQuality: 75,
     );
 
-    imagePathVolumeController.text = image!.path;
-    imageNameVolumeController.text = image.name;
+    imagePathAuthorController.text = image!.path;
+    imageNameAuthorController.text = image.name;
     Future.delayed(Duration(milliseconds: 200), () {
       setState(() {});
     });
@@ -37,8 +42,8 @@ class _AdminCreateAuthorPageState extends State<AdminCreateAuthorPage> {
   void dispose() {
     authorNameController.dispose();
     authorJobController.dispose();
-    imagePathVolumeController.dispose();
-    imageNameVolumeController.dispose();
+    imagePathAuthorController.dispose();
+    imageNameAuthorController.dispose();
     super.dispose();
   }
 
@@ -71,7 +76,7 @@ class _AdminCreateAuthorPageState extends State<AdminCreateAuthorPage> {
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(20.0),
                         child: Image.asset(
-                          imagePathVolumeController.text != "" ? imagePathVolumeController.text : 'assets/images/unknown.webp',
+                          imagePathAuthorController.text != "" ? imagePathAuthorController.text : 'assets/images/unknown.webp',
                           width: MediaQuery.of(context).size.width * 0.4,
                           fit: BoxFit.cover,
                         ),
@@ -83,8 +88,8 @@ class _AdminCreateAuthorPageState extends State<AdminCreateAuthorPage> {
                     bottom: 0,
                     child: IconButton(
                       onPressed: () {
-                        imagePathVolumeController.text = "";
-                        imageNameVolumeController.text = "";
+                        imagePathAuthorController.text = "";
+                        imageNameAuthorController.text = "";
                         setState(() {});
                       },
                       icon: Icon(CupertinoIcons.delete_left_fill),
@@ -104,9 +109,41 @@ class _AdminCreateAuthorPageState extends State<AdminCreateAuthorPage> {
                 labelText: "Travail de l'auteur",
                 errorMessage: "Veuillez entrer le travail de l'auteur",
               ),
+              MyTextField(
+                verticalPadding: 5,
+                controller: seriesIdController,
+                skipEmptyVerification: true,
+                labelText: "Id des series réalisés par l'auteur",
+                errorMessage: "Veuillez entrer l'id des series réalisés par l'auteur",
+              ),
             ],
           ),
-        )
+        ),
+        MyButton(
+          text: "Ajouter l'auteur",
+          onTap: () async {
+            final data = jsonDecode((await connector.getCollectionFullList('authors')).toString());
+            var authorAlreadyExists = false;
+            data.forEach((element) {
+              if (element['name'] == authorNameController.text) {
+                setState(() {
+                  authorAlreadyExists = true;
+                });
+              }
+            });
+            if (!authorAlreadyExists) {
+              final body = {
+                "name": authorNameController.text,
+                "job": authorJobController.text,
+                "series": jsonDecode(seriesIdController.text),
+              };
+              connector.createAuthor(body, imageNameAuthorController.text, imagePathAuthorController.text);
+              showMessage("L'auteur à été créer", context);
+            } else {
+              showMessage('L\'auteur existe déjà', context);
+            }
+          },
+        ),
       ],
     );
   }

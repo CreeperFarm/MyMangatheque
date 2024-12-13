@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:io';
 
+import 'package:http/http.dart';
 import 'package:mymangatheque/src/back/services/utils.dart';
 import 'package:mymangatheque/src/function/show_message_function.dart';
 import 'package:pocketbase/pocketbase.dart';
@@ -109,6 +111,19 @@ class PocketBaseAdminConnector {
   void createGenre(String genreName) {
     _pocketBase.collection('genres').create(
       body: {'name': genreName},
+    );
+  }
+
+  void createAuthor(Map<String, dynamic> body, String fileName, String filePath) {
+    _pocketBase.collection('authors').create(
+      body: body,
+      files: [
+        MultipartFile.fromBytes(
+          'image',
+          File(filePath).readAsBytesSync(),
+          filename: fileName,
+        )
+      ],
     );
   }
 

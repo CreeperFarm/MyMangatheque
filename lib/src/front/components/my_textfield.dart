@@ -7,6 +7,7 @@ class MyTextField extends StatelessWidget {
   final String errorMessage;
   final TextInputType? keyboardType;
   final double? verticalPadding;
+  final bool? skipEmptyVerification;
 
   const MyTextField({
     required this.controller,
@@ -15,6 +16,7 @@ class MyTextField extends StatelessWidget {
     this.obscureText,
     this.keyboardType,
     this.verticalPadding,
+    this.skipEmptyVerification,
     super.key,
   });
 
@@ -29,6 +31,8 @@ class MyTextField extends StatelessWidget {
         validator: (value) {
           if (value == null || value.isEmpty) {
             return errorMessage;
+          } else if (skipEmptyVerification != null && skipEmptyVerification!) {
+            return null;
           } else if (value.length < 6 && obscureText!) {
             return "Votre mot de passe doit contenir au moins 6 caractères!";
           } else {
