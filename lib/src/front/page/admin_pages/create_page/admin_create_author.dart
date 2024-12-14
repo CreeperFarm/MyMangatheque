@@ -120,6 +120,7 @@ class _AdminCreateAuthorPageState extends State<AdminCreateAuthorPage> {
           ),
         ),
         MyButton(
+          verticalPadding: 5,
           text: "Ajouter l'auteur",
           onTap: () async {
             final data = jsonDecode((await connector.getCollectionFullList('authors')).toString());

@@ -53,7 +53,7 @@ class _ProfilePageState extends State<ProfilePage> {
     '4': 'Avril',
     '5': 'Mai',
     '6': 'Juin',
-    '7': 'Billet',
+    '7': 'Juillet',
     '8': 'Août',
     '9': 'Septembre',
     '10': 'Octobre',

@@ -185,7 +185,7 @@ class _SeriePageState extends State<SeriePage> {
                                     children: [
                                       GestureDetector(
                                         onTap: () {
-                                          context.go('/search/sub_series/${subSerie['id']}');
+                                          context.go('/search/sub_serie/${subSerie['id']}');
                                         },
                                         child: Row(
                                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -274,10 +274,11 @@ class _SeriePageState extends State<SeriePage> {
                                   return Padding(
                                     padding: const EdgeInsets.all(5.0),
                                     child: Row(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment: CrossAxisAlignment.center,
                                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: [
                                         Row(
+                                          crossAxisAlignment: CrossAxisAlignment.center,
                                           children: [
                                             Padding(
                                               padding: const EdgeInsets.all(5),
@@ -353,16 +354,13 @@ class _SeriePageState extends State<SeriePage> {
 
 Widget pageDisplayEditor(
     PocketBaseConnector connector, double width, Map<String, dynamic> data, Map<String, dynamic> subSerie, context, BoxConstraints constraints) {
-  return Container(
-    width: width,
-    constraints: BoxConstraints(
-      maxWidth: width - 450,
-    ),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 5),
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Padding(
+        padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 5),
+        child: SizedBox(
+          width: width - 10,
           child: FutureBuilder(
             future: connector.getEditorName(subSerie['editor']),
             builder: (context, snapshot) {
@@ -382,43 +380,43 @@ Widget pageDisplayEditor(
             },
           ),
         ),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              FutureBuilder(
-                future: connector.getSubSerieVolumesImages(subSerie['id']),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.done) {
-                    return SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          for (var i = 0; i < json.decode(snapshot.data.toString()).length; i += 1)
-                            Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 5),
-                              child: SizedBox(
-                                width: 75,
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(12),
-                                  child: Image.network(snapshot.data![i].replaceAll('"', '')),
-                                ),
+      ),
+      SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            FutureBuilder(
+              future: connector.getSubSerieVolumesImages(subSerie['id']),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.done) {
+                  return SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        for (var i = 0; i < json.decode(snapshot.data.toString()).length; i += 1)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 5),
+                            child: SizedBox(
+                              width: 75,
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: Image.network(snapshot.data![i].replaceAll('"', '')),
                               ),
                             ),
-                        ],
-                      ),
-                    );
-                  } else {
-                    return const SizedBox();
-                  }
-                },
-              ),
-            ],
-          ),
-        )
-      ],
-    ),
+                          ),
+                      ],
+                    ),
+                  );
+                } else {
+                  return const SizedBox();
+                }
+              },
+            ),
+          ],
+        ),
+      )
+    ],
   );
 }

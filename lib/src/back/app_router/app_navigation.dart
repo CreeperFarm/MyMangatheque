@@ -15,6 +15,7 @@ import 'package:mymangatheque/src/front/page/discover_page.dart';
 import 'package:mymangatheque/src/front/page/info_page/author_page.dart';
 import 'package:mymangatheque/src/front/page/info_page/editor_page.dart';
 import 'package:mymangatheque/src/front/page/info_page/serie_page.dart';
+import 'package:mymangatheque/src/front/page/info_page/sub_serie_page.dart';
 import 'package:mymangatheque/src/front/page/info_page/volume_page.dart';
 import 'package:mymangatheque/src/front/page/mentions_legales_page.dart';
 import 'package:mymangatheque/src/front/page/planning/planning_page.dart';
@@ -65,6 +66,12 @@ class AppNavigation {
                       name: 'Series Home',
                       builder: (context, state) {
                         return SeriePage(serieId: state.pathParameters['id']!, key: state.pageKey);
+                      }),
+                  GoRoute(
+                      path: 'sub_serie/:id',
+                      name: 'Sub-Series Home',
+                      builder: (context, state) {
+                        return SubSeriePage(serieId: state.pathParameters['id']!, key: state.pageKey);
                       }),
                   GoRoute(
                       path: 'volume/:tomeId',
@@ -149,6 +156,12 @@ class AppNavigation {
                           return SeriePage(serieId: state.pathParameters['id']!, key: state.pageKey);
                         }),
                     GoRoute(
+                        path: 'sub_serie/:id',
+                        name: 'Sub-Series Library',
+                        builder: (context, state) {
+                          return SubSeriePage(serieId: state.pathParameters['id']!, key: state.pageKey);
+                        }),
+                    GoRoute(
                         path: 'volume/:id',
                         name: 'Volume Library',
                         builder: (context, state) {
@@ -192,6 +205,12 @@ class AppNavigation {
                         return SeriePage(serieId: state.pathParameters['id']!, key: state.pageKey);
                       }),
                   GoRoute(
+                      path: 'sub_serie/:id',
+                      name: 'Sub-Series Search',
+                      builder: (context, state) {
+                        return SubSeriePage(serieId: state.pathParameters['id']!, key: state.pageKey);
+                      }),
+                  GoRoute(
                       path: 'volume/:id',
                       name: 'Volume Search',
                       builder: (context, state) {
@@ -228,7 +247,13 @@ class AppNavigation {
                         return SeriePage(serieId: state.pathParameters['id']!, key: state.pageKey);
                       }),
                   GoRoute(
-                      path: 'manga/:id',
+                      path: 'sub_serie/:id',
+                      name: 'Sub-Series Planning',
+                      builder: (context, state) {
+                        return SubSeriePage(serieId: state.pathParameters['id']!, key: state.pageKey);
+                      }),
+                  GoRoute(
+                      path: 'volume/:id',
                       name: 'Volume Planning',
                       builder: (context, state) {
                         return VolumePage(volumeId: state.pathParameters['id']!, key: state.pageKey);
