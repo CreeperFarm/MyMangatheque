@@ -292,7 +292,7 @@ class _SubSeriePageState extends State<SubSeriePage> {
                                   return Padding(
                                     padding: const EdgeInsets.all(5.0),
                                     child: GestureDetector(
-                                      onTap: () => context.go('/search/volume/${authors[i]}'),
+                                      onTap: () => context.go('/search/volume/${volumes[i].toString()}'),
                                       child: Row(
                                         crossAxisAlignment: CrossAxisAlignment.center,
                                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -348,7 +348,7 @@ class _SubSeriePageState extends State<SubSeriePage> {
                                 return const CircularProgressIndicator();
                               },
                             ),
-                            (i != authors.length - 1 && authors.length > 1)
+                            (i != volumes.length - 1 && volumes.length > 1)
                                 ? MyLine(
                                     width: MediaQuery.of(context).size.width,
                                     vertical: 5,
