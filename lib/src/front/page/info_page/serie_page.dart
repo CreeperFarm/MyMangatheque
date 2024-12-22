@@ -185,7 +185,7 @@ class _SeriePageState extends State<SeriePage> {
                                     children: [
                                       GestureDetector(
                                         onTap: () {
-                                          context.go('/search/sub_serie/${subSerie['id']}');
+                                          context.push('/search/sub_serie/${subSerie['id']}');
                                         },
                                         child: Row(
                                           mainAxisAlignment: MainAxisAlignment.spaceBetween,

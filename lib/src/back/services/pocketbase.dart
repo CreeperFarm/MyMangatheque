@@ -317,8 +317,14 @@ class PocketBaseConnector {
     return _pocketBase.collection(collectionId).getOne(recordId).then((value) => [value]);
   }
 
+  // Get the data from one field of a collection with order
   Future<List<RecordModel>> getOneOrder(String collectionId, String recordId, order) {
     return _pocketBase.collection(collectionId).getOne(recordId).then((value) => [value]);
+  }
+
+  // Get the data from one field of a collection with expand
+  Future<List<RecordModel>> getOneExpand(String collectionId, String recordId, String? expand) {
+    return _pocketBase.collection(collectionId).getOne(recordId, expand: expand).then((value) => [value]);
   }
 
   // Get the data from a collection

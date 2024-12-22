@@ -4,13 +4,9 @@ import 'package:flutter_svg/flutter_svg.dart';
 class OwnIcon extends StatelessWidget {
   Color iconColor;
   final String iconName;
-  final int? height;
+  final double? height;
 
-  OwnIcon(
-      {required this.iconColor,
-      required this.iconName,
-      this.height,
-      super.key});
+  OwnIcon({required this.iconColor, required this.iconName, this.height, super.key});
 
   @override
   Widget build(BuildContext context) {

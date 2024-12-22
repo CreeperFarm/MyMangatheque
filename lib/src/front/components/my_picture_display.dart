@@ -9,23 +9,31 @@ class MyPictureDisplay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final height = ((MediaQuery.of(context).size.width * 16.5) / 24 > 500)
+        ? 500.0
+        : ((MediaQuery.of(context).size.width * 16.5) / 24 < 275)
+            ? 275.0
+            : (MediaQuery.of(context).size.width * 16.5) / 24;
     return SizedBox(
-      height: 275,
+      height: height,
       child: Stack(
         alignment: AlignmentDirectional.center,
         children: [
           // Image Background with blur effect
           SizedBox(
-            height: 275,
+            height: height,
             width: ((MediaQuery.of(context).size.width * 16.5) / 24 * 10),
             child: ClipRRect(
               child: Wrap(
                 children: [
-                  Transform.translate(
-                    offset: const Offset(0, (-275 / 2)),
-                    child: Image.network(
-                      pictureUrl,
-                      fit: BoxFit.fill,
+                  Expanded(
+                    child: Transform.translate(
+                      offset: Offset(0, -MediaQuery.of(context).size.width / 2),
+                      child: Image.network(
+                        scale: 1 / (MediaQuery.of(context).size.width / height),
+                        pictureUrl,
+                        fit: BoxFit.fill,
+                      ),
                     ),
                   ),
                   BackdropFilter(
@@ -42,8 +50,8 @@ class MyPictureDisplay extends StatelessWidget {
 
           // Image
           SizedBox(
-            height: 275,
-            width: ((275 * 16.5) / 24),
+            height: height,
+            width: ((height * 16.5) / 24),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(10.0),
               child: Image.network(

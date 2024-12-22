@@ -186,7 +186,7 @@ class _SubSeriePageState extends State<SubSeriePage> {
                                   return Padding(
                                     padding: const EdgeInsets.all(5.0),
                                     child: GestureDetector(
-                                      onTap: () => context.go('/search/author/${authors[i]}'),
+                                      onTap: () => context.push('/search/author/${authors[i]}'),
                                       child: Row(
                                         crossAxisAlignment: CrossAxisAlignment.center,
                                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -292,7 +292,7 @@ class _SubSeriePageState extends State<SubSeriePage> {
                                   return Padding(
                                     padding: const EdgeInsets.all(5.0),
                                     child: GestureDetector(
-                                      onTap: () => context.go('/search/volume/${volumes[i].toString()}'),
+                                      onTap: () => context.push('/search/volume/${volumes[i].toString()}'),
                                       child: Row(
                                         crossAxisAlignment: CrossAxisAlignment.center,
                                         mainAxisAlignment: MainAxisAlignment.spaceBetween,

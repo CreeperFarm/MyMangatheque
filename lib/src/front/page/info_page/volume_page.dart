@@ -38,41 +38,42 @@ class _VolumePageState extends State<VolumePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-      ),
-      body: FutureBuilder(
-        future: PocketBaseConnector().getOne('volumes', widget.volumeId),
-        builder: (BuildContext context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          }
+    return FutureBuilder(
+      future: PocketBaseConnector().getOneExpand('volumes', widget.volumeId, 'authors,genres,contains'),
+      builder: (BuildContext context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
 
-          if (snapshot.connectionState == ConnectionState.none) {
-            return Center(
-              child: const Text("Aucune connexion"),
-            );
-          }
-          if (snapshot.hasError) {
-            debugPrint(snapshot.error.toString());
-            return Center(
-              child: const Text("Une erreur est survenue"),
-            );
-          }
-          if (snapshot.hasData && snapshot.data == null) {
-            return Center(
-              child: const Text("La série n'existent pas"),
-            );
-          }
-
-          if (snapshot.connectionState == ConnectionState.done) {
-            Map<String, dynamic> data = json.decode(snapshot.data.toString())[0];
-            final List<dynamic> authors = data['authors'];
-            final DateTime release = DateTime.parse(data['release'].toString());
-            return MyScrollColumn(
+        if (snapshot.connectionState == ConnectionState.none) {
+          return Center(
+            child: const Text("Aucune connexion"),
+          );
+        }
+        if (snapshot.hasError) {
+          debugPrint(snapshot.error.toString());
+          return Center(
+            child: const Text("Une erreur est survenue"),
+          );
+        }
+        if (snapshot.hasData && snapshot.data != null) {
+          Map<String, dynamic> data = json.decode(snapshot.data.toString())[0];
+          final List<dynamic> contains = data['contain'];
+          final List<dynamic> genres = data['expand']['genres'];
+          final List<dynamic> authors = data['authors'];
+          final DateTime release = DateTime.parse(data['release'].toString());
+          return Scaffold(
+            appBar: AppBar(
+              backgroundColor: Colors.transparent,
+              title: Text(
+                data['title'].toString(),
+                softWrap: false,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            body: MyScrollColumn(
               columnMainAxisAlignment: MainAxisAlignment.start,
               children: [
                 MyPictureDisplay(
@@ -85,12 +86,24 @@ class _VolumePageState extends State<VolumePage> {
                     children: [
                       Text(
                         data['title'].toString(),
-                        textAlign: TextAlign.right,
+                        textAlign: TextAlign.left,
                         style: const TextStyle(
                           fontSize: 25,
                           fontWeight: FontWeight.w300,
                         ),
                       ),
+                      (data['support'] == null || data['support'] == "manga")
+                          ? SizedBox()
+                          : Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 5),
+                              child: Text(
+                                data['support'].toString(),
+                                style: const TextStyle(
+                                  fontSize: 30,
+                                  fontWeight: FontWeight.w200,
+                                ),
+                              ),
+                            ),
                       MyLine(
                         width: MediaQuery.of(context).size.width,
                         vertical: 10,
@@ -114,7 +127,7 @@ class _VolumePageState extends State<VolumePage> {
                                 padding: const EdgeInsets.symmetric(vertical: 5),
                                 child: Row(
                                   children: [
-                                    for (var i = 0; i < data['genres'].length; i += 1)
+                                    for (var i = 0; i < genres.length; i += 1)
                                       Padding(
                                         padding: const EdgeInsets.symmetric(horizontal: 5),
                                         child: ClipRRect(
@@ -123,19 +136,11 @@ class _VolumePageState extends State<VolumePage> {
                                             color: Theme.of(context).colorScheme.onSecondary,
                                             child: Padding(
                                               padding: const EdgeInsets.all(5),
-                                              child: FutureBuilder(
-                                                future: connector.getOne('genres', data['genres'][i]),
-                                                builder: (context, snapshot) {
-                                                  if (snapshot.connectionState == ConnectionState.done) {
-                                                    return Text(
-                                                      jsonDecode(snapshot.data![0].toString())['name'].toString(),
-                                                      style: TextStyle(
-                                                        color: Theme.of(context).colorScheme.secondary,
-                                                      ),
-                                                    );
-                                                  }
-                                                  return const SizedBox();
-                                                },
+                                              child: Text(
+                                                genres[i]['name'].toString(),
+                                                style: TextStyle(
+                                                  color: Theme.of(context).colorScheme.secondary,
+                                                ),
                                               ),
                                             ),
                                           ),
@@ -188,7 +193,7 @@ class _VolumePageState extends State<VolumePage> {
                                   return Padding(
                                     padding: const EdgeInsets.all(5.0),
                                     child: GestureDetector(
-                                      onTap: () => context.go('/search/author/${authors[i]}'),
+                                      onTap: () => context.push('/search/author/${authors[i]}'),
                                       child: Row(
                                         crossAxisAlignment: CrossAxisAlignment.center,
                                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -277,6 +282,7 @@ class _VolumePageState extends State<VolumePage> {
                                     child: MyIconTextLabel(
                                       iconName: 'calendar',
                                       text: 'Date de sortie: ${release.day} ${month[release.month.toString()]} ${release.year}',
+                                      heightIcon: 30,
                                     ),
                                   ),
                             (data['ean'] == null)
@@ -286,7 +292,29 @@ class _VolumePageState extends State<VolumePage> {
                                     child: MyIconTextLabel(
                                       iconName: 'barcode',
                                       text: 'EAN : ${data['ean']}',
+                                      heightIcon: 30,
                                     ),
+                                  ),
+                            (data['info']['pageNumber'] == null)
+                                ? SizedBox()
+                                : Padding(
+                                    padding: const EdgeInsets.symmetric(vertical: 5),
+                                    child: MyIconTextLabel(
+                                      iconName: 'book_open',
+                                      text: "Nombre de page : ${data['info']['pageNumber'].toString()}",
+                                      heightIcon: 30,
+                                    ),
+                                  ),
+                            (data['contain'] == null)
+                                ? SizedBox()
+                                : Column(
+                                    children: [
+                                      MyLine(
+                                        width: MediaQuery.of(context).size.width,
+                                        vertical: 10,
+                                        horizontal: 0,
+                                      ),
+                                    ],
                                   ),
                           ],
                         ),
@@ -295,11 +323,19 @@ class _VolumePageState extends State<VolumePage> {
                   ),
                 )
               ],
-            );
-          }
-          return const Text("loading");
-        },
-      ),
+            ),
+          );
+        } else {
+          return Scaffold(
+            appBar: AppBar(
+              title: Text("Une erreur est survenue"),
+            ),
+            body: Center(
+              child: const Text("La série n'existent pas"),
+            ),
+          );
+        }
+      },
     );
   }
 }
