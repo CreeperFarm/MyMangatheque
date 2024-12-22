@@ -83,7 +83,7 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
                   if (value) {
                     setState(() {});
                     await Future.delayed(Duration(milliseconds: 250));
-                    GoRouter.of(context).go('/admin');
+                    GoRouter.of(context).push('/admin');
                     showMessage("You're successfully connected to admins' pages", context);
                   }
                 });

@@ -59,11 +59,15 @@ class _VolumePageState extends State<VolumePage> {
           );
         }
         if (snapshot.hasData && snapshot.data != null) {
+
+          // ? Declaring variables
           Map<String, dynamic> data = json.decode(snapshot.data.toString())[0];
-          final List<dynamic> contains = data['contain'];
+          final List<dynamic> contain = data['contain'];
           final List<dynamic> genres = data['expand']['genres'];
           final List<dynamic> authors = data['authors'];
           final DateTime release = DateTime.parse(data['release'].toString());
+
+          // ? Return Scaffold
           return Scaffold(
             appBar: AppBar(
               backgroundColor: Colors.transparent,
@@ -305,7 +309,7 @@ class _VolumePageState extends State<VolumePage> {
                                       heightIcon: 30,
                                     ),
                                   ),
-                            (data['contain'] == null)
+                            (contain == null)
                                 ? SizedBox()
                                 : Column(
                                     children: [
@@ -313,7 +317,7 @@ class _VolumePageState extends State<VolumePage> {
                                         width: MediaQuery.of(context).size.width,
                                         vertical: 10,
                                         horizontal: 0,
-                                      ),
+                                      ), // TODO: Finir la partie contient
                                     ],
                                   ),
                           ],
