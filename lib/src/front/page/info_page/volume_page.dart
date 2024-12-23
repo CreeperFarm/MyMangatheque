@@ -1,9 +1,8 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:mymangatheque/src/back/services/pocketbase.dart';
-import 'package:mymangatheque/src/const/own_icon.dart';
+import 'package:mymangatheque/src/front/components/my_author_tile.dart';
 import 'package:mymangatheque/src/front/components/my_icon_text_label.dart';
 import 'package:mymangatheque/src/front/components/my_line.dart';
 import 'package:mymangatheque/src/front/components/my_picture_display.dart';
@@ -59,12 +58,11 @@ class _VolumePageState extends State<VolumePage> {
           );
         }
         if (snapshot.hasData && snapshot.data != null) {
-
           // ? Declaring variables
           Map<String, dynamic> data = json.decode(snapshot.data.toString())[0];
           final List<dynamic> contain = data['contain'];
           final List<dynamic> genres = data['expand']['genres'];
-          final List<dynamic> authors = data['authors'];
+          final List<dynamic> authors = data['expand']['authors'];
           final DateTime release = DateTime.parse(data['release'].toString());
 
           // ? Return Scaffold
@@ -189,69 +187,8 @@ class _VolumePageState extends State<VolumePage> {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            FutureBuilder(
-                              future: connector.getOne('authors', authors[i]),
-                              builder: (context, snapshot) {
-                                if (snapshot.connectionState == ConnectionState.done) {
-                                  final authorData = json.decode(snapshot.data.toString())[0];
-                                  return Padding(
-                                    padding: const EdgeInsets.all(5.0),
-                                    child: GestureDetector(
-                                      onTap: () => context.push('/search/author/${authors[i]}'),
-                                      child: Row(
-                                        crossAxisAlignment: CrossAxisAlignment.center,
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Row(
-                                            children: [
-                                              Padding(
-                                                padding: const EdgeInsets.all(5),
-                                                child: ClipRRect(
-                                                  borderRadius: BorderRadius.circular(12),
-                                                  child: Image.network(
-                                                    "https://api.mymangatheque.com/api/files/hper195bzhpmjp9/${authors[i].toString()}/${authorData['image'].toString()}",
-                                                    height: 50,
-                                                  ),
-                                                ),
-                                              ),
-                                              Padding(
-                                                padding: const EdgeInsets.only(left: 8.0),
-                                                child: Column(
-                                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                                  children: [
-                                                    Text(
-                                                      authorData['name'].toString(),
-                                                      style: const TextStyle(
-                                                        fontSize: 18,
-                                                        fontWeight: FontWeight.bold,
-                                                      ),
-                                                      softWrap: false,
-                                                      overflow: TextOverflow.ellipsis,
-                                                    ),
-                                                    Text(
-                                                      authorData['job'].toString(),
-                                                      style: const TextStyle(
-                                                        fontSize: 13,
-                                                      ),
-                                                      softWrap: false,
-                                                      overflow: TextOverflow.ellipsis,
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                          OwnIcon(
-                                            iconColor: Theme.of(context).colorScheme.primary,
-                                            iconName: 'arrow-right',
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  );
-                                }
-                                return const CircularProgressIndicator();
-                              },
+                            MyAuthorTile(
+                              authorData: authors[i],
                             ),
                             (i != authors.length - 1 && authors.length > 1)
                                 ? MyLine(
@@ -335,7 +272,7 @@ class _VolumePageState extends State<VolumePage> {
               title: Text("Une erreur est survenue"),
             ),
             body: Center(
-              child: const Text("La série n'existent pas"),
+              child: const Text("Le volume n'existe pas"),
             ),
           );
         }
