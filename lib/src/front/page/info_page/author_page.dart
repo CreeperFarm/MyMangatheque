@@ -22,7 +22,7 @@ class _AuthorPageState extends State<AuthorPage> {
   Widget build(BuildContext context) {
     final PocketBaseConnector connector = PocketBaseConnector();
     return FutureBuilder(
-        future: connector.getOneExpand('authors', widget.authorName, 'series'),
+        future: connector.getOneExpand('authors', widget.authorName, 'series.editors'),
         builder: (BuildContext context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Scaffold(
@@ -148,27 +148,32 @@ class _AuthorPageState extends State<AuthorPage> {
                   MyLine(width: MediaQuery.of(context).size.width, vertical: 10),
                   (series == null)
                       ? SizedBox()
-                      : Column(
-                          children: [
-                            Text(
-                              (series.length == 1) ? 'Série' : 'Séries',
-                              style: const TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.w300,
+                      : Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                (series.length == 1) ? 'Série :' : 'Séries :',
+                                style: const TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w300,
+                                ),
                               ),
-                            ),
-                            ListView(
-                              shrinkWrap: true,
-                              children: series
-                                  .map<Widget>(
-                                    (e) => MySeriesTile(
-                                      seriesData: e,
-                                      initRoute: widget.initRoute,
-                                    ),
-                                  )
-                                  .toList(),
-                            )
-                          ],
+                              ListView(shrinkWrap: true, children: [
+                                for (var i = 0; i < series.length; i += 1)
+                                  Column(
+                                    children: [
+                                      MySeriesTile(
+                                        seriesData: series[i],
+                                        initRoute: widget.initRoute,
+                                      ),
+                                      if (i != series.length - 1) MyLine(width: MediaQuery.of(context).size.width, vertical: 0, horizontal: 10),
+                                    ],
+                                  ),
+                              ])
+                            ],
+                          ),
                         )
                 ],
               ),
