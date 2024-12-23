@@ -71,8 +71,11 @@ class _VolumePageState extends State<VolumePage> {
               backgroundColor: Colors.transparent,
               title: Text(
                 data['title'].toString(),
-                softWrap: false,
-                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.left,
+                style: const TextStyle(
+                  fontSize: 25,
+                  fontWeight: FontWeight.w300,
+                ),
               ),
             ),
             body: MyScrollColumn(

@@ -3,10 +3,10 @@ import 'package:go_router/go_router.dart';
 import 'package:mymangatheque/src/const/const_info.dart';
 import 'package:mymangatheque/src/const/own_icon.dart';
 
-class MyTomeTile extends StatelessWidget {
+class MyVolumeTile extends StatelessWidget {
   final Map<String, dynamic> volumeData;
 
-  const MyTomeTile({required this.volumeData, super.key});
+  const MyVolumeTile({required this.volumeData, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -14,7 +14,7 @@ class MyTomeTile extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(5.0),
       child: InkWell(
-        onTap: () => context.push('/search/volume/${volumeData.toString()}'),
+        onTap: () => context.push('/search/volume/${volumeData['id'].toString()}'),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
