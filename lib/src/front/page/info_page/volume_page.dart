@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:mymangatheque/src/back/services/pocketbase.dart';
 import 'package:mymangatheque/src/front/components/my_author_tile.dart';
+import 'package:mymangatheque/src/front/components/my_genres_show.dart';
 import 'package:mymangatheque/src/front/components/my_icon_text_label.dart';
 import 'package:mymangatheque/src/front/components/my_line.dart';
 import 'package:mymangatheque/src/front/components/my_picture_display.dart';
@@ -132,25 +133,7 @@ class _VolumePageState extends State<VolumePage> {
                                 padding: const EdgeInsets.symmetric(vertical: 5),
                                 child: Row(
                                   children: [
-                                    for (var i = 0; i < genres.length; i += 1)
-                                      Padding(
-                                        padding: const EdgeInsets.symmetric(horizontal: 5),
-                                        child: ClipRRect(
-                                          borderRadius: BorderRadius.circular(12),
-                                          child: Container(
-                                            color: Theme.of(context).colorScheme.onSecondary,
-                                            child: Padding(
-                                              padding: const EdgeInsets.all(5),
-                                              child: Text(
-                                                genres[i]['name'].toString(),
-                                                style: TextStyle(
-                                                  color: Theme.of(context).colorScheme.secondary,
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
+                                    for (var i = 0; i < genres.length; i += 1) MyGenresShow(data: genres[i]),
                                   ],
                                 ),
                               ),
