@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:mymangatheque/src/back/services/pocketbase.dart';
+import 'package:mymangatheque/src/const/const_info.dart';
 import 'package:mymangatheque/src/front/components/my_author_tile.dart';
 import 'package:mymangatheque/src/front/components/my_genres_show.dart';
 import 'package:mymangatheque/src/front/components/my_icon_text_label.dart';
@@ -11,8 +12,9 @@ import 'package:mymangatheque/src/front/components/my_scroll_column.dart';
 
 class VolumePage extends StatefulWidget {
   final String volumeId;
+  final String initRoute;
 
-  const VolumePage({required this.volumeId, super.key});
+  const VolumePage({required this.volumeId, required this.initRoute, super.key});
 
   @override
   State<VolumePage> createState() => _VolumePageState();
@@ -21,41 +23,41 @@ class VolumePage extends StatefulWidget {
 class _VolumePageState extends State<VolumePage> {
   final PocketBaseConnector connector = PocketBaseConnector();
 
-  Map month = {
-    '1': 'Janvier',
-    '2': 'Février',
-    '3': 'Mars',
-    '4': 'Avril',
-    '5': 'Mai',
-    '6': 'Juin',
-    '7': 'Juillet',
-    '8': 'Août',
-    '9': 'Septembre',
-    '10': 'Octobre',
-    '11': 'Novembre',
-    '12': 'Décembre',
-  };
-
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
       future: PocketBaseConnector().getOneExpand('volumes', widget.volumeId, 'authors,genres,contains'),
       builder: (BuildContext context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(
-            child: CircularProgressIndicator(),
+          return Scaffold(
+            appBar: AppBar(
+              title: const Text("Chargement..."),
+            ),
+            body: const Center(
+              child: CircularProgressIndicator(),
+            ),
           );
         }
 
         if (snapshot.connectionState == ConnectionState.none) {
-          return Center(
-            child: const Text("Aucune connexion"),
+          return Scaffold(
+            appBar: AppBar(
+              title: Text("Aucune connexion"),
+            ),
+            body: Center(
+              child: const Text("Aucune connexion"),
+            ),
           );
         }
         if (snapshot.hasError) {
           debugPrint(snapshot.error.toString());
-          return Center(
-            child: const Text("Une erreur est survenue"),
+          return Scaffold(
+            appBar: AppBar(
+              title: Text("Une erreur est survenue"),
+            ),
+            body: Center(
+              child: const Text("Une erreur est survenue"),
+            ),
           );
         }
         if (snapshot.hasData && snapshot.data != null) {
@@ -175,6 +177,7 @@ class _VolumePageState extends State<VolumePage> {
                           children: [
                             MyAuthorTile(
                               authorData: authors[i],
+                              initRoute: widget.initRoute,
                             ),
                             (i != authors.length - 1 && authors.length > 1)
                                 ? MyLine(
@@ -255,7 +258,7 @@ class _VolumePageState extends State<VolumePage> {
         } else {
           return Scaffold(
             appBar: AppBar(
-              title: Text("Une erreur est survenue"),
+              title: Text("Le volume n'existe pas"),
             ),
             body: Center(
               child: const Text("Le volume n'existe pas"),

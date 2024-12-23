@@ -11,8 +11,9 @@ import 'package:mymangatheque/src/front/components/my_sub_series_tile.dart';
 
 class SeriePage extends StatefulWidget {
   final String serieId;
+  final String initRoute;
 
-  const SeriePage({required this.serieId, super.key});
+  const SeriePage({required this.serieId, required this.initRoute, super.key});
 
   @override
   State<SeriePage> createState() => _SeriePageState();
@@ -140,7 +141,10 @@ class _SeriePageState extends State<SeriePage> {
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              MySubSeriesTile(data: subSeries[i]),
+                              MySubSeriesTile(
+                                data: subSeries[i],
+                                initRoute: widget.initRoute,
+                              ),
                               if (i != subSeries.length - 1)
                                 MyLine(
                                   width: MediaQuery.of(context).size.width,
@@ -183,6 +187,7 @@ class _SeriePageState extends State<SeriePage> {
                             children: [
                               MyAuthorTile(
                                 authorData: authors[i],
+                                initRoute: widget.initRoute,
                               ),
                               (i != authors.length - 1 && authors.length > 1)
                                   ? MyLine(

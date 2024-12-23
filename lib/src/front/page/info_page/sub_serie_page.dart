@@ -13,8 +13,9 @@ import 'package:mymangatheque/src/front/components/my_volume_tile.dart';
 
 class SubSeriePage extends StatefulWidget {
   final String serieId;
+  final String initRoute;
 
-  const SubSeriePage({required this.serieId, super.key});
+  const SubSeriePage({required this.serieId, required this.initRoute, super.key});
 
   @override
   State<SubSeriePage> createState() => _SubSeriePageState();
@@ -201,6 +202,7 @@ class _SubSeriePageState extends State<SubSeriePage> {
                           children: [
                             MyAuthorTile(
                               authorData: authors[i],
+                              initRoute: widget.initRoute,
                             ),
                             (i != authors.length - 1 && authors.length > 1)
                                 ? MyLine(
@@ -244,6 +246,7 @@ class _SubSeriePageState extends State<SubSeriePage> {
                           children: [
                             MyVolumeTile(
                               volumeData: volumes[i],
+                              initRoute: widget.initRoute,
                             ),
                             (i != volumes.length - 1 && volumes.length > 1)
                                 ? MyLine(
@@ -276,7 +279,7 @@ class _SubSeriePageState extends State<SubSeriePage> {
                                   ),
                                   InkWell(
                                     onTap: () {
-                                      context.push('/search/editor/${editor['id'].toString()}');
+                                      context.push('${widget.initRoute}/editor/${editor['id'].toString()}');
                                     },
                                     child: Row(
                                       mainAxisAlignment: MainAxisAlignment.spaceBetween,

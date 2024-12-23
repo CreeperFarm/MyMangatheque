@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 
 class EditorPage extends StatefulWidget {
   final String editorName;
-  const EditorPage({required this.editorName, super.key});
+  final String initRoute;
+
+  const EditorPage({required this.editorName, required this.initRoute, super.key});
 
   @override
   State<EditorPage> createState() => _EditorPageState();

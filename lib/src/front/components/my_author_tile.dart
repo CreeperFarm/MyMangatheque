@@ -4,15 +4,16 @@ import 'package:mymangatheque/src/const/own_icon.dart';
 
 class MyAuthorTile extends StatelessWidget {
   final Map<String, dynamic> authorData;
+  final String initRoute;
 
-  const MyAuthorTile({required this.authorData, super.key});
+  const MyAuthorTile({required this.authorData, required this.initRoute, super.key});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(5.0),
       child: InkWell(
-        onTap: () => context.push('/search/author/${authorData['id']}'),
+        onTap: () => context.push('$initRoute/author/${authorData['id']}'),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,

@@ -4,8 +4,9 @@ import 'package:mymangatheque/src/const/own_icon.dart';
 
 class MySubSeriesTile extends StatelessWidget {
   final Map<String, dynamic> data;
+  final String initRoute;
 
-  const MySubSeriesTile({required this.data, super.key});
+  const MySubSeriesTile({required this.data, required this.initRoute, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +22,7 @@ class MySubSeriesTile extends StatelessWidget {
     });
     return InkWell(
       onTap: () {
-        context.push('/search/sub_serie/${data['id'].toString()}');
+        context.push('$initRoute/sub_serie/${data['id'].toString()}');
       },
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
