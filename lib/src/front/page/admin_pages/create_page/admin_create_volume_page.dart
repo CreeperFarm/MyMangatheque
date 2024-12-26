@@ -14,20 +14,30 @@ class AdminCreateVolumePage extends StatefulWidget {
 }
 
 class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
-  final TextEditingController titleVolumeController = TextEditingController();
-  final TextEditingController numberVolumeController = TextEditingController();
-  final TextEditingController eanVolumeController = TextEditingController();
-  final TextEditingController priceVolumeController = TextEditingController();
-  bool over18 = false;
-  final TextEditingController languageVolumeController = TextEditingController();
-  final TextEditingController supportVolumeController = TextEditingController();
-  final TextEditingController genreJapVolumeController = TextEditingController();
-  final TextEditingController resumeVolumeController = TextEditingController();
-  final TextEditingController imagePathVolumeController = TextEditingController();
-  final TextEditingController imageNameVolumeController = TextEditingController();
-  final TextEditingController bookLinkVolumeController = TextEditingController();
-  final TextEditingController infoVolumeController = TextEditingController();
-  DateTime release = DateTime.now();
+  // A (*) Mean that the field is required
+
+  final TextEditingController titleVolumeController = TextEditingController(); // Field (*) : title
+  final TextEditingController numberVolumeController = TextEditingController(); // Field : tome_number
+  final TextEditingController eanVolumeController = TextEditingController(); // Field (*) : ean
+  final TextEditingController priceVolumeController = TextEditingController(); // Field (*) : price
+  bool over18 = false; // Field (*) : over18
+  final TextEditingController languageVolumeController = TextEditingController(); // Field (*) : language
+  final TextEditingController supportVolumeController = TextEditingController(); // Field (*) : support
+  final TextEditingController genreJapVolumeController = TextEditingController(); // Field : genre_jap
+  final TextEditingController resumeVolumeController = TextEditingController(); // Field (*) : resume
+  final TextEditingController imagePathVolumeController = TextEditingController(); // Field : image
+  final TextEditingController imageNameVolumeController = TextEditingController(); // Field : image
+  final TextEditingController bookLinkVolumeController = TextEditingController(); // Field (*) : book_link
+  final TextEditingController infoVolumeController = TextEditingController(); // Field : info
+  DateTime release = DateTime.now(); // Field : release
+
+  // Correspond to id of the items connected
+  final TextEditingController serieVolumeController = TextEditingController(); // Field (*) : series
+  final TextEditingController subSerieVolumeController = TextEditingController(); // Field (*) : sub_series
+  final TextEditingController authorsVolumeController = TextEditingController(); // Field (*) : authors
+  final TextEditingController editorVolumeController = TextEditingController(); // Field (*) : editor
+  final TextEditingController genreVolumeController = TextEditingController(); // Field (*) : genres
+  final TextEditingController containsVolumeController = TextEditingController(); // Field : contain
 
   void uploadImage() async {
     final image = await ImagePicker().pickImage(
@@ -67,6 +77,12 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
     imageNameVolumeController.dispose();
     bookLinkVolumeController.dispose();
     infoVolumeController.dispose();
+    serieVolumeController.dispose();
+    subSerieVolumeController.dispose();
+    authorsVolumeController.dispose();
+    editorVolumeController.dispose();
+    genreVolumeController.dispose();
+    containsVolumeController.dispose();
     super.dispose();
   }
 
@@ -273,12 +289,20 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
                       child: const Text("Manga"),
                     ),
                     DropdownMenuItem(
-                      value: "roman",
+                      value: "Roman",
                       child: Text("Roman"),
                     ),
                     DropdownMenuItem(
-                      value: "artbook",
+                      value: "Artbook",
                       child: Text("ArtBook"),
+                    ),
+                    DropdownMenuItem(
+                      value: "Light-Novel",
+                      child: Text("Light Novel"),
+                    ),
+                    DropdownMenuItem(
+                      value: "Coffret",
+                      child: Text("Coffret"),
                     ),
                     DropdownMenuItem(
                       value: "autre",
