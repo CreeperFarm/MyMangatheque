@@ -105,7 +105,7 @@ class _VolumePageState extends State<VolumePage> {
                           : Padding(
                               padding: const EdgeInsets.symmetric(vertical: 5),
                               child: Text(
-                                data['support'].toString(),
+                                data['support'].toString().replaceAll('-', ' '),
                                 style: const TextStyle(
                                   fontSize: 30,
                                   fontWeight: FontWeight.w200,

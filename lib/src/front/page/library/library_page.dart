@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -123,8 +124,8 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  shadowColor: Theme.of(context).colorScheme.primary.withOpacity(0.5),
-                  color: Theme.of(context).colorScheme.onPrimary,
+                  shadowColor: Theme.of(context).colorScheme.onPrimary.withOpacity(0.5),
+                  color: Theme.of(context).colorScheme.surface,
                   itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
                     PopupMenuItem<String>(
                       value: 'manga',
@@ -175,28 +176,28 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
                 Tab(
                   child: MyTabBarItem(
                     tabText: "Pile à lire",
-                    colorIn: Theme.of(context).colorScheme.onPrimary,
+                    colorIn: Theme.of(context).colorScheme.surface,
                     colorOut: Theme.of(context).colorScheme.primary,
                   ),
                 ),
                 Tab(
                   child: MyTabBarItem(
                     tabText: "Collection",
-                    colorIn: Theme.of(context).colorScheme.onPrimary,
+                    colorIn: Theme.of(context).colorScheme.surface,
                     colorOut: Theme.of(context).colorScheme.primary,
                   ),
                 ),
                 Tab(
                   child: MyTabBarItem(
                     tabText: "Compléter",
-                    colorIn: Theme.of(context).colorScheme.onPrimary,
+                    colorIn: Theme.of(context).colorScheme.surface,
                     colorOut: Theme.of(context).colorScheme.primary,
                   ),
                 ),
                 Tab(
                   child: MyTabBarItem(
                     tabText: "Envies",
-                    colorIn: Theme.of(context).colorScheme.onPrimary,
+                    colorIn: Theme.of(context).colorScheme.surface,
                     colorOut: Theme.of(context).colorScheme.primary,
                   ),
                 ),
@@ -211,16 +212,22 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
             EnvyTab(),
           ],
         ),
-        floatingActionButton: Container(
-          transform: Matrix4.translationValues(0, -32, 0),
-          child: FloatingActionButton(
-            onPressed: () {
-              context.go('/library/scan');
-            },
-            tooltip: 'Scan barcode',
-            child: const Icon(CupertinoIcons.barcode),
-          ),
-        ),
+        floatingActionButton: (kIsWeb)
+            ? null
+            : Container(
+                transform: Matrix4.translationValues(0, -52, 0),
+                child: FloatingActionButton(
+                  onPressed: () {
+                    context.go('/library/scan');
+                  },
+                  tooltip: 'Scan barcode',
+                  child: OwnIcon(
+                    iconColor: Theme.of(context).colorScheme.primary,
+                    iconName: 'barcode',
+                    height: 40,
+                  ),
+                ),
+              ),
       ),
     );
   }
