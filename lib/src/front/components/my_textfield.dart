@@ -8,6 +8,9 @@ class MyTextField extends StatelessWidget {
   final TextInputType? keyboardType;
   final double? verticalPadding;
   final bool? skipEmptyVerification;
+  final FocusNode? focusNode;
+  final Function? customValidator;
+  final Function? customOnChanged;
 
   const MyTextField({
     required this.controller,
@@ -17,6 +20,9 @@ class MyTextField extends StatelessWidget {
     this.keyboardType,
     this.verticalPadding,
     this.skipEmptyVerification,
+    this.focusNode,
+    this.customValidator,
+    this.customOnChanged,
     super.key,
   });
 
@@ -28,17 +34,21 @@ class MyTextField extends StatelessWidget {
         controller: controller,
         obscureText: obscureText ?? false,
         keyboardType: keyboardType ?? TextInputType.text,
-        validator: (value) {
-          if (value == null || value.isEmpty) {
-            return errorMessage;
-          } else if (skipEmptyVerification != null && skipEmptyVerification!) {
-            return null;
-          } else if (value.length < 6 && obscureText!) {
-            return "Votre mot de passe doit contenir au moins 6 caractères!";
-          } else {
-            return null;
-          }
-        },
+        focusNode: focusNode,
+        validator: (customValidator != null)
+            ? (value) => customValidator!(value)
+            : (value) {
+                if (value == null || value.isEmpty) {
+                  return errorMessage;
+                } else if (skipEmptyVerification != null && skipEmptyVerification!) {
+                  return null;
+                } else if (value.length < 6 && obscureText!) {
+                  return "Votre mot de passe doit contenir au moins 6 caractères!";
+                } else {
+                  return null;
+                }
+              },
+        onChanged: (customOnChanged != null) ? (value) => customOnChanged!(value) : null,
         decoration: InputDecoration(
           errorBorder: OutlineInputBorder(
             borderSide: BorderSide(
