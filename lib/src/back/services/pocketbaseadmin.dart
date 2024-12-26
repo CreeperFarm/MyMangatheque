@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart';
 import 'package:mymangatheque/src/back/services/utils.dart';
 import 'package:mymangatheque/src/function/show_message_function.dart';
@@ -95,7 +96,7 @@ class PocketBaseAdminConnector {
     });
 
     subject.onCancel = () {
-      print('on cancel');
+      debugPrint('on cancel');
       subscription.cancel();
     };
     subject.onListen = () async => subject.add(
@@ -114,6 +115,19 @@ class PocketBaseAdminConnector {
     );
   }
 
+  void createVolume(Map<String, dynamic> body, String fileName, String filePath) {
+    _pocketBase.collection('volumes').create(
+      body: body,
+      files: [
+        MultipartFile.fromBytes(
+          'image',
+          File(filePath).readAsBytesSync(),
+          filename: fileName,
+        )
+      ],
+    );
+  }
+
   void createAuthor(Map<String, dynamic> body, String fileName, String filePath) {
     _pocketBase.collection('authors').create(
       body: body,
@@ -125,6 +139,16 @@ class PocketBaseAdminConnector {
         )
       ],
     );
+  }
+
+  Future<bool> checkIfExist(String collectionId, String field, String value) async {
+    final query = '{"$field":"$value"}';
+    final data = await _pocketBase.collection(collectionId).getFirstListItem(query);
+    if (data.toString().contains('"code": 4')) {
+      return false;
+    } else {
+      return true;
+    }
   }
 
   String get serverUrl => _pocketBase.baseURL;

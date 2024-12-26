@@ -7,6 +7,7 @@ class MyTextField extends StatelessWidget {
   final String errorMessage;
   final TextInputType? keyboardType;
   final double? verticalPadding;
+  final double? horizontalPadding;
   final bool? skipEmptyVerification;
   final FocusNode? focusNode;
   final Function? customValidator;
@@ -19,6 +20,7 @@ class MyTextField extends StatelessWidget {
     this.obscureText,
     this.keyboardType,
     this.verticalPadding,
+    this.horizontalPadding,
     this.skipEmptyVerification,
     this.focusNode,
     this.customValidator,
@@ -29,7 +31,7 @@ class MyTextField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 5.0, vertical: verticalPadding ?? 0.0),
+      padding: EdgeInsets.symmetric(horizontal: horizontalPadding ?? 5.0, vertical: verticalPadding ?? 0.0),
       child: TextFormField(
         controller: controller,
         obscureText: obscureText ?? false,

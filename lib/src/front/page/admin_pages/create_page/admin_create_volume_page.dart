@@ -1,7 +1,11 @@
+import 'dart:convert';
+
 import 'package:date_field/date_field.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:mymangatheque/src/back/services/pocketbaseadmin.dart';
+import 'package:mymangatheque/src/front/components/my_button.dart';
 import 'package:mymangatheque/src/front/components/my_scroll_column.dart';
 import 'package:mymangatheque/src/front/components/my_textfield.dart';
 import 'package:simple_barcode_scanner/simple_barcode_scanner.dart';
@@ -88,6 +92,7 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
 
   @override
   Widget build(BuildContext context) {
+    final PocketBaseAdminConnector adminConnector = PocketBaseAdminConnector();
     return MyScrollColumn(
       scrollPadding: const EdgeInsets.symmetric(horizontal: 10),
       children: [
@@ -417,6 +422,123 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
                   },
                 ),
               ),
+              MyTextField(
+                controller: serieVolumeController,
+                labelText: "Id de la série du Volume",
+                errorMessage: "Veuillez entrer l'id série du volume!",
+                verticalPadding: 5,
+                horizontalPadding: 0,
+                customValidator: (value) async {
+                  if (value == null || value.isEmpty) {
+                    return "Veuillez entrer l'id de la série du volume!";
+                  } else {
+                    // Check if the id is a serie
+                    if (await adminConnector.checkIfExist('series', 'id', value)) {
+                      return "Veuillez entrer l'id de série valide!";
+                    } else {
+                      return null;
+                    }
+                  }
+                },
+              ),
+              MyTextField(
+                controller: subSerieVolumeController,
+                labelText: "Id de la sous-série du Volume",
+                errorMessage: "Veuillez entrer l'id sous-série du volume!",
+                verticalPadding: 5,
+                horizontalPadding: 0,
+                customValidator: (value) async {
+                  if (value == null || value.isEmpty) {
+                    return "Veuillez entrer l'id de la sous-série du volume!";
+                  } else {
+                    // Check if the id is a serie
+                    if (await adminConnector.checkIfExist('sub_series', 'id', value)) {
+                      return "Veuillez entrer l'id de sous-série valide!";
+                    } else {
+                      return null;
+                    }
+                  }
+                },
+              ),
+              MyTextField(
+                controller: subSerieVolumeController,
+                labelText: "Id de l'éditeur du Volume",
+                errorMessage: "Veuillez entrer l'id de l'éditeur du volume!",
+                verticalPadding: 5,
+                horizontalPadding: 0,
+                customValidator: (value) async {
+                  if (value == null || value.isEmpty) {
+                    return "Veuillez entrer l'id de l'éditeur du volume!";
+                  } else {
+                    // Check if the id is a serie
+                    if (await adminConnector.checkIfExist('editors', 'id', value)) {
+                      return "Veuillez entrer l'id de l'éditeur du volume!";
+                    } else {
+                      return null;
+                    }
+                  }
+                },
+              ),
+              MyTextField(
+                controller: authorsVolumeController,
+                labelText: "Ids des auteurs du Volume",
+                errorMessage: "Veuillez entrer au moins un id des auteurs du volume!",
+                verticalPadding: 5,
+                horizontalPadding: 0,
+              ),
+              MyTextField(
+                controller: genreVolumeController,
+                labelText: "Ids des genres du Volume",
+                errorMessage: "Veuillez entrer au moins un id des genres du volume!",
+                verticalPadding: 5,
+                horizontalPadding: 0,
+              ),
+              MyTextField(
+                controller: containsVolumeController,
+                labelText: "Contenu du Volume",
+                errorMessage: "Veuillez entrer le contenu du volume!",
+                verticalPadding: 5,
+                horizontalPadding: 0,
+                customValidator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return null;
+                  } else {
+                    return null;
+                  }
+                },
+              ),
+              MyButton(
+                text: "Créer le volume",
+                verticalPadding: 10,
+                horizontalPadding: 0,
+                onTap: () {
+                  if (Form.of(context).validate()) {
+                    adminConnector.createVolume(
+                      {
+                        "title": titleVolumeController.text,
+                        "tome_number": int.parse(numberVolumeController.text),
+                        "price": priceVolumeController.text,
+                        "over18": over18,
+                        "resume": resumeVolumeController.text,
+                        "book_link": jsonEncode(bookLinkVolumeController.text),
+                        "release": release.toIso8601String(),
+                        "ean": int.parse(eanVolumeController.text),
+                        (languageVolumeController.text != "") ? "language" : languageVolumeController.text: null,
+                        "sub_series": subSerieVolumeController.text,
+                        "series": serieVolumeController.text,
+                        "authors": authorsVolumeController.text,
+                        (containsVolumeController.text != "") ? "contain" : containsVolumeController.text: null,
+                        "genres": genreVolumeController.text,
+                        (infoVolumeController.text != "") ? "info" : jsonEncode(infoVolumeController.text): null,
+                        "support": supportVolumeController.text,
+                        (genreJapVolumeController.text != "") ? "genre_jap" : genreJapVolumeController.text: null,
+                      },
+                      imageNameVolumeController.text,
+                      imagePathVolumeController.text,
+                    );
+                  }
+                },
+              )
             ],
           ),
         )
