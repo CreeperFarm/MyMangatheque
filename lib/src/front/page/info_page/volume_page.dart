@@ -336,12 +336,17 @@ class _VolumePageState extends State<VolumePage> {
                                                                           data["book_link"][i]["available"] == "Disponible")
                                                                       ? Colors.green
                                                                       : (data["book_link"][i]["available"] == "En Précommande" ||
-                                                                              data["book_link"][i]["available"] == "En Precommande")
+                                                                              data["book_link"][i]["available"] == "En Precommande" ||
+                                                                              data["book_link"][i]["available"] == "Precommande" ||
+                                                                              data["book_link"][i]["available"] == "Précommande")
                                                                           ? Colors.blue
                                                                           : (data["book_link"][i]["available"].contains("Livraison sous"))
                                                                               ? Colors.orange
                                                                               : Colors.red,
                                                                 ),
+                                                              ),
+                                                              SizedBox(
+                                                                height: 10,
                                                               ),
                                                               Text("Vendu et expédié par BDfugue."),
                                                             ],
