@@ -48,7 +48,7 @@ class MySeriesTile extends StatelessWidget {
         ),
       ),
       onTap: () {
-        context.push('$initRoute/serie/${seriesData['id']}');
+        context.push('${(initRoute == "/") ? "" : initRoute}/serie/${seriesData['id']}');
       },
     );
   }

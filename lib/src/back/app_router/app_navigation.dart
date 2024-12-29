@@ -60,7 +60,7 @@ class AppNavigation {
                         );
                       }),
                   GoRoute(
-                      path: 'author/:name',
+                      path: 'author/:id',
                       name: 'Author Home',
                       builder: (context, state) {
                         return AuthorPage(
@@ -70,7 +70,7 @@ class AppNavigation {
                         );
                       }),
                   GoRoute(
-                      path: 'serie/:name',
+                      path: 'serie/:id',
                       name: 'Series Home',
                       builder: (context, state) {
                         return SeriePage(
@@ -90,7 +90,7 @@ class AppNavigation {
                         );
                       }),
                   GoRoute(
-                      path: 'volume/:tomeId',
+                      path: 'volume/:id',
                       name: 'Volume Home',
                       builder: (context, state) {
                         return VolumePage(

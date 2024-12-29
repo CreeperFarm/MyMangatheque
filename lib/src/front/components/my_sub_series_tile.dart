@@ -22,7 +22,7 @@ class MySubSeriesTile extends StatelessWidget {
     });
     return InkWell(
       onTap: () {
-        context.push('$initRoute/sub_serie/${data['id'].toString()}');
+        context.push('${(initRoute == "/") ? "" : initRoute}/sub_serie/${data['id'].toString()}');
       },
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,

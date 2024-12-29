@@ -40,7 +40,6 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
   final TextEditingController subSerieVolumeController = TextEditingController(); // Field (*) : sub_series
   final TextEditingController authorsVolumeController = TextEditingController(); // Field (*) : authors
   final TextEditingController editorVolumeController = TextEditingController(); // Field (*) : editor
-  final TextEditingController genreVolumeController = TextEditingController(); // Field (*) : genres
   final TextEditingController containsVolumeController = TextEditingController(); // Field : contain
 
   void uploadImage() async {
@@ -85,7 +84,6 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
     subSerieVolumeController.dispose();
     authorsVolumeController.dispose();
     editorVolumeController.dispose();
-    genreVolumeController.dispose();
     containsVolumeController.dispose();
     super.dispose();
   }
@@ -188,7 +186,6 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
                 controller: priceVolumeController,
                 labelText: "Prix du Volume",
                 errorMessage: "Veuillez entrer le prix du volume!",
-                keyboardType: TextInputType.number,
                 verticalPadding: 5,
               ),
               MyTextField(
@@ -461,7 +458,7 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
                 },
               ),
               MyTextField(
-                controller: subSerieVolumeController,
+                controller: editorVolumeController,
                 labelText: "Id de l'éditeur du Volume",
                 errorMessage: "Veuillez entrer l'id de l'éditeur du volume!",
                 verticalPadding: 5,
@@ -483,13 +480,6 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
                 controller: authorsVolumeController,
                 labelText: "Ids des auteurs du Volume",
                 errorMessage: "Veuillez entrer au moins un id des auteurs du volume!",
-                verticalPadding: 5,
-                horizontalPadding: 0,
-              ),
-              MyTextField(
-                controller: genreVolumeController,
-                labelText: "Ids des genres du Volume",
-                errorMessage: "Veuillez entrer au moins un id des genres du volume!",
                 verticalPadding: 5,
                 horizontalPadding: 0,
               ),
@@ -528,7 +518,6 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
                         "series": serieVolumeController.text,
                         "authors": authorsVolumeController.text,
                         (containsVolumeController.text != "") ? "contain" : containsVolumeController.text: null,
-                        "genres": genreVolumeController.text,
                         (infoVolumeController.text != "") ? "info" : jsonEncode(infoVolumeController.text): null,
                         "support": supportVolumeController.text,
                         (genreJapVolumeController.text != "") ? "genre_jap" : genreJapVolumeController.text: null,

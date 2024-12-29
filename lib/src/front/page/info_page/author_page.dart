@@ -87,14 +87,12 @@ class _AuthorPageState extends State<AuthorPage> {
                             child: ClipRRect(
                               child: Wrap(
                                 children: [
-                                  Expanded(
-                                    child: Transform.translate(
-                                      offset: Offset(0, -MediaQuery.of(context).size.width / 2),
-                                      child: Image.network(
-                                        scale: 1 / height,
-                                        pictureUrl,
-                                        fit: BoxFit.fill,
-                                      ),
+                                  Transform.translate(
+                                    offset: Offset(0, -MediaQuery.of(context).size.width / 2),
+                                    child: Image.network(
+                                      scale: 1 / height,
+                                      pictureUrl,
+                                      fit: BoxFit.fill,
                                     ),
                                   ),
                                   BackdropFilter(

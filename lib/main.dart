@@ -1,13 +1,15 @@
+import 'dart:convert';
+
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
-import 'package:go_router/go_router.dart';
 import 'package:mymangatheque/src/back/app_router/app_navigation.dart';
 import 'package:mymangatheque/src/back/services/pocketbase.dart';
 import 'package:mymangatheque/src/const/theme/dark_mode.dart';
 import 'package:mymangatheque/src/const/theme/light_mode.dart';
+import 'package:mymangatheque/src/front/components/my_manga_show_tile.dart';
 import 'package:mymangatheque/src/models/local_storage/service_locator.dart';
 
 void main() async {
@@ -60,58 +62,110 @@ class MyHomePage extends ConsumerStatefulWidget {
 class MyHomePageState extends ConsumerState<MyHomePage> {
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            ElevatedButton(
-              onPressed: () {
-                if (PocketBaseConnector().isLoggedIn()) {
-                  context.go('/profile');
-                } else {
-                  context.go('/profile/signin');
-                }
-              },
-              child: const Text("Go to Profile Page"),
+    return FutureBuilder(
+      future: PocketBaseConnector().getCollectionFullListOrder('volumes', '-release'),
+      builder: (BuildContext context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Scaffold(
+            appBar: AppBar(
+              title: const Text("Chargement..."),
             ),
-            ElevatedButton(
-              onPressed: () {
-                if (PocketBaseConnector().isLoggedIn()) {
-                  context.go('/profile/settings');
-                } else {
-                  context.go('/profile/signin');
-                }
-              },
-              child: const Text("Go to Setting Profile Page"),
+            body: const Center(
+              child: CircularProgressIndicator(),
             ),
-            ElevatedButton(
-              onPressed: () {
-                context.go('/library/scan');
-              },
-              child: const Text("Go to Scan Page"),
+          );
+        }
+
+        if (snapshot.connectionState == ConnectionState.none) {
+          return Scaffold(
+            appBar: AppBar(
+              title: Text("Aucune connexion"),
             ),
-            ElevatedButton(
-              onPressed: () {
-                context.go('/discover');
-              },
-              child: const Text("Go to Discover Page"),
+            body: Center(
+              child: const Text("Aucune connexion"),
             ),
-            ElevatedButton(
-              onPressed: () {
-                context.go('/devpage');
-              },
-              child: const Text("Go to Dev Compo Show Page"),
+          );
+        }
+        if (snapshot.hasError) {
+          debugPrint(snapshot.error.toString());
+          return Scaffold(
+            appBar: AppBar(
+              title: Text("Une erreur est survenue"),
             ),
-            ElevatedButton(
-              onPressed: () {
-                context.go('/mentions_legales');
-              },
-              child: const Text("Go to Mentions Légales Page"),
+            body: Center(
+              child: const Text("Une erreur est survenue"),
             ),
-          ],
-        ),
-      ),
+          );
+        }
+        if (snapshot.hasData && snapshot.data != null) {
+          debugPrint(snapshot.data.toString());
+          return LayoutBuilder(builder: (context, constraints) {
+            if (constraints.maxWidth > 1200) {
+              return GridView.builder(
+                shrinkWrap: true,
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 4,
+                  childAspectRatio: 0.7,
+                ),
+                itemCount: json.decode(snapshot.data!.toString()).length,
+                itemBuilder: (BuildContext context, int index) {
+                  return MyMangaShowTile(
+                    mangaData: json.decode(snapshot.data!.toString())[index],
+                    initRoute: "/",
+                    width: constraints.maxWidth / 4 - 30,
+                    height: (constraints.maxWidth / 4 - 30) * 1.5,
+                  );
+                },
+              );
+            } else if (constraints.maxWidth > 800) {
+              return GridView.builder(
+                shrinkWrap: true,
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 3,
+                  childAspectRatio: 0.7,
+                ),
+                scrollDirection: Axis.vertical,
+                itemCount: json.decode(snapshot.data!.toString()).length,
+                itemBuilder: (BuildContext context, int index) {
+                  return MyMangaShowTile(
+                    mangaData: json.decode(snapshot.data!.toString())[index],
+                    initRoute: "/",
+                    width: constraints.maxWidth / 3 - 30,
+                    height: (constraints.maxWidth / 3 - 30) * 1.5,
+                  );
+                },
+              );
+            } else {
+              return GridView.builder(
+                shrinkWrap: true,
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  childAspectRatio: 0.7,
+                ),
+                itemCount: json.decode(snapshot.data!.toString()).length,
+                itemBuilder: (BuildContext context, int index) {
+                  return MyMangaShowTile(
+                    mangaData: json.decode(snapshot.data!.toString())[index],
+                    initRoute: "/",
+                    width: constraints.maxWidth / 2 - 30,
+                    height: (constraints.maxWidth / 2 - 30) * 1.5,
+                  );
+                },
+              );
+            }
+          });
+        } else {
+          debugPrint(snapshot.error.toString());
+          return Scaffold(
+            appBar: AppBar(
+              title: Text("Une erreur est survenue"),
+            ),
+            body: Center(
+              child: const Text("Une erreur est survenue"),
+            ),
+          );
+        }
+      },
     );
   }
 }

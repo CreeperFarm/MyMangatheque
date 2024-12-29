@@ -1,10 +1,9 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:mymangatheque/src/back/services/pocketbase.dart';
-import 'package:mymangatheque/src/const/own_icon.dart';
 import 'package:mymangatheque/src/front/components/my_author_tile.dart';
+import 'package:mymangatheque/src/front/components/my_editor_show.dart';
 import 'package:mymangatheque/src/front/components/my_genres_show.dart';
 import 'package:mymangatheque/src/front/components/my_line.dart';
 import 'package:mymangatheque/src/front/components/my_picture_display.dart';
@@ -30,7 +29,7 @@ class _SubSeriePageState extends State<SubSeriePage> {
       future: PocketBaseConnector().getOneExpand(
         'sub_series',
         widget.serieId,
-        'authors,volumes,genres,editor',
+        'authors,volumes,serie.genres,editor',
       ),
       builder: (BuildContext context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -69,7 +68,7 @@ class _SubSeriePageState extends State<SubSeriePage> {
           Map<String, dynamic> data = json.decode(snapshot.data.toString())[0];
           final List<dynamic> authors = data['expand']['authors'];
           final List<dynamic> volumes = data['expand']['volumes'];
-          final List<dynamic> genres = data['expand']['genres'];
+          final Map<String, dynamic> series = data['expand']['serie'];
           final Map<String, dynamic> editor = data['expand']['editor'];
 
           // ? Sort volumes
@@ -114,29 +113,18 @@ class _SubSeriePageState extends State<SubSeriePage> {
                           fontWeight: FontWeight.w300,
                         ),
                       ),
-                      (!data['genres'].toString().contains('wl3wzzaskhqbb16') || !data['genres'].toString().contains('b1tb6hhoylz4ndw'))
+                      (volumes[0]["support"].toString() == "manga")
                           ? SizedBox()
-                          : (data['genres'].toString().contains('b1tb6hhoylz4ndw'))
-                              ? Padding(
-                                  padding: const EdgeInsets.symmetric(vertical: 5),
-                                  child: Text(
-                                    'Art-book',
-                                    style: const TextStyle(
-                                      fontSize: 30,
-                                      fontWeight: FontWeight.w200,
-                                    ),
-                                  ),
-                                )
-                              : Padding(
-                                  padding: const EdgeInsets.symmetric(vertical: 5),
-                                  child: Text(
-                                    'Roman',
-                                    style: const TextStyle(
-                                      fontSize: 30,
-                                      fontWeight: FontWeight.w200,
-                                    ),
-                                  ),
+                          : Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 5),
+                              child: Text(
+                                volumes[0]["support"].toString().replaceAll('-', ' '),
+                                style: const TextStyle(
+                                  fontSize: 30,
+                                  fontWeight: FontWeight.w200,
                                 ),
+                              ),
+                            ),
                       MyLine(
                         width: MediaQuery.of(context).size.width,
                         vertical: 10,
@@ -160,7 +148,7 @@ class _SubSeriePageState extends State<SubSeriePage> {
                                 padding: const EdgeInsets.symmetric(vertical: 5),
                                 child: Row(
                                   children: [
-                                    for (var i = 0; i < genres.length; i += 1) MyGenresShow(data: genres[i]),
+                                    for (var i = 0; i < series["expand"]["genres"].length; i += 1) MyGenresShow(data: series["expand"]["genres"][i]),
                                   ],
                                 ),
                               ),
@@ -277,43 +265,10 @@ class _SubSeriePageState extends State<SubSeriePage> {
                                     ),
                                     textAlign: TextAlign.left,
                                   ),
-                                  InkWell(
-                                    onTap: () {
-                                      context.push('${widget.initRoute}/editor/${editor['id'].toString()}');
-                                    },
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Row(
-                                          children: [
-                                            Padding(
-                                              padding: const EdgeInsets.all(5),
-                                              child: ClipRRect(
-                                                borderRadius: BorderRadius.circular(6),
-                                                child: Image.network(
-                                                  "https://api.mymangatheque.com/api/files/whwwobw02cwbhtj/${editor['id'].toString()}/${editor['logo'].toString()}",
-                                                  height: 50,
-                                                ),
-                                              ),
-                                            ),
-                                            Padding(
-                                              padding: const EdgeInsets.only(left: 8.0),
-                                              child: Text(
-                                                editor['name'].toString(),
-                                                style: const TextStyle(
-                                                  fontSize: 18,
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        OwnIcon(
-                                          iconColor: Theme.of(context).colorScheme.primary,
-                                          iconName: 'arrow-right',
-                                        ),
-                                      ],
-                                    ),
-                                  )
+                                  MyEditorShow(
+                                    editor: editor,
+                                    initRoute: widget.initRoute,
+                                  ),
                                 ],
                               ),
                             ),

@@ -13,7 +13,7 @@ class MyAuthorTile extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(5.0),
       child: InkWell(
-        onTap: () => context.push('$initRoute/author/${authorData['id']}'),
+        onTap: () => context.push('${(initRoute == "/") ? "" : initRoute}/author/${authorData['id']}'),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
