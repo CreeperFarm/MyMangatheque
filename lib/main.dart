@@ -98,7 +98,6 @@ class MyHomePageState extends ConsumerState<MyHomePage> {
           );
         }
         if (snapshot.hasData && snapshot.data != null) {
-          debugPrint(snapshot.data.toString());
           return LayoutBuilder(builder: (context, constraints) {
             if (constraints.maxWidth > 1200) {
               return GridView.builder(
