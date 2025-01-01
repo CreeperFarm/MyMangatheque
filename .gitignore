@@ -46,3 +46,6 @@ app.*.map.json
 pubspec.lock
 ios/Podfile.lock
 pubspec.lock
+
+# Don't publish keys
+/keysigning/

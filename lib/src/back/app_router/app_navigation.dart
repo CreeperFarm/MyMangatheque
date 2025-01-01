@@ -54,7 +54,7 @@ class AppNavigation {
                       name: 'Editor Home',
                       builder: (context, state) {
                         return EditorPage(
-                          editorName: state.pathParameters['id']!,
+                          editorId: state.pathParameters['id']!,
                           initRoute: "",
                           key: state.pageKey,
                         );
@@ -162,7 +162,7 @@ class AppNavigation {
                         name: 'Editor Library',
                         builder: (context, state) {
                           return EditorPage(
-                            editorName: state.pathParameters['id']!,
+                            editorId: state.pathParameters['id']!,
                             initRoute: '/library',
                             key: state.pageKey,
                           );
@@ -231,7 +231,7 @@ class AppNavigation {
                       name: 'Editor Search',
                       builder: (context, state) {
                         return EditorPage(
-                          editorName: state.pathParameters['id']!,
+                          editorId: state.pathParameters['id']!,
                           initRoute: '/search',
                           key: state.pageKey,
                         );
@@ -293,7 +293,7 @@ class AppNavigation {
                       name: 'Editor Planning',
                       builder: (context, state) {
                         return EditorPage(
-                          editorName: state.pathParameters['id']!,
+                          editorId: state.pathParameters['id']!,
                           initRoute: '/planning',
                           key: state.pageKey,
                         );
