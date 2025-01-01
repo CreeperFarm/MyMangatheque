@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
@@ -41,6 +42,14 @@ class MyApp extends ConsumerWidget {
       dark: darkMode,
       initial: savedThemeMode ?? AdaptiveThemeMode.system,
       builder: (theme, darkTheme) => MaterialApp.router(
+        localizationsDelegates: [
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: [
+          Locale('fr'), // French
+        ],
         routerConfig: AppNavigation.router,
         title: 'MyMangatheque',
         theme: theme,

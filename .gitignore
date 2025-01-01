@@ -45,7 +45,6 @@ app.*.map.json
 /android/app/release
 pubspec.lock
 ios/Podfile.lock
-pubspec.lock
 
 # Don't publish keys
 /keysigning/
