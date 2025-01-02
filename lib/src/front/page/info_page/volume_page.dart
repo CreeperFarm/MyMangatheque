@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_custom_tabs/flutter_custom_tabs_lite.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:mymangatheque/src/back/services/pocketbase.dart';
 import 'package:mymangatheque/src/const/const_info.dart';
@@ -34,10 +35,31 @@ class _VolumePageState extends State<VolumePage> {
     });
   }
 
+  void _checkVolumeOwnership() async {
+    if (connector.isLoggedIn()) {
+      bool owned = await connector.isVolumeOwned(connector.getConnectedUser()!.id, widget.volumeId);
+      setState(() {
+        isVolumeOwned = owned;
+      });
+    } else {
+      setState(() {
+        isVolumeOwned = false;
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _checkVolumeOwnership();
+  }
+
+  bool isVolumeOwned = false;
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: PocketBaseConnector().getOneExpand('volumes', widget.volumeId, 'authors,contains,editor,series.editors'),
+      future: connector.getOneExpand('volumes', widget.volumeId, 'authors,contains,editor,series.editors'),
       builder: (BuildContext context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Scaffold(
@@ -48,9 +70,7 @@ class _VolumePageState extends State<VolumePage> {
               child: CircularProgressIndicator(),
             ),
           );
-        }
-
-        if (snapshot.connectionState == ConnectionState.none) {
+        } else if (snapshot.connectionState == ConnectionState.none) {
           return Scaffold(
             appBar: AppBar(
               title: Text("Aucune connexion"),
@@ -59,8 +79,7 @@ class _VolumePageState extends State<VolumePage> {
               child: const Text("Aucune connexion"),
             ),
           );
-        }
-        if (snapshot.hasError) {
+        } else if (snapshot.hasError) {
           debugPrint(snapshot.error.toString());
           return Scaffold(
             appBar: AppBar(
@@ -70,8 +89,7 @@ class _VolumePageState extends State<VolumePage> {
               child: const Text("Une erreur est survenue"),
             ),
           );
-        }
-        if (snapshot.hasData && snapshot.data != null) {
+        } else if (snapshot.hasData && snapshot.data != null) {
           // ? Declaring variables
           Map<String, dynamic> data = json.decode(snapshot.data.toString())[0];
           final List<dynamic> contain = data['contain'];
@@ -124,6 +142,61 @@ class _VolumePageState extends State<VolumePage> {
                                 ),
                               ),
                             ),
+                      Row(
+                        children: [
+                          SizedBox(
+                            width: MediaQuery.of(context).size.width * 0.5,
+                            height: 32 * 5 / 6 + 10,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(100),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: (!isVolumeOwned) ? Colors.blue : Theme.of(context).colorScheme.surface,
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(5.0),
+                                  child: ElevatedButton.icon(
+                                    style: ButtonStyle(
+                                        backgroundColor: (!isVolumeOwned)
+                                            ? WidgetStateProperty.all<Color>(Theme.of(context).colorScheme.surface)
+                                            : WidgetStateProperty.all<Color>(Colors.blue),
+                                        iconColor: (!isVolumeOwned)
+                                            ? WidgetStateProperty.all<Color>(Theme.of(context).colorScheme.primary)
+                                            : WidgetStateProperty.all<Color>(Theme.of(context).colorScheme.onPrimary)),
+                                    onPressed: () async {
+                                      if (connector.isLoggedIn()) {
+                                        if (!isVolumeOwned) {
+                                          connector.addVolumeToOwned(connector.getConnectedUser()!.id, data['id'].toString(), false);
+                                          setState(() {
+                                            isVolumeOwned = true;
+                                          });
+                                        } else {
+                                          connector.removeVolumeFromOwned(connector.getConnectedUser()!.id, data['id'].toString());
+                                          setState(() {
+                                            isVolumeOwned = false;
+                                          });
+                                        }
+                                      } else {
+                                        context.push(
+                                          '/profile/signin',
+                                        );
+                                      }
+                                    },
+                                    label: Text(
+                                      (!isVolumeOwned) ? 'Ajouter' : 'Retirer',
+                                      style: TextStyle(
+                                        fontSize: 15,
+                                        color: (!isVolumeOwned) ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onPrimary,
+                                      ),
+                                    ),
+                                    icon: (!isVolumeOwned) ? Icon(Icons.add) : Icon(Icons.check),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                       MyLine(
                         width: MediaQuery.of(context).size.width,
                         vertical: 10,

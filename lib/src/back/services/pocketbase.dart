@@ -467,6 +467,33 @@ class PocketBaseConnector {
     return images;
   }
 
+  // Add a volume to the collection owned
+  Future<void> addVolumeToOwned(String userId, String volumeId, bool readState) async {
+    final body = <String, dynamic>{
+      "user": userId,
+      "volume": volumeId,
+      "readed": readState,
+    };
+
+    await _pocketBase.collection('owned').create(body: body);
+  }
+
+  Future<void> removeVolumeFromOwned(String userId, String volumeId) async {
+    final result = await _pocketBase.collection('owned').getFullList(
+          filter: "user='$userId'&&volume='$volumeId'",
+        );
+    final id = json.decode(result.toString())[0]['id'];
+    await _pocketBase.collection('owned').delete(id);
+  }
+
+  // Verify if the user already own the volume
+  Future<bool> isVolumeOwned(String userId, String volumeId) async {
+    final result = await _pocketBase.collection('owned').getFullList(
+          filter: "user='$userId'&&volume='$volumeId'",
+        );
+    return !result.toString().contains('[]');
+  }
+
   Future<String> getAppVersion() async {
     return PackageInfo.fromPlatform().then((value) => value.version).toString();
   }
