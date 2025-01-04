@@ -26,7 +26,11 @@ class VolumePage extends StatefulWidget {
 }
 
 class _VolumePageState extends State<VolumePage> {
+  bool isVolumeOwned = false;
+  bool isSubSeriesFollowed = false;
+  bool isVolumeReaded = false;
   bool showMore = false;
+
   final PocketBaseConnector connector = PocketBaseConnector();
 
   void switchShowMoreState() {
@@ -41,9 +45,30 @@ class _VolumePageState extends State<VolumePage> {
       setState(() {
         isVolumeOwned = owned;
       });
+      if (owned) {
+        bool readed = await connector.isVolumeReaded(connector.getConnectedUser()!.id, widget.volumeId);
+        setState(() {
+          isVolumeReaded = readed;
+        });
+      }
     } else {
       setState(() {
         isVolumeOwned = false;
+      });
+    }
+  }
+
+  void _checkSubSeriesFollowing() async {
+    if (connector.isLoggedIn()) {
+      final result = await connector.getOneExpand('volumes', widget.volumeId, 'sub_series');
+      final Map<String, dynamic> data = json.decode(result.toString())[0];
+      bool owned = await connector.isSubSeriesFollowed(connector.getConnectedUser()!.id, data['expand']['sub_series']['id'].toString());
+      setState(() {
+        isSubSeriesFollowed = owned;
+      });
+    } else {
+      setState(() {
+        isSubSeriesFollowed = false;
       });
     }
   }
@@ -52,14 +77,13 @@ class _VolumePageState extends State<VolumePage> {
   void initState() {
     super.initState();
     _checkVolumeOwnership();
+    _checkSubSeriesFollowing();
   }
-
-  bool isVolumeOwned = false;
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: connector.getOneExpand('volumes', widget.volumeId, 'authors,contains,editor,series.editors'),
+      future: connector.getOneExpand('volumes', widget.volumeId, 'authors,contains,editor,series.editors,sub_series'),
       builder: (BuildContext context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Scaffold(
@@ -96,7 +120,9 @@ class _VolumePageState extends State<VolumePage> {
           final List<dynamic> authors = data['expand']['authors'];
           final Map<String, dynamic> editor = data['expand']['editor'];
           final Map<String, dynamic> series = data['expand']['series'];
+          final Map<String, dynamic> subSeries = data['expand']['sub_series'];
           final DateTime release = DateTime.parse(data['release'].toString());
+          double widthAddAndFollowButton = MediaQuery.of(context).size.width * 0.5 - 15;
 
           // ? Return Scaffold
           return Scaffold(
@@ -143,33 +169,48 @@ class _VolumePageState extends State<VolumePage> {
                               ),
                             ),
                       Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           SizedBox(
-                            width: MediaQuery.of(context).size.width * 0.5,
+                            width: widthAddAndFollowButton,
                             height: 32 * 5 / 6 + 10,
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(100),
                               child: Container(
                                 decoration: BoxDecoration(
-                                  color: (!isVolumeOwned) ? Colors.blue : Theme.of(context).colorScheme.surface,
+                                  color: Color(0xFF1780A3),
                                 ),
                                 child: Padding(
                                   padding: const EdgeInsets.all(5.0),
-                                  child: ElevatedButton.icon(
+                                  child: ElevatedButton(
                                     style: ButtonStyle(
-                                        backgroundColor: (!isVolumeOwned)
-                                            ? WidgetStateProperty.all<Color>(Theme.of(context).colorScheme.surface)
-                                            : WidgetStateProperty.all<Color>(Colors.blue),
-                                        iconColor: (!isVolumeOwned)
-                                            ? WidgetStateProperty.all<Color>(Theme.of(context).colorScheme.primary)
-                                            : WidgetStateProperty.all<Color>(Theme.of(context).colorScheme.onPrimary)),
+                                      backgroundColor: (!isVolumeOwned)
+                                          ? WidgetStateProperty.all<Color>(Theme.of(context).colorScheme.surface)
+                                          : WidgetStateProperty.all<Color>(Color(0xFF1780A3)),
+                                      iconColor: (!isVolumeOwned)
+                                          ? WidgetStateProperty.all<Color>(Theme.of(context).colorScheme.primary)
+                                          : WidgetStateProperty.all<Color>(Theme.of(context).colorScheme.onPrimary),
+                                      elevation: WidgetStateProperty.all<double>(0),
+                                    ),
                                     onPressed: () async {
                                       if (connector.isLoggedIn()) {
                                         if (!isVolumeOwned) {
-                                          connector.addVolumeToOwned(connector.getConnectedUser()!.id, data['id'].toString(), false);
-                                          setState(() {
-                                            isVolumeOwned = true;
-                                          });
+                                          if (!isSubSeriesFollowed) {
+                                            connector.addVolumeToOwned(connector.getConnectedUser()!.id, data['id'].toString(), false);
+                                            connector.addSubSeriesToFollowed(
+                                              connector.getConnectedUser()!.id,
+                                              subSeries['id'].toString(),
+                                            );
+                                            setState(() {
+                                              isVolumeOwned = true;
+                                              isSubSeriesFollowed = true;
+                                            });
+                                          } else {
+                                            connector.addVolumeToOwned(connector.getConnectedUser()!.id, data['id'].toString(), false);
+                                            setState(() {
+                                              isVolumeOwned = true;
+                                            });
+                                          }
                                         } else {
                                           connector.removeVolumeFromOwned(connector.getConnectedUser()!.id, data['id'].toString());
                                           setState(() {
@@ -182,14 +223,84 @@ class _VolumePageState extends State<VolumePage> {
                                         );
                                       }
                                     },
-                                    label: Text(
-                                      (!isVolumeOwned) ? 'Ajouter' : 'Retirer',
-                                      style: TextStyle(
-                                        fontSize: 15,
-                                        color: (!isVolumeOwned) ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onPrimary,
-                                      ),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        (!isVolumeOwned) ? Icon(Icons.add) : Icon(Icons.check),
+                                        Text(
+                                          (!isVolumeOwned) ? 'Ajouter' : 'Retirer',
+                                          style: TextStyle(
+                                            fontSize: 15,
+                                            color: (!isVolumeOwned) ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onPrimary,
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                    icon: (!isVolumeOwned) ? Icon(Icons.add) : Icon(Icons.check),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                            width: widthAddAndFollowButton,
+                            height: 32 * 5 / 6 + 10,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(100),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.green,
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(5.0),
+                                  child: ElevatedButton(
+                                    style: ButtonStyle(
+                                        backgroundColor: (!isSubSeriesFollowed)
+                                            ? WidgetStateProperty.all<Color>(Theme.of(context).colorScheme.surface)
+                                            : WidgetStateProperty.all<Color>(Colors.green),
+                                        iconColor: (!isSubSeriesFollowed)
+                                            ? WidgetStateProperty.all<Color>(Theme.of(context).colorScheme.primary)
+                                            : WidgetStateProperty.all<Color>(Theme.of(context).colorScheme.onPrimary),
+                                        elevation: WidgetStateProperty.all<double>(0)),
+                                    onPressed: () async {
+                                      if (connector.isLoggedIn()) {
+                                        if (!isSubSeriesFollowed) {
+                                          connector.addSubSeriesToFollowed(
+                                            connector.getConnectedUser()!.id,
+                                            subSeries['id'].toString(),
+                                          );
+                                          setState(() {
+                                            isSubSeriesFollowed = true;
+                                          });
+                                        } else {
+                                          connector.removeSubSeriesToFollowed(
+                                            connector.getConnectedUser()!.id,
+                                            subSeries['id'].toString(),
+                                          );
+                                          setState(() {
+                                            isSubSeriesFollowed = false;
+                                          });
+                                        }
+                                      } else {
+                                        context.push(
+                                          '/profile/signin',
+                                        );
+                                      }
+                                    },
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        (!isSubSeriesFollowed) ? Icon(Icons.bookmark_border) : Icon(Icons.bookmark),
+                                        Text(
+                                          (!isSubSeriesFollowed) ? 'Suivre' : 'Suivie',
+                                          style: TextStyle(
+                                            fontSize: 15,
+                                            color: (!isSubSeriesFollowed)
+                                                ? Theme.of(context).colorScheme.primary
+                                                : Theme.of(context).colorScheme.onPrimary,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ),
@@ -197,6 +308,61 @@ class _VolumePageState extends State<VolumePage> {
                           ),
                         ],
                       ),
+                      (isVolumeOwned)
+                          ? Padding(
+                              padding: const EdgeInsets.only(top: 10),
+                              child: SizedBox(
+                                width: MediaQuery.of(context).size.width,
+                                height: 32 * 5 / 6 + 10,
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(100),
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color: Colors.red,
+                                    ),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(5.0),
+                                      child: ElevatedButton.icon(
+                                        style: ButtonStyle(
+                                            backgroundColor: (!isVolumeReaded)
+                                                ? WidgetStateProperty.all<Color>(Theme.of(context).colorScheme.surface)
+                                                : WidgetStateProperty.all<Color>(Colors.red),
+                                            iconColor: (!isVolumeReaded)
+                                                ? WidgetStateProperty.all<Color>(Theme.of(context).colorScheme.primary)
+                                                : WidgetStateProperty.all<Color>(Theme.of(context).colorScheme.onPrimary),
+                                            elevation: WidgetStateProperty.all<double>(0)),
+                                        onPressed: () async {
+                                          if (connector.isLoggedIn()) {
+                                            connector.changeReadState(
+                                              connector.getConnectedUser()!.id,
+                                              data['id'].toString(),
+                                              !isVolumeReaded,
+                                            );
+                                            setState(() {
+                                              isVolumeReaded = !isVolumeReaded;
+                                            });
+                                          } else {
+                                            context.push(
+                                              '/profile/signin',
+                                            );
+                                          }
+                                        },
+                                        label: Text(
+                                          (!isVolumeReaded) ? 'Lire' : 'Lu',
+                                          style: TextStyle(
+                                            fontSize: 15,
+                                            color:
+                                                (!isVolumeReaded) ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onPrimary,
+                                          ),
+                                        ),
+                                        icon: (!isVolumeReaded) ? Icon(Icons.bookmark_add_rounded) : Icon(Icons.bookmark_remove_rounded),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            )
+                          : SizedBox(),
                       MyLine(
                         width: MediaQuery.of(context).size.width,
                         vertical: 10,

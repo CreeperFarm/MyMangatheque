@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:mymangatheque/src/back/services/pocketbase.dart';
 
-class MyMangaShowTile extends StatelessWidget {
+class MyMangaShowTile extends StatefulWidget {
   final Map<String, dynamic> mangaData;
   final String initRoute;
   final double width;
@@ -16,6 +17,33 @@ class MyMangaShowTile extends StatelessWidget {
   });
 
   @override
+  State<MyMangaShowTile> createState() => _MyMangaShowTileState();
+}
+
+class _MyMangaShowTileState extends State<MyMangaShowTile> {
+  bool isOwned = false;
+  bool isLoggedIn = PocketBaseConnector().isLoggedIn();
+
+  Future<void> _checkIfOwned() async {
+    if (PocketBaseConnector().isLoggedIn()) {
+      bool isOwnedData = await PocketBaseConnector().isVolumeOwned(PocketBaseConnector().getConnectedUser()!.id, widget.mangaData['id']);
+      setState(() {
+        isOwned = isOwnedData;
+      });
+    } else {
+      setState(() {
+        isOwned = false;
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _checkIfOwned();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(
@@ -24,14 +52,14 @@ class MyMangaShowTile extends StatelessWidget {
       ),
       child: InkWell(
         onTap: () {
-          context.push('${(initRoute == "/") ? "" : initRoute}/volume/${mangaData['id']}');
+          context.push('${(widget.initRoute == "/") ? "" : widget.initRoute}/volume/${widget.mangaData['id']}');
         },
         child: Container(
           constraints: BoxConstraints(
-            maxWidth: width,
-            maxHeight: height,
-            minWidth: width,
-            minHeight: height,
+            maxWidth: widget.width,
+            maxHeight: widget.height,
+            minWidth: widget.width,
+            minHeight: widget.height,
           ),
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.5),
@@ -45,20 +73,66 @@ class MyMangaShowTile extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Center(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 10.0,
-                      ),
-                      child: SizedBox(
-                        height: height * 0.79,
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(10.0),
-                          child: Image.network(
-                            'https://api.mymangatheque.com/api/files/tnof8u6oqfepdq6/${mangaData['id']}/${mangaData['image']}',
-                            fit: BoxFit.fill,
+                    child: Stack(
+                      alignment: AlignmentDirectional.center,
+                      children: [
+                        // Display the image
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 10.0,
+                          ),
+                          child: SizedBox(
+                            height: widget.height * 0.79,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(10.0),
+                              child: Image.network(
+                                'https://api.mymangatheque.com/api/files/tnof8u6oqfepdq6/${widget.mangaData['id']}/${widget.mangaData['image']}',
+                                fit: BoxFit.fill,
+                              ),
+                            ),
                           ),
                         ),
-                      ),
+
+                        // Show a badge if the volume is owned
+                        (isLoggedIn)
+                            ? FutureBuilder(
+                                future: PocketBaseConnector().isVolumeOwned(PocketBaseConnector().getConnectedUser()!.id, widget.mangaData['id']),
+                                builder: (BuildContext context, snapshot) {
+                                  if (snapshot.connectionState == ConnectionState.done && snapshot.hasData) {
+                                    if (snapshot.data == false) {
+                                      return Container();
+                                    } else {
+                                      return Positioned(
+                                        top: 10,
+                                        right: 0,
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                            color: Color(0xFF1780A3),
+                                            borderRadius: BorderRadius.only(
+                                              bottomLeft: Radius.circular(10.0),
+                                            ),
+                                          ),
+                                          child: Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 5.0,
+                                              vertical: 2.0,
+                                            ),
+                                            child: Icon(
+                                              Icons.check,
+                                              color: Colors.white,
+                                              size: 20,
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    }
+                                  } else {
+                                    return Container();
+                                  }
+                                },
+                              )
+                            : Container(),
+                      ],
                     ),
                   ),
                   Padding(
@@ -66,7 +140,7 @@ class MyMangaShowTile extends StatelessWidget {
                       horizontal: 10.0,
                     ),
                     child: Text(
-                      mangaData['title'].toString().replaceAll(' - Tome ${mangaData['tome_number']}', ""),
+                      widget.mangaData['title'].toString().replaceAll(' - Tome ${widget.mangaData['tome_number']}', ""),
                       style: TextStyle(
                         fontSize: 17,
                       ),
@@ -82,7 +156,7 @@ class MyMangaShowTile extends StatelessWidget {
                       bottom: 10.0,
                     ),
                     child: Text(
-                      'Tome ${mangaData['tome_number']}',
+                      'Tome ${widget.mangaData['tome_number']}',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w300,

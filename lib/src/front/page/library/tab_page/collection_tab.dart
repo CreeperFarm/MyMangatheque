@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mymangatheque/src/back/services/pocketbase.dart';
@@ -44,83 +46,33 @@ class _CollectionTabState extends State<CollectionTab> {
     if (connector.getConnectedUser() == null) {
       context.go('/profile/signin');
     }
-    return Padding(
-      padding: const EdgeInsets.all(10),
-      child: Column(
-        children: [
-          MyTomeNumberShow(tomeTotal: numberMangaOwned.toString(), editionTotal: "5"),
-          /*Expanded(
-            child: ListView.builder(
-              itemCount: _resultsList.length,
-              itemBuilder: (BuildContext context, int index) {
-                return Column(
-                  children: [
-                    ListTile(
-                      title: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.only(right: 10),
-                                child: SizedBox(
-                                  width: 50,
-                                  child: Image.network(
-                                    'https://cdn.statically.io/gh/CreeperFarm/AppManga/main/${_resultsList[index]['img']}.jpg',
-                                    width: 50,
-                                  ),
-                                ),
-                              ),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    textLength(_resultsList[index]['manga'], 27),
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 17,
-                                      color: Theme.of(context).colorScheme.primary,
-                                    ),
-                                  ),
-                                  Text(
-                                    textLength(_resultsList[index]['author'], 40),
-                                    style: TextStyle(
-                                      color: Theme.of(context).colorScheme.primary,
-                                      fontSize: 14,
-                                    ),
-                                  ),
-                                  Text(
-                                    _resultsList[index]['releaseDate'],
-                                    style: TextStyle(
-                                      color: Theme.of(context).colorScheme.primary,
-                                      fontSize: 14,
-                                    ),
-                                  )
-                                ],
-                              ),
-                            ],
-                          ),
-                          Icon(
-                            Icons.arrow_forward_ios,
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
-                        ],
-                      ),
-                      onTap: () {
-                        context.go('/library/series/${_resultsList[index]['manga']}');
-                      },
-                    ),
-                    MyLine(
-                      width: MediaQuery.of(context).size.width,
-                      vertical: 0,
-                    ),
-                  ],
-                );
-              },
-            ),
-          ),*/
-        ],
-      ),
-    );
+    return FutureBuilder(
+        future: connector.getCollectionDataWithFilterExpand('owned', "user='${connector.getConnectedUser()!.id}'", 'volume.sub_series'),
+        builder: (BuildContext context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          } else if (snapshot.connectionState == ConnectionState.none) {
+            return const Text("Aucune connexion");
+          } else if (snapshot.hasError) {
+            debugPrint(snapshot.error.toString());
+            return const Text("Une erreur est survenue");
+          } else if (snapshot.hasData && snapshot.data != null) {
+            final data = json.decode(snapshot.data.toString());
+            List<dynamic> subSeries = [];
+            // TODO: Make the data be group by sub_series
+            return Padding(
+              padding: const EdgeInsets.all(10),
+              child: Column(
+                children: [
+                  MyTomeNumberShow(tomeTotal: numberMangaOwned.toString(), editionTotal: "Soon..."),
+                ],
+              ),
+            );
+          } else {
+            return Text("Une erreur est survenue");
+          }
+        });
   }
 }

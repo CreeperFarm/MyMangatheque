@@ -71,8 +71,9 @@ class MyHomePage extends ConsumerStatefulWidget {
 class MyHomePageState extends ConsumerState<MyHomePage> {
   @override
   Widget build(BuildContext context) {
+    final PocketBaseConnector connector = PocketBaseConnector();
     return FutureBuilder(
-      future: PocketBaseConnector().getCollectionFullListOrder('volumes', '-release'),
+      future: connector.getCollectionFullListOrder('volumes', '-release'),
       builder: (BuildContext context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Scaffold(
