@@ -1,8 +1,6 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:mymangatheque/src/back/provider/search_filter_provider.dart';
 import 'package:mymangatheque/src/back/provider/search_order_provider.dart';
 import 'package:mymangatheque/src/const/own_icon.dart';
@@ -212,22 +210,6 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
             EnvyTab(),
           ],
         ),
-        floatingActionButton: (kIsWeb)
-            ? null
-            : Container(
-                transform: Matrix4.translationValues(0, -52, 0),
-                child: FloatingActionButton(
-                  onPressed: () {
-                    context.go('/library/scan');
-                  },
-                  tooltip: 'Scan barcode',
-                  child: OwnIcon(
-                    iconColor: Theme.of(context).colorScheme.primary,
-                    iconName: 'barcode',
-                    height: 40,
-                  ),
-                ),
-              ),
       ),
     );
   }
