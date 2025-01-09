@@ -84,7 +84,7 @@ class _MyMangaShowTileState extends State<MyMangaShowTile> {
                               vertical: 10.0,
                             ),
                             child: SizedBox(
-                              height: widget.height * 0.79,
+                              height: widget.height * 0.775,
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(10.0),
                                 child: Image.network(
