@@ -3,11 +3,14 @@ import 'package:go_router/go_router.dart';
 import 'package:mymangatheque/src/const/const_info.dart';
 import 'package:mymangatheque/src/const/own_icon.dart';
 
+import 'my_collection_badge.dart';
+
 class MyVolumeTile extends StatelessWidget {
   final Map<String, dynamic> volumeData;
   final String initRoute;
+  final bool? isVolumeOwned;
 
-  const MyVolumeTile({required this.volumeData, required this.initRoute, super.key});
+  const MyVolumeTile({required this.volumeData, required this.initRoute, this.isVolumeOwned, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -54,6 +57,12 @@ class MyVolumeTile extends StatelessWidget {
                         softWrap: false,
                         overflow: TextOverflow.ellipsis,
                       ),
+                      (isVolumeOwned == null && !isVolumeOwned!)
+                          ? SizedBox()
+                          : Padding(
+                              padding: const EdgeInsets.only(top: 1.0),
+                              child: MyCollectionBadge(),
+                            ),
                     ],
                   ),
                 ),

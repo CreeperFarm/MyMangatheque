@@ -73,66 +73,82 @@ class _MyMangaShowTileState extends State<MyMangaShowTile> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Center(
-                    child: Stack(
-                      alignment: AlignmentDirectional.center,
-                      children: [
-                        // Display the image
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                            vertical: 10.0,
-                          ),
-                          child: SizedBox(
-                            height: widget.height * 0.79,
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(10.0),
-                              child: Image.network(
-                                'https://api.mymangatheque.com/api/files/tnof8u6oqfepdq6/${widget.mangaData['id']}/${widget.mangaData['image']}',
-                                fit: BoxFit.fill,
+                    child: SizedBox(
+                      width: widget.width,
+                      child: Stack(
+                        alignment: AlignmentDirectional.center,
+                        children: [
+                          // Display the image
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 10.0,
+                            ),
+                            child: SizedBox(
+                              height: widget.height * 0.79,
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(10.0),
+                                child: Image.network(
+                                  'https://api.mymangatheque.com/api/files/tnof8u6oqfepdq6/${widget.mangaData['id']}/${widget.mangaData['image']}',
+                                  fit: BoxFit.fill,
+                                ),
                               ),
                             ),
                           ),
-                        ),
 
-                        // Show a badge if the volume is owned
-                        (isLoggedIn)
-                            ? FutureBuilder(
-                                future: PocketBaseConnector().isVolumeOwned(PocketBaseConnector().getConnectedUser()!.id, widget.mangaData['id']),
-                                builder: (BuildContext context, snapshot) {
-                                  if (snapshot.connectionState == ConnectionState.done && snapshot.hasData) {
-                                    if (snapshot.data == false) {
-                                      return Container();
+                          // Show a badge if the volume is owned
+                          (isLoggedIn)
+                              ? FutureBuilder(
+                                  future: PocketBaseConnector().isVolumeOwned(PocketBaseConnector().getConnectedUser()!.id, widget.mangaData['id']),
+                                  builder: (BuildContext context, snapshot) {
+                                    if (snapshot.connectionState == ConnectionState.done && snapshot.hasData) {
+                                      if (snapshot.data == false) {
+                                        return Container();
+                                      } else {
+                                        return Positioned(
+                                          top: 10,
+                                          right: 0,
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                              color: Color(0xFF1780A3),
+                                              borderRadius: BorderRadius.only(
+                                                bottomLeft: Radius.circular(10.0),
+                                                topLeft: Radius.circular(10.0),
+                                                bottomRight: Radius.circular(10.0),
+                                              ),
+                                            ),
+                                            child: Padding(
+                                              padding: const EdgeInsets.symmetric(
+                                                horizontal: 5.0,
+                                                vertical: 2.0,
+                                              ),
+                                              child: Row(
+                                                children: [
+                                                  Icon(
+                                                    Icons.check,
+                                                    color: Colors.white,
+                                                    size: 20,
+                                                  ),
+                                                  Text(
+                                                    'Possédé',
+                                                    style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: 15,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        );
+                                      }
                                     } else {
-                                      return Positioned(
-                                        top: 10,
-                                        right: 0,
-                                        child: Container(
-                                          decoration: BoxDecoration(
-                                            color: Color(0xFF1780A3),
-                                            borderRadius: BorderRadius.only(
-                                              bottomLeft: Radius.circular(10.0),
-                                            ),
-                                          ),
-                                          child: Padding(
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 5.0,
-                                              vertical: 2.0,
-                                            ),
-                                            child: Icon(
-                                              Icons.check,
-                                              color: Colors.white,
-                                              size: 20,
-                                            ),
-                                          ),
-                                        ),
-                                      );
+                                      return Container();
                                     }
-                                  } else {
-                                    return Container();
-                                  }
-                                },
-                              )
-                            : Container(),
-                      ],
+                                  },
+                                )
+                              : Container(),
+                        ],
+                      ),
                     ),
                   ),
                   Padding(

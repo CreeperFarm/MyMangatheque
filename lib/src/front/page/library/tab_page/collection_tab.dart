@@ -168,12 +168,18 @@ class _CollectionTabState extends State<CollectionTab> {
                                     ),
                                   ),
                                 ),
-                                OwnIcon(iconColor: Theme.of(context).colorScheme.primary, iconName: 'arrow-right'),
+                                OwnIcon(
+                                  iconColor: Theme.of(context).colorScheme.primary,
+                                  iconName: 'arrow-right',
+                                ),
                               ],
                             ),
                           ),
                         ),
-                        MyLine(width: MediaQuery.of(context).size.width, vertical: 10)
+                        MyLine(
+                          width: MediaQuery.of(context).size.width,
+                          vertical: 10,
+                        ),
                       ],
                     )
                 ],

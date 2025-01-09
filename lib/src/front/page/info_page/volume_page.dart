@@ -592,7 +592,7 @@ class _VolumePageState extends State<VolumePage> {
                                                           ),
                                                           ElevatedButton(
                                                             style: ButtonStyle(
-                                                              backgroundColor: MaterialStateProperty.all<Color>(Colors.red),
+                                                              backgroundColor: WidgetStateProperty.all<Color>(Colors.red),
                                                             ),
                                                             onPressed: () {
                                                               launchUrl(Uri.parse(data["book_link"][i]["url"].toString()));
@@ -674,7 +674,7 @@ class _VolumePageState extends State<VolumePage> {
                                       heightIcon: 30,
                                     ),
                                   ),
-                            (contain.isEmpty || contain == "")
+                            (contain.isEmpty || contain.toString() == "")
                                 ? SizedBox()
                                 : Column(
                                     children: [

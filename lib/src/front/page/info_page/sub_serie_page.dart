@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:mymangatheque/src/back/services/pocketbase.dart';
 import 'package:mymangatheque/src/front/components/my_author_tile.dart';
 import 'package:mymangatheque/src/front/components/my_editor_show.dart';
@@ -21,7 +22,27 @@ class SubSeriePage extends StatefulWidget {
 }
 
 class _SubSeriePageState extends State<SubSeriePage> {
+  bool isSubSeriesFollowed = false;
   final PocketBaseConnector connector = PocketBaseConnector();
+
+  void _checkSubSeriesFollowing() async {
+    if (connector.isLoggedIn()) {
+      bool owned = await connector.isSubSeriesFollowed(connector.getConnectedUser()!.id, widget.serieId);
+      setState(() {
+        isSubSeriesFollowed = owned;
+      });
+    } else {
+      setState(() {
+        isSubSeriesFollowed = false;
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _checkSubSeriesFollowing();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -125,6 +146,70 @@ class _SubSeriePageState extends State<SubSeriePage> {
                                 ),
                               ),
                             ),
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width,
+                        height: 32 * 5 / 6 + 10,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(100),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.green,
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(5.0),
+                              child: ElevatedButton(
+                                style: ButtonStyle(
+                                    backgroundColor: (!isSubSeriesFollowed)
+                                        ? WidgetStateProperty.all<Color>(Theme.of(context).colorScheme.surface)
+                                        : WidgetStateProperty.all<Color>(Colors.green),
+                                    iconColor: (!isSubSeriesFollowed)
+                                        ? WidgetStateProperty.all<Color>(Theme.of(context).colorScheme.primary)
+                                        : WidgetStateProperty.all<Color>(Theme.of(context).colorScheme.onPrimary),
+                                    elevation: WidgetStateProperty.all<double>(0)),
+                                onPressed: () async {
+                                  if (connector.isLoggedIn()) {
+                                    if (!isSubSeriesFollowed) {
+                                      connector.addSubSeriesToFollowed(
+                                        connector.getConnectedUser()!.id,
+                                        widget.serieId.toString(),
+                                      );
+                                      setState(() {
+                                        isSubSeriesFollowed = true;
+                                      });
+                                    } else {
+                                      connector.removeSubSeriesToFollowed(
+                                        connector.getConnectedUser()!.id,
+                                        widget.serieId.toString(),
+                                      );
+                                      setState(() {
+                                        isSubSeriesFollowed = false;
+                                      });
+                                    }
+                                  } else {
+                                    context.push(
+                                      '/profile/signin',
+                                    );
+                                  }
+                                },
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    (!isSubSeriesFollowed) ? Icon(Icons.bookmark_border) : Icon(Icons.bookmark),
+                                    Text(
+                                      (!isSubSeriesFollowed) ? 'Suivre' : 'Suivie',
+                                      style: TextStyle(
+                                        fontSize: 15,
+                                        color:
+                                            (!isSubSeriesFollowed) ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onPrimary,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
                       MyLine(
                         width: MediaQuery.of(context).size.width,
                         vertical: 10,
@@ -232,10 +317,37 @@ class _SubSeriePageState extends State<SubSeriePage> {
                       for (var i = 0; i < volumes.length; i += 1)
                         Column(
                           children: [
-                            MyVolumeTile(
-                              volumeData: volumes[i],
-                              initRoute: widget.initRoute,
-                            ),
+                            (connector.isLoggedIn())
+                                ? FutureBuilder(
+                                    future: connector.isVolumeOwned(connector.getConnectedUser()!.id, volumes[i]['id']),
+                                    builder: (BuildContext context, snapshot) {
+                                      if (snapshot.connectionState == ConnectionState.done && snapshot.hasData) {
+                                        if (snapshot.data == true) {
+                                          return MyVolumeTile(
+                                            volumeData: volumes[i],
+                                            isVolumeOwned: true,
+                                            initRoute: widget.initRoute,
+                                          );
+                                        } else {
+                                          return MyVolumeTile(
+                                            volumeData: volumes[i],
+                                            isVolumeOwned: false,
+                                            initRoute: widget.initRoute,
+                                          );
+                                        }
+                                      } else {
+                                        return MyVolumeTile(
+                                          volumeData: volumes[i],
+                                          isVolumeOwned: false,
+                                          initRoute: widget.initRoute,
+                                        );
+                                      }
+                                    })
+                                : MyVolumeTile(
+                                    volumeData: volumes[i],
+                                    isVolumeOwned: false,
+                                    initRoute: widget.initRoute,
+                                  ),
                             (i != volumes.length - 1 && volumes.length > 1)
                                 ? MyLine(
                                     width: MediaQuery.of(context).size.width,
