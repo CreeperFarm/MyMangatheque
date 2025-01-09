@@ -35,7 +35,7 @@ class AdminCreatePage extends StatelessWidget {
               //AdminCreateSubSeriePage(),
               AdminCreateVolumePage(),
               AdminCreateAuthorPage(),
-              //AdminCreateEditeurPage(),
+              //AdminCreateEditorPage(),
               AdminCreateGenrePage(),
             ],
           ),

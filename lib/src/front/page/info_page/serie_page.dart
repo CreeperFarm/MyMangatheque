@@ -1,17 +1,19 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:mymangatheque/src/back/services/pocketbase.dart';
-import 'package:mymangatheque/src/const/own_icon.dart';
+import 'package:mymangatheque/src/front/components/my_author_tile.dart';
+import 'package:mymangatheque/src/front/components/my_genres_show.dart';
 import 'package:mymangatheque/src/front/components/my_line.dart';
 import 'package:mymangatheque/src/front/components/my_picture_display.dart';
 import 'package:mymangatheque/src/front/components/my_scroll_column.dart';
+import 'package:mymangatheque/src/front/components/my_sub_series_tile.dart';
 
 class SeriePage extends StatefulWidget {
   final String serieId;
+  final String initRoute;
 
-  const SeriePage({required this.serieId, super.key});
+  const SeriePage({required this.serieId, required this.initRoute, super.key});
 
   @override
   State<SeriePage> createState() => _SeriePageState();
@@ -22,13 +24,8 @@ class _SeriePageState extends State<SeriePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Series"),
-        backgroundColor: Colors.transparent,
-      ),
-      body: FutureBuilder(
-        future: connector.getOne('series', widget.serieId),
+    return FutureBuilder(
+        future: connector.getOneExpand('series', widget.serieId, 'sub_series.volumes,sub_series.editor,genres,authors'),
         builder: (BuildContext context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(
@@ -46,377 +43,177 @@ class _SeriePageState extends State<SeriePage> {
               child: const Text("Une erreur est survenue"),
             );
           }
-          if (snapshot.hasData && snapshot.data == null) {
-            return Center(
-              child: const Text("La série n'existent pas"),
-            );
-          }
-
-          if (snapshot.connectionState == ConnectionState.done) {
+          if (snapshot.hasData && snapshot.data != null) {
+            // ? Define variables
             Map<String, dynamic> data = json.decode(snapshot.data.toString())[0];
-            final List<dynamic> subSeries = data['sub_series'];
-            final List<dynamic> authors = data['authors'];
-            return MyScrollColumn(
-              columnMainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                MyPictureDisplay(
-                  pictureUrl: "https://api.mymangatheque.com/api/files/utbujxtz8wtq0ar/${data['id'].toString()}/${data['image'].toString()}",
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(10),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        data['title'].toString(),
-                        textAlign: TextAlign.left,
-                        style: const TextStyle(
-                          fontSize: 35,
-                          fontWeight: FontWeight.w300,
-                        ),
-                        softWrap: false,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      MyLine(
-                        width: MediaQuery.of(context).size.width,
-                        vertical: 10,
-                        horizontal: 0,
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 5),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Genres :',
-                              style: const TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 5),
-                                child: Row(
-                                  children: [
-                                    for (var i = 0; i < data['genres'].length; i += 1)
-                                      Padding(
-                                        padding: const EdgeInsets.symmetric(horizontal: 5),
-                                        child: ClipRRect(
-                                          borderRadius: BorderRadius.circular(12),
-                                          child: Container(
-                                            color: Theme.of(context).colorScheme.onSecondary,
-                                            child: Padding(
-                                              padding: const EdgeInsets.all(5),
-                                              child: FutureBuilder(
-                                                future: connector.getOne('genres', data['genres'][i]),
-                                                builder: (context, snapshot) {
-                                                  if (snapshot.connectionState == ConnectionState.done) {
-                                                    return Text(
-                                                      jsonDecode(snapshot.data![0].toString())['name'].toString(),
-                                                      style: TextStyle(
-                                                        color: Theme.of(context).colorScheme.secondary,
-                                                      ),
-                                                    );
-                                                  }
-                                                  return const SizedBox();
-                                                },
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      MyLine(
-                        width: MediaQuery.of(context).size.width,
-                        vertical: 10,
-                        horizontal: 0,
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 5),
-                        child: (subSeries.isEmpty)
-                            ? SizedBox()
-                            : (subSeries.length == 1)
-                                ? Text(
-                                    'Edition :',
-                                    style: const TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  )
-                                : Text(
-                                    'Editions :',
-                                    style: const TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                      ),
-                      for (var i = 0; i < subSeries.length; i += 1)
-                        Column(
-                          children: [
-                            FutureBuilder(
-                              future: connector.getSubSerie(subSeries[i]),
-                              builder: (context, snapshot) {
-                                if (snapshot.connectionState == ConnectionState.waiting) {
-                                  return const CircularProgressIndicator();
-                                }
-                                if (snapshot.connectionState == ConnectionState.none) {
-                                  return const Text("Aucune connexion");
-                                }
-                                if (snapshot.hasError) {
-                                  debugPrint(snapshot.error.toString());
-                                  return const Text("Une erreur est survenue");
-                                }
-                                if (snapshot.hasData && snapshot.data == null) {
-                                  return const Text("Il n'existe pas de sous-série");
-                                }
-                                if (snapshot.connectionState == ConnectionState.done) {
-                                  Map<String, dynamic> subSerie = snapshot.data!;
-                                  return Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      GestureDetector(
-                                        onTap: () {
-                                          context.push('/search/sub_serie/${subSerie['id']}');
-                                        },
-                                        child: Row(
-                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            LayoutBuilder(
-                                              builder: (context, constraints) {
-                                                if (constraints.minWidth > 1200) {
-                                                  return pageDisplayEditor(
-                                                    connector,
-                                                    MediaQuery.of(context).size.width - 350,
-                                                    data,
-                                                    subSerie,
-                                                    context,
-                                                    constraints,
-                                                  );
-                                                } else {
-                                                  return pageDisplayEditor(
-                                                    connector,
-                                                    MediaQuery.of(context).size.width - 50,
-                                                    data,
-                                                    subSerie,
-                                                    context,
-                                                    constraints,
-                                                  );
-                                                }
-                                              },
-                                            ),
-                                            OwnIcon(
-                                              iconColor: Theme.of(context).colorScheme.primary,
-                                              iconName: 'arrow-right',
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  );
-                                }
-                                return const CircularProgressIndicator();
-                              },
-                            ),
-                            if (i != subSeries.length - 1)
-                              MyLine(
-                                width: MediaQuery.of(context).size.width,
-                                vertical: 10,
-                                horizontal: 0,
-                              ),
-                          ],
-                        ),
-                      MyLine(
-                        width: MediaQuery.of(context).size.width,
-                        vertical: 10.0,
-                        horizontal: 0.0,
-                      ),
-                      (authors.isEmpty)
-                          ? SizedBox()
-                          : (authors.length == 1)
-                              ? Padding(
-                                  padding: const EdgeInsets.symmetric(vertical: 5),
-                                  child: Text(
-                                    'Auteur :',
-                                    style: const TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                )
-                              : Padding(
-                                  padding: const EdgeInsets.symmetric(vertical: 5),
-                                  child: Text(
-                                    'Auteurs :',
-                                    style: const TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                      for (var i = 0; i < authors.length; i += 1)
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            FutureBuilder(
-                              future: connector.getOne('authors', authors[i]),
-                              builder: (context, snapshot) {
-                                if (snapshot.connectionState == ConnectionState.done) {
-                                  final authorData = json.decode(snapshot.data.toString())[0];
-                                  return Padding(
-                                    padding: const EdgeInsets.all(5.0),
-                                    child: Row(
-                                      crossAxisAlignment: CrossAxisAlignment.center,
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Row(
-                                          crossAxisAlignment: CrossAxisAlignment.center,
-                                          children: [
-                                            Padding(
-                                              padding: const EdgeInsets.all(5),
-                                              child: ClipRRect(
-                                                borderRadius: BorderRadius.circular(12),
-                                                child: Image.network(
-                                                  "https://api.mymangatheque.com/api/files/hper195bzhpmjp9/${authors[i].toString()}/${authorData['image'].toString()}",
-                                                  height: 50,
-                                                ),
-                                              ),
-                                            ),
-                                            Padding(
-                                              padding: const EdgeInsets.only(left: 8.0),
-                                              child: Column(
-                                                crossAxisAlignment: CrossAxisAlignment.start,
-                                                children: [
-                                                  Text(
-                                                    authorData['name'].toString(),
-                                                    style: const TextStyle(
-                                                      fontSize: 18,
-                                                      fontWeight: FontWeight.bold,
-                                                    ),
-                                                    softWrap: false,
-                                                    overflow: TextOverflow.ellipsis,
-                                                  ),
-                                                  Text(
-                                                    authorData['job'].toString(),
-                                                    style: const TextStyle(
-                                                      fontSize: 13,
-                                                    ),
-                                                    softWrap: false,
-                                                    overflow: TextOverflow.ellipsis,
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        OwnIcon(
-                                          iconColor: Theme.of(context).colorScheme.primary,
-                                          iconName: 'arrow-right',
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                }
-                                return const CircularProgressIndicator();
-                              },
-                            ),
-                            (i != authors.length - 1 && authors.length > 1)
-                                ? MyLine(
-                                    width: MediaQuery.of(context).size.width,
-                                    vertical: 5,
-                                    horizontal: 0,
-                                  )
-                                : SizedBox(),
-                          ],
-                        ),
-                    ],
-                  ),
-                )
-              ],
-            );
-          }
-          return Center(
-            child: const CircularProgressIndicator(),
-          );
-        },
-      ),
-    );
-  }
-}
+            final List<dynamic> subSeries = data['expand']['sub_series'];
+            final List<dynamic> authors = data['expand']['authors'];
+            final List<dynamic> genres = data['expand']['genres'];
 
-Widget pageDisplayEditor(
-    PocketBaseConnector connector, double width, Map<String, dynamic> data, Map<String, dynamic> subSerie, context, BoxConstraints constraints) {
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Padding(
-        padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 5),
-        child: SizedBox(
-          width: width - 10,
-          child: FutureBuilder(
-            future: connector.getEditorName(subSerie['editor']),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.done) {
-                return Text(
-                  '${subSerie['title'].toString().replaceFirst(data['title'] + ' - ', '')} • ${snapshot.data}',
-                  softWrap: false,
-                  overflow: TextOverflow.ellipsis,
-                );
-              } else {
-                return Text(
-                  subSerie['title'].toString().replaceFirst(data['title'] + ' - ', ''),
-                  softWrap: false,
-                  overflow: TextOverflow.ellipsis,
-                );
-              }
-            },
-          ),
-        ),
-      ),
-      SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            FutureBuilder(
-              future: connector.getSubSerieVolumesImages(subSerie['id']),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.done) {
-                  return SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
+            // ? Building the widget
+            return Scaffold(
+              appBar: AppBar(
+                title: Text(
+                  data['title'].toString(),
+                  style: const TextStyle(
+                    fontSize: 25,
+                    fontWeight: FontWeight.w300,
+                  ),
+                ),
+                backgroundColor: Colors.transparent,
+              ),
+              body: MyScrollColumn(
+                columnMainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  MyPictureDisplay(
+                    pictureUrl: "https://api.mymangatheque.com/api/files/utbujxtz8wtq0ar/${data['id'].toString()}/${data['image'].toString()}",
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(10),
+                    child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        for (var i = 0; i < json.decode(snapshot.data.toString()).length; i += 1)
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 5),
-                            child: SizedBox(
-                              width: 75,
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(12),
-                                child: Image.network(snapshot.data![i].replaceAll('"', '')),
+                        Text(
+                          data['title'].toString(),
+                          textAlign: TextAlign.left,
+                          style: const TextStyle(
+                            fontSize: 25,
+                            fontWeight: FontWeight.w300,
+                          ),
+                        ),
+                        MyLine(
+                          width: MediaQuery.of(context).size.width,
+                          vertical: 10,
+                          horizontal: 0,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 5),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Genres :',
+                                style: const TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
-                            ),
+                              SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: 5),
+                                  child: Row(
+                                    children: [
+                                      for (var i = 0; i < genres.length; i += 1) MyGenresShow(data: genres[i]),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        MyLine(
+                          width: MediaQuery.of(context).size.width,
+                          vertical: 10,
+                          horizontal: 0,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 5),
+                          child: (subSeries.isEmpty)
+                              ? SizedBox()
+                              : (subSeries.length == 1)
+                                  ? Text(
+                                      'Edition :',
+                                      style: const TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    )
+                                  : Text(
+                                      'Editions :',
+                                      style: const TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                        ),
+                        for (var i = 0; i < subSeries.length; i += 1)
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              MySubSeriesTile(
+                                data: subSeries[i],
+                                initRoute: widget.initRoute,
+                              ),
+                              if (i != subSeries.length - 1)
+                                MyLine(
+                                  width: MediaQuery.of(context).size.width,
+                                  vertical: 10,
+                                  horizontal: 0,
+                                ),
+                            ],
+                          ),
+                        MyLine(
+                          width: MediaQuery.of(context).size.width,
+                          vertical: 10.0,
+                          horizontal: 0.0,
+                        ),
+                        (authors.isEmpty)
+                            ? SizedBox()
+                            : (authors.length == 1)
+                                ? Padding(
+                                    padding: const EdgeInsets.symmetric(vertical: 5),
+                                    child: Text(
+                                      'Auteur :',
+                                      style: const TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  )
+                                : Padding(
+                                    padding: const EdgeInsets.symmetric(vertical: 5),
+                                    child: Text(
+                                      'Auteurs :',
+                                      style: const TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                        for (var i = 0; i < authors.length; i += 1)
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              MyAuthorTile(
+                                authorData: authors[i],
+                                initRoute: widget.initRoute,
+                              ),
+                              (i != authors.length - 1 && authors.length > 1)
+                                  ? MyLine(
+                                      width: MediaQuery.of(context).size.width,
+                                      vertical: 5,
+                                      horizontal: 0,
+                                    )
+                                  : SizedBox(),
+                            ],
                           ),
                       ],
                     ),
-                  );
-                } else {
-                  return const SizedBox();
-                }
-              },
-            ),
-          ],
-        ),
-      )
-    ],
-  );
+                  )
+                ],
+              ),
+            );
+          } else {
+            return Scaffold(
+              appBar: AppBar(
+                title: Text("La série n'existe pas"),
+              ),
+              body: Center(
+                child: const Text("La série n'existe pas"),
+              ),
+            );
+          }
+        });
+  }
 }

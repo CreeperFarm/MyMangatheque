@@ -26,14 +26,12 @@ class MyPictureDisplay extends StatelessWidget {
             child: ClipRRect(
               child: Wrap(
                 children: [
-                  Expanded(
-                    child: Transform.translate(
-                      offset: Offset(0, -MediaQuery.of(context).size.width / 2),
-                      child: Image.network(
-                        scale: 1 / (MediaQuery.of(context).size.width / height),
-                        pictureUrl,
-                        fit: BoxFit.fill,
-                      ),
+                  Transform.translate(
+                    offset: Offset(0, -MediaQuery.of(context).size.width / 2),
+                    child: Image.network(
+                      scale: 1 / (MediaQuery.of(context).size.width / height),
+                      pictureUrl,
+                      fit: BoxFit.fill,
                     ),
                   ),
                   BackdropFilter(

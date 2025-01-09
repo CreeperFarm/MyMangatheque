@@ -53,31 +53,51 @@ class AppNavigation {
                       path: 'editor/:id',
                       name: 'Editor Home',
                       builder: (context, state) {
-                        return EditorPage(editorName: state.pathParameters['id']!, key: state.pageKey);
+                        return EditorPage(
+                          editorId: state.pathParameters['id']!,
+                          initRoute: "",
+                          key: state.pageKey,
+                        );
                       }),
                   GoRoute(
-                      path: 'author/:name',
+                      path: 'author/:id',
                       name: 'Author Home',
                       builder: (context, state) {
-                        return AuthorPage(authorName: state.pathParameters['id']!, key: state.pageKey);
+                        return AuthorPage(
+                          authorName: state.pathParameters['id']!,
+                          initRoute: "",
+                          key: state.pageKey,
+                        );
                       }),
                   GoRoute(
-                      path: 'serie/:name',
+                      path: 'serie/:id',
                       name: 'Series Home',
                       builder: (context, state) {
-                        return SeriePage(serieId: state.pathParameters['id']!, key: state.pageKey);
+                        return SeriePage(
+                          serieId: state.pathParameters['id']!,
+                          initRoute: "",
+                          key: state.pageKey,
+                        );
                       }),
                   GoRoute(
                       path: 'sub_serie/:id',
                       name: 'Sub-Series Home',
                       builder: (context, state) {
-                        return SubSeriePage(serieId: state.pathParameters['id']!, key: state.pageKey);
+                        return SubSeriePage(
+                          serieId: state.pathParameters['id']!,
+                          initRoute: "",
+                          key: state.pageKey,
+                        );
                       }),
                   GoRoute(
-                      path: 'volume/:tomeId',
+                      path: 'volume/:id',
                       name: 'Volume Home',
                       builder: (context, state) {
-                        return VolumePage(volumeId: state.pathParameters['id']!, key: state.pageKey);
+                        return VolumePage(
+                          volumeId: state.pathParameters['id']!,
+                          initRoute: "",
+                          key: state.pageKey,
+                        );
                       }),
                   GoRoute(
                       path: 'discover',
@@ -141,31 +161,51 @@ class AppNavigation {
                         path: 'editor/:id',
                         name: 'Editor Library',
                         builder: (context, state) {
-                          return EditorPage(editorName: state.pathParameters['id']!, key: state.pageKey);
+                          return EditorPage(
+                            editorId: state.pathParameters['id']!,
+                            initRoute: '/library',
+                            key: state.pageKey,
+                          );
                         }),
                     GoRoute(
                         path: 'author/:id',
                         name: 'Author Library',
                         builder: (context, state) {
-                          return AuthorPage(authorName: state.pathParameters['id']!, key: state.pageKey);
+                          return AuthorPage(
+                            authorName: state.pathParameters['id']!,
+                            initRoute: '/library',
+                            key: state.pageKey,
+                          );
                         }),
                     GoRoute(
                         path: 'serie/:id',
                         name: 'Page de la Série',
                         builder: (context, state) {
-                          return SeriePage(serieId: state.pathParameters['id']!, key: state.pageKey);
+                          return SeriePage(
+                            serieId: state.pathParameters['id']!,
+                            initRoute: '/library',
+                            key: state.pageKey,
+                          );
                         }),
                     GoRoute(
                         path: 'sub_serie/:id',
                         name: 'Sub-Series Library',
                         builder: (context, state) {
-                          return SubSeriePage(serieId: state.pathParameters['id']!, key: state.pageKey);
+                          return SubSeriePage(
+                            serieId: state.pathParameters['id']!,
+                            initRoute: '/library',
+                            key: state.pageKey,
+                          );
                         }),
                     GoRoute(
                         path: 'volume/:id',
                         name: 'Volume Library',
                         builder: (context, state) {
-                          return VolumePage(volumeId: state.pathParameters['id']!, key: state.pageKey);
+                          return VolumePage(
+                            volumeId: state.pathParameters['id']!,
+                            initRoute: '/library',
+                            key: state.pageKey,
+                          );
                         }),
                     GoRoute(
                         path: 'scan',
@@ -190,31 +230,51 @@ class AppNavigation {
                       path: 'editor/:id',
                       name: 'Editor Search',
                       builder: (context, state) {
-                        return EditorPage(editorName: state.pathParameters['id']!, key: state.pageKey);
+                        return EditorPage(
+                          editorId: state.pathParameters['id']!,
+                          initRoute: '/search',
+                          key: state.pageKey,
+                        );
                       }),
                   GoRoute(
                       path: 'author/:id',
                       name: 'Author Search',
                       builder: (context, state) {
-                        return AuthorPage(authorName: state.pathParameters['id']!, key: state.pageKey);
+                        return AuthorPage(
+                          authorName: state.pathParameters['id']!,
+                          initRoute: '/search',
+                          key: state.pageKey,
+                        );
                       }),
                   GoRoute(
                       path: 'serie/:id',
                       name: 'Series Search',
                       builder: (context, state) {
-                        return SeriePage(serieId: state.pathParameters['id']!, key: state.pageKey);
+                        return SeriePage(
+                          serieId: state.pathParameters['id']!,
+                          initRoute: '/search',
+                          key: state.pageKey,
+                        );
                       }),
                   GoRoute(
                       path: 'sub_serie/:id',
                       name: 'Sub-Series Search',
                       builder: (context, state) {
-                        return SubSeriePage(serieId: state.pathParameters['id']!, key: state.pageKey);
+                        return SubSeriePage(
+                          serieId: state.pathParameters['id']!,
+                          initRoute: '/search',
+                          key: state.pageKey,
+                        );
                       }),
                   GoRoute(
                       path: 'volume/:id',
                       name: 'Volume Search',
                       builder: (context, state) {
-                        return VolumePage(volumeId: state.pathParameters['id']!, key: state.pageKey);
+                        return VolumePage(
+                          volumeId: state.pathParameters['id']!,
+                          initRoute: '/search',
+                          key: state.pageKey,
+                        );
                       })
                 ])
           ]),
@@ -232,31 +292,35 @@ class AppNavigation {
                       path: 'editor/:id',
                       name: 'Editor Planning',
                       builder: (context, state) {
-                        return EditorPage(editorName: state.pathParameters['id']!, key: state.pageKey);
+                        return EditorPage(
+                          editorId: state.pathParameters['id']!,
+                          initRoute: '/planning',
+                          key: state.pageKey,
+                        );
                       }),
                   GoRoute(
                       path: 'author/:id',
                       name: 'Author Planning',
                       builder: (context, state) {
-                        return AuthorPage(authorName: state.pathParameters['id']!, key: state.pageKey);
+                        return AuthorPage(authorName: state.pathParameters['id']!, initRoute: '/planning', key: state.pageKey);
                       }),
                   GoRoute(
                       path: 'serie/:id',
                       name: 'Series Planning',
                       builder: (context, state) {
-                        return SeriePage(serieId: state.pathParameters['id']!, key: state.pageKey);
+                        return SeriePage(serieId: state.pathParameters['id']!, initRoute: '/planning', key: state.pageKey);
                       }),
                   GoRoute(
                       path: 'sub_serie/:id',
                       name: 'Sub-Series Planning',
                       builder: (context, state) {
-                        return SubSeriePage(serieId: state.pathParameters['id']!, key: state.pageKey);
+                        return SubSeriePage(serieId: state.pathParameters['id']!, initRoute: '/planning', key: state.pageKey);
                       }),
                   GoRoute(
                       path: 'volume/:id',
                       name: 'Volume Planning',
                       builder: (context, state) {
-                        return VolumePage(volumeId: state.pathParameters['id']!, key: state.pageKey);
+                        return VolumePage(volumeId: state.pathParameters['id']!, initRoute: '/planning', key: state.pageKey);
                       })
                 ])
           ]),

@@ -355,6 +355,18 @@ class PocketBaseConnector {
         .then((value) => value.items);
   }
 
+  Future<List<RecordModel>> getCollectionDataWithFilterExpand(String collectionId, String query, String expand) {
+    return _pocketBase
+        .collection(collectionId)
+        .getList(
+          page: 1,
+          perPage: 500,
+          filter: query,
+          expand: expand,
+        )
+        .then((value) => value.items);
+  }
+
   // Get the data from a collection and listen to the changes
   Stream<List<RecordModel>> getCollectionDataListener(String collectionId) {
     PublishSubject<List<RecordModel>> subject = PublishSubject<List<RecordModel>>();
@@ -465,6 +477,80 @@ class PocketBaseConnector {
       }
     }
     return images;
+  }
+
+  // Add a volume to the collection owned
+  Future<void> addVolumeToOwned(String userId, String volumeId, bool readState) async {
+    final body = <String, dynamic>{
+      "user": userId,
+      "volume": volumeId,
+      "readed": readState,
+    };
+
+    await _pocketBase.collection('owned').create(body: body);
+  }
+
+  // Remove a volume from the collection owned
+  Future<void> removeVolumeFromOwned(String userId, String volumeId) async {
+    final result = await _pocketBase.collection('owned').getFullList(
+          filter: "user='$userId'&&volume='$volumeId'",
+        );
+    final id = json.decode(result.toString())[0]['id'];
+    await _pocketBase.collection('owned').delete(id);
+  }
+
+  // Verify if the user already own the volume
+  Future<bool> isVolumeOwned(String userId, String volumeId) async {
+    final result = await _pocketBase.collection('owned').getFullList(
+          filter: "user='$userId'&&volume='$volumeId'",
+        );
+    return !result.toString().contains('[]');
+  }
+
+  // Change the read state of a volume
+  Future<void> changeReadState(String userId, String volumeId, bool readState) async {
+    final result = await _pocketBase.collection('owned').getFullList(
+          filter: "user='$userId'&&volume='$volumeId'",
+        );
+    final id = json.decode(result.toString())[0]['id'];
+    final body = <String, dynamic>{
+      "readed": readState,
+    };
+    await _pocketBase.collection('owned').update(id, body: body);
+  }
+
+  // Verify if the user as read the volume
+  Future<bool> isVolumeReaded(String userId, String volumeId) async {
+    final result = await _pocketBase.collection('owned').getFullList(
+          filter: "user='$userId'&&volume='$volumeId'",
+        );
+    return json.decode(result.toString())[0]['readed'];
+  }
+
+  // Add a sub_series to the collection followed
+  Future<void> addSubSeriesToFollowed(String userId, String subSeriesId) async {
+    final body = <String, dynamic>{
+      "user": userId,
+      "sub_serie": subSeriesId,
+    };
+
+    await _pocketBase.collection('followed').create(body: body);
+  }
+
+  Future<void> removeSubSeriesToFollowed(String userId, String subSeriesId) async {
+    final result = await _pocketBase.collection('followed').getFullList(
+          filter: "user='$userId'&&sub_serie='$subSeriesId'",
+        );
+    final id = json.decode(result.toString())[0]['id'];
+    await _pocketBase.collection('followed').delete(id);
+  }
+
+  // Verify if the user already own the volume
+  Future<bool> isSubSeriesFollowed(String userId, String subSeriesId) async {
+    final result = await _pocketBase.collection('followed').getFullList(
+          filter: "user='$userId'&&sub_serie='$subSeriesId'",
+        );
+    return !result.toString().contains('[]');
   }
 
   Future<String> getAppVersion() async {

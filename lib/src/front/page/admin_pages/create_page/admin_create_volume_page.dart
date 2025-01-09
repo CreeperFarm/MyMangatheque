@@ -1,7 +1,11 @@
+import 'dart:convert';
+
 import 'package:date_field/date_field.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:mymangatheque/src/back/services/pocketbaseadmin.dart';
+import 'package:mymangatheque/src/front/components/my_button.dart';
 import 'package:mymangatheque/src/front/components/my_scroll_column.dart';
 import 'package:mymangatheque/src/front/components/my_textfield.dart';
 import 'package:simple_barcode_scanner/simple_barcode_scanner.dart';
@@ -14,20 +18,29 @@ class AdminCreateVolumePage extends StatefulWidget {
 }
 
 class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
-  final TextEditingController titleVolumeController = TextEditingController();
-  final TextEditingController numberVolumeController = TextEditingController();
-  final TextEditingController eanVolumeController = TextEditingController();
-  final TextEditingController priceVolumeController = TextEditingController();
-  bool over18 = false;
-  final TextEditingController languageVolumeController = TextEditingController();
-  final TextEditingController supportVolumeController = TextEditingController();
-  final TextEditingController genreJapVolumeController = TextEditingController();
-  final TextEditingController resumeVolumeController = TextEditingController();
-  final TextEditingController imagePathVolumeController = TextEditingController();
-  final TextEditingController imageNameVolumeController = TextEditingController();
-  final TextEditingController bookLinkVolumeController = TextEditingController();
-  final TextEditingController infoVolumeController = TextEditingController();
-  DateTime release = DateTime.now();
+  // A (*) Mean that the field is required
+
+  final TextEditingController titleVolumeController = TextEditingController(); // Field (*) : title
+  final TextEditingController numberVolumeController = TextEditingController(); // Field : tome_number
+  final TextEditingController eanVolumeController = TextEditingController(); // Field (*) : ean
+  final TextEditingController priceVolumeController = TextEditingController(); // Field (*) : price
+  bool over18 = false; // Field (*) : over18
+  final TextEditingController languageVolumeController = TextEditingController(); // Field (*) : language
+  final TextEditingController supportVolumeController = TextEditingController(); // Field (*) : support
+  final TextEditingController genreJapVolumeController = TextEditingController(); // Field : genre_jap
+  final TextEditingController resumeVolumeController = TextEditingController(); // Field (*) : resume
+  final TextEditingController imagePathVolumeController = TextEditingController(); // Field : image
+  final TextEditingController imageNameVolumeController = TextEditingController(); // Field : image
+  final TextEditingController bookLinkVolumeController = TextEditingController(); // Field (*) : book_link
+  final TextEditingController infoVolumeController = TextEditingController(); // Field : info
+  DateTime release = DateTime.now(); // Field : release
+
+  // Correspond to id of the items connected
+  final TextEditingController serieVolumeController = TextEditingController(); // Field (*) : series
+  final TextEditingController subSerieVolumeController = TextEditingController(); // Field (*) : sub_series
+  final TextEditingController authorsVolumeController = TextEditingController(); // Field (*) : authors
+  final TextEditingController editorVolumeController = TextEditingController(); // Field (*) : editor
+  final TextEditingController containsVolumeController = TextEditingController(); // Field : contain
 
   void uploadImage() async {
     final image = await ImagePicker().pickImage(
@@ -67,11 +80,17 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
     imageNameVolumeController.dispose();
     bookLinkVolumeController.dispose();
     infoVolumeController.dispose();
+    serieVolumeController.dispose();
+    subSerieVolumeController.dispose();
+    authorsVolumeController.dispose();
+    editorVolumeController.dispose();
+    containsVolumeController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final PocketBaseAdminConnector adminConnector = PocketBaseAdminConnector();
     return MyScrollColumn(
       scrollPadding: const EdgeInsets.symmetric(horizontal: 10),
       children: [
@@ -167,7 +186,6 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
                 controller: priceVolumeController,
                 labelText: "Prix du Volume",
                 errorMessage: "Veuillez entrer le prix du volume!",
-                keyboardType: TextInputType.number,
                 verticalPadding: 5,
               ),
               MyTextField(
@@ -273,12 +291,20 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
                       child: const Text("Manga"),
                     ),
                     DropdownMenuItem(
-                      value: "roman",
+                      value: "Roman",
                       child: Text("Roman"),
                     ),
                     DropdownMenuItem(
-                      value: "artbook",
+                      value: "Artbook",
                       child: Text("ArtBook"),
+                    ),
+                    DropdownMenuItem(
+                      value: "Light-Novel",
+                      child: Text("Light Novel"),
+                    ),
+                    DropdownMenuItem(
+                      value: "Coffret",
+                      child: Text("Coffret"),
                     ),
                     DropdownMenuItem(
                       value: "autre",
@@ -393,6 +419,115 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
                   },
                 ),
               ),
+              MyTextField(
+                controller: serieVolumeController,
+                labelText: "Id de la série du Volume",
+                errorMessage: "Veuillez entrer l'id série du volume!",
+                verticalPadding: 5,
+                horizontalPadding: 0,
+                customValidator: (value) async {
+                  if (value == null || value.isEmpty) {
+                    return "Veuillez entrer l'id de la série du volume!";
+                  } else {
+                    // Check if the id is a serie
+                    if (await adminConnector.checkIfExist('series', 'id', value)) {
+                      return "Veuillez entrer l'id de série valide!";
+                    } else {
+                      return null;
+                    }
+                  }
+                },
+              ),
+              MyTextField(
+                controller: subSerieVolumeController,
+                labelText: "Id de la sous-série du Volume",
+                errorMessage: "Veuillez entrer l'id sous-série du volume!",
+                verticalPadding: 5,
+                horizontalPadding: 0,
+                customValidator: (value) async {
+                  if (value == null || value.isEmpty) {
+                    return "Veuillez entrer l'id de la sous-série du volume!";
+                  } else {
+                    // Check if the id is a serie
+                    if (await adminConnector.checkIfExist('sub_series', 'id', value)) {
+                      return "Veuillez entrer l'id de sous-série valide!";
+                    } else {
+                      return null;
+                    }
+                  }
+                },
+              ),
+              MyTextField(
+                controller: editorVolumeController,
+                labelText: "Id de l'éditeur du Volume",
+                errorMessage: "Veuillez entrer l'id de l'éditeur du volume!",
+                verticalPadding: 5,
+                horizontalPadding: 0,
+                customValidator: (value) async {
+                  if (value == null || value.isEmpty) {
+                    return "Veuillez entrer l'id de l'éditeur du volume!";
+                  } else {
+                    // Check if the id is a serie
+                    if (await adminConnector.checkIfExist('editors', 'id', value)) {
+                      return "Veuillez entrer l'id de l'éditeur du volume!";
+                    } else {
+                      return null;
+                    }
+                  }
+                },
+              ),
+              MyTextField(
+                controller: authorsVolumeController,
+                labelText: "Ids des auteurs du Volume",
+                errorMessage: "Veuillez entrer au moins un id des auteurs du volume!",
+                verticalPadding: 5,
+                horizontalPadding: 0,
+              ),
+              MyTextField(
+                controller: containsVolumeController,
+                labelText: "Contenu du Volume",
+                errorMessage: "Veuillez entrer le contenu du volume!",
+                verticalPadding: 5,
+                horizontalPadding: 0,
+                customValidator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return null;
+                  } else {
+                    return null;
+                  }
+                },
+              ),
+              MyButton(
+                text: "Créer le volume",
+                verticalPadding: 10,
+                horizontalPadding: 0,
+                onTap: () {
+                  if (Form.of(context).validate()) {
+                    adminConnector.createVolume(
+                      {
+                        "title": titleVolumeController.text,
+                        "tome_number": int.parse(numberVolumeController.text),
+                        "price": priceVolumeController.text,
+                        "over18": over18,
+                        "resume": resumeVolumeController.text,
+                        "book_link": jsonEncode(bookLinkVolumeController.text),
+                        "release": release.toIso8601String(),
+                        "ean": int.parse(eanVolumeController.text),
+                        (languageVolumeController.text != "") ? "language" : languageVolumeController.text: null,
+                        "sub_series": subSerieVolumeController.text,
+                        "series": serieVolumeController.text,
+                        "authors": authorsVolumeController.text,
+                        (containsVolumeController.text != "") ? "contain" : containsVolumeController.text: null,
+                        (infoVolumeController.text != "") ? "info" : jsonEncode(infoVolumeController.text): null,
+                        "support": supportVolumeController.text,
+                        (genreJapVolumeController.text != "") ? "genre_jap" : genreJapVolumeController.text: null,
+                      },
+                      imageNameVolumeController.text,
+                      imagePathVolumeController.text,
+                    );
+                  }
+                },
+              )
             ],
           ),
         )
