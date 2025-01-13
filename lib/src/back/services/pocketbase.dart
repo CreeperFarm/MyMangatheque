@@ -283,7 +283,6 @@ class PocketBaseConnector {
     assert(email.isNotEmpty);
     debugPrint('Finding user with email $email');
     var value2 = await _pocketBase.collection('users').getFirstListItem('email="$email"');
-    print(value2.data);
     debugPrint('User found with email $email');
     return _pocketBase.collection('users').getFirstListItem('email="$email"').then(
           (value) => User.fromJSON(value.id, value.collectionId, value.data, value.created, value.updated, value.data['birthday']),
@@ -299,8 +298,9 @@ class PocketBaseConnector {
         filename: fileName,
       )
     ]).catchError((e) {
-      print(e.toString());
+      debugPrint(e.toString());
       showMessage('Une erreur est arrivé', context);
+      return e;
     });
   }
 
