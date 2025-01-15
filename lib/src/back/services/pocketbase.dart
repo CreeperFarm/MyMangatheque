@@ -48,6 +48,45 @@ class PocketBaseConnector {
       final authInfo = json.decode(authRecord.toString());
       _connectedUser.add(await findUser(authInfo['record']['email']));
     } else {}
+
+    /*if (!PocketBaseConnector().isLoggedIn()) {
+      MangaOwnedNotifier().newDataSet([]);
+    } else {
+      try {
+        final result = await PocketBaseConnector().getCollectionDataWithFilterExpand(
+          'owned',
+          "user='${PocketBaseConnector().getConnectedUser()!.id}'",
+          'volume.sub_series',
+        );
+        final data = json.decode(result.toString());
+        Map<String, dynamic> subSeriesMap = {};
+        for (var i = 0; i < data.length; i++) {
+          String title = data[i]['expand']['volume']['expand']['sub_series']['title'];
+          if (subSeriesMap.containsKey(title)) {
+            subSeriesMap[title]['volumes'].add({
+              'title': data[i]['expand']['volume']['title'],
+              'image': data[i]['expand']['volume']['image'],
+              'id': data[i]['expand']['volume']['id']
+            });
+          } else {
+            subSeriesMap[title] = {
+              'title': title,
+              'id': data[i]['expand']['volume']['expand']['sub_series']['id'],
+              'first_index_data': i,
+              'volumes': [
+                {
+                  'title': data[i]['expand']['volume']['title'],
+                  'image': data[i]['expand']['volume']['image'],
+                  'id': data[i]['expand']['volume']['id']
+                }
+              ]
+            };
+          }
+        }
+      } catch (e) {
+        debugPrint(e.toString());
+      }
+    }*/
   }
 
   // Singleton
@@ -154,7 +193,7 @@ class PocketBaseConnector {
         showMessage('Une erreur est survenue', context);
       }
     } catch (e) {
-      showMessage(e.toString(), context);
+      showMessage("Une erreur est survenue.", context);
       debugPrint(e.toString());
     }
     await closeCustomTabs();
@@ -171,7 +210,8 @@ class PocketBaseConnector {
 
       return _connectedUser.value;
     } catch (err, context) {
-      showMessage(err.toString(), context);
+      showMessage("Une erreur est survenue.", context);
+      debugPrint(err.toString());
       return null;
     }
   }

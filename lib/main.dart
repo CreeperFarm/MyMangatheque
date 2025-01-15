@@ -16,13 +16,16 @@ import 'package:mymangatheque/src/models/local_storage/service_locator.dart';
 void main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   setupServiceLocator();
-  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
 
   final savedThemeMode = await AdaptiveTheme.getThemeMode();
 
-  PocketBaseConnector().init();
+  await PocketBaseConnector().init();
 
   usePathUrlStrategy();
+  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+
+  //final container = ProviderContainer();
+  //await container.read(MangaOwnedProvider.notifier).initialize();
 
   runApp(ProviderScope(
     child: MyApp(savedThemeMode: savedThemeMode),
@@ -131,7 +134,7 @@ class MyHomePageState extends ConsumerState<MyHomePage> {
                         mangaData: json.decode(snapshot.data!.toString())[index],
                         initRoute: "/",
                         width: constraints.maxWidth / 4 - 30,
-                        height: (constraints.maxWidth / 4 - 30) * 1.5,
+                        height: (constraints.maxWidth / 4 - 30) * 1.5 + 10,
                       );
                     },
                   );
@@ -149,7 +152,7 @@ class MyHomePageState extends ConsumerState<MyHomePage> {
                         mangaData: json.decode(snapshot.data!.toString())[index],
                         initRoute: "/",
                         width: constraints.maxWidth / 3 - 30,
-                        height: (constraints.maxWidth / 3 - 30) * 1.5,
+                        height: (constraints.maxWidth / 3 - 30) * 1.5 + 10,
                       );
                     },
                   );
@@ -166,7 +169,7 @@ class MyHomePageState extends ConsumerState<MyHomePage> {
                         mangaData: json.decode(snapshot.data!.toString())[index],
                         initRoute: "/",
                         width: constraints.maxWidth / 2 - 30,
-                        height: (constraints.maxWidth / 2 - 30) * 1.5,
+                        height: (constraints.maxWidth / 2 - 30) * 1.5 + 10,
                       );
                     },
                   );

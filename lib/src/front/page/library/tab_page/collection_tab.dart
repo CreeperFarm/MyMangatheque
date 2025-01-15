@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mymangatheque/src/back/services/pocketbase.dart';
 import 'package:mymangatheque/src/const/own_icon.dart';
@@ -8,14 +9,14 @@ import 'package:mymangatheque/src/front/components/my_line.dart';
 import 'package:mymangatheque/src/front/components/my_scroll_column.dart';
 import 'package:mymangatheque/src/front/components/my_tome_number_show.dart';
 
-class CollectionTab extends StatefulWidget {
+class CollectionTab extends ConsumerStatefulWidget {
   const CollectionTab({super.key});
 
   @override
-  State<CollectionTab> createState() => _CollectionTabState();
+  ConsumerState<CollectionTab> createState() => _CollectionTabState();
 }
 
-class _CollectionTabState extends State<CollectionTab> {
+class _CollectionTabState extends ConsumerState<CollectionTab> {
   int numberMangaOwned = 0;
   PocketBaseConnector connector = PocketBaseConnector();
 
@@ -40,8 +41,14 @@ class _CollectionTabState extends State<CollectionTab> {
 
   @override
   void initState() {
-    super.initState();
+    //ref.read(MangaOwnedProvider);
     getNumberOfMangaOwned();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   @override
@@ -49,6 +56,8 @@ class _CollectionTabState extends State<CollectionTab> {
     if (connector.getConnectedUser() == null) {
       context.go('/profile/signin');
     }
+    //var subSeriesProv = ref.watch(MangaOwnedProvider);
+    //print(subSeriesProv);
     return FutureBuilder(
         future: connector.getCollectionDataWithFilterExpand('owned', "user='${connector.getConnectedUser()!.id}'", 'volume.sub_series'),
         builder: (BuildContext context, snapshot) {
@@ -88,6 +97,7 @@ class _CollectionTabState extends State<CollectionTab> {
               }
             }
             List<dynamic> subSeries = subSeriesMap.values.toList();
+
             return Padding(
               padding: const EdgeInsets.all(10),
               child: MyScrollColumn(

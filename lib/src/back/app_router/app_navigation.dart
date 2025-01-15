@@ -18,7 +18,6 @@ import 'package:mymangatheque/src/front/page/info_page/serie_page.dart';
 import 'package:mymangatheque/src/front/page/info_page/sub_serie_page.dart';
 import 'package:mymangatheque/src/front/page/info_page/volume_page.dart';
 import 'package:mymangatheque/src/front/page/mentions_legales_page.dart';
-import 'package:mymangatheque/src/front/page/planning/planning_page.dart';
 import 'package:mymangatheque/src/front/page/scan_ean_page.dart';
 import 'package:mymangatheque/src/front/page/search/search_page.dart';
 
@@ -278,7 +277,8 @@ class AppNavigation {
                       })
                 ])
           ]),
-          StatefulShellBranch(routes: [
+          // TODO : Add Planning Page
+          /*StatefulShellBranch(routes: [
             GoRoute(
                 path: '/planning',
                 name: 'Planning',
@@ -323,7 +323,7 @@ class AppNavigation {
                         return VolumePage(volumeId: state.pathParameters['id']!, initRoute: '/planning', key: state.pageKey);
                       })
                 ])
-          ]),
+          ]),*/
           StatefulShellBranch(navigatorKey: _rootNavigatorProfile, routes: [
             GoRoute(
                 path: '/profile',

@@ -23,11 +23,13 @@ class MainWrapper extends ConsumerStatefulWidget {
   ConsumerState<MainWrapper> createState() => _MainWrapperState();
 }
 
-List<String> navIcons = ["home", "collection", "search", "calendar", "user"];
-
-List<String> navTitle = ["Accueil", "Collection", "Recherche", "Planning", "Profil"];
-
-List<String> navRoute = ["/", "/library", "/search", "/planning", "/profile"];
+// TODO : restore the planning page.
+//List<String> navIcons = ["home", "collection", "search", "calendar", "user"];
+List<String> navIcons = ["home", "collection", "search", "user"];
+//List<String> navTitle = ["Accueil", "Collection", "Recherche", "Planning", "Profil"];
+List<String> navTitle = ["Accueil", "Collection", "Recherche", "Profil"];
+//List<String> navRoute = ["/", "/library", "/search", "/planning", "/profile"];
+List<String> navRoute = ["/", "/library", "/search", "/profile"];
 
 class _MainWrapperState extends ConsumerState<MainWrapper> {
   int selectedIndex = 0;
