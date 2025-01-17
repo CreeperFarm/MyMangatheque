@@ -66,6 +66,6 @@ class MangaOwnedNotifier extends Notifier<List<dynamic>> {
   }
 }
 
-final MangaOwnedProvider = NotifierProvider<MangaOwnedNotifier, List<dynamic>>(() {
+final mangaOwnedProvider = NotifierProvider<MangaOwnedNotifier, List<dynamic>>(() {
   return MangaOwnedNotifier();
 });

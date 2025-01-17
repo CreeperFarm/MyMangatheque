@@ -3,11 +3,13 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:mymangatheque/src/back/provider/manga_owned_provider.dart';
 import 'package:mymangatheque/src/back/services/pocketbase.dart';
 import 'package:mymangatheque/src/const/own_icon.dart';
 import 'package:mymangatheque/src/front/components/my_line.dart';
 import 'package:mymangatheque/src/front/components/my_scroll_column.dart';
 import 'package:mymangatheque/src/front/components/my_tome_number_show.dart';
+import 'package:mymangatheque/src/function/show_message_function.dart';
 
 class CollectionTab extends ConsumerStatefulWidget {
   const CollectionTab({super.key});
@@ -29,19 +31,59 @@ class _CollectionTabState extends ConsumerState<CollectionTab> {
   }
 
   getNumberOfMangaOwned() async {
+    final data = ref.watch(mangaOwnedProvider);
     try {
-      int countMangaOwned = await connector.getNumberOwnedManga(connector.getConnectedUser()!.id);
-      setState(() {
-        numberMangaOwned = countMangaOwned;
-      });
+      for (var i = 0; i < data.length; i++) {
+        int length = data[i]['volumes'].length;
+        numberMangaOwned += length;
+      }
     } catch (e) {
       debugPrint(e.toString());
     }
   }
 
+  Future<void> initData() async {
+    try {
+      final result = await connector.getCollectionDataWithFilterExpand('owned', "user='${connector.getConnectedUser()!.id}'", 'volume.sub_series');
+      final data = json.decode(result.toString());
+      Map<String, dynamic> subSeriesMap = {};
+      for (var i = 0; i < data.length; i++) {
+        String title = data[i]['expand']['volume']['expand']['sub_series']['title'];
+        if (subSeriesMap.containsKey(title)) {
+          subSeriesMap[title]['volumes'].add({
+            'title': data[i]['expand']['volume']['title'],
+            'image': data[i]['expand']['volume']['image'],
+            'id': data[i]['expand']['volume']['id'],
+            'readed': data[i]['readed'],
+          });
+        } else {
+          subSeriesMap[title] = {
+            'title': title,
+            'id': data[i]['expand']['volume']['expand']['sub_series']['id'],
+            //'first_index_data': i,
+            'number_of_volumes': data[i]['expand']['volume']['expand']['sub_series']['volumes'].length,
+            'volumes': [
+              {
+                'title': data[i]['expand']['volume']['title'],
+                'image': data[i]['expand']['volume']['image'],
+                'id': data[i]['expand']['volume']['id'],
+                'readed': data[i]['readed'],
+              }
+            ]
+          };
+        }
+      }
+      List<dynamic> subSeriesData = subSeriesMap.values.toList();
+      ref.read(mangaOwnedProvider.notifier).newDataSet(subSeriesData);
+    } catch (e) {
+      debugPrint(e.toString());
+      showMessage('Une erreur est survenue', context);
+    }
+  }
+
   @override
   void initState() {
-    //ref.read(MangaOwnedProvider);
+    ref.read(mangaOwnedProvider);
     getNumberOfMangaOwned();
     super.initState();
   }
@@ -56,148 +98,104 @@ class _CollectionTabState extends ConsumerState<CollectionTab> {
     if (connector.getConnectedUser() == null) {
       context.go('/profile/signin');
     }
-    //var subSeriesProv = ref.watch(MangaOwnedProvider);
-    //print(subSeriesProv);
-    return FutureBuilder(
-        future: connector.getCollectionDataWithFilterExpand('owned', "user='${connector.getConnectedUser()!.id}'", 'volume.sub_series'),
-        builder: (BuildContext context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          } else if (snapshot.connectionState == ConnectionState.none) {
-            return const Text("Aucune connexion");
-          } else if (snapshot.hasError) {
-            debugPrint(snapshot.error.toString());
-            return const Text("Une erreur est survenue");
-          } else if (snapshot.hasData && snapshot.data != null) {
-            final data = json.decode(snapshot.data.toString());
-            Map<String, dynamic> subSeriesMap = {};
-            for (var i = 0; i < data.length; i++) {
-              String title = data[i]['expand']['volume']['expand']['sub_series']['title'];
-              if (subSeriesMap.containsKey(title)) {
-                subSeriesMap[title]['volumes'].add({
-                  'title': data[i]['expand']['volume']['title'],
-                  'image': data[i]['expand']['volume']['image'],
-                  'id': data[i]['expand']['volume']['id']
-                });
-              } else {
-                subSeriesMap[title] = {
-                  'title': title,
-                  'id': data[i]['expand']['volume']['expand']['sub_series']['id'],
-                  'first_index_data': i,
-                  'volumes': [
-                    {
-                      'title': data[i]['expand']['volume']['title'],
-                      'image': data[i]['expand']['volume']['image'],
-                      'id': data[i]['expand']['volume']['id']
-                    }
-                  ]
-                };
-              }
-            }
-            List<dynamic> subSeries = subSeriesMap.values.toList();
-
-            return Padding(
-              padding: const EdgeInsets.all(10),
-              child: MyScrollColumn(
-                children: [
-                  MyTomeNumberShow(tomeTotal: numberMangaOwned.toString(), editionTotal: subSeries.length.toString()),
-                  for (var i = 0; i < subSeries.length; i++)
-                    Column(
+    initData();
+    final subSeries = ref.watch(mangaOwnedProvider);
+    return Padding(
+      padding: const EdgeInsets.all(10),
+      child: MyScrollColumn(
+        children: [
+          MyTomeNumberShow(tomeTotal: numberMangaOwned.toString(), editionTotal: subSeries.length.toString()),
+          for (var i = 0; i < subSeries.length; i++)
+            Column(
+              children: [
+                InkWell(
+                  onTap: () {
+                    context.go('/library/sub_serie/${subSeries[i]['id']}');
+                  },
+                  child: Container(
+                    constraints: BoxConstraints(
+                      maxWidth: MediaQuery.of(context).size.width,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        InkWell(
-                          onTap: () {
-                            context.go('/library/sub_serie/${subSeries[i]['id']}');
-                          },
-                          child: Container(
-                            constraints: BoxConstraints(
-                              maxWidth: MediaQuery.of(context).size.width,
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 10),
+                          child: SizedBox(
+                            width: MediaQuery.of(context).size.width - 65,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
+                                Text(
+                                  subSeries[i]['title'].replaceAll(' - Edition Standard', ''),
+                                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                                  softWrap: true,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                Text(
+                                  "${subSeries[i]['volumes'].length} tomes sur ${subSeries[i]['number_of_volumes']}",
+                                ),
                                 Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                                  padding: const EdgeInsets.only(top: 5),
                                   child: SizedBox(
                                     width: MediaQuery.of(context).size.width - 65,
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                    child: Stack(
                                       children: [
-                                        Text(
-                                          subSeries[i]['title'].replaceAll(' - Edition Standard', ''),
-                                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                                          softWrap: true,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                        Text(
-                                          "${subSeries[i]['volumes'].length} tomes sur ${data[subSeries[i]['first_index_data']]['expand']['volume']['expand']['sub_series']['volumes'].length}",
-                                        ),
-                                        Padding(
-                                          padding: const EdgeInsets.only(top: 5),
-                                          child: SizedBox(
-                                            width: MediaQuery.of(context).size.width - 65,
-                                            child: Stack(
-                                              children: [
-                                                for (var j = 0; j < subSeries[i]['volumes'].length; j++)
-                                                  (j == 0)
-                                                      ? ClipRRect(
-                                                          borderRadius: BorderRadius.circular(10.0),
-                                                          child: Image.network(
-                                                            'https://api.mymangatheque.com/api/files/tnof8u6oqfepdq6/${subSeries[i]['volumes'][j]['id']}/${subSeries[i]['volumes'][j]['image']}',
-                                                            width: 65,
-                                                          ),
-                                                        )
-                                                      : Positioned(
-                                                          left: j * 45.0,
-                                                          child: Container(
-                                                            decoration: BoxDecoration(
-                                                              boxShadow: [
-                                                                BoxShadow(
-                                                                  color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.9),
-                                                                  spreadRadius: 1,
-                                                                  blurRadius: 2,
-                                                                  offset: const Offset(0, 1),
-                                                                ),
-                                                              ],
-                                                            ),
-                                                            child: ClipRRect(
-                                                              borderRadius: BorderRadius.circular(10.0),
-                                                              child: Image.network(
-                                                                'https://api.mymangatheque.com/api/files/tnof8u6oqfepdq6/${subSeries[i]['volumes'][j]['id']}/${subSeries[i]['volumes'][j]['image']}',
-                                                                width: 65,
-                                                              ),
-                                                            ),
-                                                          ),
+                                        for (var j = 0; j < subSeries[i]['volumes'].length; j++)
+                                          (j == 0)
+                                              ? ClipRRect(
+                                                  borderRadius: BorderRadius.circular(10.0),
+                                                  child: Image.network(
+                                                    'https://api.mymangatheque.com/api/files/tnof8u6oqfepdq6/${subSeries[i]['volumes'][j]['id']}/${subSeries[i]['volumes'][j]['image']}',
+                                                    width: 65,
+                                                  ),
+                                                )
+                                              : Positioned(
+                                                  left: j * 45.0,
+                                                  child: Container(
+                                                    decoration: BoxDecoration(
+                                                      boxShadow: [
+                                                        BoxShadow(
+                                                          color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.9),
+                                                          spreadRadius: 1,
+                                                          blurRadius: 2,
+                                                          offset: const Offset(0, 1),
                                                         ),
-                                              ],
-                                            ),
-                                          ),
-                                        )
+                                                      ],
+                                                    ),
+                                                    child: ClipRRect(
+                                                      borderRadius: BorderRadius.circular(10.0),
+                                                      child: Image.network(
+                                                        'https://api.mymangatheque.com/api/files/tnof8u6oqfepdq6/${subSeries[i]['volumes'][j]['id']}/${subSeries[i]['volumes'][j]['image']}',
+                                                        width: 65,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
                                       ],
                                     ),
                                   ),
-                                ),
-                                OwnIcon(
-                                  iconColor: Theme.of(context).colorScheme.primary,
-                                  iconName: 'arrow-right',
-                                ),
+                                )
                               ],
                             ),
                           ),
                         ),
-                        MyLine(
-                          width: MediaQuery.of(context).size.width,
-                          vertical: 10,
+                        OwnIcon(
+                          iconColor: Theme.of(context).colorScheme.primary,
+                          iconName: 'arrow-right',
                         ),
                       ],
-                    )
-                ],
-              ),
-            );
-          } else {
-            return Text("Une erreur est survenue");
-          }
-        });
+                    ),
+                  ),
+                ),
+                MyLine(
+                  width: MediaQuery.of(context).size.width,
+                  vertical: 10,
+                ),
+              ],
+            )
+        ],
+      ),
+    );
   }
 }
