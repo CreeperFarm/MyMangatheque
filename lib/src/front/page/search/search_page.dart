@@ -23,20 +23,22 @@ class _SearchPageState extends ConsumerState<SearchPage> {
   final PocketBaseConnector connector = PocketBaseConnector();
 
   getClientStream() async {
-    var data = await connector.getCollectionFullListOrder('series', 'title');
+    var data = await connector.getCollectionFullListOrderExpanded('series', 'title', 'authors');
     /*var data = await FirebaseFirestore.instance
         .collection('manga')
         .orderBy(ref.watch(searchFilterProvider))
         .get();*/
+    print(data);
     setState(() {
       _allResults = data;
     });
   }
 
-  Future<String> getAllAuthorsName(List authorsId) async {
+  String getAllAuthorsName(List authorsExpanded) {
+    print(authorsExpanded);
     var authors = [];
-    for (var authorId in authorsId) {
-      authors.add(await connector.getAuthorName(authorId));
+    for (var i = 0; i < authorsExpanded.length; i++) {
+      authors.add(authorsExpanded[i]['name']);
     }
     return authors.join(" et ");
   }
@@ -179,92 +181,74 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                   itemBuilder: (context, index) {
                     if (selectedFilter == 'manga') {
                       final manga = json.decode(_resultsList[index].toString());
-                      return FutureBuilder(
-                        future: getAllAuthorsName(manga['authors']),
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState == ConnectionState.waiting) {
-                            return const Center(
-                              child: Padding(
-                                padding: EdgeInsets.all(8.0),
-                                child: CircularProgressIndicator(),
-                              ),
-                            );
-                          } else if (snapshot.hasError) {
-                            return const Center(
-                              child: Text('Error'),
-                            );
-                          } else {
-                            return Column(
+                      return Column(
+                        children: [
+                          ListTile(
+                            title: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                ListTile(
-                                  title: Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Row(
-                                        children: [
-                                          Padding(
-                                            padding: const EdgeInsets.only(right: 10),
-                                            child: SizedBox(
-                                              width: 50,
-                                              child: Image.network(
-                                                'https://api.mymangatheque.com/api/files/utbujxtz8wtq0ar/${manga['id'].toString()}/${manga['image'].toString()}',
-                                                width: 50,
-                                              ),
-                                            ),
+                                Row(
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.only(right: 10),
+                                      child: SizedBox(
+                                        width: 50,
+                                        child: Image.network(
+                                          'https://api.mymangatheque.com/api/files/utbujxtz8wtq0ar/${manga['id'].toString()}/${manga['image'].toString()}',
+                                          width: 50,
+                                        ),
+                                      ),
+                                    ),
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          textLength(manga['title'], 30),
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 17,
+                                            color: Theme.of(context).colorScheme.primary,
                                           ),
-                                          Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                textLength(manga['title'], 30),
-                                                style: TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 17,
-                                                  color: Theme.of(context).colorScheme.primary,
-                                                ),
-                                              ),
-                                              // manga['author'].toString()
+                                        ),
+                                        // manga['author'].toString()
 
-                                              Text(
-                                                textLength(snapshot.data, 35),
-                                                style: TextStyle(
-                                                  color: Theme.of(context).colorScheme.primary,
-                                                  fontSize: 14,
-                                                ),
-                                              ),
-                                              Text(
-                                                DateTime.parse(manga['first_publication']).year.toString(),
-                                                style: TextStyle(
-                                                  color: Theme.of(context).colorScheme.primary,
-                                                  fontSize: 14,
-                                                ),
-                                              )
-                                            ],
+                                        Text(
+                                          textLength(getAllAuthorsName(manga['expand']['authors']), 35),
+                                          style: TextStyle(
+                                            color: Theme.of(context).colorScheme.primary,
+                                            fontSize: 14,
                                           ),
-                                        ],
-                                      ),
-                                      Icon(
-                                        Icons.arrow_forward_ios,
-                                        color: Theme.of(context).colorScheme.primary,
-                                      ),
-                                    ],
-                                  ),
-                                  onTap: () {
-                                    context.go('/search/serie/${manga['id']}');
-                                  },
+                                        ),
+                                        Text(
+                                          DateTime.parse(manga['first_publication']).year.toString(),
+                                          style: TextStyle(
+                                            color: Theme.of(context).colorScheme.primary,
+                                            fontSize: 14,
+                                          ),
+                                        )
+                                      ],
+                                    ),
+                                  ],
                                 ),
-                                (index != _resultsList.length - 1)
-                                    ? MyLine(
-                                        width: MediaQuery.of(context).size.width,
-                                        vertical: 0,
-                                      )
-                                    : const Padding(
-                                        padding: EdgeInsets.only(bottom: 0),
-                                      ),
+                                Icon(
+                                  Icons.arrow_forward_ios,
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
                               ],
-                            );
-                          }
-                        },
+                            ),
+                            onTap: () {
+                              context.go('/search/serie/${manga['id']}');
+                            },
+                          ),
+                          (index != _resultsList.length - 1)
+                              ? MyLine(
+                                  width: MediaQuery.of(context).size.width,
+                                  vertical: 0,
+                                )
+                              : const Padding(
+                                  padding: EdgeInsets.only(bottom: 0),
+                                ),
+                        ],
                       );
                     } else if (selectedFilter == 'author') {
                       return Text("Author" "WIP");

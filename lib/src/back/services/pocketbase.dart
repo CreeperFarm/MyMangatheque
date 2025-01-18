@@ -25,6 +25,7 @@ export 'package:mymangatheque/src/models/user.dart';
 
 class PocketBaseConnector {
   late PocketBase _pocketBase;
+  int alreadyclick = 0;
 
   Future<void> init() async {
     final storage = getIt<LocalStorage>();
@@ -36,18 +37,35 @@ class PocketBaseConnector {
       clear: storage.deleteToken,
     );
 
-    _pocketBase = PocketBase(
-      'https://api.mymangatheque.com',
-      httpClientFactory: kIsWeb ? () => FetchClient(mode: RequestMode.cors) : null,
-      lang: 'fr-FR',
-      authStore: customAuthStore,
-    );
+    try {
+      _pocketBase = PocketBase(
+        'https://api.mymangatheque.com',
+        httpClientFactory: kIsWeb ? () => FetchClient(mode: RequestMode.cors) : null,
+        lang: 'fr-FR',
+        authStore: customAuthStore,
+      );
 
-    if (_pocketBase.authStore.isValid) {
-      final authRecord = await _pocketBase.collection('users').authRefresh();
-      final authInfo = json.decode(authRecord.toString());
-      _connectedUser.add(await findUser(authInfo['record']['email']));
-    } else {}
+      if (_pocketBase.authStore.isValid) {
+        try {
+          final authRecord = await _pocketBase.collection('users').authRefresh();
+          final authInfo = json.decode(authRecord.toString());
+          _connectedUser.add(await findUser(authInfo['record']['email']));
+        } catch (e) {
+          debugPrint(e.toString());
+        }
+      } else {}
+    } on SocketException {
+      AlertDialog.adaptive(
+        title: Text('Erreur de connexion'),
+        content: Text('Veuillez vérifier votre connexion internet.'),
+      );
+    } catch (e) {
+      AlertDialog.adaptive(
+        title: Text('Erreur'),
+        content: Text('Une erreur est survenue veuillez réessayer plus tard.'),
+      );
+      debugPrint(e.toString());
+    }
 
     /*if (!PocketBaseConnector().isLoggedIn()) {
       MangaOwnedNotifier().newDataSet([]);
@@ -141,62 +159,68 @@ class PocketBaseConnector {
 
   // Sign in with Google (all-in-one)
   signInWithGoogle(context) async {
-    try {
-      PocketBaseConnector().logOut();
-      _pocketBase.authStore.clear();
-      final authData = await _pocketBase.collection('users').authWithOAuth2(
-        'google',
-        (url) async {
-          await _launchUrl(url, context);
-        },
-      );
-      debugPrint(authData.toString());
-      dynamic authData2 = await json.decode(authData.toString());
+    if (alreadyclick == 0) {
+      alreadyclick = 1;
+      try {
+        PocketBaseConnector().logOut();
+        _pocketBase.authStore.clear();
+        final authData = await _pocketBase.collection('users').authWithOAuth2(
+          'google',
+          (url) async {
+            await _launchUrl(url, context);
+          },
+        );
+        debugPrint(authData.toString());
+        dynamic authData2 = await json.decode(authData.toString());
 
-      if (_pocketBase.authStore.isValid) {
-        if (DateTime.parse(authData2['record']['created']) >= DateTime.now().subtract(const Duration(minutes: 1))) {
-          var data = authData2['meta']['rawUser'];
-          try {
-            /*var imageId = await ImageDownloader.downloadImage(data['picture']);
+        if (_pocketBase.authStore.isValid) {
+          if (DateTime.parse(authData2['record']['created']) >= DateTime.now().subtract(const Duration(minutes: 1))) {
+            var data = authData2['meta']['rawUser'];
+            try {
+              /*var imageId = await ImageDownloader.downloadImage(data['picture']);
         if (imageId == null) {
           return;
         }
         var fileName = await ImageDownloader.findName(imageId);
         var path = await ImageDownloader.findPath(imageId);*/
-            var body = <String, dynamic>{
-              "email": data['email'],
-              "username": data['name'],
-              "birthday": DateTime.now().toString(),
-              "gender": "other",
-              "role": "user",
-              "emailVisibility": true,
-            };
+              var body = <String, dynamic>{
+                "email": data['email'],
+                "username": data['name'],
+                "birthday": DateTime.now().toString(),
+                "gender": "other",
+                "role": "user",
+                "emailVisibility": true,
+              };
 
-            // Upload the image of the user
-            await _pocketBase.collection('users').update(
-                  authData2['record']['id'],
-                  body: body,
-                );
-            _pocketBase.realtime.unsubscribe('users');
-            await sendVerification(data['email']);
-          } catch (e) {
-            debugPrint(e.toString());
-            showMessage("Un erreur est survenue.", context);
+              // Upload the image of the user
+              await _pocketBase.collection('users').update(
+                    authData2['record']['id'],
+                    body: body,
+                  );
+              _pocketBase.realtime.unsubscribe('users');
+              await sendVerification(data['email']);
+            } catch (e) {
+              debugPrint(e.toString());
+              showMessage("Un erreur est survenue.", context);
+            }
+          } else {
+            debugPrint('User already exists');
           }
+          _connectedUser.add(await findUser(authData2['meta']['rawUser']['email'].toString().toLowerCase()));
+          _pocketBase.realtime.unsubscribe('users');
         } else {
-          debugPrint('User already exists');
+          debugPrint('User isn\'t connected');
+          showMessage('Une erreur est survenue', context);
         }
-        _connectedUser.add(await findUser(authData2['meta']['rawUser']['email'].toString().toLowerCase()));
-        _pocketBase.realtime.unsubscribe('users');
-      } else {
-        debugPrint('User isn\'t connected');
-        showMessage('Une erreur est survenue', context);
+      } catch (e) {
+        showMessage("Une erreur est survenue.", context);
+        debugPrint(e.toString());
       }
-    } catch (e) {
-      showMessage("Une erreur est survenue.", context);
-      debugPrint(e.toString());
+      await closeCustomTabs();
+      alreadyclick = 0;
+    } else {
+      showMessage("Veuillez patientez", context);
     }
-    await closeCustomTabs();
   }
 
   // Login the user with email and password
@@ -380,6 +404,13 @@ class PocketBaseConnector {
   Future<List<RecordModel>> getCollectionFullListOrder(String collectionId, String order) {
     return _pocketBase.collection(collectionId).getFullList(
           sort: order,
+        );
+  }
+
+  Future<List<RecordModel>> getCollectionFullListOrderExpanded(String collectionId, String order, String expand) {
+    return _pocketBase.collection(collectionId).getFullList(
+          sort: order,
+          expand: expand,
         );
   }
 

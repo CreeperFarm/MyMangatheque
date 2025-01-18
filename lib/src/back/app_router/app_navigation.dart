@@ -1,6 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'package:go_router/go_router.dart';
-import 'package:mymangatheque/main.dart';
 import 'package:mymangatheque/src/back/app_router/main_wrapper.dart';
 import 'package:mymangatheque/src/back/app_router/redirect_to_page.dart';
 import 'package:mymangatheque/src/front/dev_page/component_show_page.dart';
@@ -12,6 +11,7 @@ import 'package:mymangatheque/src/front/page/auth/modify_password_page.dart';
 import 'package:mymangatheque/src/front/page/auth/signin_page.dart';
 import 'package:mymangatheque/src/front/page/auth/signup_page.dart';
 import 'package:mymangatheque/src/front/page/discover_page.dart';
+import 'package:mymangatheque/src/front/page/home_page.dart';
 import 'package:mymangatheque/src/front/page/info_page/author_page.dart';
 import 'package:mymangatheque/src/front/page/info_page/editor_page.dart';
 import 'package:mymangatheque/src/front/page/info_page/serie_page.dart';

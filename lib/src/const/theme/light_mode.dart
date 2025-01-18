@@ -19,5 +19,6 @@ ThemeData lightMode = ThemeData(
     onSecondary: Colors.blueGrey.shade900,
     tertiary: Colors.white,
     inversePrimary: Colors.grey.shade900,
+    tertiaryFixed: const Color(0xFF1780A3),
   ),
 );
