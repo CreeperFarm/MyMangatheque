@@ -19,9 +19,9 @@ class _ReadPileTabState extends ConsumerState<ReadPileTab> {
     int volumeReaded = 0;
     int volumeOwned = 0;
 
-    for (int i = 0; i < readedSubSeries.length; i++) {
-      for (int j = 0; j < readedSubSeries[i]['volumes'].length; j++) {
-        if (readedSubSeries[i]['volumes'][j]['readed'] == true) {
+    for (var subSerie in readedSubSeries) {
+      for (var volume in subSerie.volumes) {
+        if (volume.readed) {
           volumeReaded++;
         }
         volumeOwned++;

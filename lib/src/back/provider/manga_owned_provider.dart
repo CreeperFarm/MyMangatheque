@@ -1,71 +1,160 @@
 import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mymangatheque/src/back/services/pocketbase.dart';
-import 'package:riverpod/riverpod.dart';
+import 'package:mymangatheque/src/models/manga/sub_series.dart';
+import 'package:mymangatheque/src/models/manga/volume.dart';
 
-class MangaOwnedNotifier extends Notifier<List<dynamic>> {
+class MangaOwnedNotifier extends Notifier<Set<SubSeries>> {
   @override
-  List<dynamic> build() => [];
+  Set<SubSeries> build() => <SubSeries>{};
 
-  initialize() async {
+  // Init the data
+  Future<void> initData() async {
     if (PocketBaseConnector().isLoggedIn()) {
       try {
         final result = await PocketBaseConnector().getCollectionDataWithFilterExpand(
           'owned',
           "user='${PocketBaseConnector().getConnectedUser()!.id}'",
-          'volume.sub_series',
+          'volume.sub_series.editor',
         );
         final data = json.decode(result.toString());
-        print(data);
-        Map<String, dynamic> subSeriesMap = {};
         for (var i = 0; i < data.length; i++) {
-          String title = data[i]['expand']['volume']['expand']['sub_series']['title'];
-          if (subSeriesMap.containsKey(title)) {
-            subSeriesMap[title]['volumes'].add({
-              'title': data[i]['expand']['volume']['title'],
-              'image': data[i]['expand']['volume']['image'],
-              'id': data[i]['expand']['volume']['id']
-            });
+          String idLocal = data[i]['expand']['volume']['expand']['sub_series']['id'];
+          String titleLocal = data[i]['expand']['volume']['expand']['sub_series']['title'];
+          if (state.any((subSeries) => subSeries.title == titleLocal && subSeries.id == idLocal)) {
+            state.firstWhere((subSeries) => subSeries.title == titleLocal && subSeries.id == idLocal).volumes.add(
+                  Volume(
+                    id: data[i]['expand']['volume']['id'],
+                    title: data[i]['expand']['volume']['title'],
+                    tomeNumber: data[i]['expand']['volume']['tome_number'],
+                    price: data[i]['expand']['volume']['price'],
+                    image:
+                        'https://api.mymangatheque.com/api/files/tnof8u6oqfepdq6/${data[i]['expand']['volume']['id']}/${data[i]['expand']['volume']['image']}',
+                    over18: data[i]['expand']['volume']['over18'],
+                    resume: data[i]['expand']['volume']['resume'],
+                    bookLink: data[i]['expand']['volume']['book_link'],
+                    release: DateTime.parse(data[i]['expand']['volume']['release']),
+                    ean: data[i]['expand']['volume']['ean'],
+                    language: data[i]['expand']['volume']['language'],
+                    subSeries: data[i]['expand']['volume']['sub_series'],
+                    readed: data[i]['readed'],
+                    authors: data[i]['expand']['volume']['authors'],
+                    series: data[i]['expand']['volume']['series'],
+                    contains: data[i]['expand']['volume']['contains'],
+                    info: data[i]['expand']['volume']['info'],
+                    support: data[i]['expand']['volume']['support'],
+                    japGenre: data[i]['expand']['volume']['genre_jap'],
+                  ),
+                );
+            state.firstWhere((subSeries) => subSeries.title == titleLocal && subSeries.id == idLocal).numberOwnedVolumes += 1;
           } else {
-            subSeriesMap[title] = {
-              'title': title,
-              'id': data[i]['expand']['volume']['expand']['sub_series']['id'],
-              'first_index_data': i,
-              'volumes': [
-                {
-                  'title': data[i]['expand']['volume']['title'],
-                  'image': data[i]['expand']['volume']['image'],
-                  'id': data[i]['expand']['volume']['id']
-                }
-              ]
-            };
+            state.add(
+              SubSeries(
+                id: data[i]['expand']['volume']['expand']['sub_series']['id'],
+                title: data[i]['expand']['volume']['expand']['sub_series']['title'],
+                numberOfVolumes: data[i]['expand']['volume']['expand']['sub_series']['volumes'].length,
+                numberOwnedVolumes: 1,
+                volumes: [
+                  Volume(
+                    id: data[i]['expand']['volume']['id'],
+                    title: data[i]['expand']['volume']['title'],
+                    tomeNumber: data[i]['expand']['volume']['tome_number'],
+                    price: data[i]['expand']['volume']['price'],
+                    image:
+                        'https://api.mymangatheque.com/api/files/tnof8u6oqfepdq6/${data[i]['expand']['volume']['id']}/${data[i]['expand']['volume']['image']}',
+                    over18: data[i]['expand']['volume']['over18'],
+                    resume: data[i]['expand']['volume']['resume'],
+                    bookLink: data[i]['expand']['volume']['book_link'],
+                    release: DateTime.parse(data[i]['expand']['volume']['release']),
+                    ean: data[i]['expand']['volume']['ean'],
+                    language: data[i]['expand']['volume']['language'],
+                    subSeries: data[i]['expand']['volume']['sub_series'],
+                    readed: data[i]['readed'],
+                    authors: data[i]['expand']['volume']['authors'],
+                    series: data[i]['expand']['volume']['series'],
+                    // TODO: Convert it to a Volume List
+                    contains: data[i]['expand']['volume']['contains'],
+                    info: data[i]['expand']['volume']['info'],
+                    support: data[i]['expand']['volume']['support'],
+                    japGenre: data[i]['expand']['volume']['genre_jap'],
+                  )
+                ],
+              ),
+            );
           }
         }
-        print(subSeriesMap);
-        state = subSeriesMap.values.toList();
       } catch (e) {
+        // Print the error to the debug console
         debugPrint(e.toString());
-        state = [];
       }
     } else {
-      state = [];
+      // Do nothing
     }
   }
 
-  void newDataSet(newDataSet) {
-    state = newDataSet;
+  // Add a sub series to the owned list
+  void addSubSeriesToOwned(SubSeries subSeries) {
+    if (!state.contains(subSeries)) {
+      state.add(subSeries);
+    }
   }
 
-  void addDataSubSeries(newSubSeries) {
-    state.add(newSubSeries);
+  // Remove a sub series from the owned list
+  void removeSubSeriesFromOwned(SubSeries subSeries) {
+    if (state.contains(subSeries)) {
+      state.remove(subSeries);
+    }
   }
 
-  void addVolumeOwned(subSeriesId, newVolumeOwned) {
-    state.firstWhere((subSeries) => subSeries['id'] == subSeriesId)['volumes'].add(newVolumeOwned);
+  // Add a volume to a sub series
+  void addVolumeToSubSeries(SubSeries subSerie, Volume volume) {
+    if (state.contains(subSerie)) {
+      if (!subSerie.volumes.contains(volume)) {
+        state.firstWhere((subSeries) => subSeries == subSerie).volumes.add(volume);
+        state.firstWhere((subSeries) => subSeries == subSerie).numberOwnedVolumes += 1;
+      }
+    }
+  }
+
+  // Remove a volume from a sub series
+  void removeVolumeFromSubSeries(SubSeries subSerie, Volume volume) {
+    if (state.contains(subSerie)) {
+      if (subSerie.volumes.contains(volume)) {
+        state.firstWhere((subSeries) => subSeries == subSerie).volumes.remove(volume);
+        state.firstWhere((subSeries) => subSeries == subSerie).numberOwnedVolumes -= 1;
+      }
+    }
+  }
+
+  // Check if a sub series is owned
+  bool isSubSeriesOwned(SubSeries subSeries) {
+    return state.contains(subSeries);
+  }
+
+  // Check if a volume is owned
+  bool isVolumeOwned(SubSeries subSeries, Volume volume) {
+    return subSeries.volumes.contains(volume);
+  }
+
+  // Find a sub series index from it's title and it's id
+  SubSeries findSubSeriesFromTitle(String title, String id) {
+    return state.firstWhere((subSeries) => subSeries.title == title && subSeries.id == id);
+  }
+
+  // Find a volume from it's id
+  Volume findVolumeFromId(SubSeries subSeries, String title, String id) {
+    final index = subSeries.volumes.indexWhere((volume) => volume.title == title && volume.id == id);
+    return subSeries.volumes[index];
+  }
+
+  // Clear the data
+  void clear() {
+    state.clear();
   }
 }
 
-final mangaOwnedProvider = NotifierProvider<MangaOwnedNotifier, List<dynamic>>(() {
+final mangaOwnedProvider = NotifierProvider<MangaOwnedNotifier, Set<SubSeries>>(() {
   return MangaOwnedNotifier();
 });

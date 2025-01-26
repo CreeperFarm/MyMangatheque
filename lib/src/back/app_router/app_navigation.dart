@@ -17,6 +17,7 @@ import 'package:mymangatheque/src/front/page/info_page/editor_page.dart';
 import 'package:mymangatheque/src/front/page/info_page/serie_page.dart';
 import 'package:mymangatheque/src/front/page/info_page/sub_serie_page.dart';
 import 'package:mymangatheque/src/front/page/info_page/volume_page.dart';
+import 'package:mymangatheque/src/front/page/library/library_page.dart';
 import 'package:mymangatheque/src/front/page/mentions_legales_page.dart';
 import 'package:mymangatheque/src/front/page/scan_ean_page.dart';
 import 'package:mymangatheque/src/front/page/search/search_page.dart';
@@ -153,7 +154,7 @@ class AppNavigation {
                   path: '/library',
                   name: 'Mangathèque',
                   builder: (context, state) {
-                    return RedirectToLibrary(key: state.pageKey);
+                    return LibraryPage(key: state.pageKey);
                   },
                   routes: [
                     GoRoute(

@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -78,38 +76,7 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
 
   Future<void> initData() async {
     try {
-      final result = await connector.getCollectionDataWithFilterExpand('owned', "user='${connector.getConnectedUser()!.id}'", 'volume.sub_series');
-      final data = json.decode(result.toString());
-      var mangaOwnedNotifier = ref.read(mangaOwnedProvider.notifier);
-      var allData = ref.watch(mangaOwnedProvider);
-      for (var i = 0; i < data.length; i++) {
-        String id = data[i]['expand']['volume']['expand']['sub_series']['id'];
-        if (allData.contains(id)) {
-          mangaOwnedNotifier.addVolumeOwned(id, {
-            'title': data[i]['expand']['volume']['title'],
-            'image': data[i]['expand']['volume']['image'],
-            'id': data[i]['expand']['volume']['id'],
-            'readed': data[i]['readed'],
-            'over18': data[i]['expand']['volume']['over18'],
-          });
-        } else {
-          mangaOwnedNotifier.addDataSubSeries({
-            'title': data[i]['expand']['volume']['expand']['sub_series']['title'],
-            'id': id,
-            //'first_index_data': i,
-            'number_of_volumes': data[i]['expand']['volume']['expand']['sub_series']['volumes'].length,
-            'volumes': [
-              {
-                'title': data[i]['expand']['volume']['title'],
-                'image': data[i]['expand']['volume']['image'],
-                'id': data[i]['expand']['volume']['id'],
-                'readed': data[i]['readed'],
-                'over18': data[i]['expand']['volume']['over18'],
-              }
-            ]
-          });
-        }
-      }
+      await ref.read(mangaOwnedProvider.notifier).initData();
     } catch (e) {
       debugPrint(e.toString());
       showMessage('Une erreur est survenue', context);
@@ -137,7 +104,7 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (ref.read(mangaOwnedProvider) == []) {
+    if (ref.read(mangaOwnedProvider).isEmpty) {
       initData();
     }
     final selectedOrder = ref.watch(searchOrderProvider);

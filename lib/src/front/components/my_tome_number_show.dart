@@ -66,7 +66,11 @@ class MyTomeNumberShow extends StatelessWidget {
             ),
           ],
         ),
-        MyLine(width: MediaQuery.of(context).size.width, vertical: 10),
+        MyLine(
+          width: MediaQuery.of(context).size.width,
+          vertical: 10,
+          horizontal: 0,
+        ),
       ],
     );
   }
