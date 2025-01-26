@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:mymangatheque/src/back/services/pocketbase.dart';
+import 'package:mymangatheque/src/function/auto_push_or_go.dart';
 
 class MyMangaShowTile extends StatefulWidget {
   final Map<String, dynamic> mangaData;
@@ -52,7 +52,10 @@ class _MyMangaShowTileState extends State<MyMangaShowTile> {
       ),
       child: InkWell(
         onTap: () {
-          context.push('${(widget.initRoute == "/") ? "" : widget.initRoute}/volume/${widget.mangaData['id']}');
+          pushOrGo(
+            context,
+            '${(widget.initRoute == "/") ? "" : widget.initRoute}/volume/${widget.mangaData['id']}',
+          );
         },
         child: OverflowBox(
           maxWidth: widget.width,

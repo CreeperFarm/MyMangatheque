@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:mymangatheque/src/const/const_info.dart';
 import 'package:mymangatheque/src/const/own_icon.dart';
+import 'package:mymangatheque/src/function/auto_push_or_go.dart';
 
 import 'my_collection_badge.dart';
 
@@ -18,7 +18,7 @@ class MyVolumeTile extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(5.0),
       child: InkWell(
-        onTap: () => context.push('$initRoute/volume/${volumeData['id'].toString()}'),
+        onTap: () => pushOrGo(context, '$initRoute/volume/${volumeData['id'].toString()}'),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,

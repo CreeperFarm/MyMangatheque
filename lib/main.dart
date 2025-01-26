@@ -24,9 +24,11 @@ void main() async {
   //final container = ProviderContainer();
   //await container.read(MangaOwnedProvider.notifier).initialize();
 
-  runApp(ProviderScope(
-    child: MyApp(savedThemeMode: savedThemeMode),
-  ));
+  runApp(
+    ProviderScope(
+      child: MyApp(savedThemeMode: savedThemeMode),
+    ),
+  );
 }
 
 class MyApp extends ConsumerWidget {

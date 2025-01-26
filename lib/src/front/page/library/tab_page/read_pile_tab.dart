@@ -33,19 +33,50 @@ class _ReadPileTabState extends ConsumerState<ReadPileTab> {
       child: MyScrollColumn(
         columnCrossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Column(
-            children: [
-              Text(
-                '$volumeReaded tomes lu sur $volumeOwned tomes possédés.',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
+          (volumeOwned == 0)
+              ? Text(
+                  "Aucun tome n'est possédé.",
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                )
+              : Column(
+                  children: [
+                    Text(
+                      '$volumeReaded tomes lu sur $volumeOwned tomes possédés.',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: Container(
+                        height: 20,
+                        width: MediaQuery.of(context).size.width,
+                        color: Theme.of(context).colorScheme.primary.withOpacity(0.7),
+                        child: Row(
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(10),
+                              child: Container(
+                                height: 20,
+                                width: MediaQuery.of(context).size.width * (volumeReaded / volumeOwned),
+                                color: Theme.of(context).colorScheme.tertiaryFixed,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-              // TODO: Ajouter une progress bar
-            ],
+          MyLine(
+            width: MediaQuery.of(context).size.width,
+            vertical: 10,
+            horizontal: 0,
           ),
-          MyLine(width: MediaQuery.of(context).size.width, vertical: 10),
           for (var i = 0; i < readedSubSeries.length; i++) Text('data'),
         ],
       ),

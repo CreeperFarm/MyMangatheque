@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mymangatheque/src/const/own_icon.dart';
 import 'package:mymangatheque/src/front/components/my_line.dart';
+import 'package:mymangatheque/src/function/auto_push_or_go.dart';
 
 class MyTomeNumberShow extends StatelessWidget {
   final String tomeTotal;
@@ -42,7 +42,7 @@ class MyTomeNumberShow extends StatelessWidget {
                           iconColor: WidgetStateProperty.all<Color>(Theme.of(context).colorScheme.primary),
                           elevation: WidgetStateProperty.all<double>(0)),
                       onPressed: () {
-                        context.push('/library/scan');
+                        pushOrGo(context, '/library/scan');
                       },
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.center,

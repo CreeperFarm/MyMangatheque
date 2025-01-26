@@ -1,15 +1,12 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:mymangatheque/src/back/provider/manga_owned_provider.dart';
 import 'package:mymangatheque/src/back/services/pocketbase.dart';
 import 'package:mymangatheque/src/const/own_icon.dart';
 import 'package:mymangatheque/src/front/components/my_line.dart';
 import 'package:mymangatheque/src/front/components/my_scroll_column.dart';
 import 'package:mymangatheque/src/front/components/my_tome_number_show.dart';
-import 'package:mymangatheque/src/function/show_message_function.dart';
+import 'package:mymangatheque/src/function/auto_push_or_go.dart';
 
 class CollectionTab extends ConsumerStatefulWidget {
   const CollectionTab({super.key});
@@ -42,45 +39,6 @@ class _CollectionTabState extends ConsumerState<CollectionTab> {
     }
   }
 
-  Future<void> initData() async {
-    try {
-      final result = await connector.getCollectionDataWithFilterExpand('owned', "user='${connector.getConnectedUser()!.id}'", 'volume.sub_series');
-      final data = json.decode(result.toString());
-      Map<String, dynamic> subSeriesMap = {};
-      for (var i = 0; i < data.length; i++) {
-        String title = data[i]['expand']['volume']['expand']['sub_series']['title'];
-        if (subSeriesMap.containsKey(title)) {
-          subSeriesMap[title]['volumes'].add({
-            'title': data[i]['expand']['volume']['title'],
-            'image': data[i]['expand']['volume']['image'],
-            'id': data[i]['expand']['volume']['id'],
-            'readed': data[i]['readed'],
-          });
-        } else {
-          subSeriesMap[title] = {
-            'title': title,
-            'id': data[i]['expand']['volume']['expand']['sub_series']['id'],
-            //'first_index_data': i,
-            'number_of_volumes': data[i]['expand']['volume']['expand']['sub_series']['volumes'].length,
-            'volumes': [
-              {
-                'title': data[i]['expand']['volume']['title'],
-                'image': data[i]['expand']['volume']['image'],
-                'id': data[i]['expand']['volume']['id'],
-                'readed': data[i]['readed'],
-              }
-            ]
-          };
-        }
-      }
-      List<dynamic> subSeriesData = subSeriesMap.values.toList();
-      ref.read(mangaOwnedProvider.notifier).newDataSet(subSeriesData);
-    } catch (e) {
-      debugPrint(e.toString());
-      showMessage('Une erreur est survenue', context);
-    }
-  }
-
   @override
   void initState() {
     ref.read(mangaOwnedProvider);
@@ -95,10 +53,6 @@ class _CollectionTabState extends ConsumerState<CollectionTab> {
 
   @override
   Widget build(BuildContext context) {
-    if (connector.getConnectedUser() == null) {
-      context.go('/profile/signin');
-    }
-    initData();
     final subSeries = ref.watch(mangaOwnedProvider);
     return Padding(
       padding: const EdgeInsets.all(10),
@@ -110,7 +64,7 @@ class _CollectionTabState extends ConsumerState<CollectionTab> {
               children: [
                 InkWell(
                   onTap: () {
-                    context.go('/library/sub_serie/${subSeries[i]['id']}');
+                    pushOrGo(context, '/library/sub_serie/${subSeries[i]['id']}');
                   },
                   child: Container(
                     constraints: BoxConstraints(

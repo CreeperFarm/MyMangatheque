@@ -14,6 +14,7 @@ import 'package:mymangatheque/src/front/components/my_line.dart';
 import 'package:mymangatheque/src/front/components/my_picture_display.dart';
 import 'package:mymangatheque/src/front/components/my_scroll_column.dart';
 import 'package:mymangatheque/src/front/components/my_series_tile.dart';
+import 'package:mymangatheque/src/function/auto_push_or_go.dart';
 
 class VolumePage extends StatefulWidget {
   final String volumeId;
@@ -218,7 +219,8 @@ class _VolumePageState extends State<VolumePage> {
                                           });
                                         }
                                       } else {
-                                        context.push(
+                                        pushOrGo(
+                                          context,
                                           '/profile/signin',
                                         );
                                       }
@@ -281,7 +283,8 @@ class _VolumePageState extends State<VolumePage> {
                                           });
                                         }
                                       } else {
-                                        context.push(
+                                        pushOrGo(
+                                          context,
                                           '/profile/signin',
                                         );
                                       }
@@ -342,7 +345,8 @@ class _VolumePageState extends State<VolumePage> {
                                               isVolumeReaded = !isVolumeReaded;
                                             });
                                           } else {
-                                            context.push(
+                                            pushOrGo(
+                                              context,
                                               '/profile/signin',
                                             );
                                           }

@@ -3,11 +3,11 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:mymangatheque/src/back/provider/search_filter_provider.dart';
 import 'package:mymangatheque/src/back/services/pocketbase.dart';
 import 'package:mymangatheque/src/const/own_icon.dart';
 import 'package:mymangatheque/src/front/components/my_line.dart';
+import 'package:mymangatheque/src/function/auto_push_or_go.dart';
 
 class SearchPage extends ConsumerStatefulWidget {
   const SearchPage({super.key});
@@ -237,7 +237,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                               ],
                             ),
                             onTap: () {
-                              context.go('/search/serie/${manga['id']}');
+                              pushOrGo(context, '/search/serie/${manga['id']}');
                             },
                           ),
                           (index != _resultsList.length - 1)

@@ -1,14 +1,20 @@
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mymangatheque/src/back/provider/manga_owned_provider.dart';
 import 'package:mymangatheque/src/back/provider/search_filter_provider.dart';
 import 'package:mymangatheque/src/back/provider/search_order_provider.dart';
+import 'package:mymangatheque/src/back/services/pocketbase.dart';
 import 'package:mymangatheque/src/const/own_icon.dart';
 import 'package:mymangatheque/src/front/components/my_tab_bar_item.dart';
 import 'package:mymangatheque/src/front/page/library/tab_page/collection_tab.dart';
 import 'package:mymangatheque/src/front/page/library/tab_page/complete_lib_tab.dart';
 import 'package:mymangatheque/src/front/page/library/tab_page/envy_tab.dart';
 import 'package:mymangatheque/src/front/page/library/tab_page/read_pile_tab.dart';
+import 'package:mymangatheque/src/function/auto_push_or_go.dart';
+import 'package:mymangatheque/src/function/show_message_function.dart';
 
 class LibraryPage extends ConsumerStatefulWidget {
   const LibraryPage({super.key});
@@ -18,6 +24,7 @@ class LibraryPage extends ConsumerStatefulWidget {
 }
 
 class _LibraryPageState extends ConsumerState<LibraryPage> {
+  final connector = PocketBaseConnector();
   List _allResults = [];
   List _resultsList = [];
   final TextEditingController _searchController = TextEditingController();
@@ -69,6 +76,46 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
     super.didChangeDependencies();
   }
 
+  Future<void> initData() async {
+    try {
+      final result = await connector.getCollectionDataWithFilterExpand('owned', "user='${connector.getConnectedUser()!.id}'", 'volume.sub_series');
+      final data = json.decode(result.toString());
+      var mangaOwnedNotifier = ref.read(mangaOwnedProvider.notifier);
+      var allData = ref.watch(mangaOwnedProvider);
+      for (var i = 0; i < data.length; i++) {
+        String id = data[i]['expand']['volume']['expand']['sub_series']['id'];
+        if (allData.contains(id)) {
+          mangaOwnedNotifier.addVolumeOwned(id, {
+            'title': data[i]['expand']['volume']['title'],
+            'image': data[i]['expand']['volume']['image'],
+            'id': data[i]['expand']['volume']['id'],
+            'readed': data[i]['readed'],
+            'over18': data[i]['expand']['volume']['over18'],
+          });
+        } else {
+          mangaOwnedNotifier.addDataSubSeries({
+            'title': data[i]['expand']['volume']['expand']['sub_series']['title'],
+            'id': id,
+            //'first_index_data': i,
+            'number_of_volumes': data[i]['expand']['volume']['expand']['sub_series']['volumes'].length,
+            'volumes': [
+              {
+                'title': data[i]['expand']['volume']['title'],
+                'image': data[i]['expand']['volume']['image'],
+                'id': data[i]['expand']['volume']['id'],
+                'readed': data[i]['readed'],
+                'over18': data[i]['expand']['volume']['over18'],
+              }
+            ]
+          });
+        }
+      }
+    } catch (e) {
+      debugPrint(e.toString());
+      showMessage('Une erreur est survenue', context);
+    }
+  }
+
   @override
   void dispose() {
     _searchController.removeListener(() {});
@@ -80,12 +127,19 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
   void initState() {
     super.initState();
     ref.read(searchOrderProvider);
+    ref.read(mangaOwnedProvider);
+    if (connector.getConnectedUser() == null || connector.isLoggedIn() == false) {
+      pushOrGo(context, '/profile/signin');
+    }
     getClientStream();
     _searchController.addListener(_onSearchChanged);
   }
 
   @override
   Widget build(BuildContext context) {
+    if (ref.read(mangaOwnedProvider) == []) {
+      initData();
+    }
     final selectedOrder = ref.watch(searchOrderProvider);
 
     searchResultsList();

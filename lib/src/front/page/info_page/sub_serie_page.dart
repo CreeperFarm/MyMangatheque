@@ -10,6 +10,7 @@ import 'package:mymangatheque/src/front/components/my_line.dart';
 import 'package:mymangatheque/src/front/components/my_picture_display.dart';
 import 'package:mymangatheque/src/front/components/my_scroll_column.dart';
 import 'package:mymangatheque/src/front/components/my_volume_tile.dart';
+import 'package:mymangatheque/src/function/auto_push_or_go.dart';
 
 class SubSeriePage extends StatefulWidget {
   final String serieId;
@@ -186,7 +187,8 @@ class _SubSeriePageState extends State<SubSeriePage> {
                                       });
                                     }
                                   } else {
-                                    context.push(
+                                    pushOrGo(
+                                      context,
                                       '/profile/signin',
                                     );
                                   }

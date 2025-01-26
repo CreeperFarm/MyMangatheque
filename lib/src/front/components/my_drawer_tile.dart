@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:mymangatheque/src/const/own_icon.dart';
+import 'package:mymangatheque/src/function/auto_push_or_go.dart';
 
 class MyDrawerTile extends StatelessWidget {
   final String title;
@@ -22,7 +22,7 @@ class MyDrawerTile extends StatelessWidget {
         if (pop) {
           Navigator.pop(context);
         } else {}
-        context.go(goTo);
+        pushOrGo(context, goTo);
       },
     );
   }

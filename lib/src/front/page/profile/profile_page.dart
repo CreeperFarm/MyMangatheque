@@ -8,6 +8,7 @@ import 'package:mymangatheque/src/front/components/my_icon_text_button.dart';
 import 'package:mymangatheque/src/front/components/my_line.dart';
 import 'package:mymangatheque/src/front/components/my_scroll_column.dart';
 import 'package:mymangatheque/src/front/components/my_text_divider.dart';
+import 'package:mymangatheque/src/function/auto_push_or_go.dart';
 import 'package:mymangatheque/src/models/get_user_information.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -28,7 +29,7 @@ class _ProfilePageState extends State<ProfilePage> {
   // Sign Out a Connected User
   void signUserOut() {
     connector.logOut();
-    context.go('/profile/signin');
+    pushOrGo(context, '/profile/signin');
   }
 
   // Select an image to change profile picture image
@@ -100,7 +101,7 @@ class _ProfilePageState extends State<ProfilePage> {
     User? user = connector.getConnectedUser();
 
     if (user == null) {
-      context.go('/profile/signin');
+      pushOrGo(context, '/profile/signin');
     }
 
     setState(() {
@@ -269,7 +270,7 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
             GestureDetector(
               onDoubleTap: () {
-                context.go('/admin');
+                pushOrGo(context, '/admin');
               },
               child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: 20.0),

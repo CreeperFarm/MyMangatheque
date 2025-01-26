@@ -2,8 +2,8 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:mymangatheque/src/back/services/pocketbase.dart';
+import 'package:mymangatheque/src/function/auto_push_or_go.dart';
 import 'package:simple_barcode_scanner/simple_barcode_scanner.dart';
 
 class ScanEanPage extends ConsumerStatefulWidget {
@@ -35,7 +35,7 @@ class _ScanEanPageState extends ConsumerState<ScanEanPage> {
       ),
     );*/
     if (!PocketBaseConnector().isLoggedIn()) {
-      context.go('/profile/signin');
+      pushOrGo(context, '/profile/signin');
       return const Scaffold(
         body: Center(
           child: CircularProgressIndicator(),

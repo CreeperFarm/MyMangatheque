@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:go_router/go_router.dart';
 import 'package:mymangatheque/src/front/components/my_drawer_tile.dart';
+import 'package:mymangatheque/src/function/auto_push_or_go.dart';
 
 class MyDrawer extends StatelessWidget {
   final List navIcons;
@@ -24,7 +24,7 @@ class MyDrawer extends StatelessWidget {
                 children: [
                   GestureDetector(
                     onTap: () {
-                      context.go('/');
+                      pushOrGo(context, '/');
                     },
                     child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 25),
@@ -61,7 +61,7 @@ class MyDrawer extends StatelessWidget {
               ),
               GestureDetector(
                   onTap: () {
-                    context.go('/profile');
+                    pushOrGo(context, '/profile');
                   },
                   /*
                   TODO: Check if the user is connected,
