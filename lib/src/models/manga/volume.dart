@@ -1,5 +1,3 @@
-import 'dart:core';
-
 class Volume {
   Volume({
     required this.id,
@@ -36,7 +34,7 @@ class Volume {
   final String? language;
   final String subSeries;
   final String series;
-  final List<dynamic> authors;
+  final List<String> authors;
   final List<dynamic>? contains; // TODO: Convert it to a list of Volumes
   final Map<String, dynamic>? info;
   final String support;

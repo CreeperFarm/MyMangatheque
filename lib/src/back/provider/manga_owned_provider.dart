@@ -3,12 +3,12 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mymangatheque/src/back/services/pocketbase.dart';
-import 'package:mymangatheque/src/models/manga/sub_series.dart';
+import 'package:mymangatheque/src/models/manga/sub_serie_for_collection.dart';
 import 'package:mymangatheque/src/models/manga/volume.dart';
 
-class MangaOwnedNotifier extends Notifier<Set<SubSeries>> {
+class MangaOwnedNotifier extends Notifier<Set<SubSerieForCollection>> {
   @override
-  Set<SubSeries> build() => <SubSeries>{};
+  Set<SubSerieForCollection> build() => <SubSerieForCollection>{};
 
   // Init the data
   Future<void> initData() async {
@@ -24,6 +24,10 @@ class MangaOwnedNotifier extends Notifier<Set<SubSeries>> {
           String idLocal = data[i]['expand']['volume']['expand']['sub_series']['id'];
           String titleLocal = data[i]['expand']['volume']['expand']['sub_series']['title'];
           if (state.any((subSeries) => subSeries.title == titleLocal && subSeries.id == idLocal)) {
+            List<String> authorsLocal = [];
+            for (var author in data[i]['expand']['volume']['authors']) {
+              authorsLocal.add(author);
+            }
             state.firstWhere((subSeries) => subSeries.title == titleLocal && subSeries.id == idLocal).volumes.add(
                   Volume(
                     id: data[i]['expand']['volume']['id'],
@@ -40,7 +44,7 @@ class MangaOwnedNotifier extends Notifier<Set<SubSeries>> {
                     language: data[i]['expand']['volume']['language'],
                     subSeries: data[i]['expand']['volume']['sub_series'],
                     readed: data[i]['readed'],
-                    authors: data[i]['expand']['volume']['authors'],
+                    authors: authorsLocal,
                     series: data[i]['expand']['volume']['series'],
                     contains: data[i]['expand']['volume']['contains'],
                     info: data[i]['expand']['volume']['info'],
@@ -50,8 +54,12 @@ class MangaOwnedNotifier extends Notifier<Set<SubSeries>> {
                 );
             state.firstWhere((subSeries) => subSeries.title == titleLocal && subSeries.id == idLocal).numberOwnedVolumes += 1;
           } else {
+            List<String> authorsLocal = [];
+            for (var author in data[i]['expand']['volume']['authors']) {
+              authorsLocal.add(author);
+            }
             state.add(
-              SubSeries(
+              SubSerieForCollection(
                 id: data[i]['expand']['volume']['expand']['sub_series']['id'],
                 title: data[i]['expand']['volume']['expand']['sub_series']['title'],
                 numberOfVolumes: data[i]['expand']['volume']['expand']['sub_series']['volumes'].length,
@@ -72,7 +80,7 @@ class MangaOwnedNotifier extends Notifier<Set<SubSeries>> {
                     language: data[i]['expand']['volume']['language'],
                     subSeries: data[i]['expand']['volume']['sub_series'],
                     readed: data[i]['readed'],
-                    authors: data[i]['expand']['volume']['authors'],
+                    authors: authorsLocal,
                     series: data[i]['expand']['volume']['series'],
                     // TODO: Convert it to a Volume List
                     contains: data[i]['expand']['volume']['contains'],
@@ -95,21 +103,21 @@ class MangaOwnedNotifier extends Notifier<Set<SubSeries>> {
   }
 
   // Add a sub series to the owned list
-  void addSubSeriesToOwned(SubSeries subSeries) {
+  void addSubSeriesToOwned(SubSerieForCollection subSeries) {
     if (!state.contains(subSeries)) {
       state.add(subSeries);
     }
   }
 
   // Remove a sub series from the owned list
-  void removeSubSeriesFromOwned(SubSeries subSeries) {
+  void removeSubSeriesFromOwned(SubSerieForCollection subSeries) {
     if (state.contains(subSeries)) {
       state.remove(subSeries);
     }
   }
 
   // Add a volume to a sub series
-  void addVolumeToSubSeries(SubSeries subSerie, Volume volume) {
+  void addVolumeToSubSeries(SubSerieForCollection subSerie, Volume volume) {
     if (state.contains(subSerie)) {
       if (!subSerie.volumes.contains(volume)) {
         state.firstWhere((subSeries) => subSeries == subSerie).volumes.add(volume);
@@ -119,7 +127,7 @@ class MangaOwnedNotifier extends Notifier<Set<SubSeries>> {
   }
 
   // Remove a volume from a sub series
-  void removeVolumeFromSubSeries(SubSeries subSerie, Volume volume) {
+  void removeVolumeFromSubSeries(SubSerieForCollection subSerie, Volume volume) {
     if (state.contains(subSerie)) {
       if (subSerie.volumes.contains(volume)) {
         state.firstWhere((subSeries) => subSeries == subSerie).volumes.remove(volume);
@@ -129,22 +137,22 @@ class MangaOwnedNotifier extends Notifier<Set<SubSeries>> {
   }
 
   // Check if a sub series is owned
-  bool isSubSeriesOwned(SubSeries subSeries) {
+  bool isSubSeriesOwned(SubSerieForCollection subSeries) {
     return state.contains(subSeries);
   }
 
   // Check if a volume is owned
-  bool isVolumeOwned(SubSeries subSeries, Volume volume) {
+  bool isVolumeOwned(SubSerieForCollection subSeries, Volume volume) {
     return subSeries.volumes.contains(volume);
   }
 
   // Find a sub series index from it's title and it's id
-  SubSeries findSubSeriesFromTitle(String title, String id) {
+  SubSerieForCollection findSubSeriesFromTitle(String title, String id) {
     return state.firstWhere((subSeries) => subSeries.title == title && subSeries.id == id);
   }
 
   // Find a volume from it's id
-  Volume findVolumeFromId(SubSeries subSeries, String title, String id) {
+  Volume findVolumeFromId(SubSerieForCollection subSeries, String title, String id) {
     final index = subSeries.volumes.indexWhere((volume) => volume.title == title && volume.id == id);
     return subSeries.volumes[index];
   }
@@ -155,6 +163,6 @@ class MangaOwnedNotifier extends Notifier<Set<SubSeries>> {
   }
 }
 
-final mangaOwnedProvider = NotifierProvider<MangaOwnedNotifier, Set<SubSeries>>(() {
+final mangaOwnedProvider = NotifierProvider<MangaOwnedNotifier, Set<SubSerieForCollection>>(() {
   return MangaOwnedNotifier();
 });

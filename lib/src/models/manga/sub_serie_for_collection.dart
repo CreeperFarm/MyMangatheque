@@ -1,7 +1,7 @@
 import 'package:mymangatheque/src/models/manga/volume.dart';
 
-class SubSeries {
-  SubSeries({
+class SubSerieForCollection {
+  SubSerieForCollection({
     required this.id,
     required this.title,
     required this.numberOfVolumes,
