@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/cupertino.dart';
 import 'package:mymangatheque/src/models/manga/sub_serie_for_collection.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -12,12 +13,14 @@ class LocalStorage {
   static const _ownedSubSerieKey = 'ownedSubSerie';
 
   Future<String?> getToken() async {
+    debugPrint("Retrieving user's token from local storage");
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString(_tokenKey);
     return token;
   }
 
   Future<void> setToken(String token) async {
+    debugPrint("Saving user's token from local storage");
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_tokenKey, token);
   }
@@ -27,18 +30,25 @@ class LocalStorage {
     prefs.remove(_tokenKey);
   }
 
-  Future<SubSerieForCollection?> getOwnedSubSerie() async {
+  Future<Set<SubSerieForCollection>?> getOwnedSubSerie() async {
+    debugPrint("Retrieving owned sub series from local storage");
     final prefs = await SharedPreferences.getInstance();
     final jsonString = prefs.getString(_ownedSubSerieKey); // Get JSON String
 
     if (jsonString == null) return null; // Return null if no data
 
-    return SubSerieForCollection.fromJson(json.decode(jsonString));
+    return (json.decode(jsonString) as List).map((e) => SubSerieForCollection.fromJson(e)).toSet();
   }
 
-  Future<void> saveOwnedSubSerie(SubSerieForCollection subSerie) async {
+  Future<void> saveOwnedSubSerie(Set<SubSerieForCollection> subSerie) async {
+    debugPrint("Saving owned sub series from local storage");
     final prefs = await SharedPreferences.getInstance();
-    final jsonString = json.encode(subSerie.toJson()); // Convert to JSON String
+    final jsonString = json.encode(subSerie.toList()); // Convert to JSON String
     await prefs.setString(_ownedSubSerieKey, jsonString);
+  }
+
+  Future<void> deleteOwnedSubSerie() async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.remove(_ownedSubSerieKey);
   }
 }

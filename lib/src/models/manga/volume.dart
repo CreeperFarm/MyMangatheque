@@ -69,6 +69,23 @@ class Volume {
     return {
       'id': id,
       'title': title,
+      'tomeNumber': tomeNumber,
+      'price': price,
+      'image': image,
+      'over18': over18,
+      'resume': resume,
+      'bookLink': bookLink,
+      'release': release!.toIso8601String(),
+      'ean': ean,
+      'language': language,
+      'subSeries': subSeries,
+      'series': series,
+      'authors': authors,
+      'contains': contains,
+      'info': info,
+      'support': support,
+      'japGenre': japGenre,
+      'readed': readed,
     };
   }
 }
