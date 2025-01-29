@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:mymangatheque/src/models/manga/sub_serie_for_collection.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// This implementation uses shared_preferences, which is NOT secure.
@@ -6,6 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// for Apple.
 class LocalStorage {
   static const _tokenKey = 'token';
+  static const _ownedSubSerieKey = 'ownedSubSerie';
 
   Future<String?> getToken() async {
     final prefs = await SharedPreferences.getInstance();
@@ -21,5 +25,20 @@ class LocalStorage {
   Future<void> deleteToken() async {
     final prefs = await SharedPreferences.getInstance();
     prefs.remove(_tokenKey);
+  }
+
+  Future<SubSerieForCollection?> getOwnedSubSerie() async {
+    final prefs = await SharedPreferences.getInstance();
+    final jsonString = prefs.getString(_ownedSubSerieKey); // Get JSON String
+
+    if (jsonString == null) return null; // Return null if no data
+
+    return SubSerieForCollection.fromJson(json.decode(jsonString));
+  }
+
+  Future<void> saveOwnedSubSerie(SubSerieForCollection subSerie) async {
+    final prefs = await SharedPreferences.getInstance();
+    final jsonString = json.encode(subSerie.toJson()); // Convert to JSON String
+    await prefs.setString(_ownedSubSerieKey, jsonString);
   }
 }

@@ -40,4 +40,35 @@ class Volume {
   final String support;
   final String? japGenre;
   bool readed;
+
+  factory Volume.fromJson(Map<String, dynamic> json) {
+    return Volume(
+      id: json['id'],
+      title: json['title'],
+      tomeNumber: json['tomeNumber'],
+      price: json['price'],
+      image: json['image'],
+      over18: json['over18'],
+      resume: json['resume'],
+      bookLink: json['bookLink'],
+      release: DateTime.parse(json['release']),
+      ean: json['ean'],
+      language: json['language'],
+      subSeries: json['subSeries'],
+      series: json['series'],
+      authors: List<String>.from(json['authors']),
+      contains: json['contains'],
+      info: json['info'],
+      support: json['support'],
+      japGenre: json['japGenre'],
+      readed: json['readed'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'title': title,
+    };
+  }
 }

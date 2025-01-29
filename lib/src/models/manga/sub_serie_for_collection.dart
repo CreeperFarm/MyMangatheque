@@ -14,4 +14,24 @@ class SubSerieForCollection {
   final int numberOfVolumes;
   int numberOwnedVolumes;
   List<Volume> volumes;
+
+  factory SubSerieForCollection.fromJson(Map<String, dynamic> json) {
+    return SubSerieForCollection(
+      id: json['id'],
+      title: json['title'],
+      numberOfVolumes: json['numberOfVolumes'],
+      numberOwnedVolumes: json['numberOwnedVolumes'],
+      volumes: List<Volume>.from(json['volumes'].map((x) => Volume.fromJson(x))),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'title': title,
+      'numberOfVolumes': numberOfVolumes,
+      'numberOwnedVolumes': numberOwnedVolumes,
+      'volumes': volumes.map((x) => x.toJson()).toList(),
+    };
+  }
 }
