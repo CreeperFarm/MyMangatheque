@@ -89,6 +89,7 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   once: ^1.7.0
+  connectivity_plus: ^6.1.2
 
   # Need triage
 

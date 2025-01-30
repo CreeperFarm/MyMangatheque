@@ -77,7 +77,25 @@ class _ReadPileTabState extends ConsumerState<ReadPileTab> {
             vertical: 10,
             horizontal: 0,
           ),
-          for (var i = 0; i < readedSubSeries.length; i++) Text('data'),
+          for (var i = 0; i < readedSubSeries.length; i++)
+            Column(
+              children: [
+                Text(
+                  readedSubSeries.toList()[i].title.replaceAll(' - Edition Standard', ''),
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  softWrap: true,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                MyLine(
+                  width: MediaQuery.of(context).size.width,
+                  vertical: 10,
+                  horizontal: 0,
+                ),
+              ],
+            ),
         ],
       ),
     );
