@@ -28,6 +28,7 @@ class MyScrollColumn extends StatelessWidget {
           mainAxisAlignment: columnMainAxisAlignment != null ? columnMainAxisAlignment! : MainAxisAlignment.start,
           crossAxisAlignment: columnCrossAxisAlignment != null ? columnCrossAxisAlignment! : CrossAxisAlignment.start,
           children: [
+            (constraints.maxWidth > 600 ? const SizedBox(height: 15) : const SizedBox(height: 0)),
             for (var child in children) child,
             (constraints.maxWidth < 600 ? const SizedBox(height: 92) : const SizedBox(height: 15)),
           ],
