@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:mymangatheque/src/back/services/pocketbase.dart';
 import 'package:mymangatheque/src/function/auto_push_or_go.dart';
@@ -86,12 +88,50 @@ class _MyMangaShowTileState extends State<MyMangaShowTile> {
                         child: Stack(
                           alignment: AlignmentDirectional.center,
                           children: [
+                            Positioned(
+                              top: 5,
+                              right: 12,
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 10.0,
+                                ),
+                                child: SizedBox(
+                                  height: widget.height * 0.74 - 10,
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(10.0),
+                                    child: Wrap(
+                                      children: [
+                                        Image.network(
+                                          'https://api.mymangatheque.com/api/files/tnof8u6oqfepdq6/${widget.mangaData['id']}/${widget.mangaData['image']}',
+                                          height: widget.height * 0.74 - 10,
+                                          fit: BoxFit.fill,
+                                        ),
+                                        BackdropFilter(
+                                          filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                                          child: Container(
+                                            alignment: Alignment.center,
+                                            color: Colors.grey.withValues(alpha: .4),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
                             // Display the image
                             Padding(
                               padding: const EdgeInsets.symmetric(
                                 vertical: 10.0,
                               ),
-                              child: SizedBox(
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.5),
+                                  borderRadius: BorderRadius.circular(10.0),
+                                  border: Border.all(
+                                    color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.5),
+                                  ), // Added border color
+                                ),
                                 height: widget.height * 0.74 - 10,
                                 child: ClipRRect(
                                   borderRadius: BorderRadius.circular(10.0),

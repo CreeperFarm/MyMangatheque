@@ -8,14 +8,15 @@ class MyScrollColumn extends StatelessWidget {
   final MainAxisSize? columnMainAxisSize;
   final CrossAxisAlignment? columnCrossAxisAlignment;
 
-  MyScrollColumn(
-      {required this.children,
-      this.scrollDirection,
-      this.scrollPadding,
-      this.columnMainAxisAlignment,
-      this.columnMainAxisSize,
-      this.columnCrossAxisAlignment,
-      super.key});
+  const MyScrollColumn({
+    required this.children,
+    this.scrollDirection,
+    this.scrollPadding,
+    this.columnMainAxisAlignment,
+    this.columnMainAxisSize,
+    this.columnCrossAxisAlignment,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
