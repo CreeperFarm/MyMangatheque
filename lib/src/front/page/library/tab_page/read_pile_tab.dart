@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mymangatheque/src/back/provider/manga_owned_provider.dart';
 import 'package:mymangatheque/src/front/components/my_line.dart';
+import 'package:mymangatheque/src/front/components/my_loader_display.dart';
 import 'package:mymangatheque/src/front/components/my_scroll_column.dart';
+import 'package:mymangatheque/src/models/manga/volume.dart';
 
 class ReadPileTab extends ConsumerStatefulWidget {
   const ReadPileTab({super.key});
@@ -28,6 +30,16 @@ class _ReadPileTabState extends ConsumerState<ReadPileTab> {
       }
     }
 
+    int numberVolumeReaded(List<Volume> volumes) {
+      int volumeReaded = 0;
+      for (var volume in volumes) {
+        if (volume.readed) {
+          volumeReaded++;
+        }
+      }
+      return volumeReaded;
+    }
+
     return Padding(
       padding: EdgeInsets.all(10),
       child: MyScrollColumn(
@@ -50,26 +62,7 @@ class _ReadPileTabState extends ConsumerState<ReadPileTab> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(10),
-                      child: Container(
-                        height: 20,
-                        width: MediaQuery.of(context).size.width,
-                        color: Theme.of(context).colorScheme.primary.withOpacity(0.7),
-                        child: Row(
-                          children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(10),
-                              child: Container(
-                                height: 20,
-                                width: MediaQuery.of(context).size.width * (volumeReaded / volumeOwned),
-                                color: Theme.of(context).colorScheme.tertiaryFixed,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
+                    MyLoaderDisplay(percentage: (volumeReaded / volumeOwned)),
                   ],
                 ),
           MyLine(
@@ -77,6 +70,7 @@ class _ReadPileTabState extends ConsumerState<ReadPileTab> {
             vertical: 10,
             horizontal: 0,
           ),
+          // TODO: Display only the image of volumes owned but not readed
           for (var i = 0; i < readedSubSeries.length; i++)
             Column(
               children: [
@@ -86,8 +80,59 @@ class _ReadPileTabState extends ConsumerState<ReadPileTab> {
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
+                  textAlign: TextAlign.start,
                   softWrap: true,
                   overflow: TextOverflow.ellipsis,
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  child: MyLoaderDisplay(
+                    percentage: numberVolumeReaded(readedSubSeries.toList()[i].volumes) / readedSubSeries.toList()[i].numberOwnedVolumes,
+                    paddingWidth: 40,
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 10, left: 10, right: 10),
+                  child: SizedBox(
+                    width: MediaQuery.of(context).size.width,
+                    child: Stack(
+                      children: [
+                        for (var j = 0; j < numberVolumeReaded(readedSubSeries.toList()[i].volumes); j++)
+                          (readedSubSeries.toList()[i].volumes[j].readed)
+                              ? (j == 0)
+                                  ? ClipRRect(
+                                      borderRadius: BorderRadius.circular(10.0),
+                                      child: Image.network(
+                                        readedSubSeries.toList()[i].volumes[j].image,
+                                        width: 65,
+                                      ),
+                                    )
+                                  : Positioned(
+                                      left: j * 45.0,
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.9),
+                                              spreadRadius: 1,
+                                              blurRadius: 2,
+                                              offset: const Offset(0, 1),
+                                            ),
+                                          ],
+                                        ),
+                                        child: ClipRRect(
+                                          borderRadius: BorderRadius.circular(10.0),
+                                          child: Image.network(
+                                            readedSubSeries.toList()[i].volumes[j].image,
+                                            width: 65,
+                                          ),
+                                        ),
+                                      ),
+                                    )
+                              : Container(),
+                      ],
+                    ),
+                  ),
                 ),
                 MyLine(
                   width: MediaQuery.of(context).size.width,
