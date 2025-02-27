@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:mymangatheque/src/back/services/pocketbase.dart';
 import 'package:mymangatheque/src/front/components/my_author_tile.dart';
 import 'package:mymangatheque/src/front/components/my_editor_show.dart';
@@ -324,22 +323,16 @@ class _SubSeriePageState extends State<SubSeriePage> {
                                     future: connector.isVolumeOwned(connector.getConnectedUser()!.id, volumes[i]['id']),
                                     builder: (BuildContext context, snapshot) {
                                       if (snapshot.connectionState == ConnectionState.done && snapshot.hasData) {
-                                        if (snapshot.data == true) {
-                                          return MyVolumeTile(
-                                            volumeData: volumes[i],
-                                            isVolumeOwned: true,
-                                            initRoute: widget.initRoute,
-                                          );
-                                        } else {
-                                          return MyVolumeTile(
-                                            volumeData: volumes[i],
-                                            isVolumeOwned: false,
-                                            initRoute: widget.initRoute,
-                                          );
-                                        }
+                                        return MyVolumeTile(
+                                          volumeData: volumes[i],
+                                          subSerieData: series,
+                                          isVolumeOwned: snapshot.data,
+                                          initRoute: widget.initRoute,
+                                        );
                                       } else {
                                         return MyVolumeTile(
                                           volumeData: volumes[i],
+                                          subSerieData: series,
                                           isVolumeOwned: false,
                                           initRoute: widget.initRoute,
                                         );
@@ -347,6 +340,7 @@ class _SubSeriePageState extends State<SubSeriePage> {
                                     })
                                 : MyVolumeTile(
                                     volumeData: volumes[i],
+                                    subSerieData: series,
                                     isVolumeOwned: false,
                                     initRoute: widget.initRoute,
                                   ),

@@ -22,8 +22,9 @@ class MangaOwnedNotifier extends Notifier<Set<SubSerieForCollection>> {
       final List<ConnectivityResult> connectivityResult = await (Connectivity().checkConnectivity());
       if (kIsWeb || connectivityResult.contains(ConnectivityResult.ethernet)) {
         if (PocketBaseConnector().isLoggedIn()) {
-          Once.runHourly(
+          Once.runCustom(
             'manga_owned_notifier_init_data',
+            duration: const Duration(minutes: 5),
             callback: () async {
               try {
                 final result = await PocketBaseConnector().getCollectionDataWithFilterExpand(

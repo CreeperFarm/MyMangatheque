@@ -17,17 +17,27 @@ class _ReadPileTabState extends ConsumerState<ReadPileTab> {
   @override
   Widget build(BuildContext context) {
     final readedSubSeries = ref.watch(mangaOwnedProvider);
+    List<dynamic> readSubSeriesList = readedSubSeries.toList();
 
     int volumeReaded = 0;
     int volumeOwned = 0;
 
+    // SubSerieForCollection notReadedBook;
+
     for (var subSerie in readedSubSeries) {
-      for (var volume in subSerie.volumes) {
+      // int numberOfTomesReaded = 0;
+      for (int i = 0; i < subSerie.volumes.length; i++) {
+        Volume volume = subSerie.volumes[i];
         if (volume.readed) {
           volumeReaded++;
+          // numberOfTomesReaded++;
+          // subSerie.volumes.removeAt(i);
         }
         volumeOwned++;
       }
+      // if (numberOfTomesReaded < subSerie.numberOwnedVolumes) {
+      //   notReadedBook = subSerie;
+      // }
     }
 
     int numberVolumeReaded(List<Volume> volumes) {
@@ -75,7 +85,7 @@ class _ReadPileTabState extends ConsumerState<ReadPileTab> {
             Column(
               children: [
                 Text(
-                  readedSubSeries.toList()[i].title.replaceAll(' - Edition Standard', ''),
+                  readSubSeriesList[i].title.replaceAll(' - Edition Standard', ''),
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -87,7 +97,7 @@ class _ReadPileTabState extends ConsumerState<ReadPileTab> {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 10),
                   child: MyLoaderDisplay(
-                    percentage: numberVolumeReaded(readedSubSeries.toList()[i].volumes) / readedSubSeries.toList()[i].numberOwnedVolumes,
+                    percentage: numberVolumeReaded(readSubSeriesList[i].volumes) / readSubSeriesList[i].numberOwnedVolumes,
                     paddingWidth: 40,
                   ),
                 ),
@@ -97,13 +107,13 @@ class _ReadPileTabState extends ConsumerState<ReadPileTab> {
                     width: MediaQuery.of(context).size.width,
                     child: Stack(
                       children: [
-                        for (var j = 0; j < numberVolumeReaded(readedSubSeries.toList()[i].volumes); j++)
-                          (readedSubSeries.toList()[i].volumes[j].readed)
+                        for (var j = 0; j < readSubSeriesList[i].numberOwnedVolumes - numberVolumeReaded(readSubSeriesList[i].volumes); j++)
+                          (!readSubSeriesList[i].volumes[j].readed)
                               ? (j == 0)
                                   ? ClipRRect(
                                       borderRadius: BorderRadius.circular(10.0),
                                       child: Image.network(
-                                        readedSubSeries.toList()[i].volumes[j].image,
+                                        readSubSeriesList[i].volumes[j].image,
                                         width: 65,
                                       ),
                                     )
@@ -123,7 +133,7 @@ class _ReadPileTabState extends ConsumerState<ReadPileTab> {
                                         child: ClipRRect(
                                           borderRadius: BorderRadius.circular(10.0),
                                           child: Image.network(
-                                            readedSubSeries.toList()[i].volumes[j].image,
+                                            readSubSeriesList[i].volumes[j].image,
                                             width: 65,
                                           ),
                                         ),

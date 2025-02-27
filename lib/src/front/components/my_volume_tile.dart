@@ -7,10 +7,11 @@ import 'my_collection_badge.dart';
 
 class MyVolumeTile extends StatelessWidget {
   final Map<String, dynamic> volumeData;
+  final Map<String, dynamic>? subSerieData;
   final String initRoute;
   final bool? isVolumeOwned;
 
-  const MyVolumeTile({required this.volumeData, required this.initRoute, this.isVolumeOwned, super.key});
+  const MyVolumeTile({required this.volumeData, required this.subSerieData, required this.initRoute, this.isVolumeOwned, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -57,7 +58,7 @@ class MyVolumeTile extends StatelessWidget {
                         softWrap: false,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      (isVolumeOwned == null && !isVolumeOwned!)
+                      (!subSerieData!.containsKey(volumeData['sub_serie_id'].toString()) && isVolumeOwned != true)
                           ? SizedBox()
                           : Padding(
                               padding: const EdgeInsets.only(top: 1.0),
