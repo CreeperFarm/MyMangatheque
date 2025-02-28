@@ -193,40 +193,51 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                                       padding: const EdgeInsets.only(right: 10),
                                       child: SizedBox(
                                         width: 50,
-                                        child: Image.network(
-                                          'https://api.mymangatheque.com/api/files/utbujxtz8wtq0ar/${manga['id'].toString()}/${manga['image'].toString()}',
-                                          width: 50,
+                                        child: ClipRRect(
+                                          borderRadius: BorderRadius.circular(10.0),
+                                          child: Image.network(
+                                            'https://api.mymangatheque.com/api/files/utbujxtz8wtq0ar/${manga['id'].toString()}/${manga['image'].toString()}',
+                                            width: 50,
+                                          ),
                                         ),
                                       ),
                                     ),
-                                    Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          textLength(manga['title'], 30),
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 17,
-                                            color: Theme.of(context).colorScheme.primary,
+                                    SizedBox(
+                                      width: MediaQuery.of(context).size.width -
+                                          (MediaQuery.of(context).padding.left + MediaQuery.of(context).padding.right + 124),
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            manga['title'],
+                                            softWrap: false,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 17,
+                                              color: Theme.of(context).colorScheme.primary,
+                                            ),
                                           ),
-                                        ),
-                                        // manga['author'].toString()
+                                          // manga['author'].toString()
 
-                                        Text(
-                                          textLength(getAllAuthorsName(manga['expand']['authors']), 35),
-                                          style: TextStyle(
-                                            color: Theme.of(context).colorScheme.primary,
-                                            fontSize: 14,
+                                          Text(
+                                            getAllAuthorsName(manga['expand']['authors']),
+                                            softWrap: false,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(
+                                              color: Theme.of(context).colorScheme.primary,
+                                              fontSize: 14,
+                                            ),
                                           ),
-                                        ),
-                                        Text(
-                                          DateTime.parse(manga['first_publication']).year.toString(),
-                                          style: TextStyle(
-                                            color: Theme.of(context).colorScheme.primary,
-                                            fontSize: 14,
-                                          ),
-                                        )
-                                      ],
+                                          Text(
+                                            DateTime.parse(manga['first_publication']).year.toString(),
+                                            style: TextStyle(
+                                              color: Theme.of(context).colorScheme.primary,
+                                              fontSize: 14,
+                                            ),
+                                          )
+                                        ],
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -246,14 +257,14 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                                   vertical: 0,
                                 )
                               : const Padding(
-                                  padding: EdgeInsets.only(bottom: 0),
+                                  padding: EdgeInsets.only(bottom: 60),
                                 ),
                         ],
                       );
                     } else if (selectedFilter == 'author') {
                       return Text("Author" "WIP");
                     } else {
-                      return Text("Author" "WIP");
+                      return Text("Editor" "WIP");
                     }
                   },
                 ),

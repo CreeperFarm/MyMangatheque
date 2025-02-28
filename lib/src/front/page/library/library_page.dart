@@ -76,7 +76,9 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
 
   Future<void> initData() async {
     try {
-      await ref.read(mangaOwnedProvider.notifier).initData();
+      await ref.read(mangaOwnedProvider.notifier).initData().then((value) {
+        setState(() {});
+      });
     } catch (e) {
       debugPrint(e.toString());
       showMessage('Une erreur est survenue', context);

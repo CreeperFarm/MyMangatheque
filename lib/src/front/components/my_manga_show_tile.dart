@@ -90,10 +90,12 @@ class _MyMangaShowTileState extends State<MyMangaShowTile> {
                           children: [
                             Positioned(
                               top: 5,
-                              right: 12,
                               child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 10.0,
+                                padding: const EdgeInsets.only(
+                                  top: 10.0,
+                                  bottom: 10.0,
+                                  right: 10.0,
+                                  left: 20.0,
                                 ),
                                 child: SizedBox(
                                   height: widget.height * 0.74 - 10,
@@ -154,7 +156,7 @@ class _MyMangaShowTileState extends State<MyMangaShowTile> {
                                         } else {
                                           return Positioned(
                                             top: 10,
-                                            right: 0,
+                                            right: 10,
                                             child: Container(
                                               decoration: BoxDecoration(
                                                 color: Color(0xFF1780A3),

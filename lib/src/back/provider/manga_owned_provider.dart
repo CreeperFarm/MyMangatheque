@@ -14,7 +14,7 @@ class MangaOwnedNotifier extends Notifier<Set<SubSerieForCollection>> {
   Set<SubSerieForCollection> build() => <SubSerieForCollection>{};
 
   // Init the data
-  Future<void> initData() async {
+  Future<bool> initData() async {
     Set<SubSerieForCollection>? temp = await LocalStorage().getOwnedSubSerie();
 
     if (temp != null) {
@@ -24,7 +24,7 @@ class MangaOwnedNotifier extends Notifier<Set<SubSerieForCollection>> {
         if (PocketBaseConnector().isLoggedIn()) {
           Once.runCustom(
             'manga_owned_notifier_init_data',
-            duration: const Duration(minutes: 5),
+            duration: const Duration(seconds: 5),
             callback: () async {
               try {
                 final result = await PocketBaseConnector().getCollectionDataWithFilterExpand(
@@ -210,6 +210,7 @@ class MangaOwnedNotifier extends Notifier<Set<SubSerieForCollection>> {
         debugPrint(e.toString());
       }
     }
+    return true; // Return true because the initialisation is ended.
   }
 
   // Add a sub series to the owned list
