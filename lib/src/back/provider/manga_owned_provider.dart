@@ -64,6 +64,7 @@ class MangaOwnedNotifier extends Notifier<Set<SubSerieForCollection>> {
                             info: data[i]['expand']['volume']['info'],
                             support: data[i]['expand']['volume']['support'],
                             japGenre: data[i]['expand']['volume']['genre_jap'],
+                            lastTimeChecked: DateTime.now(),
                           ),
                         );
                     state.firstWhere((subSeries) => subSeries.title == titleLocal && subSeries.id == idLocal).numberOwnedVolumes += 1;
@@ -101,6 +102,7 @@ class MangaOwnedNotifier extends Notifier<Set<SubSerieForCollection>> {
                             info: data[i]['expand']['volume']['info'],
                             support: data[i]['expand']['volume']['support'],
                             japGenre: data[i]['expand']['volume']['genre_jap'],
+                            lastTimeChecked: DateTime.now(),
                           )
                         ],
                       ),
@@ -160,6 +162,7 @@ class MangaOwnedNotifier extends Notifier<Set<SubSerieForCollection>> {
                     info: data[i]['expand']['volume']['info'],
                     support: data[i]['expand']['volume']['support'],
                     japGenre: data[i]['expand']['volume']['genre_jap'],
+                    lastTimeChecked: DateTime.now(),
                   ),
                 );
             state.firstWhere((subSeries) => subSeries.title == titleLocal && subSeries.id == idLocal).numberOwnedVolumes += 1;
@@ -197,6 +200,7 @@ class MangaOwnedNotifier extends Notifier<Set<SubSerieForCollection>> {
                     info: data[i]['expand']['volume']['info'],
                     support: data[i]['expand']['volume']['support'],
                     japGenre: data[i]['expand']['volume']['genre_jap'],
+                    lastTimeChecked: DateTime.now(),
                   )
                 ],
               ),

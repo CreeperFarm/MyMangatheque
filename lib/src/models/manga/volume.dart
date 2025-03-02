@@ -19,27 +19,29 @@ class Volume {
     required this.info,
     required this.support,
     required this.japGenre,
+    required this.lastTimeChecked,
   });
 
-  final String id;
-  final String title;
-  final num? tomeNumber;
-  final num price;
-  final String image;
-  final bool over18;
-  final String resume;
-  final List<dynamic> bookLink;
-  final DateTime? release;
-  final num ean;
-  final String? language;
-  final String subSeries;
-  final String series;
-  final List<String> authors;
-  final List<dynamic>? contains; // TODO: Convert it to a list of Volumes
-  final Map<String, dynamic>? info;
-  final String support;
-  final String? japGenre;
-  bool readed;
+  final String id; // * Get the id of the volume
+  final String title; // * Get the title of the volume
+  final num? tomeNumber; // * Get the tome number of the volume
+  num price; // * Get the price of the volume
+  final String image; // * Get the image link of the volume
+  final bool over18; // * Get if the volume is over 18
+  final String resume; // * Get the resume of the volume
+  List<dynamic> bookLink; // * Get the book link of the volume
+  final DateTime? release; // * Get the release date of the volume
+  final num ean; // * Get the ean of the volume
+  final String? language; // * Get the language of the volume
+  final String subSeries; // * Get the ID sub serie of the volume
+  final String series; // * Get the ID serie of the volume
+  final List<String> authors; // * Get the list of authors of the volume
+  final List<String>? contains; // * Get the list of contains of the volume
+  final Map<String, dynamic>? info; // * Get the info of the volume
+  final String support; // * Get the support of the volume
+  final String? japGenre; // * Get the japanese genre of the volume
+  bool readed; // * Get if the volume is readed
+  DateTime lastTimeChecked; // * Get the last time checked of the volume
 
   factory Volume.fromJson(Map<String, dynamic> json) {
     return Volume(
@@ -57,11 +59,12 @@ class Volume {
       subSeries: json['subSeries'],
       series: json['series'],
       authors: List<String>.from(json['authors']),
-      contains: json['contains'],
+      contains: List<String>.from(json['contains']),
       info: json['info'],
       support: json['support'],
       japGenre: json['japGenre'],
       readed: json['readed'],
+      lastTimeChecked: DateTime.parse(json['lastTimeChecked']),
     );
   }
 
@@ -86,6 +89,7 @@ class Volume {
       'support': support,
       'japGenre': japGenre,
       'readed': readed,
+      'lastTimeChecked': lastTimeChecked.toIso8601String(),
     };
   }
 }
