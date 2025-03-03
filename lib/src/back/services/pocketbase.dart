@@ -5,7 +5,6 @@ import 'dart:io';
 
 // Importing other libraries
 import 'package:dart_date/dart_date.dart';
-import 'package:fetch_client/fetch_client.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_custom_tabs/flutter_custom_tabs.dart';
@@ -18,6 +17,8 @@ import 'package:mymangatheque/src/models/user.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:pocketbase/pocketbase.dart';
 import 'package:rxdart/rxdart.dart';
+
+import 'factories/factory_mobile.dart' if (dart.library.html) 'factories/factory_web.dart';
 
 // Exporting the classes
 export 'package:mymangatheque/src/models/file.dart';
@@ -40,8 +41,8 @@ class PocketBaseConnector {
     try {
       _pocketBase = PocketBase(
         'https://api.mymangatheque.com',
-        httpClientFactory: kIsWeb ? () => FetchClient(mode: RequestMode.cors) : null,
         lang: 'fr-FR',
+        httpClientFactory: httpClientFactory.getHttpClient(),
         authStore: customAuthStore,
       );
 
@@ -117,8 +118,11 @@ class PocketBaseConnector {
   final BehaviorSubject<User?> _connectedUser = BehaviorSubject<User?>();
 
   PocketBaseConnector._internal()
-      : _pocketBase =
-            PocketBase('https://api.mymangatheque.com', httpClientFactory: kIsWeb ? () => FetchClient(mode: RequestMode.cors) : null, lang: 'fr-FR');
+      : _pocketBase = PocketBase(
+          'https://api.mymangatheque.com',
+          httpClientFactory: httpClientFactory.getHttpClient(),
+          lang: 'fr-FR',
+        );
 
   Future<void> refresh() async {
     if (!_pocketBase.authStore.isValid) {
