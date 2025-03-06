@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mymangatheque/src/back/services/pocketbase.dart';
 import 'package:mymangatheque/src/models/local_storage/local_storage.dart';
+import 'package:mymangatheque/src/models/local_storage/service_locator.dart';
 import 'package:mymangatheque/src/models/manga/sub_serie_for_collection.dart';
 import 'package:mymangatheque/src/models/manga/volume.dart';
 import 'package:once/once.dart';
@@ -15,7 +16,9 @@ class MangaOwnedNotifier extends Notifier<Set<SubSerieForCollection>> {
 
   // Init the data
   Future<bool> initData() async {
-    Set<SubSerieForCollection>? temp = await LocalStorage().getOwnedSubSerie();
+    final storage = getIt<LocalStorage>();
+    Set<SubSerieForCollection>? temp = await storage.getOwnedSubSerie(); // Get the data from the local storage
+    print(temp);
 
     if (temp != null) {
       state = temp;
@@ -24,7 +27,7 @@ class MangaOwnedNotifier extends Notifier<Set<SubSerieForCollection>> {
         if (PocketBaseConnector().isLoggedIn()) {
           Once.runCustom(
             'manga_owned_notifier_init_data',
-            duration: const Duration(seconds: 5),
+            duration: const Duration(milliseconds: 5),
             callback: () async {
               try {
                 final result = await PocketBaseConnector().getCollectionDataWithFilterExpand(
@@ -33,14 +36,18 @@ class MangaOwnedNotifier extends Notifier<Set<SubSerieForCollection>> {
                   'volume.sub_series.editor',
                 );
                 final data = json.decode(result.toString());
+                debugPrint(data);
                 state.clear();
                 for (var i = 0; i < data.length; i++) {
                   String idLocal = data[i]['expand']['volume']['expand']['sub_series']['id'];
                   String titleLocal = data[i]['expand']['volume']['expand']['sub_series']['title'];
+                  debugPrint(state.toString());
                   if (state.any((subSeries) => subSeries.title == titleLocal && subSeries.id == idLocal)) {
                     List<String> authorsLocal = [];
-                    for (var author in data[i]['expand']['volume']['authors']) {
-                      authorsLocal.add(author);
+                    if (data[i]['expand']['volume']['authors'] != null) {
+                      for (var author in data[i]['expand']['volume']['authors']) {
+                        authorsLocal.add(author);
+                      }
                     }
                     state.firstWhere((subSeries) => subSeries.title == titleLocal && subSeries.id == idLocal).volumes.add(
                           Volume(
@@ -70,8 +77,10 @@ class MangaOwnedNotifier extends Notifier<Set<SubSerieForCollection>> {
                     state.firstWhere((subSeries) => subSeries.title == titleLocal && subSeries.id == idLocal).numberOwnedVolumes += 1;
                   } else {
                     List<String> authorsLocal = [];
-                    for (var author in data[i]['expand']['volume']['authors']) {
-                      authorsLocal.add(author);
+                    if (data[i]['expand']['volume']['authors'] != null) {
+                      for (var author in data[i]['expand']['volume']['authors']) {
+                        authorsLocal.add(author);
+                      }
                     }
                     state.add(
                       SubSerieForCollection(
@@ -113,8 +122,7 @@ class MangaOwnedNotifier extends Notifier<Set<SubSerieForCollection>> {
                 // Print the error to the debug console
                 debugPrint(e.toString());
               }
-              await LocalStorage().deleteOwnedSubSerie();
-              await LocalStorage().saveOwnedSubSerie(state);
+              await storage.saveOwnedSubSerie(state);
             },
           );
         } else {
@@ -207,8 +215,7 @@ class MangaOwnedNotifier extends Notifier<Set<SubSerieForCollection>> {
             );
           }
         }
-        await LocalStorage().deleteOwnedSubSerie();
-        await LocalStorage().saveOwnedSubSerie(state);
+        await storage.saveOwnedSubSerie(state);
       } catch (e) {
         // Print the error to the debug console
         debugPrint(e.toString());
@@ -218,37 +225,45 @@ class MangaOwnedNotifier extends Notifier<Set<SubSerieForCollection>> {
   }
 
   // Add a sub series to the owned list
-  void addSubSeriesToOwned(SubSerieForCollection subSeries) {
+  Future<void> addSubSeriesToOwned(SubSerieForCollection subSeries) async {
+    final storage = getIt<LocalStorage>();
     if (!state.contains(subSeries)) {
       state.add(subSeries);
     }
+    await storage.saveOwnedSubSerie(state);
   }
 
   // Remove a sub series from the owned list
-  void removeSubSeriesFromOwned(SubSerieForCollection subSeries) {
+  Future<void> removeSubSeriesFromOwned(SubSerieForCollection subSeries) async {
+    final storage = getIt<LocalStorage>();
     if (state.contains(subSeries)) {
       state.remove(subSeries);
     }
+    await storage.saveOwnedSubSerie(state);
   }
 
   // Add a volume to a sub series
-  void addVolumeToSubSeries(SubSerieForCollection subSerie, Volume volume) {
+  Future<void> addVolumeToSubSeries(SubSerieForCollection subSerie, Volume volume) async {
+    final storage = getIt<LocalStorage>();
     if (state.contains(subSerie)) {
       if (!subSerie.volumes.contains(volume)) {
         state.firstWhere((subSeries) => subSeries == subSerie).volumes.add(volume);
         state.firstWhere((subSeries) => subSeries == subSerie).numberOwnedVolumes += 1;
       }
     }
+    await storage.saveOwnedSubSerie(state);
   }
 
   // Remove a volume from a sub series
-  void removeVolumeFromSubSeries(SubSerieForCollection subSerie, Volume volume) {
+  Future<void> removeVolumeFromSubSeries(SubSerieForCollection subSerie, Volume volume) async {
+    final storage = getIt<LocalStorage>();
     if (state.contains(subSerie)) {
       if (subSerie.volumes.contains(volume)) {
         state.firstWhere((subSeries) => subSeries == subSerie).volumes.remove(volume);
         state.firstWhere((subSeries) => subSeries == subSerie).numberOwnedVolumes -= 1;
       }
     }
+    await storage.saveOwnedSubSerie(state);
   }
 
   // Check if a sub series is owned
@@ -273,8 +288,10 @@ class MangaOwnedNotifier extends Notifier<Set<SubSerieForCollection>> {
   }
 
   // Clear the data
-  void clear() {
+  Future<void> clear() async {
+    final storage = getIt<LocalStorage>();
     state.clear();
+    await storage.saveOwnedSubSerie(state);
   }
 }
 

@@ -10,6 +10,7 @@ import 'package:mymangatheque/src/front/components/my_scroll_column.dart';
 import 'package:mymangatheque/src/front/components/my_text_divider.dart';
 import 'package:mymangatheque/src/function/auto_push_or_go.dart';
 import 'package:mymangatheque/src/models/get_user_information.dart';
+import 'package:mymangatheque/src/models/local_storage/local_storage.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -246,24 +247,70 @@ class _ProfilePageState extends State<ProfilePage> {
                     }
                   }),
             ),
-            MyLine(width: MediaQuery.of(context).size.width, vertical: 10),
+            MyLine(
+              width: MediaQuery.of(context).size.width,
+              vertical: 10,
+            ),
+            SingleChildScrollView(
+              child: GestureDetector(
+                onTap: () {
+                  LocalStorage().deleteToken();
+                  LocalStorage().deleteOwnedSubSerie();
+                  LocalStorage().clearAllCache();
+                },
+                child: Row(
+                  children: [
+                    const Padding(padding: EdgeInsets.only(right: 16)),
+                    OwnIcon(iconColor: Theme.of(context).colorScheme.primary, iconName: 'trash'),
+                    const Padding(padding: EdgeInsets.only(right: 9)),
+                    const Text("Vider le cache"),
+                  ],
+                ),
+              ),
+            ),
+            MyLine(
+              width: MediaQuery.of(context).size.width,
+              vertical: 10,
+            ),
             SingleChildScrollView(
               child: GestureDetector(
                 onTap: () => GoRouter.of(context).go('/profile/modify_password'),
                 child: Row(
                   children: [
-                    const Padding(padding: EdgeInsets.only(right: 16)),
-                    OwnIcon(iconColor: Theme.of(context).colorScheme.primary, iconName: 'lock'),
-                    const Padding(padding: EdgeInsets.only(right: 9)),
+                    const Padding(
+                      padding: EdgeInsets.only(right: 16),
+                    ),
+                    OwnIcon(
+                      iconColor: Theme.of(context).colorScheme.primary,
+                      iconName: 'lock',
+                    ),
+                    const Padding(
+                      padding: EdgeInsets.only(right: 9),
+                    ),
                     const Text('Changer de mot de passe'),
                   ],
                 ),
               ),
             ),
-            MyLine(width: MediaQuery.of(context).size.width, vertical: 10.0),
-            MyIconTextButton(function: signUserOut, color: Colors.red, iconName: 'logout', text: 'Se déconnecter'),
-            MyTextDivider(text: "Zone de danger"),
-            MyIconTextButton(function: signUserOut, color: Colors.red, iconName: 'delete', text: 'Supprimer mon compte'),
+            MyLine(
+              width: MediaQuery.of(context).size.width,
+              vertical: 10.0,
+            ),
+            MyIconTextButton(
+              function: signUserOut,
+              color: Colors.red,
+              iconName: 'logout',
+              text: 'Se déconnecter',
+            ),
+            MyTextDivider(
+              text: "Zone de danger",
+            ),
+            MyIconTextButton(
+              function: signUserOut,
+              color: Colors.red,
+              iconName: 'delete',
+              text: 'Supprimer mon compte',
+            ),
             MyLine(
               width: MediaQuery.of(context).size.width,
               vertical: 10.0,

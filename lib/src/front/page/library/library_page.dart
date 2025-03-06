@@ -33,14 +33,6 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
 
   getClientStream() async {
     var order = ref.watch(searchOrderProvider);
-    /*var data = await FirebaseFirestore.instance
-        .collection('manga')
-        .orderBy(order, descending: order == 'releaseDate' ? true : false)
-        .get();
-
-    setState(() {
-      _allResults = data.docs;
-    });*/
   }
 
   _onSearchChanged() {
@@ -77,17 +69,19 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
   Future<void> initData() async {
     try {
       await ref.read(mangaOwnedProvider.notifier).initData().then((value) {
-        setState(() {});
+        if (mounted) {
+          setState(() {});
+        }
       });
     } catch (e) {
       debugPrint(e.toString());
-      showMessage('Une erreur est survenue', context);
+      showMessage('Une erreur est survenue, veuillez réessayer plus tard.', context);
     }
   }
 
   @override
   void dispose() {
-    _searchController.removeListener(() {});
+    _searchController.removeListener(_onSearchChanged);
     _searchController.dispose();
     super.dispose();
   }

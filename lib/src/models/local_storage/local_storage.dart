@@ -38,6 +38,7 @@ class LocalStorage {
   Future<void> deleteToken() async {
     final prefs = await SharedPreferences.getInstance();
     prefs.remove(_tokenKey);
+    debugPrint("The token from local storage as been deleted.");
   }
 
   // * End of token ----------------------------------------------------------------------------------------------------
@@ -63,6 +64,7 @@ class LocalStorage {
   Future<void> deleteOwnedSubSerie() async {
     final prefs = await SharedPreferences.getInstance();
     prefs.remove(_ownedSubSerieKey);
+    debugPrint("Owned sub series from local storage as been deleted.");
   }
 
   // * End of owned sub series ----------------------------------------------------------------------------------------
@@ -88,6 +90,7 @@ class LocalStorage {
   Future<void> deleteCacheSeries() async {
     final prefs = await SharedPreferences.getInstance();
     prefs.remove(_cacheSeriesKey);
+    debugPrint("Cache of series from local storage as been deleted.");
   }
 
 // * End of cache series ------------------------------------------------------------------------------------------
@@ -113,6 +116,7 @@ class LocalStorage {
   Future<void> deleteCacheSubSeries() async {
     final prefs = await SharedPreferences.getInstance();
     prefs.remove(_cacheSubSeriesKey);
+    debugPrint("Cache of sub series from local storage as been deleted.");
   }
 
 // * End of cache sub series ----------------------------------------------------------------------------------------
@@ -138,6 +142,7 @@ class LocalStorage {
   Future<void> deleteCacheVolumes() async {
     final prefs = await SharedPreferences.getInstance();
     prefs.remove(_cacheVolumesKey);
+    debugPrint("Cache of volumes from local storage as been deleted.");
   }
 
 // * End of cache volumes -------------------------------------------------------------------------------------------
@@ -163,6 +168,7 @@ class LocalStorage {
   Future<void> deleteCacheAuthors() async {
     final prefs = await SharedPreferences.getInstance();
     prefs.remove(_cacheAuthorsKey);
+    debugPrint("Cache of authors from local storage as been deleted.");
   }
 
 // * End of cache authors -------------------------------------------------------------------------------------------
@@ -188,6 +194,7 @@ class LocalStorage {
   Future<void> deleteCacheEditors() async {
     final prefs = await SharedPreferences.getInstance();
     prefs.remove(_cacheEditorsKey);
+    debugPrint("Cache of editors from local storage as been deleted.");
   }
 
 // * End of cache editors -------------------------------------------------------------------------------------------
@@ -200,6 +207,7 @@ class LocalStorage {
     prefs.remove(_cacheVolumesKey);
     prefs.remove(_cacheAuthorsKey);
     prefs.remove(_cacheEditorsKey);
+    debugPrint("The whole cache from local storage as been deleted.");
   }
 // * End of clear all cache -----------------------------------------------------------------------------------------
 }

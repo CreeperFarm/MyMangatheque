@@ -83,28 +83,32 @@ class _ReadPileTabState extends ConsumerState<ReadPileTab> {
           // TODO: Display only the image of volumes owned but not readed
           for (var i = 0; i < readedSubSeries.length; i++)
             Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  readSubSeriesList[i].title.replaceAll(' - Edition Standard', ''),
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                  child: Text(
+                    readSubSeriesList[i].title.replaceAll(' - Edition Standard', ''),
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    softWrap: true,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  textAlign: TextAlign.start,
-                  softWrap: true,
-                  overflow: TextOverflow.ellipsis,
                 ),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 10),
-                  child: MyLoaderDisplay(
-                    percentage: numberVolumeReaded(readSubSeriesList[i].volumes) / readSubSeriesList[i].numberOwnedVolumes,
-                    paddingWidth: 40,
+                  child: Text(
+                    '${numberVolumeReaded(readSubSeriesList[i].volumes)} tome(s) lu sur ${readSubSeriesList[i].numberOwnedVolumes}',
                   ),
                 ),
                 Padding(
                   padding: const EdgeInsets.only(top: 10, left: 10, right: 10),
                   child: SizedBox(
                     width: MediaQuery.of(context).size.width,
+                    height: (readSubSeriesList[i].numberOwnedVolumes - numberVolumeReaded(readSubSeriesList[i].volumes) != 0) ? 100 : 0,
                     child: Stack(
                       children: [
                         for (var j = 0; j < readSubSeriesList[i].numberOwnedVolumes - numberVolumeReaded(readSubSeriesList[i].volumes); j++)

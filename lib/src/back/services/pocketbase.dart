@@ -5,7 +5,6 @@ import 'dart:io';
 
 // Importing other libraries
 import 'package:dart_date/dart_date.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_custom_tabs/flutter_custom_tabs.dart';
 import 'package:http/http.dart';
@@ -26,7 +25,7 @@ export 'package:mymangatheque/src/models/user.dart';
 
 class PocketBaseConnector {
   late PocketBase _pocketBase;
-  int alreadyclick = 0;
+  int alreadyClick = 0;
 
   Future<void> init() async {
     final storage = getIt<LocalStorage>();
@@ -67,45 +66,6 @@ class PocketBaseConnector {
       );
       debugPrint(e.toString());
     }
-
-    /*if (!PocketBaseConnector().isLoggedIn()) {
-      MangaOwnedNotifier().newDataSet([]);
-    } else {
-      try {
-        final result = await PocketBaseConnector().getCollectionDataWithFilterExpand(
-          'owned',
-          "user='${PocketBaseConnector().getConnectedUser()!.id}'",
-          'volume.sub_series',
-        );
-        final data = json.decode(result.toString());
-        Map<String, dynamic> subSeriesMap = {};
-        for (var i = 0; i < data.length; i++) {
-          String title = data[i]['expand']['volume']['expand']['sub_series']['title'];
-          if (subSeriesMap.containsKey(title)) {
-            subSeriesMap[title]['volumes'].add({
-              'title': data[i]['expand']['volume']['title'],
-              'image': data[i]['expand']['volume']['image'],
-              'id': data[i]['expand']['volume']['id']
-            });
-          } else {
-            subSeriesMap[title] = {
-              'title': title,
-              'id': data[i]['expand']['volume']['expand']['sub_series']['id'],
-              'first_index_data': i,
-              'volumes': [
-                {
-                  'title': data[i]['expand']['volume']['title'],
-                  'image': data[i]['expand']['volume']['image'],
-                  'id': data[i]['expand']['volume']['id']
-                }
-              ]
-            };
-          }
-        }
-      } catch (e) {
-        debugPrint(e.toString());
-      }
-    }*/
   }
 
   // Singleton
@@ -163,8 +123,8 @@ class PocketBaseConnector {
 
   // Sign in with Google (all-in-one)
   signInWithGoogle(context) async {
-    if (alreadyclick == 0) {
-      alreadyclick = 1;
+    if (alreadyClick == 0) {
+      alreadyClick = 1;
       try {
         PocketBaseConnector().logOut();
         _pocketBase.authStore.clear();
@@ -190,7 +150,7 @@ class PocketBaseConnector {
               var body = <String, dynamic>{
                 "email": data['email'],
                 "username": data['name'],
-                "birthday": DateTime.now().toString(),
+                "birthday": DateTime.now().toIso8601String(),
                 "gender": "other",
                 "role": "user",
                 "emailVisibility": true,
@@ -210,18 +170,20 @@ class PocketBaseConnector {
           } else {
             debugPrint('User already exists');
           }
+          print(authData2);
           _connectedUser.add(await findUser(authData2['meta']['rawUser']['email'].toString().toLowerCase()));
+
           _pocketBase.realtime.unsubscribe('users');
         } else {
           debugPrint('User isn\'t connected');
-          showMessage('Une erreur est survenue', context);
+          showMessage('Une erreur est survenue, vous n\'avez pas été connecter à votre compte.', context);
         }
       } catch (e) {
-        showMessage("Une erreur est survenue.", context);
+        showMessage("Une erreur est survenue, vous n'avez pas été connecter à votre compte.", context);
         debugPrint(e.toString());
       }
       await closeCustomTabs();
-      alreadyclick = 0;
+      alreadyClick = 0;
     } else {
       showMessage("Veuillez patientez", context);
     }
@@ -258,6 +220,8 @@ class PocketBaseConnector {
   void logOut() {
     _pocketBase.authStore.clear();
     _connectedUser.add(null);
+    LocalStorage().deleteToken();
+    LocalStorage().deleteOwnedSubSerie();
   }
 
   // Reset Password
@@ -284,7 +248,7 @@ class PocketBaseConnector {
       await _pocketBase.collection('users').confirmPasswordReset(_pocketBase.authStore.token, newPassword, newPassword);
       return showMessage('Votre mots de passe a bien été modifié.', context);
     } catch (e) {
-      print(e);
+      debugPrint(e.toString());
       if (e.toString().contains('Must be a valid email address')) {
         return showMessage('Veuillez entrer une adresse email valide.', context);
       } else {
@@ -327,7 +291,7 @@ class PocketBaseConnector {
         .collection('users')
         .create(body: body)
         .catchError((e) {
-          print(e);
+          debugPrint(e);
           showMessage('Une erreur est arrivé $e', context);
           return e;
         })
@@ -350,11 +314,20 @@ class PocketBaseConnector {
   Future<User?> findUser(String email) async {
     assert(email.isNotEmpty);
     debugPrint('Finding user with email $email');
-    var value2 = await _pocketBase.collection('users').getFirstListItem('email="$email"');
     debugPrint('User found with email $email');
     return _pocketBase.collection('users').getFirstListItem('email="$email"').then(
-          (value) => User.fromJSON(value.id, value.collectionId, value.data, value.created, value.updated, value.data['birthday']),
+      (value) {
+        debugPrint('User found with email $email and data retrieved and parsed.');
+        return User.fromJSON(
+          value.id,
+          value.collectionId,
+          value.data,
+          value.data["created"],
+          value.data["updated"],
+          value.data["birthday"],
         );
+      },
+    );
   }
 
   // Update the avatar of the user
@@ -451,7 +424,7 @@ class PocketBaseConnector {
     });
 
     subject.onCancel = () {
-      print('on cancel');
+      debugPrint('on cancel');
       subscription.cancel();
     };
     subject.onListen = () async => subject.add(
@@ -472,7 +445,7 @@ class PocketBaseConnector {
       // Get the number of manga owned by the user
       count = result.length;
     } catch (e) {
-      print(e);
+      debugPrint(e.toString());
     }
 
     return count; // Return the number of manga owned by the user
@@ -489,7 +462,7 @@ class PocketBaseConnector {
       // Get the number of manga fav by the user
       count = result.length;
     } catch (e) {
-      print(e);
+      debugPrint(e.toString());
     }
 
     return count; // Return the number of manga fav by the user
@@ -636,5 +609,5 @@ class PocketBaseConnector {
 
   Future<String> get buildVersion async => await PackageInfo.fromPlatform().then((value) => value.buildNumber);
 
-  String get serverUrl => _pocketBase.baseUrl;
+  String get serverUrl => _pocketBase.baseURL;
 }
