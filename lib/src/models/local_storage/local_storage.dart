@@ -50,8 +50,7 @@ class LocalStorage {
     final jsonString = prefs.getString(_ownedSubSerieKey); // Get JSON String
 
     if (jsonString == null) return null; // Return null if no data
-
-    return (json.decode(jsonString) as List).map((e) => SubSerieForCollection.fromJson(e)).toSet();
+    return (json.decode(jsonString)).map((e) => SubSerieForCollection.fromJson(e)).toSet();
   }
 
   Future<void> saveOwnedSubSerie(Set<SubSerieForCollection> subSerie) async {

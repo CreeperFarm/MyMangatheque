@@ -52,7 +52,7 @@ class _MyMangaShowTileState extends State<MyMangaShowTile> {
         right: 10.0,
         bottom: 10.0,
       ),
-      child: InkWell(
+      child: GestureDetector(
         onTap: () {
           pushOrGo(
             context,

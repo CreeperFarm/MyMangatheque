@@ -8,7 +8,6 @@ import 'package:mymangatheque/src/models/local_storage/local_storage.dart';
 import 'package:mymangatheque/src/models/local_storage/service_locator.dart';
 import 'package:mymangatheque/src/models/manga/sub_serie_for_collection.dart';
 import 'package:mymangatheque/src/models/manga/volume.dart';
-import 'package:once/once.dart';
 
 class MangaOwnedNotifier extends Notifier<Set<SubSerieForCollection>> {
   @override
@@ -17,114 +16,113 @@ class MangaOwnedNotifier extends Notifier<Set<SubSerieForCollection>> {
   // Init the data
   Future<bool> initData() async {
     final storage = getIt<LocalStorage>();
-    Set<SubSerieForCollection>? temp = await storage.getOwnedSubSerie(); // Get the data from the local storage
-    print(temp);
+    // Set<SubSerieForCollection>? temp = await storage.getOwnedSubSerie(); // Get the data from the local storage
+    // debugPrint(temp.toString());
 
-    if (temp != null) {
-      state = temp;
+    if (false /*temp != null || temp != {}*/) {
+      //state = temp!; A réactiver
       final List<ConnectivityResult> connectivityResult = await (Connectivity().checkConnectivity());
-      if (kIsWeb || connectivityResult.contains(ConnectivityResult.ethernet)) {
+      // TODO : Make it work and save the data in the local storage
+      if (kIsWeb ||
+          connectivityResult.contains(ConnectivityResult.wifi) ||
+          connectivityResult.contains(ConnectivityResult.mobile) ||
+          connectivityResult.contains(ConnectivityResult.ethernet) ||
+          connectivityResult.contains(ConnectivityResult.vpn)) {
         if (PocketBaseConnector().isLoggedIn()) {
-          Once.runCustom(
-            'manga_owned_notifier_init_data',
-            duration: const Duration(milliseconds: 5),
-            callback: () async {
-              try {
-                final result = await PocketBaseConnector().getCollectionDataWithFilterExpand(
-                  'owned',
-                  "user='${PocketBaseConnector().getConnectedUser()!.id}'",
-                  'volume.sub_series.editor',
-                );
-                final data = json.decode(result.toString());
-                debugPrint(data);
-                state.clear();
-                for (var i = 0; i < data.length; i++) {
-                  String idLocal = data[i]['expand']['volume']['expand']['sub_series']['id'];
-                  String titleLocal = data[i]['expand']['volume']['expand']['sub_series']['title'];
-                  debugPrint(state.toString());
-                  if (state.any((subSeries) => subSeries.title == titleLocal && subSeries.id == idLocal)) {
-                    List<String> authorsLocal = [];
-                    if (data[i]['expand']['volume']['authors'] != null) {
-                      for (var author in data[i]['expand']['volume']['authors']) {
-                        authorsLocal.add(author);
-                      }
-                    }
-                    state.firstWhere((subSeries) => subSeries.title == titleLocal && subSeries.id == idLocal).volumes.add(
-                          Volume(
-                            id: data[i]['expand']['volume']['id'],
-                            title: data[i]['expand']['volume']['title'],
-                            tomeNumber: data[i]['expand']['volume']['tome_number'],
-                            price: data[i]['expand']['volume']['price'],
-                            image:
-                                'https://api.mymangatheque.com/api/files/tnof8u6oqfepdq6/${data[i]['expand']['volume']['id']}/${data[i]['expand']['volume']['image']}',
-                            over18: data[i]['expand']['volume']['over18'],
-                            resume: data[i]['expand']['volume']['resume'],
-                            bookLink: data[i]['expand']['volume']['book_link'],
-                            release: DateTime.parse(data[i]['expand']['volume']['release']),
-                            ean: data[i]['expand']['volume']['ean'],
-                            language: data[i]['expand']['volume']['language'],
-                            subSeries: data[i]['expand']['volume']['sub_series'],
-                            readed: data[i]['readed'],
-                            authors: authorsLocal,
-                            series: data[i]['expand']['volume']['series'],
-                            contains: data[i]['expand']['volume']['contains'],
-                            info: data[i]['expand']['volume']['info'],
-                            support: data[i]['expand']['volume']['support'],
-                            japGenre: data[i]['expand']['volume']['genre_jap'],
-                            lastTimeChecked: DateTime.now(),
-                          ),
-                        );
-                    state.firstWhere((subSeries) => subSeries.title == titleLocal && subSeries.id == idLocal).numberOwnedVolumes += 1;
-                  } else {
-                    List<String> authorsLocal = [];
-                    if (data[i]['expand']['volume']['authors'] != null) {
-                      for (var author in data[i]['expand']['volume']['authors']) {
-                        authorsLocal.add(author);
-                      }
-                    }
-                    state.add(
-                      SubSerieForCollection(
-                        id: data[i]['expand']['volume']['expand']['sub_series']['id'],
-                        title: data[i]['expand']['volume']['expand']['sub_series']['title'],
-                        numberOfVolumes: data[i]['expand']['volume']['expand']['sub_series']['volumes'].length,
-                        numberOwnedVolumes: 1,
-                        volumes: [
-                          Volume(
-                            id: data[i]['expand']['volume']['id'],
-                            title: data[i]['expand']['volume']['title'],
-                            tomeNumber: data[i]['expand']['volume']['tome_number'],
-                            price: data[i]['expand']['volume']['price'],
-                            image:
-                                'https://api.mymangatheque.com/api/files/tnof8u6oqfepdq6/${data[i]['expand']['volume']['id']}/${data[i]['expand']['volume']['image']}',
-                            over18: data[i]['expand']['volume']['over18'],
-                            resume: data[i]['expand']['volume']['resume'],
-                            bookLink: data[i]['expand']['volume']['book_link'],
-                            release: DateTime.parse(data[i]['expand']['volume']['release']),
-                            ean: data[i]['expand']['volume']['ean'],
-                            language: data[i]['expand']['volume']['language'],
-                            subSeries: data[i]['expand']['volume']['sub_series'],
-                            readed: data[i]['readed'],
-                            authors: authorsLocal,
-                            series: data[i]['expand']['volume']['series'],
-                            // TODO: Convert it to a Volume List
-                            contains: data[i]['expand']['volume']['contains'],
-                            info: data[i]['expand']['volume']['info'],
-                            support: data[i]['expand']['volume']['support'],
-                            japGenre: data[i]['expand']['volume']['genre_jap'],
-                            lastTimeChecked: DateTime.now(),
-                          )
-                        ],
-                      ),
-                    );
+          try {
+            final result = await PocketBaseConnector().getCollectionDataWithFilterExpand(
+              'owned',
+              "user='${PocketBaseConnector().getConnectedUser()!.id}'",
+              'volume.sub_series.editor',
+            );
+            final data = json.decode(result.toString());
+            debugPrint(data);
+            state.clear();
+            for (var i = 0; i < data.length; i++) {
+              String idLocal = data[i]['expand']['volume']['expand']['sub_series']['id'];
+              String titleLocal = data[i]['expand']['volume']['expand']['sub_series']['title'];
+              debugPrint(state.toString());
+              if (state.any((subSeries) => subSeries.title == titleLocal && subSeries.id == idLocal)) {
+                List<String> authorsLocal = [];
+                if (data[i]['expand']['volume']['authors'] != null) {
+                  for (var author in data[i]['expand']['volume']['authors']) {
+                    authorsLocal.add(author);
                   }
                 }
-              } catch (e) {
-                // Print the error to the debug console
-                debugPrint(e.toString());
+                state.firstWhere((subSeries) => subSeries.title == titleLocal && subSeries.id == idLocal).volumes.add(
+                      Volume(
+                        id: data[i]['expand']['volume']['id'],
+                        title: data[i]['expand']['volume']['title'],
+                        tomeNumber: data[i]['expand']['volume']['tome_number'],
+                        price: data[i]['expand']['volume']['price'],
+                        image:
+                            'https://api.mymangatheque.com/api/files/tnof8u6oqfepdq6/${data[i]['expand']['volume']['id']}/${data[i]['expand']['volume']['image']}',
+                        over18: data[i]['expand']['volume']['over18'],
+                        resume: data[i]['expand']['volume']['resume'],
+                        bookLink: data[i]['expand']['volume']['book_link'],
+                        release: DateTime.parse(data[i]['expand']['volume']['release']),
+                        ean: data[i]['expand']['volume']['ean'],
+                        language: data[i]['expand']['volume']['language'],
+                        subSeries: data[i]['expand']['volume']['sub_series'],
+                        readed: data[i]['readed'],
+                        authors: authorsLocal,
+                        series: data[i]['expand']['volume']['series'],
+                        contains: data[i]['expand']['volume']['contains'],
+                        info: data[i]['expand']['volume']['info'],
+                        support: data[i]['expand']['volume']['support'],
+                        japGenre: data[i]['expand']['volume']['genre_jap'],
+                        lastTimeChecked: DateTime.now(),
+                      ),
+                    );
+                state.firstWhere((subSeries) => subSeries.title == titleLocal && subSeries.id == idLocal).numberOwnedVolumes += 1;
+              } else {
+                List<String> authorsLocal = [];
+                if (data[i]['expand']['volume']['authors'] != null) {
+                  for (var author in data[i]['expand']['volume']['authors']) {
+                    authorsLocal.add(author);
+                  }
+                }
+                state.add(
+                  SubSerieForCollection(
+                    id: data[i]['expand']['volume']['expand']['sub_series']['id'],
+                    title: data[i]['expand']['volume']['expand']['sub_series']['title'],
+                    numberOfVolumes: data[i]['expand']['volume']['expand']['sub_series']['volumes'].length,
+                    numberOwnedVolumes: 1,
+                    volumes: [
+                      Volume(
+                        id: data[i]['expand']['volume']['id'],
+                        title: data[i]['expand']['volume']['title'],
+                        tomeNumber: data[i]['expand']['volume']['tome_number'],
+                        price: data[i]['expand']['volume']['price'],
+                        image:
+                            'https://api.mymangatheque.com/api/files/tnof8u6oqfepdq6/${data[i]['expand']['volume']['id']}/${data[i]['expand']['volume']['image']}',
+                        over18: data[i]['expand']['volume']['over18'],
+                        resume: data[i]['expand']['volume']['resume'],
+                        bookLink: data[i]['expand']['volume']['book_link'],
+                        release: DateTime.parse(data[i]['expand']['volume']['release']),
+                        ean: data[i]['expand']['volume']['ean'],
+                        language: data[i]['expand']['volume']['language'],
+                        subSeries: data[i]['expand']['volume']['sub_series'],
+                        readed: data[i]['readed'],
+                        authors: authorsLocal,
+                        series: data[i]['expand']['volume']['series'],
+                        // TODO: Convert it to a Volume List
+                        contains: data[i]['expand']['volume']['contains'],
+                        info: data[i]['expand']['volume']['info'],
+                        support: data[i]['expand']['volume']['support'],
+                        japGenre: data[i]['expand']['volume']['genre_jap'],
+                        lastTimeChecked: DateTime.now(),
+                      )
+                    ],
+                  ),
+                );
               }
-              await storage.saveOwnedSubSerie(state);
-            },
-          );
+            }
+          } catch (e) {
+            // Print the error to the debug console
+            debugPrint(e.toString());
+          }
+          await storage.saveOwnedSubSerie(state);
         } else {
           // Do Nothing
         }
@@ -139,6 +137,7 @@ class MangaOwnedNotifier extends Notifier<Set<SubSerieForCollection>> {
           'volume.sub_series.editor',
         );
         final data = json.decode(result.toString());
+        print(data);
         state.clear();
         for (var i = 0; i < data.length; i++) {
           String idLocal = data[i]['expand']['volume']['expand']['sub_series']['id'];
@@ -221,6 +220,7 @@ class MangaOwnedNotifier extends Notifier<Set<SubSerieForCollection>> {
         debugPrint(e.toString());
       }
     }
+    await storage.saveOwnedSubSerie(state);
     return true; // Return true because the initialisation is ended.
   }
 

@@ -88,7 +88,7 @@ class _CollectionTabState extends ConsumerState<CollectionTab> {
                                   overflow: TextOverflow.ellipsis,
                                 ),
                                 Text(
-                                  "${subSerie.numberOwnedVolumes} tome(s) possédé sur ${subSerie.numberOfVolumes}",
+                                  "${subSerie.numberOwnedVolumes} tome${subSerie.numberOwnedVolumes == 1 ? "" : "s"} possédé sur ${subSerie.numberOfVolumes} tome${subSerie.numberOfVolumes == 1 ? "" : "s"}",
                                 ),
                                 Padding(
                                   padding: const EdgeInsets.only(top: 5),
