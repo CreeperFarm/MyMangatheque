@@ -62,7 +62,7 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
 
   @override
   void didChangeDependencies() {
-    getClientStream();
+    // getClientStream();
     super.didChangeDependencies();
   }
 
@@ -89,19 +89,19 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
   @override
   void initState() {
     super.initState();
-    ref.read(searchOrderProvider);
+    /*ref.read(searchOrderProvider);
     ref.read(mangaOwnedProvider);
     if (connector.getConnectedUser() == null || connector.isLoggedIn() == false) {
       pushOrGo(context, '/profile/signin');
     }
     getClientStream();
-    _searchController.addListener(_onSearchChanged);
+    _searchController.addListener(_onSearchChanged);*/
   }
 
   @override
   Widget build(BuildContext context) {
     if (ref.read(mangaOwnedProvider).isEmpty) {
-      initData();
+      /*initData();*/
     }
     final selectedOrder = ref.watch(searchOrderProvider);
 
