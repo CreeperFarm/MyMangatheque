@@ -186,6 +186,7 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
               ),
               isScrollable: true,
               splashBorderRadius: BorderRadius.circular(360),
+
               tabAlignment: TabAlignment.start,
               tabs: [
                 Tab(
