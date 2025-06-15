@@ -21,7 +21,7 @@ class SubSerieForCollection {
       title: json['title'],
       numberOfVolumes: json['numberOfVolumes'],
       numberOwnedVolumes: json['numberOwnedVolumes'],
-      volumes: List<Volume>.from(json['volumes'].map((x) => Volume.fromJson(x))),
+      volumes: json['volumes'] != null ? List<Volume>.from(json['volumes'].map((x) => Volume.fromJson(x))) : <Volume>[],
     );
   }
 
