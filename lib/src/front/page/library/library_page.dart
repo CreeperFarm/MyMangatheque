@@ -62,15 +62,17 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
 
   @override
   void didChangeDependencies() {
-    // getClientStream();
+    getClientStream();
     super.didChangeDependencies();
   }
 
   Future<void> initData() async {
     try {
       await ref.read(mangaOwnedProvider.notifier).initData().then((value) {
-        if (mounted) {
+        if (value) {
           setState(() {});
+        } else {
+          showMessage('Une erreur est survenue lors de l\'initialisation des données.', context);
         }
       });
     } catch (e) {
@@ -89,19 +91,19 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
   @override
   void initState() {
     super.initState();
-    /*ref.read(searchOrderProvider);
+    ref.read(searchOrderProvider);
     ref.read(mangaOwnedProvider);
     if (connector.getConnectedUser() == null || connector.isLoggedIn() == false) {
       pushOrGo(context, '/profile/signin');
     }
     getClientStream();
-    _searchController.addListener(_onSearchChanged);*/
+    _searchController.addListener(_onSearchChanged);
   }
 
   @override
   Widget build(BuildContext context) {
-    if (ref.read(mangaOwnedProvider).isEmpty) {
-      /*initData();*/
+    if (connector.getConnectedUser() == null || connector.isLoggedIn() == false) {
+      pushOrGo(context, '/profile/signin');
     }
     final selectedOrder = ref.watch(searchOrderProvider);
 
@@ -186,7 +188,6 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
               ),
               isScrollable: true,
               splashBorderRadius: BorderRadius.circular(360),
-
               tabAlignment: TabAlignment.start,
               tabs: [
                 Tab(

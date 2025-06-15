@@ -7,6 +7,7 @@ import 'package:mymangatheque/src/front/components/my_line.dart';
 import 'package:mymangatheque/src/front/components/my_scroll_column.dart';
 import 'package:mymangatheque/src/front/components/my_tome_number_show.dart';
 import 'package:mymangatheque/src/function/auto_push_or_go.dart';
+import 'package:mymangatheque/src/function/show_message_function.dart';
 
 class CollectionTab extends ConsumerStatefulWidget {
   const CollectionTab({super.key});
@@ -28,6 +29,7 @@ class _CollectionTabState extends ConsumerState<CollectionTab> {
 
   int getNumberVolume() {
     final subSeries = ref.watch(mangaOwnedProvider);
+    debugPrint(subSeries.toString());
     int number = 0;
     for (var subSerie in subSeries) {
       number += subSerie.numberOwnedVolumes;
@@ -47,12 +49,15 @@ class _CollectionTabState extends ConsumerState<CollectionTab> {
 
   @override
   Widget build(BuildContext context) {
-    Future.delayed(
-      Duration(seconds: 1),
-      () {
-        setState(() {});
-      },
-    );
+    if (ref.watch(mangaOwnedProvider).isEmpty) {
+      ref.read(mangaOwnedProvider.notifier).initData().then((value) {
+        if (value == false) {
+          debugPrint("Error while loading data");
+        } else {
+          setState(() {});
+        }
+      });
+    }
     final subSeries = ref.watch(mangaOwnedProvider);
 
     return Padding(
