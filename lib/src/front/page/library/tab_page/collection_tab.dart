@@ -7,7 +7,6 @@ import 'package:mymangatheque/src/front/components/my_line.dart';
 import 'package:mymangatheque/src/front/components/my_scroll_column.dart';
 import 'package:mymangatheque/src/front/components/my_tome_number_show.dart';
 import 'package:mymangatheque/src/function/auto_push_or_go.dart';
-import 'package:mymangatheque/src/function/show_message_function.dart';
 
 class CollectionTab extends ConsumerStatefulWidget {
   const CollectionTab({super.key});

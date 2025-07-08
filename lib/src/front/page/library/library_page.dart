@@ -7,11 +7,11 @@ import 'package:mymangatheque/src/back/provider/search_order_provider.dart';
 import 'package:mymangatheque/src/back/services/pocketbase.dart';
 import 'package:mymangatheque/src/const/own_icon.dart';
 import 'package:mymangatheque/src/front/components/my_tab_bar_item.dart';
+import 'package:mymangatheque/src/front/page/auth/signin_page.dart';
 import 'package:mymangatheque/src/front/page/library/tab_page/collection_tab.dart';
 import 'package:mymangatheque/src/front/page/library/tab_page/complete_lib_tab.dart';
 import 'package:mymangatheque/src/front/page/library/tab_page/envy_tab.dart';
 import 'package:mymangatheque/src/front/page/library/tab_page/read_pile_tab.dart';
-import 'package:mymangatheque/src/function/auto_push_or_go.dart';
 import 'package:mymangatheque/src/function/show_message_function.dart';
 
 class LibraryPage extends ConsumerStatefulWidget {
@@ -91,22 +91,20 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
   @override
   void initState() {
     super.initState();
+
     ref.read(searchOrderProvider);
     ref.read(mangaOwnedProvider);
-    if (connector.getConnectedUser() == null || connector.isLoggedIn() == false) {
-      pushOrGo(context, '/profile/signin');
-    }
+
     getClientStream();
     _searchController.addListener(_onSearchChanged);
   }
 
   @override
   Widget build(BuildContext context) {
-    if (connector.getConnectedUser() == null || connector.isLoggedIn() == false) {
-      pushOrGo(context, '/profile/signin');
+    if (!connector.isLoggedIn()) {
+      return SignInPage();
     }
     final selectedOrder = ref.watch(searchOrderProvider);
-
     searchResultsList();
 
     return DefaultTabController(

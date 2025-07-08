@@ -490,8 +490,8 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
                 verticalPadding: 5,
                 horizontalPadding: 0,
                 customValidator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return null;
+                  if (genreJapVolumeController.text == "Coffret") {
+                    return "Veuillez entrer le contenu du coffret !";
                   } else {
                     return null;
                   }

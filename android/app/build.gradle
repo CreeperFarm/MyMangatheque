@@ -30,7 +30,7 @@ if (keystorePropertiesFile.exists()) {
 
 android {
     namespace "com.mymangatheque"
-    compileSdkVersion 35
+    compileSdkVersion 36
     ndkVersion = "25.1.8937393"
 
     compileOptions {
