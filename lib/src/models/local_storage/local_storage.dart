@@ -14,6 +14,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// use it is because it requires a developer account for Apple.
 class LocalStorage {
   static const _tokenKey = 'token';
+  static const _cacheLanguageKey = 'cacheLanguage';
   static const _ownedSubSerieKey = 'ownedSubSerie';
   static const _cacheSeriesKey = 'cacheSeries';
   static const _cacheSubSeriesKey = 'cacheSubSeries';
@@ -42,6 +43,28 @@ class LocalStorage {
   }
 
   // * End of token ----------------------------------------------------------------------------------------------------
+
+  // * Language Code ---------------------------------------------------------------------------------------------------
+  Future<String?> getLanguageCode() async {
+    final prefs = await SharedPreferences.getInstance();
+    final language = prefs.getString(_cacheLanguageKey);
+    debugPrint("Retrieving user's language from local storage ($language)");
+    return language;
+  }
+
+  Future<void> setLanguageCode(String language) async {
+    debugPrint("Saving user's language from local storage ($language)");
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_cacheLanguageKey, language);
+  }
+
+  Future<void> deleteLanguageCode() async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.remove('language');
+    debugPrint("The language from local storage as been deleted.");
+  }
+
+  // * End of language ------------------------------------------------------------------------------------------------
 
   // * Owned sub series ------------------------------------------------------------------------------------------------
   Future<Set<SubSerieForCollection>?> getOwnedSubSerie() async {

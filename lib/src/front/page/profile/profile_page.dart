@@ -1,7 +1,13 @@
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
+import 'package:mymangatheque/l10n/app_localizations.dart';
+import 'package:mymangatheque/src/back/language/language.dart';
+import 'package:mymangatheque/src/back/language/language_repository.dart';
 import 'package:mymangatheque/src/back/services/pocketbase.dart';
 import 'package:mymangatheque/src/const/own_icon.dart';
 import 'package:mymangatheque/src/front/components/my_icon_text_button.dart';
@@ -12,16 +18,18 @@ import 'package:mymangatheque/src/function/auto_push_or_go.dart';
 import 'package:mymangatheque/src/models/get_user_information.dart';
 import 'package:mymangatheque/src/models/local_storage/local_storage.dart';
 
-class ProfilePage extends StatefulWidget {
+class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});
 
   @override
-  State<ProfilePage> createState() => _ProfilePageState();
+  ConsumerState<ProfilePage> createState() => _ProfilePageState();
 }
 
-class _ProfilePageState extends State<ProfilePage> {
+class _ProfilePageState extends ConsumerState<ProfilePage> {
   dynamic savedThemeMode;
   dynamic theme;
+
+  //String localLanguage = PlatformDispatcher.instance.locale.languageCode;
   int numberMangaOwned = 0;
   int numberSerieFav = 0;
 
@@ -42,26 +50,19 @@ class _ProfilePageState extends State<ProfilePage> {
       imageQuality: 75,
     );
 
-    await connector.updateAvatar('users', connector.getConnectedUser()!.id, image!.name, image.path, context).then((value) async {
+    await connector
+        .updateAvatar(
+      'users',
+      connector.getConnectedUser()!.id,
+      image!.name,
+      image.path,
+      context,
+    )
+        .then((value) async {
       await connector.updateUserData(connector.getConnectedUser()!.email);
       setState(() {});
     });
   }
-
-  Map month = {
-    '1': 'Janvier',
-    '2': 'Février',
-    '3': 'Mars',
-    '4': 'Avril',
-    '5': 'Mai',
-    '6': 'Juin',
-    '7': 'Juillet',
-    '8': 'Août',
-    '9': 'Septembre',
-    '10': 'Octobre',
-    '11': 'Novembre',
-    '12': 'Décembre',
-  };
 
   // Get the number of owned manga
   getNumberOfMangaOwned() async {
@@ -103,20 +104,42 @@ class _ProfilePageState extends State<ProfilePage> {
 
     if (user == null) {
       pushOrGo(context, '/profile/signin');
+      return const SizedBox.shrink(); // Return empty widget while navigating
     }
 
-    setState(() {
-      theme = AdaptiveTheme.of(context).mode.isSystem
-          ? 'system'
-          : AdaptiveTheme.of(context).mode.isDark
-              ? 'dark'
-              : 'light';
-    });
+    // Get localization - return early if not available
+    var localizations = AppLocalizations.of(context);
+    if (localizations == null) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
+    if (theme !=
+        (AdaptiveTheme.of(context).mode.isSystem
+            ? 'system'
+            : AdaptiveTheme.of(context).mode.isDark
+                ? 'dark'
+                : 'light')) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        setState(() {
+          theme = AdaptiveTheme.of(context).mode.isSystem
+              ? 'system'
+              : AdaptiveTheme.of(context).mode.isDark
+                  ? 'dark'
+                  : 'light';
+        });
+      });
+    }
+
+    final language = ref.watch(languageProvider);
 
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        title: const Text('Page de profile et de réglage'),
+        title: Text(localizations.profileSettings),
       ),
       body: Center(
         child: MyScrollColumn(
@@ -126,53 +149,62 @@ class _ProfilePageState extends State<ProfilePage> {
               onTap: () {
                 pickUploadImage();
               },
-              child: GetUserProfilePicture(file: user!.avatar!),
+              child: GetUserProfilePicture(file: user.avatar!),
             ),
             const Padding(padding: EdgeInsets.only(bottom: 25)),
-
             MyLine(width: MediaQuery.of(context).size.width, vertical: 10),
             Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                child: SingleChildScrollView(child: GetUserInfo(beforeText: "L'email est : ", afterText: user.email))),
+              padding: const EdgeInsets.symmetric(horizontal: 10.0),
+              child: SingleChildScrollView(
+                child: Text(localizations.emailIs(user.email)),
+              ),
+            ),
 
             MyLine(width: MediaQuery.of(context).size.width, vertical: 10),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10.0),
-              child: SingleChildScrollView(child: GetUserInfo(beforeText: 'Votre pseudo est : ', afterText: user.username)),
+              child: SingleChildScrollView(
+                child: Text(
+                  localizations.usernameIs(user.username),
+                ),
+              ),
             ),
             MyLine(width: MediaQuery.of(context).size.width, vertical: 10),
             Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                child: GestureDetector(
-                  onTap: () {},
-                  child: SingleChildScrollView(
-                      child: GetUserInfo(
-                          beforeText: 'Compte créer le : ',
-                          afterText: '${user.created.day} ${month[user.created.month.toString()]} ${user.created.year}')),
-                )),
-            MyLine(width: MediaQuery.of(context).size.width, vertical: 10),
-            Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                child: SingleChildScrollView(
-                    child: GetUserInfo(
-                        beforeText: 'Date de naissance : ',
-                        afterText: '${user.birthday.day} ${month[user.birthday.month.toString()]} ${user.birthday.year}'))),
-            MyLine(width: MediaQuery.of(context).size.width, vertical: 10),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 10.0),
+              padding: const EdgeInsets.symmetric(horizontal: 10.0),
               child: SingleChildScrollView(
-                child: GetUserInfo(
-                    beforeText: numberMangaOwned < 1 ? 'Nombre de tome de manga possédé : ' : 'Nombre de tomes de manga possédé : ',
-                    afterText: numberMangaOwned < 1 ? '$numberMangaOwned tome' : '$numberMangaOwned tomes'),
+                child: Text(
+                  localizations.accountCreatedOn(
+                    DateFormat.yMMMMd(Localizations.localeOf(context).languageCode).format(selectedBDayDate),
+                  ),
+                ),
+              ),
+            ),
+            MyLine(width: MediaQuery.of(context).size.width, vertical: 10),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10.0),
+              child: SingleChildScrollView(
+                child: Text(
+                  localizations.birthdayDateIs(
+                    DateFormat.yMMMMd(Localizations.localeOf(context).languageCode).format(selectedBDayDate),
+                  ),
+                ),
               ),
             ),
             MyLine(width: MediaQuery.of(context).size.width, vertical: 10),
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 10.0),
               child: SingleChildScrollView(
-                child: GetUserInfo(
-                    beforeText: numberSerieFav < 1 ? 'Nombre de série en favoris : ' : 'Nombre de séries en favoris : ',
-                    afterText: numberSerieFav < 1 ? '$numberSerieFav série' : '$numberSerieFav séries'),
+                child: Text(localizations.volumeOwnedNumber(numberMangaOwned)),
+              ),
+            ),
+            MyLine(width: MediaQuery.of(context).size.width, vertical: 10),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 10.0),
+              child: SingleChildScrollView(
+                child: Text(
+                  localizations.favoriteSeriesNumber(numberSerieFav),
+                ),
               ),
             ),
             MyLine(width: MediaQuery.of(context).size.width, vertical: 10), // Drop Down Menu du DarkMode
@@ -192,8 +224,12 @@ class _ProfilePageState extends State<ProfilePage> {
                             'assets/images/theme/light-icon.png',
                             width: 20,
                           ),
-                          const Padding(padding: EdgeInsets.only(right: 10)),
-                          const Text('Thème clair')
+                          const Padding(
+                            padding: EdgeInsets.only(right: 10),
+                          ),
+                          Text(
+                            localizations.lightMode,
+                          ),
                         ],
                       ),
                     ),
@@ -205,8 +241,12 @@ class _ProfilePageState extends State<ProfilePage> {
                             'assets/images/theme/dark-icon.png',
                             width: 20,
                           ),
-                          const Padding(padding: EdgeInsets.only(right: 10)),
-                          const Text('Thème sombre')
+                          const Padding(
+                            padding: EdgeInsets.only(right: 10),
+                          ),
+                          Text(
+                            localizations.darkMode,
+                          ),
                         ],
                       ),
                     ),
@@ -218,8 +258,12 @@ class _ProfilePageState extends State<ProfilePage> {
                             'assets/images/theme/auto-icon.png',
                             width: 20,
                           ),
-                          const Padding(padding: EdgeInsets.only(right: 10)),
-                          const Text('Thème du système')
+                          const Padding(
+                            padding: EdgeInsets.only(right: 10),
+                          ),
+                          Text(
+                            localizations.systemMode,
+                          ),
                         ],
                       ),
                     ),
@@ -246,6 +290,63 @@ class _ProfilePageState extends State<ProfilePage> {
                       });
                     }
                   }),
+            ),
+            MyLine(
+              width: MediaQuery.of(context).size.width,
+              vertical: 10,
+            ),
+            Container(
+              padding: const EdgeInsets.all(10),
+              margin: const EdgeInsets.symmetric(horizontal: 5),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: DropdownButtonFormField(
+                items: [
+                  DropdownMenuItem(
+                    value: Language.english,
+                    child: Row(
+                      children: [
+                        Image.asset(
+                          'assets/images/us.png',
+                          width: 20,
+                        ),
+                        const Padding(
+                          padding: EdgeInsets.only(right: 10),
+                        ),
+                        Text(
+                          localizations.english,
+                        ),
+                      ],
+                    ),
+                  ),
+                  DropdownMenuItem(
+                    value: Language.french,
+                    child: Row(
+                      children: [
+                        SvgPicture.asset(
+                          'assets/images/fr.svg',
+                          width: 20,
+                        ),
+                        const Padding(
+                          padding: EdgeInsets.only(right: 10),
+                        ),
+                        Text(
+                          localizations.french,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                ),
+                value: language,
+                onChanged: (value) {
+                  ref.read(languageRepositoryProvider).setLanguage(value!);
+                  setState(() {});
+                },
+              ),
             ),
             MyLine(
               width: MediaQuery.of(context).size.width,

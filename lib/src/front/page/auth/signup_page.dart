@@ -248,11 +248,11 @@ class _SignUpPageState extends State<SignUpPage> {
                           ),
                           items: const [
                             DropdownMenuItem(
-                              value: "men",
+                              value: "male",
                               child: Text("Homme"),
                             ),
                             DropdownMenuItem(
-                              value: "women",
+                              value: "female",
                               child: Text("Femme"),
                             ),
                             DropdownMenuItem(

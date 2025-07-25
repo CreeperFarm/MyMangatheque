@@ -1,0 +1,101 @@
+{
+  "@@locale": "en",
+  "helloWorld": "Hello World!",
+  "home": "Home",
+  "collection": "Collection",
+  "search": "Search",
+  "profile": "Profile",
+  "pronoun": "{gender, select, male{he} female{she} other{they}}",
+  "@pronoun": {
+    "description": "A gendered message",
+    "placeholders": {
+      "gender": {
+        "type": "String"
+      }
+    }
+  },
+  "authFailed": "Email or password incorrect.",
+  "userLoginFailed": "An error occurred, you have not been connected to your account.",
+  "userLoginSuccess": "You have successfully logged in.",
+  "errorOccurred": "An error occurred, please try again later.",
+  "pleaseWait": "Please wait...",
+  "emailResetSent": "A password reset email has been sent to your email address.",
+  "invalidEmail": "The email address is invalid.",
+  "modifyPasswordSuccess": "Password successfully changed.",
+  "logIn": "Log In",
+  "legalNotice": "Legal Notice",
+  "january": "January",
+  "february": "February",
+  "march": "March",
+  "april": "April",
+  "may": "May",
+  "june": "June",
+  "july": "July",
+  "august": "August",
+  "september": "September",
+  "october": "October",
+  "november": "November",
+  "december": "December",
+  "profileSettings": "Profile & Settings Page",
+  "emailIs": "Your email is {email}",
+  "@emailIs": {
+    "description": "A message that includes the user's email",
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "usernameIs": "Your username is {username}",
+  "@usernameIs": {
+    "description": "A message that includes the user's username",
+    "placeholders": {
+      "username": {
+        "type": "String"
+      }
+    }
+  },
+  "accountCreatedOn": "Account created on {date}",
+  "@accountCreatedOn": {
+    "description": "A message that includes the account creation date",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "birthdayDateIs": "Your birthday is on {date}",
+  "@birthdayDateIs": {
+    "description": "A message that includes the user's birthday date",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "volumeOwnedNumber": "{count, plural, =0 {You own 0 volume} =1{You own 1 volume} other {You own {count} volumes}}",
+  "@volumeOwnedNumber": {
+    "description": "A message that indicates the number of volumes owned by the user",
+    "placeholders": {
+      "count": {
+        "type": "num",
+        "format": "compact"
+      }
+    }
+  },
+  "favoriteSeriesNumber": "{count, plural, =0 {You have 0 favorite series} =1{You have 1 favorite series} other {You have {count} favorite series}}",
+  "@favoriteSeriesNumber": {
+    "description": "A message that indicates the number of favorite series of the user",
+    "placeholders": {
+      "count": {
+        "type": "num",
+        "format": "compact"
+      }
+    }
+  },
+  "lightMode": "Light Mode",
+  "darkMode": "Dark Mode",
+  "systemMode": "System Mode",
+  "english": "English",
+  "french": "French"
+}

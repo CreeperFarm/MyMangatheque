@@ -1,0 +1,101 @@
+{
+  "@@locale": "fr",
+  "helloWorld": "Bonjour le monde !",
+  "home": "Accueil",
+  "collection": "Collection",
+  "search": "Recherche",
+  "profile": "Profil",
+  "pronoun": "{gender, select, male{il} female{elle} other{iel}}",
+  "@pronoun": {
+    "description": "Un message genré",
+    "placeholders": {
+      "gender": {
+        "type": "String"
+      }
+    }
+  },
+  "authFailed": "Email ou mot de passe incorrect.",
+  "userLoginFailed": "Une erreur est survenue, vous n\\'avez pas été connecter à votre compte.",
+  "userLoginSuccess": "Vous êtes connecté avec succès.",
+  "errorOccurred": "Une erreur est survenue, veuillez réessayer plus tard.",
+  "pleaseWait": "Veuillez patienter...",
+  "emailResetSent": "Un email de réinitialisation de mot de passe a été envoyé à votre adresse email.",
+  "invalidEmail": "L'adresse email est invalide.",
+  "modifyPasswordSuccess": "Mot de passe modifié avec succès.",
+  "logIn": "Se connecter",
+  "legalNotice": "Mentions légales",
+  "january": "Janvier",
+  "february": "Février",
+  "march": "Mars",
+  "april": "Avril",
+  "may": "Mai",
+  "june": "Juin",
+  "july": "Juillet",
+  "august": "Août",
+  "september": "Septembre",
+  "october": "Octobre",
+  "november": "Novembre",
+  "december": "Décembre",
+  "profileSettings": "Page de profil et réglages",
+  "emailIs": "Votre email est {email}",
+  "@emailIs": {
+    "description": "Un message qui inclut l'email de l'utilisateur",
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "usernameIs": "Votre pseudo est {username}",
+  "@usernameIs": {
+    "description": "Un message qui inclut le pseudo de l'utilisateur",
+    "placeholders": {
+      "username": {
+        "type": "String"
+      }
+    }
+  },
+  "accountCreatedOn": "Compte créé le {date}",
+  "@accountCreatedOn": {
+    "description": "Un message qui inclut la date de création du compte",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "birthdayDateIs": "Votre anniversaire est le {date}",
+  "@birthdayDateIs": {
+    "description": "Un message qui inclut la date d'anniversaire de l'utilisateur",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "volumeOwnedNumber": "{count, plural, =0 {Vous possédez 0 volume} =1{Vous possédez un volume} other {Vous possédez {count} volumes}}",
+  "@volumeOwnedNumber": {
+    "description": "Un message qui indique le nombre de volumes possédés par l'utilisateur",
+    "placeholders": {
+      "count": {
+        "type": "num",
+        "format": "compact"
+      }
+    }
+  },
+  "favoriteSeriesNumber": "{count, plural, =0 {Vous avez 0 série} =1{Vous avez une série} other {Vous avez {count} séries}} en favoris",
+  "@favoriteSeriesNumber": {
+    "description": "Un message qui indique le nombre de séries favorites de l'utilisateur",
+    "placeholders": {
+      "count": {
+        "type": "num",
+        "format": "compact"
+      }
+    }
+  },
+  "lightMode": "Thème clair",
+  "darkMode": "Thème sombre",
+  "systemMode": "Thème du système",
+  "english": "Anglais",
+  "french": "Français"
+}

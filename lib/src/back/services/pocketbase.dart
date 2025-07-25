@@ -2,12 +2,14 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:ui';
 
 // Importing other libraries
 import 'package:dart_date/dart_date.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_custom_tabs/flutter_custom_tabs.dart';
 import 'package:http/http.dart';
+import 'package:mymangatheque/generated/l10n.dart';
 import 'package:mymangatheque/src/back/services/utils.dart';
 import 'package:mymangatheque/src/function/show_message_function.dart';
 import 'package:mymangatheque/src/models/local_storage/local_storage.dart';
@@ -81,7 +83,7 @@ class PocketBaseConnector {
       : _pocketBase = PocketBase(
           'https://api.mymangatheque.com',
           httpClientFactory: httpClientFactory.getHttpClient(),
-          lang: 'fr-FR',
+          lang: PlatformDispatcher.instance.locale.languageCode == 'fr' ? 'fr-FR' : 'en-US',
         );
 
   Future<void> refresh() async {
@@ -176,16 +178,16 @@ class PocketBaseConnector {
           _pocketBase.realtime.unsubscribe('users');
         } else {
           debugPrint('User isn\'t connected');
-          showMessage('Une erreur est survenue, vous n\'avez pas été connecter à votre compte.', context);
+          showMessage(AppLocalizations.of(context).userLoginFailed, context);
         }
       } catch (e) {
-        showMessage("Une erreur est survenue, vous n'avez pas été connecter à votre compte.", context);
+        showMessage(AppLocalizations.of(context).errorOccurred, context);
         debugPrint(e.toString());
       }
       await closeCustomTabs();
       alreadyClick = 0;
     } else {
-      showMessage("Veuillez patientez", context);
+      showMessage(AppLocalizations.of(context).pleaseWait, context);
     }
   }
 
@@ -196,11 +198,11 @@ class PocketBaseConnector {
 
       _connectedUser.add(await findUser(email.toLowerCase()));
 
-      showMessage("Vous êtes connecté(e).", context);
+      showMessage(AppLocalizations.of(context).userLoginSuccess, context);
 
       return _connectedUser.value;
     } catch (err, context) {
-      showMessage("Une erreur est survenue.", context);
+      showMessage(AppLocalizations.of(context as BuildContext).errorOccurred, context);
       debugPrint(err.toString());
       return null;
     }
@@ -229,13 +231,12 @@ class PocketBaseConnector {
     try {
       await _pocketBase.collection('users').requestPasswordReset(email);
       Navigator.pop(context);
-      return showMessage(
-          'Un lien vous as été envoyé par mail pour la réinitialisation de votre mots de passe, veuillez verifier vos spams.', context);
+      return showMessage(AppLocalizations.of(context).emailResetSent, context);
     } catch (e) {
       if (e.toString().contains('Must be a valid email address')) {
-        return showMessage('Veuillez entrer une adresse email valide.', context);
+        return showMessage(AppLocalizations.of(context).invalidEmail, context);
       } else {
-        return showMessage('Une erreur est arrivé.', context);
+        return showMessage(AppLocalizations.of(context).errorOccurred, context);
       }
     }
   }
@@ -246,13 +247,13 @@ class PocketBaseConnector {
       _pocketBase.authStore.clear();
       loginWithEmail(email, oldPassword, context);
       await _pocketBase.collection('users').confirmPasswordReset(_pocketBase.authStore.token, newPassword, newPassword);
-      return showMessage('Votre mots de passe a bien été modifié.', context);
+      return showMessage(AppLocalizations.of(context).modifyPasswordSuccess, context);
     } catch (e) {
       debugPrint(e.toString());
       if (e.toString().contains('Must be a valid email address')) {
-        return showMessage('Veuillez entrer une adresse email valide.', context);
+        return showMessage(AppLocalizations.of(context).invalidEmail, context);
       } else {
-        return showMessage('Une erreur est arrivé.', context);
+        return showMessage(AppLocalizations.of(context).errorOccurred, context);
       }
     }
   }
@@ -292,7 +293,7 @@ class PocketBaseConnector {
         .create(body: body)
         .catchError((e) {
           debugPrint(e);
-          showMessage('Une erreur est arrivé $e', context);
+          showMessage(AppLocalizations.of(context).errorOccurred, context);
           return e;
         })
         .then((value) => value.id)
@@ -340,7 +341,7 @@ class PocketBaseConnector {
       )
     ]).catchError((e) {
       debugPrint(e.toString());
-      showMessage('Une erreur est arrivé', context);
+      showMessage(AppLocalizations.of(context).errorOccurred, context);
       return e;
     });
   }

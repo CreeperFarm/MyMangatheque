@@ -1,11 +1,13 @@
 import 'package:flutter/cupertino.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mymangatheque/src/back/app_router/main_wrapper.dart';
-import 'package:mymangatheque/src/back/app_router/redirect_to_page.dart';
+// REMOVE THIS IMPORT: import 'package:mymangatheque/src/back/app_router/redirect_to_page.dart';
+import 'package:mymangatheque/src/back/services/pocketbase.dart'; // Import PocketBaseConnector
 import 'package:mymangatheque/src/front/dev_page/component_show_page.dart';
 import 'package:mymangatheque/src/front/page/admin_pages/admin_create_page.dart';
 import 'package:mymangatheque/src/front/page/admin_pages/admin_home.dart';
 import 'package:mymangatheque/src/front/page/admin_pages/admin_login_page.dart';
+import 'package:mymangatheque/src/front/page/auth/delete_account_page.dart'; // Import DeleteAccountPage
 import 'package:mymangatheque/src/front/page/auth/forgot_password_page.dart';
 import 'package:mymangatheque/src/front/page/auth/modify_password_page.dart';
 import 'package:mymangatheque/src/front/page/auth/signin_page.dart';
@@ -19,6 +21,7 @@ import 'package:mymangatheque/src/front/page/info_page/sub_serie_page.dart';
 import 'package:mymangatheque/src/front/page/info_page/volume_page.dart';
 import 'package:mymangatheque/src/front/page/library/library_page.dart';
 import 'package:mymangatheque/src/front/page/mentions_legales_page.dart';
+import 'package:mymangatheque/src/front/page/profile/profile_page.dart'; // Import ProfilePage
 import 'package:mymangatheque/src/front/page/scan_ean_page.dart';
 import 'package:mymangatheque/src/front/page/search/search_page.dart';
 
@@ -34,11 +37,14 @@ class AppNavigation {
   static final _rootNavigatorProfile = GlobalKey<NavigatorState>(debugLabel: 'shellProfile');
 
   //GoRouter Config
-  static final GoRouter router = GoRouter(navigatorKey: _rootNavigatorKey, initialLocation: initR, routes: <RouteBase>[
-    // MainWrapper Route
-    StatefulShellRoute.indexedStack(
+  static final GoRouter router = GoRouter(
+    navigatorKey: _rootNavigatorKey,
+    initialLocation: initR,
+    routes: <RouteBase>[
+      // MainWrapper Route
+      StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
-          return MainWrapper(navigationShell: navigationShell);
+          return MainWrapper(navigationShell: navigationShell, key: state.pageKey);
         },
         branches: <StatefulShellBranch>[
           StatefulShellBranch(navigatorKey: _rootNavigatorHome, routes: [
@@ -117,11 +123,17 @@ class AppNavigation {
                       builder: (context, state) {
                         return MentionsLegalesPage(key: state.pageKey);
                       }),
+                  // Modified to directly handle the redirect logic for delete account
                   GoRoute(
                       path: 'delete_account',
                       name: 'Suppression du compte',
                       builder: (context, state) {
-                        return RedirectToDelete(key: state.pageKey);
+                        // Directly check login status and return the appropriate page
+                        if (PocketBaseConnector().isLoggedIn()) {
+                          return const DeleteAccountPage();
+                        } else {
+                          return const SignInPage();
+                        }
                       }),
                   GoRoute(
                       path: 'admin',
@@ -278,59 +290,18 @@ class AppNavigation {
                       })
                 ])
           ]),
-          // TODO : Add Planning Page
-          /*StatefulShellBranch(routes: [
-            GoRoute(
-                path: '/planning',
-                name: 'Planning',
-                builder: (context, state) {
-                  return PlanningPage(
-                    key: state.pageKey,
-                  );
-                },
-                routes: [
-                  GoRoute(
-                      path: 'editor/:id',
-                      name: 'Editor Planning',
-                      builder: (context, state) {
-                        return EditorPage(
-                          editorId: state.pathParameters['id']!,
-                          initRoute: '/planning',
-                          key: state.pageKey,
-                        );
-                      }),
-                  GoRoute(
-                      path: 'author/:id',
-                      name: 'Author Planning',
-                      builder: (context, state) {
-                        return AuthorPage(authorName: state.pathParameters['id']!, initRoute: '/planning', key: state.pageKey);
-                      }),
-                  GoRoute(
-                      path: 'serie/:id',
-                      name: 'Series Planning',
-                      builder: (context, state) {
-                        return SeriePage(serieId: state.pathParameters['id']!, initRoute: '/planning', key: state.pageKey);
-                      }),
-                  GoRoute(
-                      path: 'sub_serie/:id',
-                      name: 'Sub-Series Planning',
-                      builder: (context, state) {
-                        return SubSeriePage(serieId: state.pathParameters['id']!, initRoute: '/planning', key: state.pageKey);
-                      }),
-                  GoRoute(
-                      path: 'volume/:id',
-                      name: 'Volume Planning',
-                      builder: (context, state) {
-                        return VolumePage(volumeId: state.pathParameters['id']!, initRoute: '/planning', key: state.pageKey);
-                      })
-                ])
-          ]),*/
-          StatefulShellBranch(navigatorKey: _rootNavigatorProfile, routes: [
-            GoRoute(
+          StatefulShellBranch(
+            navigatorKey: _rootNavigatorProfile,
+            routes: [
+              GoRoute(
                 path: '/profile',
                 name: 'Profile',
                 builder: (context, state) {
-                  return RedirectToProfile(key: state.pageKey);
+                  if (PocketBaseConnector().isLoggedIn()) {
+                    return const ProfilePage();
+                  } else {
+                    return const SignInPage();
+                  }
                 },
                 routes: [
                   GoRoute(
@@ -357,8 +328,12 @@ class AppNavigation {
                       builder: (context, state) {
                         return ForgotPasswordPage(key: state.pageKey);
                       }),
-                ])
-          ]),
-        ]),
-  ]);
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+    ],
+  );
 }

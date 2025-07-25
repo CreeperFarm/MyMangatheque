@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart';
+import 'package:mymangatheque/generated/l10n.dart';
 import 'package:mymangatheque/src/back/services/utils.dart';
 import 'package:mymangatheque/src/function/show_message_function.dart';
 import 'package:pocketbase/pocketbase.dart';
@@ -19,7 +21,16 @@ class PocketBaseAdminConnector {
 
   bool _isConnected = false;
 
-  PocketBaseAdminConnector._internal() : _pocketBase = PocketBase('https://api.mymangatheque.com', lang: 'fr-FR');
+  PocketBaseAdminConnector._internal()
+      : _pocketBase = PocketBase(
+          'https://api.mymangatheque.com',
+          lang: PlatformDispatcher.instance.locale.languageCode == 'fr' ? 'fr-FR' : 'en-US',
+        ) {
+    _pocketBase.authStore.onChange.listen((event) {
+      _isConnected = _pocketBase.authStore.isValid;
+      debugPrint('Auth store changed: $_isConnected');
+    });
+  }
 
   // Check if your logged-in
   bool isLoggedIn() {
@@ -33,7 +44,7 @@ class PocketBaseAdminConnector {
       return _isConnected = _pocketBase.authStore.isValid;
     } catch (err) {
       if (err.toString().contains('Failed to authenticate')) {
-        showMessage('Email ou mot de passe incorrect', context);
+        showMessage(AppLocalizations.of(context).authFailed, context);
       } else {
         showMessage(err.toString(), context);
       }
