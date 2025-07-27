@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:mymangatheque/l10n/app_localizations.dart';
 import 'package:mymangatheque/src/const/own_icon.dart';
 import 'package:mymangatheque/src/front/components/my_line.dart';
 import 'package:simple_barcode_scanner/simple_barcode_scanner.dart';
@@ -7,15 +8,16 @@ import 'package:simple_barcode_scanner/simple_barcode_scanner.dart';
 class MyTomeNumberShow extends StatelessWidget {
   final String tomeTotal;
   final String editionTotal;
+  AppLocalizations localizations;
 
-  const MyTomeNumberShow({required this.tomeTotal, required this.editionTotal, super.key});
+  MyTomeNumberShow({required this.tomeTotal, required this.editionTotal, required this.localizations, super.key});
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         Text(
-          "$tomeTotal Tomes • $editionTotal Édition",
+          "$tomeTotal ${localizations.volume} • $editionTotal ${localizations.edition}",
           textAlign: TextAlign.start,
           style: GoogleFonts.adventPro(
             textStyle: const TextStyle(
@@ -60,7 +62,7 @@ class MyTomeNumberShow extends StatelessWidget {
                           OwnIcon(iconColor: Theme.of(context).colorScheme.primary, iconName: 'barcode'),
                           SizedBox(width: 5),
                           Text(
-                            'Scanner',
+                            localizations.scanner,
                             style: TextStyle(
                               fontSize: 15,
                               color: Theme.of(context).colorScheme.primary,

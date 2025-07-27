@@ -5,8 +5,10 @@ import 'package:path/path.dart';
 
 class GetUserProfilePicture extends StatelessWidget {
   final PocketBaseFile file;
+  final double? height;
+  final double? width;
 
-  const GetUserProfilePicture({required this.file, super.key});
+  const GetUserProfilePicture({required this.file, this.height, this.width, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -53,8 +55,8 @@ class GetUserProfilePicture extends StatelessWidget {
         borderRadius: BorderRadius.circular(150.0),
         child: Image.asset(
           'assets/images/unknown.webp',
-          height: 175,
-          width: 175,
+          height: height ?? 175,
+          width: width ?? 175,
           fit: BoxFit.cover,
         ),
       ),
@@ -67,8 +69,8 @@ class GetUserProfilePicture extends StatelessWidget {
         borderRadius: BorderRadius.circular(150.0),
         child: Image.network(
           url,
-          height: 175,
-          width: 175,
+          height: height ?? 175,
+          width: width ?? 175,
           fit: BoxFit.cover,
         ),
       ),

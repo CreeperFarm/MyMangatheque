@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:mymangatheque/l10n/app_localizations.dart';
 import 'package:mymangatheque/src/back/services/pocketbaseadmin.dart';
 import 'package:mymangatheque/src/front/components/my_button.dart';
 import 'package:mymangatheque/src/front/components/my_scroll_column.dart';
@@ -49,6 +50,16 @@ class _AdminCreateAuthorPageState extends State<AdminCreateAuthorPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Get localization - return early if not available
+    var localizations = AppLocalizations.of(context);
+    if (localizations == null) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
     PocketBaseAdminConnector connector = PocketBaseAdminConnector();
     return MyScrollColumn(
       scrollPadding: const EdgeInsets.symmetric(horizontal: 10),
@@ -56,7 +67,7 @@ class _AdminCreateAuthorPageState extends State<AdminCreateAuthorPage> {
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 10),
           child: Text(
-            "Créer un auteur",
+            localizations.createAuthor,
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
@@ -100,28 +111,28 @@ class _AdminCreateAuthorPageState extends State<AdminCreateAuthorPage> {
               MyTextField(
                 verticalPadding: 5,
                 controller: authorNameController,
-                labelText: "Nom de l'auteur",
-                errorMessage: "Veuillez entrer le nom de l'auteur",
+                labelText: localizations.authorName,
+                errorMessage: localizations.provideAuthorName,
               ),
               MyTextField(
                 verticalPadding: 5,
                 controller: authorJobController,
-                labelText: "Travail de l'auteur",
-                errorMessage: "Veuillez entrer le travail de l'auteur",
+                labelText: localizations.authorJobs,
+                errorMessage: localizations.provideAuthorJobs,
               ),
               MyTextField(
                 verticalPadding: 5,
                 controller: seriesIdController,
                 skipEmptyVerification: true,
-                labelText: "Id des series réalisés par l'auteur",
-                errorMessage: "Veuillez entrer l'id des series réalisés par l'auteur",
+                labelText: localizations.seriesIdOfAuthor,
+                errorMessage: localizations.provideSeriesIdOfAuthor,
               ),
             ],
           ),
         ),
         MyButton(
           verticalPadding: 5,
-          text: "Ajouter l'auteur",
+          text: localizations.authorAdd,
           onTap: () async {
             final data = jsonDecode((await connector.getCollectionFullList('authors')).toString());
             var authorAlreadyExists = false;
@@ -139,9 +150,9 @@ class _AdminCreateAuthorPageState extends State<AdminCreateAuthorPage> {
                 "series": jsonDecode(seriesIdController.text),
               };
               connector.createAuthor(body, imageNameAuthorController.text, imagePathAuthorController.text);
-              showMessage("L'auteur à été créer", context);
+              showMessage(localizations.authorAddSuccess, context);
             } else {
-              showMessage('L\'auteur existe déjà', context);
+              showMessage(localizations.authorDuplicate, context);
             }
           },
         ),

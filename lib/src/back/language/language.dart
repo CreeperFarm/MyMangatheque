@@ -1,5 +1,7 @@
 import 'dart:io';
+import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 enum Language {
@@ -14,7 +16,12 @@ enum Language {
 }
 
 final languageProvider = StateProvider<Language>((ref) {
-  final String defaultLocale = Platform.localeName;
+  final String defaultLocale;
+  if (kIsWeb) {
+    defaultLocale = ui.PlatformDispatcher.instance.locale.toString(); // For web, use the browser's locale
+  } else {
+    defaultLocale = Platform.localeName; // For mobile, use the device's locale
+  }
   if (defaultLocale.startsWith('fr')) {
     return Language.french;
   } else if (defaultLocale.startsWith('en')) {

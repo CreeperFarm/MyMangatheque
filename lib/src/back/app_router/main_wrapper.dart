@@ -72,16 +72,21 @@ class _MainWrapperState extends ConsumerState<MainWrapper> {
 
   @override
   Widget build(BuildContext context) {
+    // Get localization - return early if not available
+    var localizations = AppLocalizations.of(context);
+    if (localizations == null) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
     // TODO : restore the planning page.
     //List<String> navIcons = ["home", "collection", "search", "calendar", "user"];
     const List<String> navIcons = ["home", "collection", "search", "user"];
     //List<String> navTitle = ["Accueil", "Collection", "Recherche", "Planning", "Profil"];
-    List<String> navTitle = [
-      AppLocalizations.of(context)!.home,
-      AppLocalizations.of(context)!.collection,
-      AppLocalizations.of(context)!.search,
-      AppLocalizations.of(context)!.profile
-    ];
+    List<String> navTitle = [localizations.home, localizations.collection, localizations.search, localizations.profile];
     //List<String> navRoute = ["/", "/library", "/search", "/planning", "/profile"];
     const List<String> navRoute = ["/", "/library", "/search", "/profile"];
     // This is to change color when starting the app
@@ -205,6 +210,8 @@ class _MainWrapperState extends ConsumerState<MainWrapper> {
                 navIcons: navIcons,
                 navTitle: navTitle,
                 navRoute: navRoute,
+                profileText: localizations.profile,
+                logInText: localizations.logIn,
               ),
               body: widget.navigationShell,
             );

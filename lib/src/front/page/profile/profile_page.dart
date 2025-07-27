@@ -15,6 +15,7 @@ import 'package:mymangatheque/src/front/components/my_line.dart';
 import 'package:mymangatheque/src/front/components/my_scroll_column.dart';
 import 'package:mymangatheque/src/front/components/my_text_divider.dart';
 import 'package:mymangatheque/src/function/auto_push_or_go.dart';
+import 'package:mymangatheque/src/function/show_message_function.dart';
 import 'package:mymangatheque/src/models/get_user_information.dart';
 import 'package:mymangatheque/src/models/local_storage/local_storage.dart';
 
@@ -36,8 +37,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   final connector = PocketBaseConnector();
 
   // Sign Out a Connected User
-  void signUserOut() {
+  void signUserOut({required String text}) async {
     connector.logOut();
+    showMessage(text, context);
     pushOrGo(context, '/profile/signin');
   }
 
@@ -358,13 +360,14 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   LocalStorage().deleteToken();
                   LocalStorage().deleteOwnedSubSerie();
                   LocalStorage().clearAllCache();
+                  showMessage(localizations.clearCacheSuccess, context);
                 },
                 child: Row(
                   children: [
                     const Padding(padding: EdgeInsets.only(right: 16)),
                     OwnIcon(iconColor: Theme.of(context).colorScheme.primary, iconName: 'trash'),
                     const Padding(padding: EdgeInsets.only(right: 9)),
-                    const Text("Vider le cache"),
+                    Text(localizations.clearCache),
                   ],
                 ),
               ),
@@ -388,7 +391,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                     const Padding(
                       padding: EdgeInsets.only(right: 9),
                     ),
-                    const Text('Changer de mot de passe'),
+                    Text(localizations.modifyPassword),
                   ],
                 ),
               ),
@@ -398,19 +401,21 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               vertical: 10.0,
             ),
             MyIconTextButton(
-              function: signUserOut,
+              function: () => signUserOut(text: localizations.logOutSuccess),
               color: Colors.red,
               iconName: 'logout',
-              text: 'Se déconnecter',
+              text: localizations.logOut,
             ),
             MyTextDivider(
-              text: "Zone de danger",
+              text: localizations.dangerZone,
             ),
             MyIconTextButton(
-              function: signUserOut,
+              function: () => signUserOut(
+                text: localizations.deleteAccountFailed,
+              ),
               color: Colors.red,
               iconName: 'delete',
-              text: 'Supprimer mon compte',
+              text: localizations.deleteAccount,
             ),
             MyLine(
               width: MediaQuery.of(context).size.width,
@@ -434,7 +439,12 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                             final String buildVersion = snapshot.data.toString();
                             return Column(
                               children: [
-                                Text('Version de l\'application : $appVersion & version du build : $buildVersion'),
+                                Text(
+                                  localizations.appVersionAndAppBuildVersion(
+                                    appVersion,
+                                    buildVersion,
+                                  ),
+                                ),
                               ],
                             );
                           } else {

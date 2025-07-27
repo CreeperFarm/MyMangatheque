@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:mymangatheque/l10n/app_localizations.dart';
 import 'package:mymangatheque/src/back/services/pocketbase.dart';
 import 'package:mymangatheque/src/front/components/my_button.dart';
 import 'package:mymangatheque/src/front/components/my_textfield.dart';
@@ -40,9 +41,19 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Get localization - return early if not available
+    var localizations = AppLocalizations.of(context);
+    if (localizations == null) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Mot de passe oublié'),
+        title: Text(localizations.passwordForgot),
         elevation: 0,
       ),
       body: Center(
@@ -57,7 +68,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                   colorFilter: ColorFilter.mode(Theme.of(context).colorScheme.primary, BlendMode.srcIn),
                 ),
                 Text(
-                  "Entrer votre email et nous vous enverrons un email pour avec un lien pour réinitialiser votre mot de passe.",
+                  localizations.enterEmailForSendingEmailReset,
                   textAlign: TextAlign.center,
                   style: GoogleFonts.poppins(
                     color: Theme.of(context).colorScheme.primary,
@@ -67,18 +78,18 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                 const SizedBox(height: 11),
                 MyTextField(
                   controller: emailController,
-                  labelText: "Email du compte",
+                  labelText: localizations.accountEmail,
                   obscureText: false,
-                  errorMessage: "Veuillez enter votre email!",
+                  errorMessage: localizations.provideAccountEmail,
                 ),
                 const SizedBox(height: 11),
                 MyButton(
-                  text: "Reinitialiser le mot de passe",
+                  text: localizations.passwordReset,
                   onTap: () {
                     if (emailController.text.isEmpty) {
-                      showMessage("Veuillez enter votre email!", context);
+                      showMessage(localizations.provideAccountEmail, context);
                     } else if (!emailController.text.contains('@') || !emailController.text.contains('.')) {
-                      showMessage("Veuillez enter un email valide!", context);
+                      showMessage(localizations.provideValidAccountEmail, context);
                     } else {
                       PocketBaseConnector().resetPassword(emailController.text, context);
                     }

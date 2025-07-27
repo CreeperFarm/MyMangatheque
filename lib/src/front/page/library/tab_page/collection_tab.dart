@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mymangatheque/l10n/app_localizations.dart';
 import 'package:mymangatheque/src/back/provider/manga_owned_provider.dart';
 import 'package:mymangatheque/src/back/services/pocketbase.dart';
 import 'package:mymangatheque/src/const/own_icon.dart';
@@ -48,6 +49,16 @@ class _CollectionTabState extends ConsumerState<CollectionTab> {
 
   @override
   Widget build(BuildContext context) {
+    // Get localization - return early if not available
+    var localizations = AppLocalizations.of(context);
+    if (localizations == null) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
     if (ref.watch(mangaOwnedProvider).isEmpty) {
       ref.read(mangaOwnedProvider.notifier).initData().then((value) {
         if (value == false) {
@@ -63,7 +74,11 @@ class _CollectionTabState extends ConsumerState<CollectionTab> {
       padding: const EdgeInsets.all(10),
       child: MyScrollColumn(
         children: [
-          MyTomeNumberShow(tomeTotal: getNumberVolume().toString(), editionTotal: subSeries.length.toString()),
+          MyTomeNumberShow(
+            tomeTotal: getNumberVolume().toString(),
+            editionTotal: subSeries.length.toString(),
+            localizations: localizations,
+          ),
           ...subSeries.map((subSerie) {
             return Column(
               children: [

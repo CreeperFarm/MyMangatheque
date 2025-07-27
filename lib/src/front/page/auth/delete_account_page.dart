@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mymangatheque/l10n/app_localizations.dart';
 import 'package:mymangatheque/src/back/services/pocketbase.dart';
 
 class DeleteAccountPage extends StatelessWidget {
@@ -6,20 +7,28 @@ class DeleteAccountPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Get localization - return early if not available
+    var localizations = AppLocalizations.of(context);
+    if (localizations == null) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Supprimer mon compte'),
+        title: Text(localizations.deleteAccount),
       ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            const Text('Êtes-vous sûr de vouloir supprimer votre compte ?'),
-            const Text('Cette action est irréversible.'),
+            Text(localizations.deleteAccountConfirmation),
             ElevatedButton(
-              onPressed: PocketBaseConnector()
-                  .deleteUser(PocketBaseConnector().getConnectedUser()!.id),
-              child: const Text('Supprimer mon compte'),
+              onPressed: PocketBaseConnector().deleteUser(PocketBaseConnector().getConnectedUser()!.id),
+              child: Text(localizations.deleteAccount),
             ),
           ],
         ),

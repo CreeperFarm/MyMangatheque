@@ -10,7 +10,7 @@ import 'intl/messages_all.dart';
 
 // ignore_for_file: non_constant_identifier_names, lines_longer_than_80_chars
 // ignore_for_file: join_return_with_assignment, prefer_final_in_for_each
-// ignore_for_file: avoid_redundant_argument_values
+// ignore_for_file: avoid_redundant_argument_values, avoid_escaping_inner_quotes
 
 class AppLocalizations {
   AppLocalizations();
@@ -18,28 +18,35 @@ class AppLocalizations {
   static AppLocalizations? _current;
 
   static AppLocalizations get current {
-    assert(_current != null, 'No instance of AppLocalizations was loaded. Try to initialize the AppLocalizations delegate before accessing AppLocalizations.current.');
+    assert(
+      _current != null,
+      'No instance of AppLocalizations was loaded. Try to initialize the AppLocalizations delegate before accessing AppLocalizations.current.',
+    );
     return _current!;
   }
 
-  static const AppLocalizationDelegate delegate =
-    AppLocalizationDelegate();
+  static const AppLocalizationDelegate delegate = AppLocalizationDelegate();
 
   static Future<AppLocalizations> load(Locale locale) {
-    final name = (locale.countryCode?.isEmpty ?? false) ? locale.languageCode : locale.toString();
-    final localeName = Intl.canonicalizedLocale(name); 
+    final name = (locale.countryCode?.isEmpty ?? false)
+        ? locale.languageCode
+        : locale.toString();
+    final localeName = Intl.canonicalizedLocale(name);
     return initializeMessages(localeName).then((_) {
       Intl.defaultLocale = localeName;
       final instance = AppLocalizations();
       AppLocalizations._current = instance;
- 
+
       return instance;
     });
-  } 
+  }
 
   static AppLocalizations of(BuildContext context) {
     final instance = AppLocalizations.maybeOf(context);
-    assert(instance != null, 'No instance of AppLocalizations present in the widget tree. Did you add AppLocalizations.delegate in localizationsDelegates?');
+    assert(
+      instance != null,
+      'No instance of AppLocalizations present in the widget tree. Did you add AppLocalizations.delegate in localizationsDelegates?',
+    );
     return instance!;
   }
 
@@ -47,54 +54,59 @@ class AppLocalizations {
     return Localizations.of<AppLocalizations>(context, AppLocalizations);
   }
 
+  /// `English`
+  String get english {
+    return Intl.message('English', name: 'english', desc: '', args: []);
+  }
+
+  /// `French`
+  String get french {
+    return Intl.message('French', name: 'french', desc: '', args: []);
+  }
+
+  /// `Spanish`
+  String get spanish {
+    return Intl.message('Spanish', name: 'spanish', desc: '', args: []);
+  }
+
+  /// `Italian`
+  String get italian {
+    return Intl.message('Italian', name: 'italian', desc: '', args: []);
+  }
+
+  /// `German`
+  String get german {
+    return Intl.message('German', name: 'german', desc: '', args: []);
+  }
+
+  /// `Japanese`
+  String get japanese {
+    return Intl.message('Japanese', name: 'japanese', desc: '', args: []);
+  }
+
   /// `Hello World!`
   String get helloWorld {
-    return Intl.message(
-      'Hello World!',
-      name: 'helloWorld',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Hello World!', name: 'helloWorld', desc: '', args: []);
   }
 
   /// `Home`
   String get home {
-    return Intl.message(
-      'Home',
-      name: 'home',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Home', name: 'home', desc: '', args: []);
   }
 
   /// `Collection`
   String get collection {
-    return Intl.message(
-      'Collection',
-      name: 'collection',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Collection', name: 'collection', desc: '', args: []);
   }
 
   /// `Search`
   String get search {
-    return Intl.message(
-      'Search',
-      name: 'search',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Search', name: 'search', desc: '', args: []);
   }
 
   /// `Profile`
   String get profile {
-    return Intl.message(
-      'Profile',
-      name: 'profile',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Profile', name: 'profile', desc: '', args: []);
   }
 
   /// `{gender, select, male{he} female{she} other{they}}`
@@ -115,6 +127,16 @@ class AppLocalizations {
     return Intl.message(
       'Email or password incorrect.',
       name: 'authFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The password must be at least 6 characters long.`
+  String get passwordTooShort {
+    return Intl.message(
+      'The password must be at least 6 characters long.',
+      name: 'passwordTooShort',
       desc: '',
       args: [],
     );
@@ -192,11 +214,103 @@ class AppLocalizations {
 
   /// `Log In`
   String get logIn {
+    return Intl.message('Log In', name: 'logIn', desc: '', args: []);
+  }
+
+  /// `Log In with Google`
+  String get logInWithGoogle {
     return Intl.message(
-      'Log In',
-      name: 'logIn',
+      'Log In with Google',
+      name: 'logInWithGoogle',
       desc: '',
       args: [],
+    );
+  }
+
+  /// `Log In with Apple`
+  String get logInWithApple {
+    return Intl.message(
+      'Log In with Apple',
+      name: 'logInWithApple',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `You have successfully logged in.`
+  String get logInSuccess {
+    return Intl.message(
+      'You have successfully logged in.',
+      name: 'logInSuccess',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `An error occurred, you have not been connected to your account.`
+  String get logInFailed {
+    return Intl.message(
+      'An error occurred, you have not been connected to your account.',
+      name: 'logInFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Log Out`
+  String get logOut {
+    return Intl.message('Log Out', name: 'logOut', desc: '', args: []);
+  }
+
+  /// `You have successfully logged out.`
+  String get logOutSuccess {
+    return Intl.message(
+      'You have successfully logged out.',
+      name: 'logOutSuccess',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `An error occurred, you have not been logged out.`
+  String get logOutFailed {
+    return Intl.message(
+      'An error occurred, you have not been logged out.',
+      name: 'logOutFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The minimum required number of characters is {minLength}.`
+  String minLengthNotReached(num minLength) {
+    final NumberFormat minLengthNumberFormat = NumberFormat.compact(
+      locale: Intl.getCurrentLocale(),
+    );
+    final String minLengthString = minLengthNumberFormat.format(minLength);
+
+    return Intl.message(
+      'The minimum required number of characters is $minLengthString.',
+      name: 'minLengthNotReached',
+      desc:
+          'An error message indicating that the minimum length has not been met',
+      args: [minLengthString],
+    );
+  }
+
+  /// `The maximum allowed number of characters is {maxLength}.`
+  String maxLengthExceeded(num maxLength) {
+    final NumberFormat maxLengthNumberFormat = NumberFormat.compact(
+      locale: Intl.getCurrentLocale(),
+    );
+    final String maxLengthString = maxLengthNumberFormat.format(maxLength);
+
+    return Intl.message(
+      'The maximum allowed number of characters is $maxLengthString.',
+      name: 'maxLengthExceeded',
+      desc:
+          'An error message indicating that the maximum length has been exceeded',
+      args: [maxLengthString],
     );
   }
 
@@ -212,122 +326,62 @@ class AppLocalizations {
 
   /// `January`
   String get january {
-    return Intl.message(
-      'January',
-      name: 'january',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('January', name: 'january', desc: '', args: []);
   }
 
   /// `February`
   String get february {
-    return Intl.message(
-      'February',
-      name: 'february',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('February', name: 'february', desc: '', args: []);
   }
 
   /// `March`
   String get march {
-    return Intl.message(
-      'March',
-      name: 'march',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('March', name: 'march', desc: '', args: []);
   }
 
   /// `April`
   String get april {
-    return Intl.message(
-      'April',
-      name: 'april',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('April', name: 'april', desc: '', args: []);
   }
 
   /// `May`
   String get may {
-    return Intl.message(
-      'May',
-      name: 'may',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('May', name: 'may', desc: '', args: []);
   }
 
   /// `June`
   String get june {
-    return Intl.message(
-      'June',
-      name: 'june',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('June', name: 'june', desc: '', args: []);
   }
 
   /// `July`
   String get july {
-    return Intl.message(
-      'July',
-      name: 'july',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('July', name: 'july', desc: '', args: []);
   }
 
   /// `August`
   String get august {
-    return Intl.message(
-      'August',
-      name: 'august',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('August', name: 'august', desc: '', args: []);
   }
 
   /// `September`
   String get september {
-    return Intl.message(
-      'September',
-      name: 'september',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('September', name: 'september', desc: '', args: []);
   }
 
   /// `October`
   String get october {
-    return Intl.message(
-      'October',
-      name: 'october',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('October', name: 'october', desc: '', args: []);
   }
 
   /// `November`
   String get november {
-    return Intl.message(
-      'November',
-      name: 'november',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('November', name: 'november', desc: '', args: []);
   }
 
   /// `December`
   String get december {
-    return Intl.message(
-      'December',
-      name: 'december',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('December', name: 'december', desc: '', args: []);
   }
 
   /// `Profile & Settings Page`
@@ -341,7 +395,7 @@ class AppLocalizations {
   }
 
   /// `Your email is {email}`
-  String emailIs(Object email) {
+  String emailIs(String email) {
     return Intl.message(
       'Your email is $email',
       name: 'emailIs',
@@ -351,7 +405,7 @@ class AppLocalizations {
   }
 
   /// `Your username is {username}`
-  String usernameIs(Object username) {
+  String usernameIs(String username) {
     return Intl.message(
       'Your username is $username',
       name: 'usernameIs',
@@ -361,7 +415,7 @@ class AppLocalizations {
   }
 
   /// `Account created on {date}`
-  String accountCreatedOn(Object date) {
+  String accountCreatedOn(String date) {
     return Intl.message(
       'Account created on $date',
       name: 'accountCreatedOn',
@@ -371,7 +425,7 @@ class AppLocalizations {
   }
 
   /// `Your birthday is on {date}`
-  String birthdayDateIs(Object date) {
+  String birthdayDateIs(String date) {
     return Intl.message(
       'Your birthday is on $date',
       name: 'birthdayDateIs',
@@ -401,59 +455,1125 @@ class AppLocalizations {
       one: 'You have 1 favorite series',
       other: 'You have $count favorite series',
       name: 'favoriteSeriesNumber',
-      desc: 'A message that indicates the number of favorite series of the user',
+      desc:
+          'A message that indicates the number of favorite series of the user',
       args: [count],
     );
   }
 
   /// `Light Mode`
   String get lightMode {
-    return Intl.message(
-      'Light Mode',
-      name: 'lightMode',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Light Mode', name: 'lightMode', desc: '', args: []);
   }
 
   /// `Dark Mode`
   String get darkMode {
-    return Intl.message(
-      'Dark Mode',
-      name: 'darkMode',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Dark Mode', name: 'darkMode', desc: '', args: []);
   }
 
   /// `System Mode`
   String get systemMode {
+    return Intl.message('System Mode', name: 'systemMode', desc: '', args: []);
+  }
+
+  /// `Clear Cache`
+  String get clearCache {
+    return Intl.message('Clear Cache', name: 'clearCache', desc: '', args: []);
+  }
+
+  /// `Cache successfully cleared.`
+  String get clearCacheSuccess {
     return Intl.message(
-      'System Mode',
-      name: 'systemMode',
+      'Cache successfully cleared.',
+      name: 'clearCacheSuccess',
       desc: '',
       args: [],
     );
   }
 
-  /// `English`
-  String get english {
+  /// `Modify Password`
+  String get modifyPassword {
     return Intl.message(
-      'English',
-      name: 'english',
+      'Modify Password',
+      name: 'modifyPassword',
       desc: '',
       args: [],
     );
   }
 
-  /// `French`
-  String get french {
+  /// `Danger Zone`
+  String get dangerZone {
+    return Intl.message('Danger Zone', name: 'dangerZone', desc: '', args: []);
+  }
+
+  /// `Delete Account`
+  String get deleteAccount {
     return Intl.message(
-      'French',
-      name: 'french',
+      'Delete Account',
+      name: 'deleteAccount',
       desc: '',
       args: [],
     );
+  }
+
+  /// `Are you sure you want to delete your account? This action cannot be undone.`
+  String get deleteAccountConfirmation {
+    return Intl.message(
+      'Are you sure you want to delete your account? This action cannot be undone.',
+      name: 'deleteAccountConfirmation',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Your account has been successfully deleted.`
+  String get deleteAccountSuccess {
+    return Intl.message(
+      'Your account has been successfully deleted.',
+      name: 'deleteAccountSuccess',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `An error occurred, your account has not been deleted, you have been log out of your account.`
+  String get deleteAccountFailed {
+    return Intl.message(
+      'An error occurred, your account has not been deleted, you have been log out of your account.',
+      name: 'deleteAccountFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `App Version: {appVersion} & Build Version: {buildVersion}`
+  String appVersionAndAppBuildVersion(String appVersion, String buildVersion) {
+    return Intl.message(
+      'App Version: $appVersion & Build Version: $buildVersion',
+      name: 'appVersionAndAppBuildVersion',
+      desc: 'A message that includes the app version and build version',
+      args: [appVersion, buildVersion],
+    );
+  }
+
+  /// `Volume {count}`
+  String volumeNum(num count) {
+    final NumberFormat countNumberFormat = NumberFormat.compact(
+      locale: Intl.getCurrentLocale(),
+    );
+    final String countString = countNumberFormat.format(count);
+
+    return Intl.message(
+      'Volume $countString',
+      name: 'volumeNum',
+      desc: 'A message that indicates the volume number',
+      args: [countString],
+    );
+  }
+
+  /// `Owned`
+  String get owned {
+    return Intl.message('Owned', name: 'owned', desc: '', args: []);
+  }
+
+  /// `Volume`
+  String get volume {
+    return Intl.message('Volume', name: 'volume', desc: '', args: []);
+  }
+
+  /// `Series`
+  String get series {
+    return Intl.message('Series', name: 'series', desc: '', args: []);
+  }
+
+  /// `Edition`
+  String get edition {
+    return Intl.message('Edition', name: 'edition', desc: '', args: []);
+  }
+
+  /// `Author`
+  String get author {
+    return Intl.message('Author', name: 'author', desc: '', args: []);
+  }
+
+  /// `Publisher`
+  String get publisher {
+    return Intl.message('Publisher', name: 'publisher', desc: '', args: []);
+  }
+
+  /// `Publication Date`
+  String get publicationDate {
+    return Intl.message(
+      'Publication Date',
+      name: 'publicationDate',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `ISBN`
+  String get isbn {
+    return Intl.message('ISBN', name: 'isbn', desc: '', args: []);
+  }
+
+  /// `Scanner`
+  String get scanner {
+    return Intl.message('Scanner', name: 'scanner', desc: '', args: []);
+  }
+
+  /// `Scan the barcode of your volume to add it to your collection.`
+  String get scannerDescription {
+    return Intl.message(
+      'Scan the barcode of your volume to add it to your collection.',
+      name: 'scannerDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Create Author`
+  String get createAuthor {
+    return Intl.message(
+      'Create Author',
+      name: 'createAuthor',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Author Name`
+  String get authorName {
+    return Intl.message('Author Name', name: 'authorName', desc: '', args: []);
+  }
+
+  /// `Please provide the author's name`
+  String get provideAuthorName {
+    return Intl.message(
+      'Please provide the author\'s name',
+      name: 'provideAuthorName',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Author Jobs (separated by commas)`
+  String get authorJobs {
+    return Intl.message(
+      'Author Jobs (separated by commas)',
+      name: 'authorJobs',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please provide the author's jobs (separated by commas)`
+  String get provideAuthorJobs {
+    return Intl.message(
+      'Please provide the author\'s jobs (separated by commas)',
+      name: 'provideAuthorJobs',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Series ID of the Author`
+  String get seriesIdOfAuthor {
+    return Intl.message(
+      'Series ID of the Author',
+      name: 'seriesIdOfAuthor',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please provide the series ID(s) of the author`
+  String get provideSeriesIdOfAuthor {
+    return Intl.message(
+      'Please provide the series ID(s) of the author',
+      name: 'provideSeriesIdOfAuthor',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add Author`
+  String get authorAdd {
+    return Intl.message('Add Author', name: 'authorAdd', desc: '', args: []);
+  }
+
+  /// `Author successfully added.`
+  String get authorAddSuccess {
+    return Intl.message(
+      'Author successfully added.',
+      name: 'authorAddSuccess',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `An author with this name already exists.`
+  String get authorDuplicate {
+    return Intl.message(
+      'An author with this name already exists.',
+      name: 'authorDuplicate',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Create Genre`
+  String get createGenre {
+    return Intl.message(
+      'Create Genre',
+      name: 'createGenre',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Genre Name`
+  String get genreName {
+    return Intl.message('Genre Name', name: 'genreName', desc: '', args: []);
+  }
+
+  /// `Please provide the genre name`
+  String get provideGenreName {
+    return Intl.message(
+      'Please provide the genre name',
+      name: 'provideGenreName',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add Genre`
+  String get genreAdd {
+    return Intl.message('Add Genre', name: 'genreAdd', desc: '', args: []);
+  }
+
+  /// `Genre successfully added.`
+  String get genreAddSuccess {
+    return Intl.message(
+      'Genre successfully added.',
+      name: 'genreAddSuccess',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `A genre with this name already exists.`
+  String get genreDuplicate {
+    return Intl.message(
+      'A genre with this name already exists.',
+      name: 'genreDuplicate',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Create Volume`
+  String get createVolume {
+    return Intl.message(
+      'Create Volume',
+      name: 'createVolume',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Volume Title`
+  String get volumeTitle {
+    return Intl.message(
+      'Volume Title',
+      name: 'volumeTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please provide the volume title`
+  String get provideVolumeTitle {
+    return Intl.message(
+      'Please provide the volume title',
+      name: 'provideVolumeTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Volume Number`
+  String get volumeNumber {
+    return Intl.message(
+      'Volume Number',
+      name: 'volumeNumber',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please provide the volume number`
+  String get provideVolumeNumber {
+    return Intl.message(
+      'Please provide the volume number',
+      name: 'provideVolumeNumber',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `EAN of the Volume`
+  String get volumeEAN {
+    return Intl.message(
+      'EAN of the Volume',
+      name: 'volumeEAN',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please provide the EAN of the volume`
+  String get provideVolumeEAN {
+    return Intl.message(
+      'Please provide the EAN of the volume',
+      name: 'provideVolumeEAN',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Volume Price`
+  String get volumePrice {
+    return Intl.message(
+      'Volume Price',
+      name: 'volumePrice',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please provide the price of the volume`
+  String get provideVolumePrice {
+    return Intl.message(
+      'Please provide the price of the volume',
+      name: 'provideVolumePrice',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Volume Summary`
+  String get volumeSummary {
+    return Intl.message(
+      'Volume Summary',
+      name: 'volumeSummary',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please provide the summary of the volume`
+  String get provideVolumeSummary {
+    return Intl.message(
+      'Please provide the summary of the volume',
+      name: 'provideVolumeSummary',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Volume Link`
+  String get volumeLink {
+    return Intl.message('Volume Link', name: 'volumeLink', desc: '', args: []);
+  }
+
+  /// `Please provide the link of the volume`
+  String get provideVolumeLink {
+    return Intl.message(
+      'Please provide the link of the volume',
+      name: 'provideVolumeLink',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Volume Information`
+  String get volumeInfo {
+    return Intl.message(
+      'Volume Information',
+      name: 'volumeInfo',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please provide the information about the volume`
+  String get provideVolumeInfo {
+    return Intl.message(
+      'Please provide the information about the volume',
+      name: 'provideVolumeInfo',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Adult Content`
+  String get adultContent {
+    return Intl.message(
+      'Adult Content',
+      name: 'adultContent',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Warning: Adult Content`
+  String get adultContentWarning {
+    return Intl.message(
+      'Warning: Adult Content',
+      name: 'adultContentWarning',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Volume Language`
+  String get volumeLanguage {
+    return Intl.message(
+      'Volume Language',
+      name: 'volumeLanguage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please choose the language of the volume`
+  String get chooseVolumeLanguage {
+    return Intl.message(
+      'Please choose the language of the volume',
+      name: 'chooseVolumeLanguage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Manga`
+  String get manga {
+    return Intl.message('Manga', name: 'manga', desc: '', args: []);
+  }
+
+  /// `Novel`
+  String get novel {
+    return Intl.message('Novel', name: 'novel', desc: '', args: []);
+  }
+
+  /// `Artbook`
+  String get artbook {
+    return Intl.message('Artbook', name: 'artbook', desc: '', args: []);
+  }
+
+  /// `Light Novel`
+  String get lightNovel {
+    return Intl.message('Light Novel', name: 'lightNovel', desc: '', args: []);
+  }
+
+  /// `Box Set`
+  String get boxSet {
+    return Intl.message('Box Set', name: 'boxSet', desc: '', args: []);
+  }
+
+  /// `Other`
+  String get other {
+    return Intl.message('Other', name: 'other', desc: '', args: []);
+  }
+
+  /// `Volume Support`
+  String get volumeSupport {
+    return Intl.message(
+      'Volume Support',
+      name: 'volumeSupport',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please choose the support of the volume`
+  String get chooseVolumeSupport {
+    return Intl.message(
+      'Please choose the support of the volume',
+      name: 'chooseVolumeSupport',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Select Date`
+  String get selectDate {
+    return Intl.message('Select Date', name: 'selectDate', desc: '', args: []);
+  }
+
+  /// `Please select a date`
+  String get pleaseSelectDate {
+    return Intl.message(
+      'Please select a date',
+      name: 'pleaseSelectDate',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Volume Series ID`
+  String get volumeSeriesId {
+    return Intl.message(
+      'Volume Series ID',
+      name: 'volumeSeriesId',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please provide the series ID of the volume`
+  String get provideVolumeSeriesId {
+    return Intl.message(
+      'Please provide the series ID of the volume',
+      name: 'provideVolumeSeriesId',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please provide a valid series ID for the volume`
+  String get provideValidVolumeSeriesId {
+    return Intl.message(
+      'Please provide a valid series ID for the volume',
+      name: 'provideValidVolumeSeriesId',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Volume Sub-Series ID`
+  String get volumeSubSeriesId {
+    return Intl.message(
+      'Volume Sub-Series ID',
+      name: 'volumeSubSeriesId',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please provide the sub-series ID of the volume`
+  String get provideVolumeSubSeriesId {
+    return Intl.message(
+      'Please provide the sub-series ID of the volume',
+      name: 'provideVolumeSubSeriesId',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please provide a valid sub-series ID for the volume`
+  String get provideValidVolumeSubSeriesId {
+    return Intl.message(
+      'Please provide a valid sub-series ID for the volume',
+      name: 'provideValidVolumeSubSeriesId',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Volume Editor ID`
+  String get volumeEditorId {
+    return Intl.message(
+      'Volume Editor ID',
+      name: 'volumeEditorId',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please provide the editor ID of the volume`
+  String get provideVolumeEditorId {
+    return Intl.message(
+      'Please provide the editor ID of the volume',
+      name: 'provideVolumeEditorId',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please provide a valid editor ID for the volume`
+  String get provideValidVolumeEditorId {
+    return Intl.message(
+      'Please provide a valid editor ID for the volume',
+      name: 'provideValidVolumeEditorId',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Volume Authors IDs`
+  String get volumeAuthorsIds {
+    return Intl.message(
+      'Volume Authors IDs',
+      name: 'volumeAuthorsIds',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please provide the author IDs of the volume`
+  String get provideVolumeAuthorsIds {
+    return Intl.message(
+      'Please provide the author IDs of the volume',
+      name: 'provideVolumeAuthorsIds',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Content of Box Set`
+  String get contentOfBoxSet {
+    return Intl.message(
+      'Content of Box Set',
+      name: 'contentOfBoxSet',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please provide the content of the box set`
+  String get provideContentOfBoxSet {
+    return Intl.message(
+      'Please provide the content of the box set',
+      name: 'provideContentOfBoxSet',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add Volume`
+  String get volumeAdd {
+    return Intl.message('Add Volume', name: 'volumeAdd', desc: '', args: []);
+  }
+
+  /// `Volume successfully added.`
+  String get volumeAddSuccess {
+    return Intl.message(
+      'Volume successfully added.',
+      name: 'volumeAddSuccess',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `An error occurred, the volume has not been added.`
+  String get volumeAddError {
+    return Intl.message(
+      'An error occurred, the volume has not been added.',
+      name: 'volumeAddError',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Sub-Series`
+  String get subSeries {
+    return Intl.message('Sub-Series', name: 'subSeries', desc: '', args: []);
+  }
+
+  /// `Editor`
+  String get editor {
+    return Intl.message('Editor', name: 'editor', desc: '', args: []);
+  }
+
+  /// `Genre`
+  String get genre {
+    return Intl.message('Genre', name: 'genre', desc: '', args: []);
+  }
+
+  /// `Admin Home Page`
+  String get adminHomePage {
+    return Intl.message(
+      'Admin Home Page',
+      name: 'adminHomePage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Welcome on the admin home page. This is the admin home page where you can manage authors, genres, and volumes.`
+  String get adminHomePageDescription {
+    return Intl.message(
+      'Welcome on the admin home page. This is the admin home page where you can manage authors, genres, and volumes.',
+      name: 'adminHomePageDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Admin Login Page`
+  String get adminLoginPage {
+    return Intl.message(
+      'Admin Login Page',
+      name: 'adminLoginPage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Your Email`
+  String get yourEmail {
+    return Intl.message('Your Email', name: 'yourEmail', desc: '', args: []);
+  }
+
+  /// `Please provide your email`
+  String get provideYourEmail {
+    return Intl.message(
+      'Please provide your email',
+      name: 'provideYourEmail',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Your Password`
+  String get yourPassword {
+    return Intl.message(
+      'Your Password',
+      name: 'yourPassword',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please provide your password`
+  String get provideYourPassword {
+    return Intl.message(
+      'Please provide your password',
+      name: 'provideYourPassword',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `You have successfully logged in as an admin.`
+  String get adminLoginSuccess {
+    return Intl.message(
+      'You have successfully logged in as an admin.',
+      name: 'adminLoginSuccess',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Forgot Password?`
+  String get passwordForgot {
+    return Intl.message(
+      'Forgot Password?',
+      name: 'passwordForgot',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Password Reset`
+  String get passwordReset {
+    return Intl.message(
+      'Password Reset',
+      name: 'passwordReset',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enter your email to receive a link to reset your password.`
+  String get enterEmailForSendingEmailReset {
+    return Intl.message(
+      'Enter your email to receive a link to reset your password.',
+      name: 'enterEmailForSendingEmailReset',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Email of the Account`
+  String get accountEmail {
+    return Intl.message(
+      'Email of the Account',
+      name: 'accountEmail',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please provide the email of the account`
+  String get provideAccountEmail {
+    return Intl.message(
+      'Please provide the email of the account',
+      name: 'provideAccountEmail',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please provide a valid account email`
+  String get provideValidAccountEmail {
+    return Intl.message(
+      'Please provide a valid account email',
+      name: 'provideValidAccountEmail',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Old Password`
+  String get oldPassword {
+    return Intl.message(
+      'Old Password',
+      name: 'oldPassword',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please provide your old password`
+  String get provideOldPassword {
+    return Intl.message(
+      'Please provide your old password',
+      name: 'provideOldPassword',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `New Password`
+  String get newPassword {
+    return Intl.message(
+      'New Password',
+      name: 'newPassword',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please provide your new password`
+  String get provideNewPassword {
+    return Intl.message(
+      'Please provide your new password',
+      name: 'provideNewPassword',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Confirm New Password`
+  String get confirmNewPassword {
+    return Intl.message(
+      'Confirm New Password',
+      name: 'confirmNewPassword',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please confirm your new password`
+  String get provideConfirmNewPassword {
+    return Intl.message(
+      'Please confirm your new password',
+      name: 'provideConfirmNewPassword',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The new password and confirmation do not match.`
+  String get passwordsDoNotMatch {
+    return Intl.message(
+      'The new password and confirmation do not match.',
+      name: 'passwordsDoNotMatch',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Sign In Page`
+  String get signInPage {
+    return Intl.message('Sign In Page', name: 'signInPage', desc: '', args: []);
+  }
+
+  /// `Sign In`
+  String get signIn {
+    return Intl.message('Sign In', name: 'signIn', desc: '', args: []);
+  }
+
+  /// `Sign Up Page`
+  String get signUpPage {
+    return Intl.message('Sign Up Page', name: 'signUpPage', desc: '', args: []);
+  }
+
+  /// `Sign Up`
+  String get signUp {
+    return Intl.message('Sign Up', name: 'signUp', desc: '', args: []);
+  }
+
+  /// `Log in to access your collection, manage your profile, and enjoy personalized features.`
+  String get whyLogInDescription {
+    return Intl.message(
+      'Log in to access your collection, manage your profile, and enjoy personalized features.',
+      name: 'whyLogInDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Create an account to start building your collection, track your favorite series, and connect with other manga enthusiasts.`
+  String get whySignUpDescription {
+    return Intl.message(
+      'Create an account to start building your collection, track your favorite series, and connect with other manga enthusiasts.',
+      name: 'whySignUpDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Or continue with`
+  String get orContinueWith {
+    return Intl.message(
+      'Or continue with',
+      name: 'orContinueWith',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Create an Account`
+  String get createAccount {
+    return Intl.message(
+      'Create an Account',
+      name: 'createAccount',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Don't have an account yet?`
+  String get noAccountYet {
+    return Intl.message(
+      'Don\'t have an account yet?',
+      name: 'noAccountYet',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Already have an account?`
+  String get alreadyHaveAnAccount {
+    return Intl.message(
+      'Already have an account?',
+      name: 'alreadyHaveAnAccount',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Password must be at least 8 characters long.`
+  String get passwordMinLength {
+    return Intl.message(
+      'Password must be at least 8 characters long.',
+      name: 'passwordMinLength',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Username must be at least 3 characters long.`
+  String get usernameMinLength {
+    return Intl.message(
+      'Username must be at least 3 characters long.',
+      name: 'usernameMinLength',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Username`
+  String get username {
+    return Intl.message('Username', name: 'username', desc: '', args: []);
+  }
+
+  /// `Please provide your username`
+  String get provideUsername {
+    return Intl.message(
+      'Please provide your username',
+      name: 'provideUsername',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please confirm your password`
+  String get pleaseConfirmPassword {
+    return Intl.message(
+      'Please confirm your password',
+      name: 'pleaseConfirmPassword',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Confirm Your Password`
+  String get confirmYourPassword {
+    return Intl.message(
+      'Confirm Your Password',
+      name: 'confirmYourPassword',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Your Birthday`
+  String get yourBirthday {
+    return Intl.message(
+      'Your Birthday',
+      name: 'yourBirthday',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please provide your birthday`
+  String get provideYourBirthday {
+    return Intl.message(
+      'Please provide your birthday',
+      name: 'provideYourBirthday',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Your gender`
+  String get yourGender {
+    return Intl.message('Your gender', name: 'yourGender', desc: '', args: []);
+  }
+
+  /// `Please provide your gender`
+  String get provideYourGender {
+    return Intl.message(
+      'Please provide your gender',
+      name: 'provideYourGender',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Male`
+  String get male {
+    return Intl.message('Male', name: 'male', desc: '', args: []);
+  }
+
+  /// `Female`
+  String get female {
+    return Intl.message('Female', name: 'female', desc: '', args: []);
   }
 }
 

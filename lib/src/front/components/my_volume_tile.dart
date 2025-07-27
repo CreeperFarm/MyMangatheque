@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:mymangatheque/src/const/const_info.dart';
+import 'package:intl/intl.dart';
+import 'package:mymangatheque/l10n/app_localizations.dart';
 import 'package:mymangatheque/src/const/own_icon.dart';
 import 'package:mymangatheque/src/function/auto_push_or_go.dart';
 
@@ -11,10 +12,26 @@ class MyVolumeTile extends StatelessWidget {
   final String initRoute;
   final bool? isVolumeOwned;
 
-  const MyVolumeTile({required this.volumeData, required this.subSerieData, required this.initRoute, this.isVolumeOwned, super.key});
+  MyVolumeTile({
+    required this.volumeData,
+    required this.subSerieData,
+    required this.initRoute,
+    this.isVolumeOwned,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
+    // Get localization - return early if not available
+    var localizations = AppLocalizations.of(context);
+    if (localizations == null) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
     final DateTime release = DateTime.parse(volumeData['release']);
     return Padding(
       padding: const EdgeInsets.all(5.0),
@@ -42,7 +59,7 @@ class MyVolumeTile extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Tome ${volumeData['tome_number']}',
+                        '${localizations.volume} ${volumeData['tome_number']}',
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -51,7 +68,7 @@ class MyVolumeTile extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                       ),
                       Text(
-                        '${release.day} ${month[release.month.toString()]} ${release.year}',
+                        DateFormat.yMMMMd(localizations).format(release),
                         style: const TextStyle(
                           fontSize: 13,
                         ),
@@ -62,7 +79,9 @@ class MyVolumeTile extends StatelessWidget {
                           ? SizedBox()
                           : Padding(
                               padding: const EdgeInsets.only(top: 1.0),
-                              child: MyCollectionBadge(),
+                              child: MyCollectionBadge(
+                                localizations: localizations,
+                              ),
                             ),
                     ],
                   ),

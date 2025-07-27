@@ -92,6 +92,7 @@ dependencies:
   connectivity_plus: ^6.1.2
   shared_preferences: ^2.5.3
   url_strategy: ^0.3.0
+  intl_utils: ^2.8.11
 
   # Need triage
 

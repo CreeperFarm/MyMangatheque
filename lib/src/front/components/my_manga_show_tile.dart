@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:mymangatheque/l10n/app_localizations.dart';
 import 'package:mymangatheque/src/back/services/pocketbase.dart';
 import 'package:mymangatheque/src/function/auto_push_or_go.dart';
 
@@ -47,6 +48,16 @@ class _MyMangaShowTileState extends State<MyMangaShowTile> {
 
   @override
   Widget build(BuildContext context) {
+    // Get localization - return early if not available
+    var localizations = AppLocalizations.of(context);
+    if (localizations == null) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
     return Padding(
       padding: const EdgeInsets.only(
         right: 10.0,
@@ -179,7 +190,7 @@ class _MyMangaShowTileState extends State<MyMangaShowTile> {
                                                       size: 20,
                                                     ),
                                                     Text(
-                                                      'Possédé',
+                                                      localizations.owned,
                                                       style: TextStyle(
                                                         color: Colors.white,
                                                         fontSize: 15,
@@ -222,7 +233,7 @@ class _MyMangaShowTileState extends State<MyMangaShowTile> {
                         bottom: 10.0,
                       ),
                       child: Text(
-                        'Tome ${widget.mangaData['tome_number']}',
+                        localizations.volumeNum(widget.mangaData['tome_number']),
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w300,

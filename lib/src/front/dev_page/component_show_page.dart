@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:mymangatheque/l10n/app_localizations.dart';
 import 'package:mymangatheque/src/front/components/my_button.dart';
+import 'package:mymangatheque/src/front/components/my_icon_text_button.dart';
 import 'package:mymangatheque/src/front/components/my_line.dart';
 import 'package:mymangatheque/src/front/components/my_picture_display.dart';
 import 'package:mymangatheque/src/front/components/my_scroll_column.dart';
@@ -8,13 +10,21 @@ import 'package:mymangatheque/src/front/components/my_text_divider.dart';
 import 'package:mymangatheque/src/front/components/my_textfield.dart';
 import 'package:mymangatheque/src/front/components/my_tome_number_show.dart';
 
-import '../components/my_icon_text_button.dart';
-
 class ComponentShowPage extends StatelessWidget {
   const ComponentShowPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // Get localization - return early if not available
+    var localizations = AppLocalizations.of(context);
+    if (localizations == null) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
     var controller = TextEditingController();
     return Scaffold(
         appBar: AppBar(
@@ -58,11 +68,12 @@ class ComponentShowPage extends StatelessWidget {
                   ],
                 )),
             const Text('MyTomeNumberShow(tomeTotal: string of the number of tome, editionTotal: string of the number of edition)'),
-            const Padding(
+            Padding(
               padding: EdgeInsets.all(10),
               child: MyTomeNumberShow(
                 tomeTotal: '22',
                 editionTotal: '18',
+                localizations: localizations,
               ),
             ),
             const Text('SquareTile(imagePath: imagePath (in local storage), onTap: () {})'),
