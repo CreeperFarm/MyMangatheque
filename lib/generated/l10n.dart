@@ -986,6 +986,24 @@ class AppLocalizations {
     return Intl.message('Other', name: 'other', desc: '', args: []);
   }
 
+  /// `{support, select, manga{Manga} novel{Novel} artbook{Artbook} lightNovel{Light Novel} boxSet{Box Set} other{Other}}`
+  String supportIs(String support) {
+    return Intl.select(
+      support,
+      {
+        'manga': 'Manga',
+        'novel': 'Novel',
+        'artbook': 'Artbook',
+        'lightNovel': 'Light Novel',
+        'boxSet': 'Box Set',
+        'other': 'Other',
+      },
+      name: 'supportIs',
+      desc: 'A message that indicates the type of support for the volume',
+      args: [support],
+    );
+  }
+
   /// `Volume Support`
   String get volumeSupport {
     return Intl.message(
@@ -1574,6 +1592,300 @@ class AppLocalizations {
   /// `Female`
   String get female {
     return Intl.message('Female', name: 'female', desc: '', args: []);
+  }
+
+  /// `Loading...`
+  String get loading {
+    return Intl.message('Loading...', name: 'loading', desc: '', args: []);
+  }
+
+  /// `Loading data, please wait...`
+  String get loadingData {
+    return Intl.message(
+      'Loading data, please wait...',
+      name: 'loadingData',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No connection`
+  String get noConnection {
+    return Intl.message(
+      'No connection',
+      name: 'noConnection',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{job, select, writerMen{Writer} writerWomen{Writer} artistMen{Artist} artistWomen{Artist} editorMen{Editor} editorWomen{Editor} illustratorMen{Illustrator} illustratorWomen{Illustrator} scriptwriterMen{Scriptwriter} scriptwriterWomen{Scriptwriter} authorMen{Author} authorWomen{Author} mangakaMen{Mangaka} mangakaWomen{Mangaka} charaDesignMen{Chara Design} charaDesignWomen{Chara Design} other{Other}}`
+  String jobsName(String job) {
+    return Intl.select(
+      job,
+      {
+        'writerMen': 'Writer',
+        'writerWomen': 'Writer',
+        'artistMen': 'Artist',
+        'artistWomen': 'Artist',
+        'editorMen': 'Editor',
+        'editorWomen': 'Editor',
+        'illustratorMen': 'Illustrator',
+        'illustratorWomen': 'Illustrator',
+        'scriptwriterMen': 'Scriptwriter',
+        'scriptwriterWomen': 'Scriptwriter',
+        'authorMen': 'Author',
+        'authorWomen': 'Author',
+        'mangakaMen': 'Mangaka',
+        'mangakaWomen': 'Mangaka',
+        'charaDesignMen': 'Chara Design',
+        'charaDesignWomen': 'Chara Design',
+        'other': 'Other',
+      },
+      name: 'jobsName',
+      desc: 'A placeholder for jobs name',
+      args: [job],
+    );
+  }
+
+  /// `{count, plural, =0 {Series} =1{Series} other {Series}}`
+  String seriesCount(num count) {
+    return Intl.plural(
+      count,
+      zero: 'Series',
+      one: 'Series',
+      other: 'Series',
+      name: 'seriesCount',
+      desc: 'A message that indicates the number of series',
+      args: [count],
+    );
+  }
+
+  /// `The author does not exist.`
+  String get authorDoesNotExist {
+    return Intl.message(
+      'The author does not exist.',
+      name: 'authorDoesNotExist',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The series does not exist.`
+  String get seriesDoesNotExist {
+    return Intl.message(
+      'The series does not exist.',
+      name: 'seriesDoesNotExist',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The sub-series does not exist.`
+  String get subSeriesDoesNotExist {
+    return Intl.message(
+      'The sub-series does not exist.',
+      name: 'subSeriesDoesNotExist',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The volume does not exist.`
+  String get volumeDoesNotExist {
+    return Intl.message(
+      'The volume does not exist.',
+      name: 'volumeDoesNotExist',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The editor does not exist.`
+  String get editorDoesNotExist {
+    return Intl.message(
+      'The editor does not exist.',
+      name: 'editorDoesNotExist',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Genres`
+  String get genres {
+    return Intl.message('Genres', name: 'genres', desc: '', args: []);
+  }
+
+  /// `Editors`
+  String get editors {
+    return Intl.message('Editors', name: 'editors', desc: '', args: []);
+  }
+
+  /// `Authors`
+  String get authors {
+    return Intl.message('Authors', name: 'authors', desc: '', args: []);
+  }
+
+  /// `Volumes`
+  String get volumes {
+    return Intl.message('Volumes', name: 'volumes', desc: '', args: []);
+  }
+
+  /// `Follow`
+  String get follow {
+    return Intl.message('Follow', name: 'follow', desc: '', args: []);
+  }
+
+  /// `Followed`
+  String get followed {
+    return Intl.message('Followed', name: 'followed', desc: '', args: []);
+  }
+
+  /// `Add`
+  String get add {
+    return Intl.message('Add', name: 'add', desc: '', args: []);
+  }
+
+  /// `Remove`
+  String get remove {
+    return Intl.message('Remove', name: 'remove', desc: '', args: []);
+  }
+
+  /// `Read`
+  String get read {
+    return Intl.message('Read', name: 'read', desc: '', args: []);
+  }
+
+  /// `Readed`
+  String get readed {
+    return Intl.message('Readed', name: 'readed', desc: '', args: []);
+  }
+
+  /// `Summary`
+  String get summary {
+    return Intl.message('Summary', name: 'summary', desc: '', args: []);
+  }
+
+  /// `See More`
+  String get seeMore {
+    return Intl.message('See More', name: 'seeMore', desc: '', args: []);
+  }
+
+  /// `See Less`
+  String get seeLess {
+    return Intl.message('See Less', name: 'seeLess', desc: '', args: []);
+  }
+
+  /// `Sadly, this volume is no longer available.`
+  String get volumeNotAvailableAnymore {
+    return Intl.message(
+      'Sadly, this volume is no longer available.',
+      name: 'volumeNotAvailableAnymore',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This volume is not available for sale.`
+  String get volumeNotAvailableForSale {
+    return Intl.message(
+      'This volume is not available for sale.',
+      name: 'volumeNotAvailableForSale',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Price`
+  String get price {
+    return Intl.message('Price', name: 'price', desc: '', args: []);
+  }
+
+  /// `{availability, select, inStock{In Stock} available{Available} unavailable{Unavailable} onPreorder{On Preorder} other{{availability}}}`
+  String availability(String availability) {
+    return Intl.select(
+      availability,
+      {
+        'inStock': 'In Stock',
+        'available': 'Available',
+        'unavailable': 'Unavailable',
+        'onPreorder': 'On Preorder',
+        'other': '$availability',
+      },
+      name: 'availability',
+      desc: 'A message that indicates the availability of a volume',
+      args: [availability],
+    );
+  }
+
+  /// `Shipping under {days} days`
+  String shippingUnderDays(num days) {
+    final NumberFormat daysNumberFormat = NumberFormat.compact(
+      locale: Intl.getCurrentLocale(),
+    );
+    final String daysString = daysNumberFormat.format(days);
+
+    return Intl.message(
+      'Shipping under $daysString days',
+      name: 'shippingUnderDays',
+      desc: 'A message that indicates the shipping time',
+      args: [daysString],
+    );
+  }
+
+  /// `Shipping under {count, select, 0 {0 weeks} 1{1 week} other{{count} weeks}}`
+  String shippingUnderWeeks(String count) {
+    return Intl.message(
+      'Shipping under {count, select, 0 {0 weeks} 1{1 week} other{$count weeks}}',
+      name: 'shippingUnderWeeks',
+      desc: 'A message that indicates the shipping time in weeks',
+      args: [count],
+    );
+  }
+
+  /// `Sold and shipped by {seller}`
+  String soldAndShippedBy(String seller) {
+    return Intl.message(
+      'Sold and shipped by $seller',
+      name: 'soldAndShippedBy',
+      desc: 'A message that indicates the seller of a volume',
+      args: [seller],
+    );
+  }
+
+  /// `Buy on {store}`
+  String buyOn(String store) {
+    return Intl.message(
+      'Buy on $store',
+      name: 'buyOn',
+      desc: 'A message that indicates where to buy a volume',
+      args: [store],
+    );
+  }
+
+  /// `Informations`
+  String get informations {
+    return Intl.message(
+      'Informations',
+      name: 'informations',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `EAN`
+  String get ean {
+    return Intl.message('EAN', name: 'ean', desc: '', args: []);
+  }
+
+  /// `Number of Pages`
+  String get numberOfPages {
+    return Intl.message(
+      'Number of Pages',
+      name: 'numberOfPages',
+      desc: '',
+      args: [],
+    );
   }
 }
 

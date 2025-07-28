@@ -68,7 +68,7 @@ class MyVolumeTile extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                       ),
                       Text(
-                        DateFormat.yMMMMd(localizations).format(release),
+                        DateFormat.yMMMMd(localizations.localeName).format(release),
                         style: const TextStyle(
                           fontSize: 13,
                         ),

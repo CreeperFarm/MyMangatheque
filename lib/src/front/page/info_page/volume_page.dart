@@ -2,10 +2,9 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_custom_tabs/flutter_custom_tabs_lite.dart';
-import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:mymangatheque/l10n/app_localizations.dart';
 import 'package:mymangatheque/src/back/services/pocketbase.dart';
-import 'package:mymangatheque/src/const/const_info.dart';
 import 'package:mymangatheque/src/const/own_icon.dart';
 import 'package:mymangatheque/src/front/components/my_author_tile.dart';
 import 'package:mymangatheque/src/front/components/my_editor_show.dart';
@@ -83,13 +82,23 @@ class _VolumePageState extends State<VolumePage> {
 
   @override
   Widget build(BuildContext context) {
+    // Get localization - return early if not available
+    var localizations = AppLocalizations.of(context);
+    if (localizations == null) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
     return FutureBuilder(
       future: connector.getOneExpand('volumes', widget.volumeId, 'authors,contains,editor,series.editors,sub_series'),
       builder: (BuildContext context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Scaffold(
             appBar: AppBar(
-              title: const Text("Chargement..."),
+              title: Text(localizations.loading),
             ),
             body: const Center(
               child: CircularProgressIndicator(),
@@ -98,20 +107,20 @@ class _VolumePageState extends State<VolumePage> {
         } else if (snapshot.connectionState == ConnectionState.none) {
           return Scaffold(
             appBar: AppBar(
-              title: Text("Aucune connexion"),
+              title: Text(localizations.noConnection),
             ),
             body: Center(
-              child: const Text("Aucune connexion"),
+              child: Text(localizations.noConnection),
             ),
           );
         } else if (snapshot.hasError) {
           debugPrint(snapshot.error.toString());
           return Scaffold(
             appBar: AppBar(
-              title: Text("Une erreur est survenue"),
+              title: Text(localizations.errorOccurred),
             ),
             body: Center(
-              child: const Text("Une erreur est survenue"),
+              child: Text(localizations.errorOccurred),
             ),
           );
         } else if (snapshot.hasData && snapshot.data != null) {
@@ -162,7 +171,7 @@ class _VolumePageState extends State<VolumePage> {
                           : Padding(
                               padding: const EdgeInsets.symmetric(vertical: 5),
                               child: Text(
-                                data['support'].toString().replaceAll('-', ' '),
+                                localizations.supportIs(data['support'].toString()),
                                 style: const TextStyle(
                                   fontSize: 30,
                                   fontWeight: FontWeight.w200,
@@ -230,7 +239,7 @@ class _VolumePageState extends State<VolumePage> {
                                       children: [
                                         (!isVolumeOwned) ? Icon(Icons.add) : Icon(Icons.check),
                                         Text(
-                                          (!isVolumeOwned) ? 'Ajouter' : 'Retirer',
+                                          (!isVolumeOwned) ? localizations.add : localizations.remove,
                                           style: TextStyle(
                                             fontSize: 15,
                                             color: (!isVolumeOwned) ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onPrimary,
@@ -294,7 +303,7 @@ class _VolumePageState extends State<VolumePage> {
                                       children: [
                                         (!isSubSeriesFollowed) ? Icon(Icons.bookmark_border) : Icon(Icons.bookmark),
                                         Text(
-                                          (!isSubSeriesFollowed) ? 'Suivre' : 'Suivie',
+                                          (!isSubSeriesFollowed) ? localizations.follow : localizations.followed,
                                           style: TextStyle(
                                             fontSize: 15,
                                             color: (!isSubSeriesFollowed)
@@ -352,7 +361,7 @@ class _VolumePageState extends State<VolumePage> {
                                           }
                                         },
                                         label: Text(
-                                          (!isVolumeReaded) ? 'Lire' : 'Lu',
+                                          (!isVolumeReaded) ? localizations.read : localizations.readed,
                                           style: TextStyle(
                                             fontSize: 15,
                                             color:
@@ -378,7 +387,7 @@ class _VolumePageState extends State<VolumePage> {
                               ? Padding(
                                   padding: const EdgeInsets.symmetric(vertical: 5),
                                   child: Text(
-                                    'Auteur :',
+                                    '${localizations.author} :',
                                     style: const TextStyle(
                                       fontSize: 20,
                                       fontWeight: FontWeight.bold,
@@ -388,7 +397,7 @@ class _VolumePageState extends State<VolumePage> {
                               : Padding(
                                   padding: const EdgeInsets.symmetric(vertical: 5),
                                   child: Text(
-                                    'Auteurs :',
+                                    '${localizations.authors} :',
                                     style: const TextStyle(
                                       fontSize: 20,
                                       fontWeight: FontWeight.bold,
@@ -423,7 +432,7 @@ class _VolumePageState extends State<VolumePage> {
                                   horizontal: 0,
                                 ),
                                 Text(
-                                  'Résumé :',
+                                  '${localizations.summary} :',
                                   style: const TextStyle(
                                     fontSize: 20,
                                     fontWeight: FontWeight.bold,
@@ -449,7 +458,7 @@ class _VolumePageState extends State<VolumePage> {
                                       showMore = !showMore;
                                     }),
                                     child: Text(
-                                      (showMore) ? "Voir moins" : "Voir plus",
+                                      (showMore) ? localizations.seeMore : localizations.seeLess,
                                       style: const TextStyle(
                                         color: Colors.blue,
                                         fontSize: 15,
@@ -470,7 +479,7 @@ class _VolumePageState extends State<VolumePage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Éditeur :',
+                              '${localizations.editor} :',
                               style: const TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
@@ -494,7 +503,7 @@ class _VolumePageState extends State<VolumePage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Série :',
+                              '${localizations.series} :',
                               style: const TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
@@ -514,7 +523,7 @@ class _VolumePageState extends State<VolumePage> {
                       ),
                       (data['price'] == 0 || data['price'] == -1)
                           ? Text(
-                              'Malheureusement, ce volume n\'est plus disponible à la vente.',
+                              localizations.volumeNotAvailableAnymore,
                               style: const TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
@@ -526,7 +535,7 @@ class _VolumePageState extends State<VolumePage> {
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text(
-                                      'Prix : ${NumberFormat.currency(locale: "fr_FR", symbol: "€", decimalDigits: 2).format(data['price'])}',
+                                      '${localizations.price} : ${NumberFormat.currency(locale: "fr_FR", symbol: "€", decimalDigits: 2).format(data['price'])}',
                                       style: const TextStyle(
                                         fontSize: 18,
                                         fontWeight: FontWeight.bold,
@@ -565,25 +574,38 @@ class _VolumePageState extends State<VolumePage> {
                                             (data['book_link'][i]['seller'] != "bdfugue")
                                                 ? SizedBox()
                                                 : (data['price'] == "0" || data['price'] == "-1")
-                                                    ? Text("Malheureusement, ce volume n'est pas disponible à la vente.")
+                                                    ? Text(localizations.volumeNotAvailableForSale)
                                                     : Column(
                                                         children: [
                                                           Row(
                                                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                                             children: [
                                                               Text(
-                                                                data["book_link"][i]["available"].toString(),
+                                                                (data["book_link"][i]["available"].contains("shippingUnder")! == false)
+                                                                    ? localizations.availability(data["book_link"][i]["available"])
+                                                                    : (data["book_link"][i]["available"].contains("Days"))
+                                                                        ? localizations.shippingUnderDays(
+                                                                            data["book_link"][i]["available"]
+                                                                                .replace("shippingUnder", "")
+                                                                                .replaces("days", "")
+                                                                                .replace(" ", ""),
+                                                                          )
+                                                                        : localizations.shippingUnderWeeks(
+                                                                            data["book_link"][i]["available"]
+                                                                                .replace("shippingUnder", "")
+                                                                                .replaces("week", "")
+                                                                                .replace("s", "")
+                                                                                .replace(" ", ""),
+                                                                          ),
                                                                 style: TextStyle(
                                                                   fontSize: 15,
-                                                                  color: (data["book_link"][i]["available"] == "En Stock" ||
-                                                                          data["book_link"][i]["available"] == "Disponible")
+                                                                  color: (data["book_link"][i]["available"] == "inStock" ||
+                                                                          data["book_link"][i]["available"] == "availanle")
                                                                       ? Colors.green
-                                                                      : (data["book_link"][i]["available"] == "En Précommande" ||
-                                                                              data["book_link"][i]["available"] == "En Precommande" ||
-                                                                              data["book_link"][i]["available"] == "Precommande" ||
-                                                                              data["book_link"][i]["available"] == "Précommande")
+                                                                      : (data["book_link"][i]["available"] == "onPreorder" ||
+                                                                              data["book_link"][i]["available"] == "preorder")
                                                                           ? Colors.blue
-                                                                          : (data["book_link"][i]["available"].contains("Livraison sous"))
+                                                                          : (data["book_link"][i]["available"].contains("shippingUnder"))
                                                                               ? Colors.orange
                                                                               : Colors.red,
                                                                 ),
@@ -591,7 +613,13 @@ class _VolumePageState extends State<VolumePage> {
                                                               SizedBox(
                                                                 height: 10,
                                                               ),
-                                                              Text("Vendu et expédié par BDfugue."),
+                                                              Text(
+                                                                localizations.soldAndShippedBy(
+                                                                  data["book_link"][i]["seller"].toString() == "bdfugue"
+                                                                      ? "BDFugue"
+                                                                      : data["book_link"][i]["seller"].toString(),
+                                                                ),
+                                                              ),
                                                             ],
                                                           ),
                                                           ElevatedButton(
@@ -615,7 +643,11 @@ class _VolumePageState extends State<VolumePage> {
                                                                   width: 10,
                                                                 ),
                                                                 Text(
-                                                                  "Acheter sur BDfugue",
+                                                                  localizations.buyOn(
+                                                                    data["book_link"][i]["seller"].toString() == "bdfugue"
+                                                                        ? "BDFugue"
+                                                                        : data["book_link"][i]["seller"].toString(),
+                                                                  ),
                                                                   style: TextStyle(
                                                                     color: Theme.of(context).colorScheme.primary,
                                                                     fontWeight: FontWeight.bold,
@@ -637,7 +669,7 @@ class _VolumePageState extends State<VolumePage> {
                         horizontal: 0,
                       ),
                       Text(
-                        'Informations :',
+                        '${localizations.informations} :',
                         style: const TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
@@ -654,7 +686,7 @@ class _VolumePageState extends State<VolumePage> {
                                     padding: const EdgeInsets.symmetric(vertical: 5),
                                     child: MyIconTextLabel(
                                       iconName: 'calendar',
-                                      text: 'Date de sortie: ${release.day} ${month[release.month.toString()]} ${release.year}',
+                                      text: '${localizations.publicationDate} : ${DateFormat.yMMMMd(localizations.localeName).format(release)}',
                                       heightIcon: 30,
                                     ),
                                   ),
@@ -664,7 +696,7 @@ class _VolumePageState extends State<VolumePage> {
                                     padding: const EdgeInsets.symmetric(vertical: 5),
                                     child: MyIconTextLabel(
                                       iconName: 'barcode',
-                                      text: 'EAN : ${data['ean']}',
+                                      text: '${localizations.ean} : ${data['ean']}',
                                       heightIcon: 30,
                                     ),
                                   ),
@@ -674,7 +706,7 @@ class _VolumePageState extends State<VolumePage> {
                                     padding: const EdgeInsets.symmetric(vertical: 5),
                                     child: MyIconTextLabel(
                                       iconName: 'book_open',
-                                      text: "Nombre de page : ${data['info']['pageNumber'].toString()}",
+                                      text: "${localizations.numberOfPages} : ${data['info']['pageNumber'].toString()}",
                                       heightIcon: 30,
                                     ),
                                   ),

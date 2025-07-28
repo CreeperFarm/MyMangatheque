@@ -25,27 +25,48 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m1(appVersion, buildVersion) =>
       "App Version: ${appVersion} & Build Version: ${buildVersion}";
 
-  static String m2(date) => "Your birthday is on ${date}";
+  static String m2(availability) =>
+      "${Intl.select(availability, {'inStock': 'In Stock', 'available': 'Available', 'unavailable': 'Unavailable', 'onPreorder': 'On Preorder', 'other': '${availability}'})}";
 
-  static String m3(email) => "Your email is ${email}";
+  static String m3(date) => "Your birthday is on ${date}";
 
-  static String m4(count) =>
+  static String m4(store) => "Buy on ${store}";
+
+  static String m5(email) => "Your email is ${email}";
+
+  static String m6(count) =>
       "${Intl.plural(count, zero: 'You have 0 favorite series', one: 'You have 1 favorite series', other: 'You have ${count} favorite series')}";
 
-  static String m5(maxLength) =>
+  static String m7(job) =>
+      "${Intl.select(job, {'writerMen': 'Writer', 'writerWomen': 'Writer', 'artistMen': 'Artist', 'artistWomen': 'Artist', 'editorMen': 'Editor', 'editorWomen': 'Editor', 'illustratorMen': 'Illustrator', 'illustratorWomen': 'Illustrator', 'scriptwriterMen': 'Scriptwriter', 'scriptwriterWomen': 'Scriptwriter', 'authorMen': 'Author', 'authorWomen': 'Author', 'mangakaMen': 'Mangaka', 'mangakaWomen': 'Mangaka', 'charaDesignMen': 'Chara Design', 'charaDesignWomen': 'Chara Design', 'other': 'Other'})}";
+
+  static String m8(maxLength) =>
       "The maximum allowed number of characters is ${maxLength}.";
 
-  static String m6(minLength) =>
+  static String m9(minLength) =>
       "The minimum required number of characters is ${minLength}.";
 
-  static String m7(gender) =>
+  static String m10(gender) =>
       "${Intl.gender(gender, female: 'she', male: 'he', other: 'they')}";
 
-  static String m8(username) => "Your username is ${username}";
+  static String m11(count) =>
+      "${Intl.plural(count, zero: 'Series', one: 'Series', other: 'Series')}";
 
-  static String m9(count) => "Volume ${count}";
+  static String m12(days) => "Shipping under ${days} days";
 
-  static String m10(count) =>
+  static String m13(count) =>
+      "Shipping under {count, select, 0 {0 weeks} 1{1 week} other{${count} weeks}}";
+
+  static String m14(seller) => "Sold and shipped by ${seller}";
+
+  static String m15(support) =>
+      "${Intl.select(support, {'manga': 'Manga', 'novel': 'Novel', 'artbook': 'Artbook', 'lightNovel': 'Light Novel', 'boxSet': 'Box Set', 'other': 'Other'})}";
+
+  static String m16(username) => "Your username is ${username}";
+
+  static String m17(count) => "Volume ${count}";
+
+  static String m18(count) =>
       "${Intl.plural(count, zero: 'You own 0 volume', one: 'You own 1 volume', other: 'You own ${count} volumes')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -54,6 +75,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "accountEmail": MessageLookupByLibrary.simpleMessage(
       "Email of the Account",
     ),
+    "add": MessageLookupByLibrary.simpleMessage("Add"),
     "adminHomePage": MessageLookupByLibrary.simpleMessage("Admin Home Page"),
     "adminHomePageDescription": MessageLookupByLibrary.simpleMessage(
       "Welcome on the admin home page. This is the admin home page where you can manage authors, genres, and volumes.",
@@ -81,6 +103,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "authorAddSuccess": MessageLookupByLibrary.simpleMessage(
       "Author successfully added.",
     ),
+    "authorDoesNotExist": MessageLookupByLibrary.simpleMessage(
+      "The author does not exist.",
+    ),
     "authorDuplicate": MessageLookupByLibrary.simpleMessage(
       "An author with this name already exists.",
     ),
@@ -88,8 +113,11 @@ class MessageLookup extends MessageLookupByLibrary {
       "Author Jobs (separated by commas)",
     ),
     "authorName": MessageLookupByLibrary.simpleMessage("Author Name"),
-    "birthdayDateIs": m2,
+    "authors": MessageLookupByLibrary.simpleMessage("Authors"),
+    "availability": m2,
+    "birthdayDateIs": m3,
     "boxSet": MessageLookupByLibrary.simpleMessage("Box Set"),
+    "buyOn": m4,
     "chooseVolumeLanguage": MessageLookupByLibrary.simpleMessage(
       "Please choose the language of the volume",
     ),
@@ -127,9 +155,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "deleteAccountSuccess": MessageLookupByLibrary.simpleMessage(
       "Your account has been successfully deleted.",
     ),
+    "ean": MessageLookupByLibrary.simpleMessage("EAN"),
     "edition": MessageLookupByLibrary.simpleMessage("Edition"),
     "editor": MessageLookupByLibrary.simpleMessage("Editor"),
-    "emailIs": m3,
+    "editorDoesNotExist": MessageLookupByLibrary.simpleMessage(
+      "The editor does not exist.",
+    ),
+    "editors": MessageLookupByLibrary.simpleMessage("Editors"),
+    "emailIs": m5,
     "emailResetSent": MessageLookupByLibrary.simpleMessage(
       "A password reset email has been sent to your email address.",
     ),
@@ -140,9 +173,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "errorOccurred": MessageLookupByLibrary.simpleMessage(
       "An error occurred, please try again later.",
     ),
-    "favoriteSeriesNumber": m4,
+    "favoriteSeriesNumber": m6,
     "february": MessageLookupByLibrary.simpleMessage("February"),
     "female": MessageLookupByLibrary.simpleMessage("Female"),
+    "follow": MessageLookupByLibrary.simpleMessage("Follow"),
+    "followed": MessageLookupByLibrary.simpleMessage("Followed"),
     "french": MessageLookupByLibrary.simpleMessage("French"),
     "genre": MessageLookupByLibrary.simpleMessage("Genre"),
     "genreAdd": MessageLookupByLibrary.simpleMessage("Add Genre"),
@@ -153,9 +188,11 @@ class MessageLookup extends MessageLookupByLibrary {
       "A genre with this name already exists.",
     ),
     "genreName": MessageLookupByLibrary.simpleMessage("Genre Name"),
+    "genres": MessageLookupByLibrary.simpleMessage("Genres"),
     "german": MessageLookupByLibrary.simpleMessage("German"),
     "helloWorld": MessageLookupByLibrary.simpleMessage("Hello World!"),
     "home": MessageLookupByLibrary.simpleMessage("Home"),
+    "informations": MessageLookupByLibrary.simpleMessage("Informations"),
     "invalidEmail": MessageLookupByLibrary.simpleMessage(
       "The email address is invalid.",
     ),
@@ -163,11 +200,16 @@ class MessageLookup extends MessageLookupByLibrary {
     "italian": MessageLookupByLibrary.simpleMessage("Italian"),
     "january": MessageLookupByLibrary.simpleMessage("January"),
     "japanese": MessageLookupByLibrary.simpleMessage("Japanese"),
+    "jobsName": m7,
     "july": MessageLookupByLibrary.simpleMessage("July"),
     "june": MessageLookupByLibrary.simpleMessage("June"),
     "legalNotice": MessageLookupByLibrary.simpleMessage("Legal Notice"),
     "lightMode": MessageLookupByLibrary.simpleMessage("Light Mode"),
     "lightNovel": MessageLookupByLibrary.simpleMessage("Light Novel"),
+    "loading": MessageLookupByLibrary.simpleMessage("Loading..."),
+    "loadingData": MessageLookupByLibrary.simpleMessage(
+      "Loading data, please wait...",
+    ),
     "logIn": MessageLookupByLibrary.simpleMessage("Log In"),
     "logInFailed": MessageLookupByLibrary.simpleMessage(
       "An error occurred, you have not been connected to your account.",
@@ -189,9 +231,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "male": MessageLookupByLibrary.simpleMessage("Male"),
     "manga": MessageLookupByLibrary.simpleMessage("Manga"),
     "march": MessageLookupByLibrary.simpleMessage("March"),
-    "maxLengthExceeded": m5,
+    "maxLengthExceeded": m8,
     "may": MessageLookupByLibrary.simpleMessage("May"),
-    "minLengthNotReached": m6,
+    "minLengthNotReached": m9,
     "modifyPassword": MessageLookupByLibrary.simpleMessage("Modify Password"),
     "modifyPasswordSuccess": MessageLookupByLibrary.simpleMessage(
       "Password successfully changed.",
@@ -200,8 +242,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "noAccountYet": MessageLookupByLibrary.simpleMessage(
       "Don\'t have an account yet?",
     ),
+    "noConnection": MessageLookupByLibrary.simpleMessage("No connection"),
     "novel": MessageLookupByLibrary.simpleMessage("Novel"),
     "november": MessageLookupByLibrary.simpleMessage("November"),
+    "numberOfPages": MessageLookupByLibrary.simpleMessage("Number of Pages"),
     "october": MessageLookupByLibrary.simpleMessage("October"),
     "oldPassword": MessageLookupByLibrary.simpleMessage("Old Password"),
     "orContinueWith": MessageLookupByLibrary.simpleMessage("Or continue with"),
@@ -225,11 +269,12 @@ class MessageLookup extends MessageLookupByLibrary {
       "Please select a date",
     ),
     "pleaseWait": MessageLookupByLibrary.simpleMessage("Please wait..."),
+    "price": MessageLookupByLibrary.simpleMessage("Price"),
     "profile": MessageLookupByLibrary.simpleMessage("Profile"),
     "profileSettings": MessageLookupByLibrary.simpleMessage(
       "Profile & Settings Page",
     ),
-    "pronoun": m7,
+    "pronoun": m10,
     "provideAccountEmail": MessageLookupByLibrary.simpleMessage(
       "Please provide the email of the account",
     ),
@@ -319,23 +364,40 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "publicationDate": MessageLookupByLibrary.simpleMessage("Publication Date"),
     "publisher": MessageLookupByLibrary.simpleMessage("Publisher"),
+    "read": MessageLookupByLibrary.simpleMessage("Read"),
+    "readed": MessageLookupByLibrary.simpleMessage("Readed"),
+    "remove": MessageLookupByLibrary.simpleMessage("Remove"),
     "scanner": MessageLookupByLibrary.simpleMessage("Scanner"),
     "scannerDescription": MessageLookupByLibrary.simpleMessage(
       "Scan the barcode of your volume to add it to your collection.",
     ),
     "search": MessageLookupByLibrary.simpleMessage("Search"),
+    "seeLess": MessageLookupByLibrary.simpleMessage("See Less"),
+    "seeMore": MessageLookupByLibrary.simpleMessage("See More"),
     "selectDate": MessageLookupByLibrary.simpleMessage("Select Date"),
     "september": MessageLookupByLibrary.simpleMessage("September"),
     "series": MessageLookupByLibrary.simpleMessage("Series"),
+    "seriesCount": m11,
+    "seriesDoesNotExist": MessageLookupByLibrary.simpleMessage(
+      "The series does not exist.",
+    ),
     "seriesIdOfAuthor": MessageLookupByLibrary.simpleMessage(
       "Series ID of the Author",
     ),
+    "shippingUnderDays": m12,
+    "shippingUnderWeeks": m13,
     "signIn": MessageLookupByLibrary.simpleMessage("Sign In"),
     "signInPage": MessageLookupByLibrary.simpleMessage("Sign In Page"),
     "signUp": MessageLookupByLibrary.simpleMessage("Sign Up"),
     "signUpPage": MessageLookupByLibrary.simpleMessage("Sign Up Page"),
+    "soldAndShippedBy": m14,
     "spanish": MessageLookupByLibrary.simpleMessage("Spanish"),
     "subSeries": MessageLookupByLibrary.simpleMessage("Sub-Series"),
+    "subSeriesDoesNotExist": MessageLookupByLibrary.simpleMessage(
+      "The sub-series does not exist.",
+    ),
+    "summary": MessageLookupByLibrary.simpleMessage("Summary"),
+    "supportIs": m15,
     "systemMode": MessageLookupByLibrary.simpleMessage("System Mode"),
     "userLoginFailed": MessageLookupByLibrary.simpleMessage(
       "An error occurred, you have not been connected to your account.",
@@ -344,7 +406,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "You have successfully logged in.",
     ),
     "username": MessageLookupByLibrary.simpleMessage("Username"),
-    "usernameIs": m8,
+    "usernameIs": m16,
     "usernameMinLength": MessageLookupByLibrary.simpleMessage(
       "Username must be at least 3 characters long.",
     ),
@@ -359,14 +421,23 @@ class MessageLookup extends MessageLookupByLibrary {
     "volumeAuthorsIds": MessageLookupByLibrary.simpleMessage(
       "Volume Authors IDs",
     ),
+    "volumeDoesNotExist": MessageLookupByLibrary.simpleMessage(
+      "The volume does not exist.",
+    ),
     "volumeEAN": MessageLookupByLibrary.simpleMessage("EAN of the Volume"),
     "volumeEditorId": MessageLookupByLibrary.simpleMessage("Volume Editor ID"),
     "volumeInfo": MessageLookupByLibrary.simpleMessage("Volume Information"),
     "volumeLanguage": MessageLookupByLibrary.simpleMessage("Volume Language"),
     "volumeLink": MessageLookupByLibrary.simpleMessage("Volume Link"),
-    "volumeNum": m9,
+    "volumeNotAvailableAnymore": MessageLookupByLibrary.simpleMessage(
+      "Sadly, this volume is no longer available.",
+    ),
+    "volumeNotAvailableForSale": MessageLookupByLibrary.simpleMessage(
+      "This volume is not available for sale.",
+    ),
+    "volumeNum": m17,
     "volumeNumber": MessageLookupByLibrary.simpleMessage("Volume Number"),
-    "volumeOwnedNumber": m10,
+    "volumeOwnedNumber": m18,
     "volumePrice": MessageLookupByLibrary.simpleMessage("Volume Price"),
     "volumeSeriesId": MessageLookupByLibrary.simpleMessage("Volume Series ID"),
     "volumeSubSeriesId": MessageLookupByLibrary.simpleMessage(
@@ -375,6 +446,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "volumeSummary": MessageLookupByLibrary.simpleMessage("Volume Summary"),
     "volumeSupport": MessageLookupByLibrary.simpleMessage("Volume Support"),
     "volumeTitle": MessageLookupByLibrary.simpleMessage("Volume Title"),
+    "volumes": MessageLookupByLibrary.simpleMessage("Volumes"),
     "whyLogInDescription": MessageLookupByLibrary.simpleMessage(
       "Log in to access your collection, manage your profile, and enjoy personalized features.",
     ),

@@ -788,6 +788,12 @@ abstract class AppLocalizations {
   /// **'Other'**
   String get other;
 
+  /// A message that indicates the type of support for the volume
+  ///
+  /// In en, this message translates to:
+  /// **'{support, select, manga{Manga} novel{Novel} artbook{Artbook} lightNovel{Light Novel} boxSet{Box Set} other{Other}}'**
+  String supportIs(String support);
+
   /// No description provided for @volumeSupport.
   ///
   /// In en, this message translates to:
@@ -1183,6 +1189,210 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Female'**
   String get female;
+
+  /// No description provided for @loading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading...'**
+  String get loading;
+
+  /// No description provided for @loadingData.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading data, please wait...'**
+  String get loadingData;
+
+  /// No description provided for @noConnection.
+  ///
+  /// In en, this message translates to:
+  /// **'No connection'**
+  String get noConnection;
+
+  /// A placeholder for jobs name
+  ///
+  /// In en, this message translates to:
+  /// **'{job, select, writerMen{Writer} writerWomen{Writer} artistMen{Artist} artistWomen{Artist} editorMen{Editor} editorWomen{Editor} illustratorMen{Illustrator} illustratorWomen{Illustrator} scriptwriterMen{Scriptwriter} scriptwriterWomen{Scriptwriter} authorMen{Author} authorWomen{Author} mangakaMen{Mangaka} mangakaWomen{Mangaka} charaDesignMen{Chara Design} charaDesignWomen{Chara Design} other{Other}}'**
+  String jobsName(String job);
+
+  /// A message that indicates the number of series
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0 {Series} =1{Series} other {Series}}'**
+  String seriesCount(num count);
+
+  /// No description provided for @authorDoesNotExist.
+  ///
+  /// In en, this message translates to:
+  /// **'The author does not exist.'**
+  String get authorDoesNotExist;
+
+  /// No description provided for @seriesDoesNotExist.
+  ///
+  /// In en, this message translates to:
+  /// **'The series does not exist.'**
+  String get seriesDoesNotExist;
+
+  /// No description provided for @subSeriesDoesNotExist.
+  ///
+  /// In en, this message translates to:
+  /// **'The sub-series does not exist.'**
+  String get subSeriesDoesNotExist;
+
+  /// No description provided for @volumeDoesNotExist.
+  ///
+  /// In en, this message translates to:
+  /// **'The volume does not exist.'**
+  String get volumeDoesNotExist;
+
+  /// No description provided for @editorDoesNotExist.
+  ///
+  /// In en, this message translates to:
+  /// **'The editor does not exist.'**
+  String get editorDoesNotExist;
+
+  /// No description provided for @genres.
+  ///
+  /// In en, this message translates to:
+  /// **'Genres'**
+  String get genres;
+
+  /// No description provided for @editors.
+  ///
+  /// In en, this message translates to:
+  /// **'Editors'**
+  String get editors;
+
+  /// No description provided for @authors.
+  ///
+  /// In en, this message translates to:
+  /// **'Authors'**
+  String get authors;
+
+  /// No description provided for @volumes.
+  ///
+  /// In en, this message translates to:
+  /// **'Volumes'**
+  String get volumes;
+
+  /// No description provided for @follow.
+  ///
+  /// In en, this message translates to:
+  /// **'Follow'**
+  String get follow;
+
+  /// No description provided for @followed.
+  ///
+  /// In en, this message translates to:
+  /// **'Followed'**
+  String get followed;
+
+  /// No description provided for @add.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get add;
+
+  /// No description provided for @remove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get remove;
+
+  /// No description provided for @read.
+  ///
+  /// In en, this message translates to:
+  /// **'Read'**
+  String get read;
+
+  /// No description provided for @readed.
+  ///
+  /// In en, this message translates to:
+  /// **'Readed'**
+  String get readed;
+
+  /// No description provided for @summary.
+  ///
+  /// In en, this message translates to:
+  /// **'Summary'**
+  String get summary;
+
+  /// No description provided for @seeMore.
+  ///
+  /// In en, this message translates to:
+  /// **'See More'**
+  String get seeMore;
+
+  /// No description provided for @seeLess.
+  ///
+  /// In en, this message translates to:
+  /// **'See Less'**
+  String get seeLess;
+
+  /// No description provided for @volumeNotAvailableAnymore.
+  ///
+  /// In en, this message translates to:
+  /// **'Sadly, this volume is no longer available.'**
+  String get volumeNotAvailableAnymore;
+
+  /// No description provided for @volumeNotAvailableForSale.
+  ///
+  /// In en, this message translates to:
+  /// **'This volume is not available for sale.'**
+  String get volumeNotAvailableForSale;
+
+  /// No description provided for @price.
+  ///
+  /// In en, this message translates to:
+  /// **'Price'**
+  String get price;
+
+  /// A message that indicates the availability of a volume
+  ///
+  /// In en, this message translates to:
+  /// **'{availability, select, inStock{In Stock} available{Available} unavailable{Unavailable} onPreorder{On Preorder} other{{availability}}}'**
+  String availability(String availability);
+
+  /// A message that indicates the shipping time
+  ///
+  /// In en, this message translates to:
+  /// **'Shipping under {days} days'**
+  String shippingUnderDays(num days);
+
+  /// A message that indicates the shipping time in weeks
+  ///
+  /// In en, this message translates to:
+  /// **'Shipping under {count, select, 0 {0 weeks} 1{1 week} other{{count} weeks}}'**
+  String shippingUnderWeeks(String count);
+
+  /// A message that indicates the seller of a volume
+  ///
+  /// In en, this message translates to:
+  /// **'Sold and shipped by {seller}'**
+  String soldAndShippedBy(String seller);
+
+  /// A message that indicates where to buy a volume
+  ///
+  /// In en, this message translates to:
+  /// **'Buy on {store}'**
+  String buyOn(String store);
+
+  /// No description provided for @informations.
+  ///
+  /// In en, this message translates to:
+  /// **'Informations'**
+  String get informations;
+
+  /// No description provided for @ean.
+  ///
+  /// In en, this message translates to:
+  /// **'EAN'**
+  String get ean;
+
+  /// No description provided for @numberOfPages.
+  ///
+  /// In en, this message translates to:
+  /// **'Number of Pages'**
+  String get numberOfPages;
 }
 
 class _AppLocalizationsDelegate

@@ -434,6 +434,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get other => 'Other';
 
   @override
+  String supportIs(String support) {
+    String _temp0 = intl.Intl.selectLogic(
+      support,
+      {
+        'manga': 'Manga',
+        'novel': 'Novel',
+        'artbook': 'Artbook',
+        'lightNovel': 'Light Novel',
+        'boxSet': 'Box Set',
+        'other': 'Other',
+      },
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get volumeSupport => 'Volume Support';
 
   @override
@@ -647,4 +663,179 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get female => 'Female';
+
+  @override
+  String get loading => 'Loading...';
+
+  @override
+  String get loadingData => 'Loading data, please wait...';
+
+  @override
+  String get noConnection => 'No connection';
+
+  @override
+  String jobsName(String job) {
+    String _temp0 = intl.Intl.selectLogic(
+      job,
+      {
+        'writerMen': 'Writer',
+        'writerWomen': 'Writer',
+        'artistMen': 'Artist',
+        'artistWomen': 'Artist',
+        'editorMen': 'Editor',
+        'editorWomen': 'Editor',
+        'illustratorMen': 'Illustrator',
+        'illustratorWomen': 'Illustrator',
+        'scriptwriterMen': 'Scriptwriter',
+        'scriptwriterWomen': 'Scriptwriter',
+        'authorMen': 'Author',
+        'authorWomen': 'Author',
+        'mangakaMen': 'Mangaka',
+        'mangakaWomen': 'Mangaka',
+        'charaDesignMen': 'Chara Design',
+        'charaDesignWomen': 'Chara Design',
+        'other': 'Other',
+      },
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String seriesCount(num count) {
+    final intl.NumberFormat countNumberFormat = intl.NumberFormat.compact(
+      locale: localeName,
+    );
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Series',
+      one: 'Series',
+      zero: 'Series',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get authorDoesNotExist => 'The author does not exist.';
+
+  @override
+  String get seriesDoesNotExist => 'The series does not exist.';
+
+  @override
+  String get subSeriesDoesNotExist => 'The sub-series does not exist.';
+
+  @override
+  String get volumeDoesNotExist => 'The volume does not exist.';
+
+  @override
+  String get editorDoesNotExist => 'The editor does not exist.';
+
+  @override
+  String get genres => 'Genres';
+
+  @override
+  String get editors => 'Editors';
+
+  @override
+  String get authors => 'Authors';
+
+  @override
+  String get volumes => 'Volumes';
+
+  @override
+  String get follow => 'Follow';
+
+  @override
+  String get followed => 'Followed';
+
+  @override
+  String get add => 'Add';
+
+  @override
+  String get remove => 'Remove';
+
+  @override
+  String get read => 'Read';
+
+  @override
+  String get readed => 'Readed';
+
+  @override
+  String get summary => 'Summary';
+
+  @override
+  String get seeMore => 'See More';
+
+  @override
+  String get seeLess => 'See Less';
+
+  @override
+  String get volumeNotAvailableAnymore =>
+      'Sadly, this volume is no longer available.';
+
+  @override
+  String get volumeNotAvailableForSale =>
+      'This volume is not available for sale.';
+
+  @override
+  String get price => 'Price';
+
+  @override
+  String availability(String availability) {
+    String _temp0 = intl.Intl.selectLogic(
+      availability,
+      {
+        'inStock': 'In Stock',
+        'available': 'Available',
+        'unavailable': 'Unavailable',
+        'onPreorder': 'On Preorder',
+        'other': '$availability',
+      },
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String shippingUnderDays(num days) {
+    final intl.NumberFormat daysNumberFormat = intl.NumberFormat.compact(
+      locale: localeName,
+    );
+    final String daysString = daysNumberFormat.format(days);
+
+    return 'Shipping under $daysString days';
+  }
+
+  @override
+  String shippingUnderWeeks(String count) {
+    String _temp0 = intl.Intl.selectLogic(
+      count,
+      {
+        '0': '0 weeks',
+        '1': '1 week',
+        'other': '$count weeks',
+      },
+    );
+    return 'Shipping under $_temp0';
+  }
+
+  @override
+  String soldAndShippedBy(String seller) {
+    return 'Sold and shipped by $seller';
+  }
+
+  @override
+  String buyOn(String store) {
+    return 'Buy on $store';
+  }
+
+  @override
+  String get informations => 'Informations';
+
+  @override
+  String get ean => 'EAN';
+
+  @override
+  String get numberOfPages => 'Number of Pages';
 }

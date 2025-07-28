@@ -211,6 +211,15 @@
   "lightNovel": "Light Novel",
   "boxSet": "Box Set",
   "other": "Other",
+  "supportIs": "{support, select, manga{Manga} novel{Novel} artbook{Artbook} lightNovel{Light Novel} boxSet{Box Set} other{Other}}",
+  "@supportIs": {
+    "description": "A message that indicates the type of support for the volume",
+    "placeholders": {
+      "support": {
+        "type": "String"
+      }
+    }
+  },
   "volumeSupport": "Volume Support",
   "chooseVolumeSupport": "Please choose the support of the volume",
   "selectDate": "Select Date",
@@ -276,5 +285,97 @@
   "yourGender": "Your gender",
   "provideYourGender": "Please provide your gender",
   "male": "Male",
-  "female": "Female"
+  "female": "Female",
+  "loading": "Loading...",
+  "loadingData": "Loading data, please wait...",
+  "noConnection": "No connection",
+  "jobsName": "{job, select, writerMen{Writer} writerWomen{Writer} artistMen{Artist} artistWomen{Artist} editorMen{Editor} editorWomen{Editor} illustratorMen{Illustrator} illustratorWomen{Illustrator} scriptwriterMen{Scriptwriter} scriptwriterWomen{Scriptwriter} authorMen{Author} authorWomen{Author} mangakaMen{Mangaka} mangakaWomen{Mangaka} charaDesignMen{Chara Design} charaDesignWomen{Chara Design} other{Other}}",
+  "@jobsName": {
+    "description": "A placeholder for jobs name",
+    "placeholders": {
+      "job": {
+        "type": "String"
+      }
+    }
+  },
+  "seriesCount": "{count, plural, =0 {Series} =1{Series} other {Series}}",
+  "@seriesCount": {
+    "description": "A message that indicates the number of series",
+    "placeholders": {
+      "count": {
+        "type": "num",
+        "format": "compact"
+      }
+    }
+  },
+  "authorDoesNotExist": "The author does not exist.",
+  "seriesDoesNotExist": "The series does not exist.",
+  "subSeriesDoesNotExist": "The sub-series does not exist.",
+  "volumeDoesNotExist": "The volume does not exist.",
+  "editorDoesNotExist": "The editor does not exist.",
+  "genres": "Genres",
+  "editors": "Editors",
+  "authors": "Authors",
+  "volumes": "Volumes",
+  "follow": "Follow",
+  "followed": "Followed",
+  "add": "Add",
+  "remove": "Remove",
+  "read": "Read",
+  "readed": "Readed",
+  "summary": "Summary",
+  "seeMore": "See More",
+  "seeLess": "See Less",
+  "volumeNotAvailableAnymore": "Sadly, this volume is no longer available.",
+  "volumeNotAvailableForSale": "This volume is not available for sale.",
+  "price": "Price",
+  "availability": "{availability, select, inStock{In Stock} available{Available} unavailable{Unavailable} onPreorder{On Preorder} other{{availability}}}",
+  "@availability": {
+    "description": "A message that indicates the availability of a volume",
+    "placeholders": {
+      "availability": {
+        "type": "String"
+      }
+    }
+  },
+  "shippingUnderDays": "Shipping under {days} days",
+  "@shippingUnderDays": {
+    "description": "A message that indicates the shipping time",
+    "placeholders": {
+      "days": {
+        "type": "num",
+        "format": "compact"
+      }
+    }
+  },
+  "shippingUnderWeeks": "Shipping under {count, select, 0 {0 weeks} 1{1 week} other{{count} weeks}}",
+  "@shippingUnderWeeks": {
+    "description": "A message that indicates the shipping time in weeks",
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "soldAndShippedBy": "Sold and shipped by {seller}",
+  "@soldAndShippedBy": {
+    "description": "A message that indicates the seller of a volume",
+    "placeholders": {
+      "seller": {
+        "type": "String"
+      }
+    }
+  },
+  "buyOn": "Buy on {store}",
+  "@buyOn": {
+    "description": "A message that indicates where to buy a volume",
+    "placeholders": {
+      "store": {
+        "type": "String"
+      }
+    }
+  },
+  "informations": "Informations",
+  "ean": "EAN",
+  "numberOfPages": "Number of Pages"
 }

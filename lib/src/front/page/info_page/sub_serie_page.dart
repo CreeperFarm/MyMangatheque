@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:mymangatheque/l10n/app_localizations.dart';
 import 'package:mymangatheque/src/back/services/pocketbase.dart';
 import 'package:mymangatheque/src/front/components/my_author_tile.dart';
 import 'package:mymangatheque/src/front/components/my_editor_show.dart';
@@ -46,6 +47,16 @@ class _SubSeriePageState extends State<SubSeriePage> {
 
   @override
   Widget build(BuildContext context) {
+    // Get localization - return early if not available
+    var localizations = AppLocalizations.of(context);
+    if (localizations == null) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
     return FutureBuilder(
       future: PocketBaseConnector().getOneExpand(
         'sub_series',
@@ -70,7 +81,7 @@ class _SubSeriePageState extends State<SubSeriePage> {
               backgroundColor: Colors.transparent,
             ),
             body: Center(
-              child: const Text("Aucune connexion"),
+              child: Text(localizations.noConnection),
             ),
           );
         }
@@ -197,7 +208,7 @@ class _SubSeriePageState extends State<SubSeriePage> {
                                   children: [
                                     (!isSubSeriesFollowed) ? Icon(Icons.bookmark_border) : Icon(Icons.bookmark),
                                     Text(
-                                      (!isSubSeriesFollowed) ? 'Suivre' : 'Suivie',
+                                      (!isSubSeriesFollowed) ? localizations.follow : localizations.followed,
                                       style: TextStyle(
                                         fontSize: 15,
                                         color:
@@ -222,7 +233,7 @@ class _SubSeriePageState extends State<SubSeriePage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Genres :',
+                              '${localizations.genres} :',
                               style: const TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
@@ -253,7 +264,7 @@ class _SubSeriePageState extends State<SubSeriePage> {
                               ? Padding(
                                   padding: const EdgeInsets.symmetric(vertical: 5),
                                   child: Text(
-                                    'Auteur :',
+                                    '${localizations.author} :',
                                     style: const TextStyle(
                                       fontSize: 20,
                                       fontWeight: FontWeight.bold,
@@ -263,7 +274,7 @@ class _SubSeriePageState extends State<SubSeriePage> {
                               : Padding(
                                   padding: const EdgeInsets.symmetric(vertical: 5),
                                   child: Text(
-                                    'Auteurs :',
+                                    '${localizations.authors} :',
                                     style: const TextStyle(
                                       fontSize: 20,
                                       fontWeight: FontWeight.bold,
@@ -298,7 +309,7 @@ class _SubSeriePageState extends State<SubSeriePage> {
                               ? Padding(
                                   padding: const EdgeInsets.symmetric(vertical: 5),
                                   child: Text(
-                                    'Volume :',
+                                    '${localizations.volume} :',
                                     style: const TextStyle(
                                       fontSize: 20,
                                       fontWeight: FontWeight.bold,
@@ -308,7 +319,7 @@ class _SubSeriePageState extends State<SubSeriePage> {
                               : Padding(
                                   padding: const EdgeInsets.symmetric(vertical: 5),
                                   child: Text(
-                                    'Volumes :',
+                                    '${localizations.volumes} :',
                                     style: const TextStyle(
                                       fontSize: 20,
                                       fontWeight: FontWeight.bold,
@@ -366,7 +377,7 @@ class _SubSeriePageState extends State<SubSeriePage> {
                                     horizontal: 0,
                                   ),
                                   Text(
-                                    'Éditeur :',
+                                    '${localizations.editor} :',
                                     style: const TextStyle(
                                       fontSize: 20,
                                       fontWeight: FontWeight.bold,
@@ -392,7 +403,7 @@ class _SubSeriePageState extends State<SubSeriePage> {
               backgroundColor: Colors.transparent,
             ),
             body: Center(
-              child: const Text("La sous-série n'existe pas"),
+              child: Text(localizations.subSeriesDoesNotExist),
             ),
           );
         }
