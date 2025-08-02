@@ -177,7 +177,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               child: SingleChildScrollView(
                 child: Text(
                   localizations.accountCreatedOn(
-                    DateFormat.yMMMMd(Localizations.localeOf(context).languageCode).format(selectedBDayDate),
+                    DateFormat.yMMMMd(Localizations.localeOf(context).languageCode).format(
+                      connector.getConnectedUser()!.created,
+                    ),
                   ),
                 ),
               ),
@@ -188,7 +190,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               child: SingleChildScrollView(
                 child: Text(
                   localizations.birthdayDateIs(
-                    DateFormat.yMMMMd(Localizations.localeOf(context).languageCode).format(selectedBDayDate),
+                    DateFormat.yMMMMd(Localizations.localeOf(context).languageCode).format(
+                      connector.getConnectedUser()!.birthday,
+                    ),
                   ),
                 ),
               ),
@@ -421,9 +425,12 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               width: MediaQuery.of(context).size.width,
               vertical: 10.0,
             ),
-            GestureDetector(
-              child: Text(localizations.legalNotice),
-              onTap: () => pushOrGo(context, "/profile/legal_notice"),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20.0),
+              child: GestureDetector(
+                child: Text(localizations.legalNotice),
+                onTap: () => pushOrGo(context, "/profile/legal_notice"),
+              ),
             ),
             GestureDetector(
               onDoubleTap: () {
