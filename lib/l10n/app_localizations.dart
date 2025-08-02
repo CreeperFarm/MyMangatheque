@@ -170,6 +170,54 @@ abstract class AppLocalizations {
   /// **'{gender, select, male{he} female{she} other{they}}'**
   String pronoun(String gender);
 
+  /// No description provided for @alphabeticalOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Alphabetical Order'**
+  String get alphabeticalOrder;
+
+  /// No description provided for @lastRelease.
+  ///
+  /// In en, this message translates to:
+  /// **'Last Release'**
+  String get lastRelease;
+
+  /// No description provided for @completeLibrary.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete'**
+  String get completeLibrary;
+
+  /// No description provided for @desiredLibrary.
+  ///
+  /// In en, this message translates to:
+  /// **'Desired'**
+  String get desiredLibrary;
+
+  /// No description provided for @readPile.
+  ///
+  /// In en, this message translates to:
+  /// **'Read Pile'**
+  String get readPile;
+
+  /// No description provided for @favorite.
+  ///
+  /// In en, this message translates to:
+  /// **'Favorite'**
+  String get favorite;
+
+  /// No description provided for @discover.
+  ///
+  /// In en, this message translates to:
+  /// **'Discover'**
+  String get discover;
+
+  /// No description provided for @dataUndercase.
+  ///
+  /// In en, this message translates to:
+  /// **'data'**
+  String get dataUndercase;
+
   /// No description provided for @authFailed.
   ///
   /// In en, this message translates to:
@@ -199,6 +247,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'An error occurred, please try again later.'**
   String get errorOccurred;
+
+  /// An error message indicating that an object could not be initialized
+  ///
+  /// In en, this message translates to:
+  /// **'An error occurred while initializing {object}, please try again later.'**
+  String errorInitializing(String object);
 
   /// No description provided for @pleaseWait.
   ///
@@ -1393,6 +1447,228 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Number of Pages'**
   String get numberOfPages;
+
+  /// A message that indicates the number of volumes owned over the total number of volumes
+  ///
+  /// In en, this message translates to:
+  /// **'{owned, plural, =0{0 volume} =1{1 volume} other{{owned} volumes}} owned over {total, plural, =0{0 volume} =1{1 volume} other{{total} volumes}}'**
+  String volumeOwnedOverX(num owned, num total);
+
+  /// A message that indicates the number of volumes read over the total number of volumes owned
+  ///
+  /// In en, this message translates to:
+  /// **'{readed, plural, =0{0 volume} =1{1 volume} other{{readed} volumes}} read over {total, plural, =0{0 volume} =1{1 volume} other{{total} volumes}} you own.'**
+  String volumeReadedOverX(num readed, num total);
+
+  /// A message that indicates the number of volumes read over the total number of volumes in a series
+  ///
+  /// In en, this message translates to:
+  /// **'{readed, plural, =0{0 volume} =1{1 volume} other{{readed} volumes}} read over {total, plural, =0{0 volume} =1{1 volume} other{{total} volumes}}.'**
+  String volumeReadedOverSeriesX(num readed, num total);
+
+  /// No description provided for @zeroVolumesOwned.
+  ///
+  /// In en, this message translates to:
+  /// **'You own 0 volumes.'**
+  String get zeroVolumesOwned;
+
+  /// No description provided for @allVolumesReaded.
+  ///
+  /// In en, this message translates to:
+  /// **'You have read all the volumes you own.'**
+  String get allVolumesReaded;
+
+  /// No description provided for @preamble.
+  ///
+  /// In en, this message translates to:
+  /// **'Preamble'**
+  String get preamble;
+
+  /// No description provided for @preambleLane1.
+  ///
+  /// In en, this message translates to:
+  /// **'The information and recommendations (\"Information\") available on this website (also known as \"the Site\") are offered to you in good faith. This information is believed to be correct at the time you read it. However, MyMangatheque or its subsidiaries and affiliated entities do not guarantee the completeness and accuracy of the Information. You assume full risk of relying on it.'**
+  String get preambleLane1;
+
+  /// No description provided for @preambleLane2.
+  ///
+  /// In en, this message translates to:
+  /// **'The Information is provided to you on the condition that you, or any other person reviewing it, may determine its suitability for a specific purpose before using it. Under no circumstances shall MyMangatheque or its subsidiaries and affiliated entities be liable for any damages that may result from the reliance on this information, its use, or the use of any product to which it refers.'**
+  String get preambleLane2;
+
+  /// No description provided for @preambleLane3.
+  ///
+  /// In en, this message translates to:
+  /// **'The Information should not be construed as recommendations for the use of any information, product, procedure, equipment or formulation that would be inconsistent with any patent, copyright or trademark.'**
+  String get preambleLane3;
+
+  /// No description provided for @preambleLane4.
+  ///
+  /// In en, this message translates to:
+  /// **'MyMangatheque or its subsidiaries and affiliated entities shall not be liable if the use of the Information infringes any patent, trademark or, more generally, any intellectual property right.'**
+  String get preambleLane4;
+
+  /// No description provided for @preambleLane5.
+  ///
+  /// In en, this message translates to:
+  /// **'No warranty, express or implied, is given as to the merchantability of the information provided, nor as to its suitability for a particular purpose, nor as to the products referred to in this information.'**
+  String get preambleLane5;
+
+  /// No description provided for @preambleLane6.
+  ///
+  /// In en, this message translates to:
+  /// **'Under no circumstances do MyMangatheque or its subsidiaries and affiliated entities undertake to update or correct the Information that will be disseminated by them on the Internet or on their web servers. Similarly, MyMangatheque or its subsidiaries and affiliated entities reserve the right to modify or correct the content of their sites at any time and without notice.'**
+  String get preambleLane6;
+
+  /// No description provided for @intellectualProperty.
+  ///
+  /// In en, this message translates to:
+  /// **'Intellectual Property'**
+  String get intellectualProperty;
+
+  /// No description provided for @authorRights.
+  ///
+  /// In en, this message translates to:
+  /// **'Author Rights'**
+  String get authorRights;
+
+  /// No description provided for @authorRightsLane1.
+  ///
+  /// In en, this message translates to:
+  /// **'MyMangatheque and its content (texts, images, videos, etc.) are protected by intellectual property laws in force in France. Any reproduction, representation, modification, publication, or adaptation of all or part of the elements of the site, regardless of the means or process used, is prohibited without prior written authorization or for personal use as a code challenge but without publication.'**
+  String get authorRightsLane1;
+
+  /// No description provided for @thirdPartyContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Third-Party Content'**
+  String get thirdPartyContent;
+
+  /// No description provided for @thirdPartyContentLane1.
+  ///
+  /// In en, this message translates to:
+  /// **'Third-party content used on the MyMangatheque site belongs to their respective author.'**
+  String get thirdPartyContentLane1;
+
+  /// No description provided for @personalData.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal Data'**
+  String get personalData;
+
+  /// No description provided for @userContent.
+  ///
+  /// In en, this message translates to:
+  /// **'User Content'**
+  String get userContent;
+
+  /// No description provided for @userContentLane1.
+  ///
+  /// In en, this message translates to:
+  /// **'The User is solely responsible for the User Content that he/she posts online via the Service, as well as the texts and/or opinions that he/she expresses. The User expressly and graciously assigns to MyMangatheque all intellectual property rights relating thereto, including the right of reproduction, representation and adaptation, for the legal duration of copyright protection. He/she undertakes in particular to ensure that this data is not of a nature to harm the legitimate interests of any third party whatsoever. In this respect, he/she guarantees MyMangatheque against any action, based directly or indirectly on these comments and/or data, that may be brought by anyone against MyMangatheque. He/she undertakes in particular to take charge of the payment of any sums resulting from the action of a third party against MyMangatheque, including lawyers\' fees and court costs.'**
+  String get userContentLane1;
+
+  /// No description provided for @userContentLane2.
+  ///
+  /// In en, this message translates to:
+  /// **'MyMangatheque reserves the right to remove all or part of the User Content, at any time and for any reason, without prior warning or justification. The User may not make any claim in this regard.'**
+  String get userContentLane2;
+
+  /// No description provided for @userContentLane3.
+  ///
+  /// In en, this message translates to:
+  /// **'MyMangatheque collects and processes personal data in compliance with current regulations, in particular the General Data Protection Regulation (GDPR).'**
+  String get userContentLane3;
+
+  /// No description provided for @protectionOfPersonalData.
+  ///
+  /// In en, this message translates to:
+  /// **'Protection of Personal Data'**
+  String get protectionOfPersonalData;
+
+  /// No description provided for @protectionOfPersonalDataLane1.
+  ///
+  /// In en, this message translates to:
+  /// **'Your personal data is intended solely for MyMangatheque. It will under no circumstances be communicated to third parties. In accordance with the rules on the protection of personal data (Article 34 of the French Data Protection Act of 6 January 1978, Directives 95/46 and 97/66), you have the right to access, rectify, and delete data concerning you. To exercise this right, to object to receiving any commercial messages, or for any rectification, please contact us by email, available in the contact section.'**
+  String get protectionOfPersonalDataLane1;
+
+  /// No description provided for @cookieUsage.
+  ///
+  /// In en, this message translates to:
+  /// **'Cookie Usage'**
+  String get cookieUsage;
+
+  /// No description provided for @cookieUsageLane1.
+  ///
+  /// In en, this message translates to:
+  /// **'The user is informed that when visiting the Site, a cookie may be automatically installed on their browser software. A cookie consists of a block of data that does not allow the user to be identified but allows information relating to the user\'s navigation on the Site to be recorded in order to carry out analyses of Site traffic, all with the aim of improving the quality of the Site.'**
+  String get cookieUsageLane1;
+
+  /// No description provided for @cookieUsageLane2.
+  ///
+  /// In en, this message translates to:
+  /// **'The user has the right to access, rectify or delete personal data communicated via a cookie under the conditions indicated above.'**
+  String get cookieUsageLane2;
+
+  /// No description provided for @externalLinks.
+  ///
+  /// In en, this message translates to:
+  /// **'External Links'**
+  String get externalLinks;
+
+  /// No description provided for @externalLinksLane1.
+  ///
+  /// In en, this message translates to:
+  /// **'The MyMangatheque website may contain links to external sites. We are not responsible for the content and privacy practices of these sites. These links are provided as a service to users of the Site or the websites of its subsidiaries and affiliated entities. The decision to activate links is solely up to the users.'**
+  String get externalLinksLane1;
+
+  /// No description provided for @contactRightsAndUpdateDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact, Rights and Update Date'**
+  String get contactRightsAndUpdateDate;
+
+  /// No description provided for @contact.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact'**
+  String get contact;
+
+  /// No description provided for @contactLane1.
+  ///
+  /// In en, this message translates to:
+  /// **'For any questions or complaints, please contact us at one of the following email addresses: mymangatheque@gmail.com or contact@mymangatheque.com .'**
+  String get contactLane1;
+
+  /// No description provided for @applicableLawAndCompetentJurisdiction.
+  ///
+  /// In en, this message translates to:
+  /// **'Applicable Law and Competent Jurisdiction'**
+  String get applicableLawAndCompetentJurisdiction;
+
+  /// No description provided for @applicableLawAndCompetentJurisdictionLane1.
+  ///
+  /// In en, this message translates to:
+  /// **'These legal notices are subject to French law. In the event of a dispute, the French courts will have sole jurisdiction.'**
+  String get applicableLawAndCompetentJurisdictionLane1;
+
+  /// No description provided for @lastUpdateDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Last Update Date'**
+  String get lastUpdateDate;
+
+  /// No description provided for @scanEAN.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan EAN'**
+  String get scanEAN;
+
+  /// No description provided for @openScan.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Scan'**
+  String get openScan;
 }
 
 class _AppLocalizationsDelegate

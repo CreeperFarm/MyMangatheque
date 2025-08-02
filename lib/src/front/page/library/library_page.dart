@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mymangatheque/l10n/app_localizations.dart';
 import 'package:mymangatheque/src/back/provider/manga_owned_provider.dart';
 import 'package:mymangatheque/src/back/provider/search_filter_provider.dart';
 import 'package:mymangatheque/src/back/provider/search_order_provider.dart';
@@ -72,12 +73,20 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
         if (value) {
           setState(() {});
         } else {
-          showMessage('Une erreur est survenue lors de l\'initialisation des données.', context);
+          showMessage(
+            AppLocalizations.of(context)!.errorInitializing(
+              AppLocalizations.of(context)!.dataUndercase,
+            ),
+            context,
+          );
         }
       });
     } catch (e) {
       debugPrint(e.toString());
-      showMessage('Une erreur est survenue, veuillez réessayer plus tard.', context);
+      showMessage(
+        AppLocalizations.of(context)!.errorOccurred,
+        context,
+      );
     }
   }
 
@@ -101,6 +110,16 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Get localization - return early if not available
+    var localizations = AppLocalizations.of(context);
+    if (localizations == null) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
     if (!connector.isLoggedIn()) {
       return SignInPage();
     }
@@ -117,7 +136,7 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
               Expanded(
                 child: CupertinoSearchTextField(
                   controller: _searchController,
-                  placeholder: 'Recherche',
+                  placeholder: localizations.search,
                   placeholderStyle: TextStyle(
                     color: Theme.of(context).colorScheme.primary,
                   ),
@@ -150,8 +169,8 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             if (selectedOrder == 'manga') const Icon(Icons.check) else const Padding(padding: EdgeInsets.only(right: 0)),
-                            const Text(
-                              'Ordre Alphabétique',
+                            Text(
+                              localizations.alphabeticalOrder,
                               textAlign: TextAlign.right,
                             ),
                           ],
@@ -159,17 +178,21 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
                       ),
                     ),
                     PopupMenuItem<String>(
-                        value: 'releaseDate',
-                        child: SizedBox(
-                          width: 175,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              if (selectedOrder == 'releaseDate') const Icon(Icons.check) else const Padding(padding: EdgeInsets.only(right: 0)),
-                              const Text('Dernière Sortie'),
-                            ],
-                          ),
-                        )),
+                      value: 'releaseDate',
+                      child: SizedBox(
+                        width: 175,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            if (selectedOrder == 'releaseDate') const Icon(Icons.check) else const Padding(padding: EdgeInsets.only(right: 0)),
+                            Text(
+                              localizations.lastRelease,
+                              textAlign: TextAlign.right,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -190,28 +213,28 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
               tabs: [
                 Tab(
                   child: MyTabBarItem(
-                    tabText: "Pile à lire",
+                    tabText: localizations.readPile,
                     colorIn: Theme.of(context).colorScheme.surface,
                     colorOut: Theme.of(context).colorScheme.primary,
                   ),
                 ),
                 Tab(
                   child: MyTabBarItem(
-                    tabText: "Collection",
+                    tabText: localizations.collection,
                     colorIn: Theme.of(context).colorScheme.surface,
                     colorOut: Theme.of(context).colorScheme.primary,
                   ),
                 ),
                 Tab(
                   child: MyTabBarItem(
-                    tabText: "Compléter",
+                    tabText: localizations.completeLibrary,
                     colorIn: Theme.of(context).colorScheme.surface,
                     colorOut: Theme.of(context).colorScheme.primary,
                   ),
                 ),
                 Tab(
                   child: MyTabBarItem(
-                    tabText: "Envies",
+                    tabText: localizations.desiredLibrary,
                     colorIn: Theme.of(context).colorScheme.surface,
                     colorOut: Theme.of(context).colorScheme.primary,
                   ),

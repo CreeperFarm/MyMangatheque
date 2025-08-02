@@ -179,7 +179,7 @@ class _MainWrapperState extends ConsumerState<MainWrapper> {
                               ),
                             ),
                             Link(
-                              uri: Uri.parse("https://mymangatheque.com/mentions_legales"),
+                              uri: Uri.parse("https://mymangatheque.com/legal_notice"),
                               builder: (context, link) {
                                 return InkWell(
                                   onTap: link,

@@ -9,7 +9,7 @@ import 'package:dart_date/dart_date.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_custom_tabs/flutter_custom_tabs.dart';
 import 'package:http/http.dart';
-import 'package:mymangatheque/generated/l10n.dart';
+import 'package:mymangatheque/l10n/app_localizations.dart';
 import 'package:mymangatheque/src/back/services/utils.dart';
 import 'package:mymangatheque/src/function/show_message_function.dart';
 import 'package:mymangatheque/src/models/local_storage/local_storage.dart';
@@ -58,13 +58,13 @@ class PocketBaseConnector {
       } else {}
     } on SocketException {
       AlertDialog.adaptive(
-        title: Text('Erreur de connexion'),
-        content: Text('Veuillez vérifier votre connexion internet.'),
+        title: Text("No Connection"),
+        content: Text("No Connection"),
       );
     } catch (e) {
       AlertDialog.adaptive(
-        title: Text('Erreur'),
-        content: Text('Une erreur est survenue veuillez réessayer plus tard.'),
+        title: Text("An error occurred"),
+        content: Text("An error occurred"),
       );
       debugPrint(e.toString());
     }
@@ -178,16 +178,16 @@ class PocketBaseConnector {
           _pocketBase.realtime.unsubscribe('users');
         } else {
           debugPrint('User isn\'t connected');
-          showMessage(AppLocalizations.of(context).userLoginFailed, context);
+          showMessage(AppLocalizations.of(context)!.userLoginFailed, context);
         }
       } catch (e) {
-        showMessage(AppLocalizations.of(context).errorOccurred, context);
+        showMessage(AppLocalizations.of(context)!.errorOccurred, context);
         debugPrint(e.toString());
       }
       await closeCustomTabs();
       alreadyClick = 0;
     } else {
-      showMessage(AppLocalizations.of(context).pleaseWait, context);
+      showMessage(AppLocalizations.of(context)!.pleaseWait, context);
     }
   }
 
@@ -198,11 +198,11 @@ class PocketBaseConnector {
 
       _connectedUser.add(await findUser(email.toLowerCase()));
 
-      showMessage(AppLocalizations.of(context).userLoginSuccess, context);
+      showMessage(AppLocalizations.of(context)!.userLoginSuccess, context);
 
       return _connectedUser.value;
-    } catch (err, context) {
-      showMessage(AppLocalizations.of(context as BuildContext).errorOccurred, context);
+    } catch (err) {
+      showMessage(AppLocalizations.of(context)!.errorOccurred, context);
       debugPrint(err.toString());
       return null;
     }
@@ -231,12 +231,12 @@ class PocketBaseConnector {
     try {
       await _pocketBase.collection('users').requestPasswordReset(email);
       Navigator.pop(context);
-      return showMessage(AppLocalizations.of(context).emailResetSent, context);
+      return showMessage(AppLocalizations.of(context)!.emailResetSent, context);
     } catch (e) {
       if (e.toString().contains('Must be a valid email address')) {
-        return showMessage(AppLocalizations.of(context).invalidEmail, context);
+        return showMessage(AppLocalizations.of(context)!.invalidEmail, context);
       } else {
-        return showMessage(AppLocalizations.of(context).errorOccurred, context);
+        return showMessage(AppLocalizations.of(context)!.errorOccurred, context);
       }
     }
   }
@@ -247,13 +247,13 @@ class PocketBaseConnector {
       _pocketBase.authStore.clear();
       loginWithEmail(email, oldPassword, context);
       await _pocketBase.collection('users').confirmPasswordReset(_pocketBase.authStore.token, newPassword, newPassword);
-      return showMessage(AppLocalizations.of(context).modifyPasswordSuccess, context);
+      return showMessage(AppLocalizations.of(context)!.modifyPasswordSuccess, context);
     } catch (e) {
       debugPrint(e.toString());
       if (e.toString().contains('Must be a valid email address')) {
-        return showMessage(AppLocalizations.of(context).invalidEmail, context);
+        return showMessage(AppLocalizations.of(context)!.invalidEmail, context);
       } else {
-        return showMessage(AppLocalizations.of(context).errorOccurred, context);
+        return showMessage(AppLocalizations.of(context)!.errorOccurred, context);
       }
     }
   }
@@ -293,7 +293,7 @@ class PocketBaseConnector {
         .create(body: body)
         .catchError((e) {
           debugPrint(e);
-          showMessage(AppLocalizations.of(context).errorOccurred, context);
+          showMessage(AppLocalizations.of(context)!.errorOccurred, context);
           return e;
         })
         .then((value) => value.id)
@@ -341,7 +341,7 @@ class PocketBaseConnector {
       )
     ]).catchError((e) {
       debugPrint(e.toString());
-      showMessage(AppLocalizations.of(context).errorOccurred, context);
+      showMessage(AppLocalizations.of(context)!.errorOccurred, context);
       return e;
     });
   }

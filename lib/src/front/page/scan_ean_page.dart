@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mymangatheque/l10n/app_localizations.dart';
 import 'package:mymangatheque/src/back/services/pocketbase.dart';
 import 'package:mymangatheque/src/function/auto_push_or_go.dart';
 import 'package:simple_barcode_scanner/simple_barcode_scanner.dart';
@@ -26,6 +27,16 @@ class _ScanEanPageState extends ConsumerState<ScanEanPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Get localization - return early if not available
+    var localizations = AppLocalizations.of(context);
+    if (localizations == null) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
     /*return Scaffold(
       appBar: AppBar(
         title: const Text('Scan EAN'),
@@ -47,7 +58,7 @@ class _ScanEanPageState extends ConsumerState<ScanEanPage> {
 
         return Scaffold(
           appBar: AppBar(
-            title: const Text("Scan EAN"),
+            title: Text(localizations.scanEAN),
             backgroundColor: Colors.transparent,
           ),
           body: Column(
@@ -71,7 +82,7 @@ class _ScanEanPageState extends ConsumerState<ScanEanPage> {
                     }
                   });
                 },
-                child: const Text('Open Scanner'),
+                child: Text(localizations.openScan),
               ),
               Text(ean ?? "No data"),
             ],

@@ -55,6 +55,30 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get alphabeticalOrder => 'Alphabetical Order';
+
+  @override
+  String get lastRelease => 'Last Release';
+
+  @override
+  String get completeLibrary => 'Complete';
+
+  @override
+  String get desiredLibrary => 'Desired';
+
+  @override
+  String get readPile => 'Read Pile';
+
+  @override
+  String get favorite => 'Favorite';
+
+  @override
+  String get discover => 'Discover';
+
+  @override
+  String get dataUndercase => 'data';
+
+  @override
   String get authFailed => 'Email or password incorrect.';
 
   @override
@@ -70,6 +94,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get errorOccurred => 'An error occurred, please try again later.';
+
+  @override
+  String errorInitializing(String object) {
+    return 'An error occurred while initializing $object, please try again later.';
+  }
 
   @override
   String get pleaseWait => 'Please wait...';
@@ -838,4 +867,208 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get numberOfPages => 'Number of Pages';
+
+  @override
+  String volumeOwnedOverX(num owned, num total) {
+    final intl.NumberFormat ownedNumberFormat = intl.NumberFormat.compact(
+      locale: localeName,
+    );
+    final String ownedString = ownedNumberFormat.format(owned);
+    final intl.NumberFormat totalNumberFormat = intl.NumberFormat.compact(
+      locale: localeName,
+    );
+    final String totalString = totalNumberFormat.format(total);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      owned,
+      locale: localeName,
+      other: '$ownedString volumes',
+      one: '1 volume',
+      zero: '0 volume',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      total,
+      locale: localeName,
+      other: '$totalString volumes',
+      one: '1 volume',
+      zero: '0 volume',
+    );
+    return '$_temp0 owned over $_temp1';
+  }
+
+  @override
+  String volumeReadedOverX(num readed, num total) {
+    final intl.NumberFormat readedNumberFormat = intl.NumberFormat.compact(
+      locale: localeName,
+    );
+    final String readedString = readedNumberFormat.format(readed);
+    final intl.NumberFormat totalNumberFormat = intl.NumberFormat.compact(
+      locale: localeName,
+    );
+    final String totalString = totalNumberFormat.format(total);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      readed,
+      locale: localeName,
+      other: '$readedString volumes',
+      one: '1 volume',
+      zero: '0 volume',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      total,
+      locale: localeName,
+      other: '$totalString volumes',
+      one: '1 volume',
+      zero: '0 volume',
+    );
+    return '$_temp0 read over $_temp1 you own.';
+  }
+
+  @override
+  String volumeReadedOverSeriesX(num readed, num total) {
+    final intl.NumberFormat readedNumberFormat = intl.NumberFormat.compact(
+      locale: localeName,
+    );
+    final String readedString = readedNumberFormat.format(readed);
+    final intl.NumberFormat totalNumberFormat = intl.NumberFormat.compact(
+      locale: localeName,
+    );
+    final String totalString = totalNumberFormat.format(total);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      readed,
+      locale: localeName,
+      other: '$readedString volumes',
+      one: '1 volume',
+      zero: '0 volume',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      total,
+      locale: localeName,
+      other: '$totalString volumes',
+      one: '1 volume',
+      zero: '0 volume',
+    );
+    return '$_temp0 read over $_temp1.';
+  }
+
+  @override
+  String get zeroVolumesOwned => 'You own 0 volumes.';
+
+  @override
+  String get allVolumesReaded => 'You have read all the volumes you own.';
+
+  @override
+  String get preamble => 'Preamble';
+
+  @override
+  String get preambleLane1 =>
+      'The information and recommendations (\"Information\") available on this website (also known as \"the Site\") are offered to you in good faith. This information is believed to be correct at the time you read it. However, MyMangatheque or its subsidiaries and affiliated entities do not guarantee the completeness and accuracy of the Information. You assume full risk of relying on it.';
+
+  @override
+  String get preambleLane2 =>
+      'The Information is provided to you on the condition that you, or any other person reviewing it, may determine its suitability for a specific purpose before using it. Under no circumstances shall MyMangatheque or its subsidiaries and affiliated entities be liable for any damages that may result from the reliance on this information, its use, or the use of any product to which it refers.';
+
+  @override
+  String get preambleLane3 =>
+      'The Information should not be construed as recommendations for the use of any information, product, procedure, equipment or formulation that would be inconsistent with any patent, copyright or trademark.';
+
+  @override
+  String get preambleLane4 =>
+      'MyMangatheque or its subsidiaries and affiliated entities shall not be liable if the use of the Information infringes any patent, trademark or, more generally, any intellectual property right.';
+
+  @override
+  String get preambleLane5 =>
+      'No warranty, express or implied, is given as to the merchantability of the information provided, nor as to its suitability for a particular purpose, nor as to the products referred to in this information.';
+
+  @override
+  String get preambleLane6 =>
+      'Under no circumstances do MyMangatheque or its subsidiaries and affiliated entities undertake to update or correct the Information that will be disseminated by them on the Internet or on their web servers. Similarly, MyMangatheque or its subsidiaries and affiliated entities reserve the right to modify or correct the content of their sites at any time and without notice.';
+
+  @override
+  String get intellectualProperty => 'Intellectual Property';
+
+  @override
+  String get authorRights => 'Author Rights';
+
+  @override
+  String get authorRightsLane1 =>
+      'MyMangatheque and its content (texts, images, videos, etc.) are protected by intellectual property laws in force in France. Any reproduction, representation, modification, publication, or adaptation of all or part of the elements of the site, regardless of the means or process used, is prohibited without prior written authorization or for personal use as a code challenge but without publication.';
+
+  @override
+  String get thirdPartyContent => 'Third-Party Content';
+
+  @override
+  String get thirdPartyContentLane1 =>
+      'Third-party content used on the MyMangatheque site belongs to their respective author.';
+
+  @override
+  String get personalData => 'Personal Data';
+
+  @override
+  String get userContent => 'User Content';
+
+  @override
+  String get userContentLane1 =>
+      'The User is solely responsible for the User Content that he/she posts online via the Service, as well as the texts and/or opinions that he/she expresses. The User expressly and graciously assigns to MyMangatheque all intellectual property rights relating thereto, including the right of reproduction, representation and adaptation, for the legal duration of copyright protection. He/she undertakes in particular to ensure that this data is not of a nature to harm the legitimate interests of any third party whatsoever. In this respect, he/she guarantees MyMangatheque against any action, based directly or indirectly on these comments and/or data, that may be brought by anyone against MyMangatheque. He/she undertakes in particular to take charge of the payment of any sums resulting from the action of a third party against MyMangatheque, including lawyers\' fees and court costs.';
+
+  @override
+  String get userContentLane2 =>
+      'MyMangatheque reserves the right to remove all or part of the User Content, at any time and for any reason, without prior warning or justification. The User may not make any claim in this regard.';
+
+  @override
+  String get userContentLane3 =>
+      'MyMangatheque collects and processes personal data in compliance with current regulations, in particular the General Data Protection Regulation (GDPR).';
+
+  @override
+  String get protectionOfPersonalData => 'Protection of Personal Data';
+
+  @override
+  String get protectionOfPersonalDataLane1 =>
+      'Your personal data is intended solely for MyMangatheque. It will under no circumstances be communicated to third parties. In accordance with the rules on the protection of personal data (Article 34 of the French Data Protection Act of 6 January 1978, Directives 95/46 and 97/66), you have the right to access, rectify, and delete data concerning you. To exercise this right, to object to receiving any commercial messages, or for any rectification, please contact us by email, available in the contact section.';
+
+  @override
+  String get cookieUsage => 'Cookie Usage';
+
+  @override
+  String get cookieUsageLane1 =>
+      'The user is informed that when visiting the Site, a cookie may be automatically installed on their browser software. A cookie consists of a block of data that does not allow the user to be identified but allows information relating to the user\'s navigation on the Site to be recorded in order to carry out analyses of Site traffic, all with the aim of improving the quality of the Site.';
+
+  @override
+  String get cookieUsageLane2 =>
+      'The user has the right to access, rectify or delete personal data communicated via a cookie under the conditions indicated above.';
+
+  @override
+  String get externalLinks => 'External Links';
+
+  @override
+  String get externalLinksLane1 =>
+      'The MyMangatheque website may contain links to external sites. We are not responsible for the content and privacy practices of these sites. These links are provided as a service to users of the Site or the websites of its subsidiaries and affiliated entities. The decision to activate links is solely up to the users.';
+
+  @override
+  String get contactRightsAndUpdateDate => 'Contact, Rights and Update Date';
+
+  @override
+  String get contact => 'Contact';
+
+  @override
+  String get contactLane1 =>
+      'For any questions or complaints, please contact us at one of the following email addresses: mymangatheque@gmail.com or contact@mymangatheque.com .';
+
+  @override
+  String get applicableLawAndCompetentJurisdiction =>
+      'Applicable Law and Competent Jurisdiction';
+
+  @override
+  String get applicableLawAndCompetentJurisdictionLane1 =>
+      'These legal notices are subject to French law. In the event of a dispute, the French courts will have sole jurisdiction.';
+
+  @override
+  String get lastUpdateDate => 'Last Update Date';
+
+  @override
+  String get scanEAN => 'Scan EAN';
+
+  @override
+  String get openScan => 'Open Scan';
 }

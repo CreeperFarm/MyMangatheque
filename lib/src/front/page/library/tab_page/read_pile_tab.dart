@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mymangatheque/l10n/app_localizations.dart';
 import 'package:mymangatheque/src/back/provider/manga_owned_provider.dart';
 import 'package:mymangatheque/src/front/components/my_line.dart';
 import 'package:mymangatheque/src/front/components/my_loader_display.dart';
@@ -16,6 +17,16 @@ class ReadPileTab extends ConsumerStatefulWidget {
 class _ReadPileTabState extends ConsumerState<ReadPileTab> {
   @override
   Widget build(BuildContext context) {
+    // Get localization - return early if not available
+    var localizations = AppLocalizations.of(context);
+    if (localizations == null) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
     final readedSubSeries = ref.watch(mangaOwnedProvider);
     List<dynamic> readSubSeriesList = readedSubSeries.toList();
 
@@ -57,24 +68,35 @@ class _ReadPileTabState extends ConsumerState<ReadPileTab> {
         children: [
           (volumeOwned == 0)
               ? Text(
-                  "Aucun tome n'est possédé.",
+                  localizations.zeroVolumesOwned,
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                   ),
                 )
-              : Column(
-                  children: [
-                    Text(
-                      '$volumeReaded tomes lu sur $volumeOwned tomes possédés.',
+              : (volumeOwned == volumeReaded)
+                  ? Text(
+                      localizations.allVolumesReaded,
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
                       ),
+                    )
+                  : Column(
+                      children: [
+                        Text(
+                          localizations.volumeReadedOverX(
+                            volumeReaded,
+                            volumeOwned,
+                          ),
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        MyLoaderDisplay(percentage: (volumeReaded / volumeOwned)),
+                      ],
                     ),
-                    MyLoaderDisplay(percentage: (volumeReaded / volumeOwned)),
-                  ],
-                ),
           MyLine(
             width: MediaQuery.of(context).size.width,
             vertical: 10,
@@ -101,7 +123,10 @@ class _ReadPileTabState extends ConsumerState<ReadPileTab> {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 10),
                   child: Text(
-                    '${numberVolumeReaded(readSubSeriesList[i].volumes)} tome(s) lu sur ${readSubSeriesList[i].numberOwnedVolumes}',
+                    localizations.volumeReadedOverSeriesX(
+                      numberVolumeReaded(readSubSeriesList[i].volumes),
+                      readSubSeriesList[i].numberOwnedVolumes,
+                    ),
                   ),
                 ),
                 Padding(

@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mymangatheque/l10n/app_localizations.dart';
 import 'package:mymangatheque/src/back/services/pocketbase.dart';
 import 'package:mymangatheque/src/front/components/my_manga_show_tile.dart';
 
@@ -22,6 +23,16 @@ class MyHomePageState extends ConsumerState<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    // Get localization - return early if not available
+    var localizations = AppLocalizations.of(context);
+    if (localizations == null) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
     final PocketBaseConnector connector = PocketBaseConnector();
 
     return StreamBuilder(
@@ -33,7 +44,7 @@ class MyHomePageState extends ConsumerState<MyHomePage> {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return Scaffold(
                 appBar: AppBar(
-                  title: const Text("Chargement..."),
+                  title: Text(localizations.loading),
                 ),
                 body: const Center(
                   child: CircularProgressIndicator(),
@@ -44,10 +55,10 @@ class MyHomePageState extends ConsumerState<MyHomePage> {
             if (snapshot.connectionState == ConnectionState.none) {
               return Scaffold(
                 appBar: AppBar(
-                  title: Text("Aucune connexion"),
+                  title: Text(localizations.noConnection),
                 ),
                 body: Center(
-                  child: const Text("Aucune connexion"),
+                  child: Text(localizations.noConnection),
                 ),
               );
             }
@@ -55,10 +66,10 @@ class MyHomePageState extends ConsumerState<MyHomePage> {
               debugPrint(snapshot.error.toString());
               return Scaffold(
                 appBar: AppBar(
-                  title: Text("Une erreur est survenue"),
+                  title: Text(localizations.errorOccurred),
                 ),
                 body: Center(
-                  child: const Text("Une erreur est survenue"),
+                  child: Text(localizations.errorOccurred),
                 ),
               );
             }
@@ -122,10 +133,10 @@ class MyHomePageState extends ConsumerState<MyHomePage> {
               debugPrint(snapshot.error.toString());
               return Scaffold(
                 appBar: AppBar(
-                  title: Text("Une erreur est survenue"),
+                  title: Text(localizations.errorOccurred),
                 ),
                 body: Center(
-                  child: const Text("Une erreur est survenue"),
+                  child: Text(localizations.errorOccurred),
                 ),
               );
             }

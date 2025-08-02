@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:mymangatheque/src/back/services/pocketbase.dart';
 
@@ -33,7 +31,7 @@ class _PlanningPageState extends State<PlanningPage> {
     for (var authorId in authorsId) {
       authors.add(await connector.getAuthorName(authorId));
     }
-    return authors.join(" et ");
+    return authors.join(" & ");
   }
 
   String textLength(text, length) {
@@ -57,86 +55,10 @@ class _PlanningPageState extends State<PlanningPage> {
     var itemWidth = MediaQuery.of(context).size.width / itemPerLine;
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Planning"),
+        title: Text("Planning"),
       ),
-      body: GridView.builder(
-        padding: const EdgeInsets.all(10),
-        gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-          maxCrossAxisExtent: itemWidth,
-          crossAxisSpacing: 5,
-          mainAxisSpacing: 5,
-          childAspectRatio: 16.5 / 25,
-        ),
-        itemCount: latestManga.length,
-        itemBuilder: (context, index) {
-          return FutureBuilder(
-            future: connector.getCollectionDataWithFilter("volumes",
-                'release?<="${DateTime.now().add(const Duration(days: 14)).toUtc()}"&&release?>="${DateTime.now().subtract(const Duration(days: 14)).toIso8601String()}"'),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.done && snapshot.hasData) {
-                final manga = json.decode(snapshot.data![index].toString());
-                return SizedBox(
-                  height: itemHeight,
-                  width: itemWidth,
-                  child: Container(
-                    color: Colors.pink,
-                    child: Column(
-                      children: [
-                        Center(
-                          child: SizedBox(
-                            height: itemHeight - 175,
-                            width: (itemHeight - 175) * 16.5 / 24,
-                            child: Padding(
-                              padding: const EdgeInsets.all(5.0),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(10),
-                                child: Image.network(
-                                  'https://api.mymangatheque.com/api/files/tnof8u6oqfepdq6/${manga['id']}/${manga['image']}',
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                        Text(
-                          textLength(manga['title'], 20),
-                          style: const TextStyle(fontSize: 18),
-                        ),
-                        FutureBuilder(
-                          future: getAllAuthorsName(manga['authors']),
-                          builder: (context, snapshot) {
-                            if (snapshot.connectionState == ConnectionState.done && snapshot.hasData) {
-                              return Text(
-                                textLength(snapshot.data.toString(), 34),
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                ),
-                              );
-                            } else {
-                              return SizedBox(
-                                height: 18,
-                                width: 18,
-                                child: Center(
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                  ),
-                                ),
-                              );
-                            }
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              } else {
-                return const Center(
-                  child: CircularProgressIndicator(),
-                );
-              }
-            },
-          );
-        },
+      body: Center(
+        child: Text("TODO: Add the planning page"),
       ),
     );
   }

@@ -422,6 +422,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               vertical: 10.0,
             ),
             GestureDetector(
+              child: Text(localizations.legalNotice),
+              onTap: () => pushOrGo(context, "/profile/legal_notice"),
+            ),
+            GestureDetector(
               onDoubleTap: () {
                 pushOrGo(context, '/admin');
               },

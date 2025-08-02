@@ -123,6 +123,12 @@ class AppNavigation {
                       builder: (context, state) {
                         return MentionsLegalesPage(key: state.pageKey);
                       }),
+                  GoRoute(
+                      path: 'legal_notice',
+                      name: 'Legal Notice',
+                      builder: (context, state) {
+                        return MentionsLegalesPage(key: state.pageKey);
+                      }),
                   // Modified to directly handle the redirect logic for delete account
                   GoRoute(
                       path: 'delete_account',
@@ -327,6 +333,18 @@ class AppNavigation {
                       name: 'ForgotPassword',
                       builder: (context, state) {
                         return ForgotPasswordPage(key: state.pageKey);
+                      }),
+                  GoRoute(
+                      path: 'mentions_legales',
+                      name: 'Mentions Légales Profile',
+                      builder: (context, state) {
+                        return MentionsLegalesPage(key: state.pageKey);
+                      }),
+                  GoRoute(
+                      path: 'legal_notice',
+                      name: 'Legal Notice Profile',
+                      builder: (context, state) {
+                        return MentionsLegalesPage(key: state.pageKey);
                       }),
                 ],
               ),

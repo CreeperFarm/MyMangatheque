@@ -107,7 +107,10 @@ class _CollectionTabState extends ConsumerState<CollectionTab> {
                                   overflow: TextOverflow.ellipsis,
                                 ),
                                 Text(
-                                  "${subSerie.numberOwnedVolumes} tome${subSerie.numberOwnedVolumes == 1 ? "" : "s"} possédé sur ${subSerie.numberOfVolumes} tome${subSerie.numberOfVolumes == 1 ? "" : "s"}",
+                                  localizations.volumeOwnedOverX(
+                                    subSerie.numberOwnedVolumes,
+                                    subSerie.numberOfVolumes,
+                                  ),
                                 ),
                                 Padding(
                                   padding: const EdgeInsets.only(top: 5),

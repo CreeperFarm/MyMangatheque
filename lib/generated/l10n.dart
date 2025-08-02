@@ -122,6 +122,61 @@ class AppLocalizations {
     );
   }
 
+  /// `Alphabetical Order`
+  String get alphabeticalOrder {
+    return Intl.message(
+      'Alphabetical Order',
+      name: 'alphabeticalOrder',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Last Release`
+  String get lastRelease {
+    return Intl.message(
+      'Last Release',
+      name: 'lastRelease',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Complete`
+  String get completeLibrary {
+    return Intl.message(
+      'Complete',
+      name: 'completeLibrary',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Desired`
+  String get desiredLibrary {
+    return Intl.message('Desired', name: 'desiredLibrary', desc: '', args: []);
+  }
+
+  /// `Read Pile`
+  String get readPile {
+    return Intl.message('Read Pile', name: 'readPile', desc: '', args: []);
+  }
+
+  /// `Favorite`
+  String get favorite {
+    return Intl.message('Favorite', name: 'favorite', desc: '', args: []);
+  }
+
+  /// `Discover`
+  String get discover {
+    return Intl.message('Discover', name: 'discover', desc: '', args: []);
+  }
+
+  /// `data`
+  String get dataUndercase {
+    return Intl.message('data', name: 'dataUndercase', desc: '', args: []);
+  }
+
   /// `Email or password incorrect.`
   String get authFailed {
     return Intl.message(
@@ -169,6 +224,17 @@ class AppLocalizations {
       name: 'errorOccurred',
       desc: '',
       args: [],
+    );
+  }
+
+  /// `An error occurred while initializing {object}, please try again later.`
+  String errorInitializing(String object) {
+    return Intl.message(
+      'An error occurred while initializing $object, please try again later.',
+      name: 'errorInitializing',
+      desc:
+          'An error message indicating that an object could not be initialized',
+      args: [object],
     );
   }
 
@@ -1886,6 +1952,359 @@ class AppLocalizations {
       desc: '',
       args: [],
     );
+  }
+
+  /// `{owned, plural, =0{0 volume} =1{1 volume} other{{owned} volumes}} owned over {total, plural, =0{0 volume} =1{1 volume} other{{total} volumes}}`
+  String volumeOwnedOverX(num owned, num total) {
+    return Intl.message(
+      '${Intl.plural(owned, zero: '0 volume', one: '1 volume', other: '$owned volumes')} owned over ${Intl.plural(total, zero: '0 volume', one: '1 volume', other: '$total volumes')}',
+      name: 'volumeOwnedOverX',
+      desc:
+          'A message that indicates the number of volumes owned over the total number of volumes',
+      args: [owned, total],
+    );
+  }
+
+  /// `{readed, plural, =0{0 volume} =1{1 volume} other{{readed} volumes}} read over {total, plural, =0{0 volume} =1{1 volume} other{{total} volumes}} you own.`
+  String volumeReadedOverX(num readed, num total) {
+    return Intl.message(
+      '${Intl.plural(readed, zero: '0 volume', one: '1 volume', other: '$readed volumes')} read over ${Intl.plural(total, zero: '0 volume', one: '1 volume', other: '$total volumes')} you own.',
+      name: 'volumeReadedOverX',
+      desc:
+          'A message that indicates the number of volumes read over the total number of volumes owned',
+      args: [readed, total],
+    );
+  }
+
+  /// `{readed, plural, =0{0 volume} =1{1 volume} other{{readed} volumes}} read over {total, plural, =0{0 volume} =1{1 volume} other{{total} volumes}}.`
+  String volumeReadedOverSeriesX(num readed, num total) {
+    return Intl.message(
+      '${Intl.plural(readed, zero: '0 volume', one: '1 volume', other: '$readed volumes')} read over ${Intl.plural(total, zero: '0 volume', one: '1 volume', other: '$total volumes')}.',
+      name: 'volumeReadedOverSeriesX',
+      desc:
+          'A message that indicates the number of volumes read over the total number of volumes in a series',
+      args: [readed, total],
+    );
+  }
+
+  /// `You own 0 volumes.`
+  String get zeroVolumesOwned {
+    return Intl.message(
+      'You own 0 volumes.',
+      name: 'zeroVolumesOwned',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `You have read all the volumes you own.`
+  String get allVolumesReaded {
+    return Intl.message(
+      'You have read all the volumes you own.',
+      name: 'allVolumesReaded',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Preamble`
+  String get preamble {
+    return Intl.message('Preamble', name: 'preamble', desc: '', args: []);
+  }
+
+  /// `The information and recommendations ("Information") available on this website (also known as "the Site") are offered to you in good faith. This information is believed to be correct at the time you read it. However, MyMangatheque or its subsidiaries and affiliated entities do not guarantee the completeness and accuracy of the Information. You assume full risk of relying on it.`
+  String get preambleLane1 {
+    return Intl.message(
+      'The information and recommendations ("Information") available on this website (also known as "the Site") are offered to you in good faith. This information is believed to be correct at the time you read it. However, MyMangatheque or its subsidiaries and affiliated entities do not guarantee the completeness and accuracy of the Information. You assume full risk of relying on it.',
+      name: 'preambleLane1',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The Information is provided to you on the condition that you, or any other person reviewing it, may determine its suitability for a specific purpose before using it. Under no circumstances shall MyMangatheque or its subsidiaries and affiliated entities be liable for any damages that may result from the reliance on this information, its use, or the use of any product to which it refers.`
+  String get preambleLane2 {
+    return Intl.message(
+      'The Information is provided to you on the condition that you, or any other person reviewing it, may determine its suitability for a specific purpose before using it. Under no circumstances shall MyMangatheque or its subsidiaries and affiliated entities be liable for any damages that may result from the reliance on this information, its use, or the use of any product to which it refers.',
+      name: 'preambleLane2',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The Information should not be construed as recommendations for the use of any information, product, procedure, equipment or formulation that would be inconsistent with any patent, copyright or trademark.`
+  String get preambleLane3 {
+    return Intl.message(
+      'The Information should not be construed as recommendations for the use of any information, product, procedure, equipment or formulation that would be inconsistent with any patent, copyright or trademark.',
+      name: 'preambleLane3',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `MyMangatheque or its subsidiaries and affiliated entities shall not be liable if the use of the Information infringes any patent, trademark or, more generally, any intellectual property right.`
+  String get preambleLane4 {
+    return Intl.message(
+      'MyMangatheque or its subsidiaries and affiliated entities shall not be liable if the use of the Information infringes any patent, trademark or, more generally, any intellectual property right.',
+      name: 'preambleLane4',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No warranty, express or implied, is given as to the merchantability of the information provided, nor as to its suitability for a particular purpose, nor as to the products referred to in this information.`
+  String get preambleLane5 {
+    return Intl.message(
+      'No warranty, express or implied, is given as to the merchantability of the information provided, nor as to its suitability for a particular purpose, nor as to the products referred to in this information.',
+      name: 'preambleLane5',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Under no circumstances do MyMangatheque or its subsidiaries and affiliated entities undertake to update or correct the Information that will be disseminated by them on the Internet or on their web servers. Similarly, MyMangatheque or its subsidiaries and affiliated entities reserve the right to modify or correct the content of their sites at any time and without notice.`
+  String get preambleLane6 {
+    return Intl.message(
+      'Under no circumstances do MyMangatheque or its subsidiaries and affiliated entities undertake to update or correct the Information that will be disseminated by them on the Internet or on their web servers. Similarly, MyMangatheque or its subsidiaries and affiliated entities reserve the right to modify or correct the content of their sites at any time and without notice.',
+      name: 'preambleLane6',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Intellectual Property`
+  String get intellectualProperty {
+    return Intl.message(
+      'Intellectual Property',
+      name: 'intellectualProperty',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Author Rights`
+  String get authorRights {
+    return Intl.message(
+      'Author Rights',
+      name: 'authorRights',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `MyMangatheque and its content (texts, images, videos, etc.) are protected by intellectual property laws in force in France. Any reproduction, representation, modification, publication, or adaptation of all or part of the elements of the site, regardless of the means or process used, is prohibited without prior written authorization or for personal use as a code challenge but without publication.`
+  String get authorRightsLane1 {
+    return Intl.message(
+      'MyMangatheque and its content (texts, images, videos, etc.) are protected by intellectual property laws in force in France. Any reproduction, representation, modification, publication, or adaptation of all or part of the elements of the site, regardless of the means or process used, is prohibited without prior written authorization or for personal use as a code challenge but without publication.',
+      name: 'authorRightsLane1',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Third-Party Content`
+  String get thirdPartyContent {
+    return Intl.message(
+      'Third-Party Content',
+      name: 'thirdPartyContent',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Third-party content used on the MyMangatheque site belongs to their respective author.`
+  String get thirdPartyContentLane1 {
+    return Intl.message(
+      'Third-party content used on the MyMangatheque site belongs to their respective author.',
+      name: 'thirdPartyContentLane1',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Personal Data`
+  String get personalData {
+    return Intl.message(
+      'Personal Data',
+      name: 'personalData',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `User Content`
+  String get userContent {
+    return Intl.message(
+      'User Content',
+      name: 'userContent',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The User is solely responsible for the User Content that he/she posts online via the Service, as well as the texts and/or opinions that he/she expresses. The User expressly and graciously assigns to MyMangatheque all intellectual property rights relating thereto, including the right of reproduction, representation and adaptation, for the legal duration of copyright protection. He/she undertakes in particular to ensure that this data is not of a nature to harm the legitimate interests of any third party whatsoever. In this respect, he/she guarantees MyMangatheque against any action, based directly or indirectly on these comments and/or data, that may be brought by anyone against MyMangatheque. He/she undertakes in particular to take charge of the payment of any sums resulting from the action of a third party against MyMangatheque, including lawyers' fees and court costs.`
+  String get userContentLane1 {
+    return Intl.message(
+      'The User is solely responsible for the User Content that he/she posts online via the Service, as well as the texts and/or opinions that he/she expresses. The User expressly and graciously assigns to MyMangatheque all intellectual property rights relating thereto, including the right of reproduction, representation and adaptation, for the legal duration of copyright protection. He/she undertakes in particular to ensure that this data is not of a nature to harm the legitimate interests of any third party whatsoever. In this respect, he/she guarantees MyMangatheque against any action, based directly or indirectly on these comments and/or data, that may be brought by anyone against MyMangatheque. He/she undertakes in particular to take charge of the payment of any sums resulting from the action of a third party against MyMangatheque, including lawyers\' fees and court costs.',
+      name: 'userContentLane1',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `MyMangatheque reserves the right to remove all or part of the User Content, at any time and for any reason, without prior warning or justification. The User may not make any claim in this regard.`
+  String get userContentLane2 {
+    return Intl.message(
+      'MyMangatheque reserves the right to remove all or part of the User Content, at any time and for any reason, without prior warning or justification. The User may not make any claim in this regard.',
+      name: 'userContentLane2',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `MyMangatheque collects and processes personal data in compliance with current regulations, in particular the General Data Protection Regulation (GDPR).`
+  String get userContentLane3 {
+    return Intl.message(
+      'MyMangatheque collects and processes personal data in compliance with current regulations, in particular the General Data Protection Regulation (GDPR).',
+      name: 'userContentLane3',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Protection of Personal Data`
+  String get protectionOfPersonalData {
+    return Intl.message(
+      'Protection of Personal Data',
+      name: 'protectionOfPersonalData',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Your personal data is intended solely for MyMangatheque. It will under no circumstances be communicated to third parties. In accordance with the rules on the protection of personal data (Article 34 of the French Data Protection Act of 6 January 1978, Directives 95/46 and 97/66), you have the right to access, rectify, and delete data concerning you. To exercise this right, to object to receiving any commercial messages, or for any rectification, please contact us by email, available in the contact section.`
+  String get protectionOfPersonalDataLane1 {
+    return Intl.message(
+      'Your personal data is intended solely for MyMangatheque. It will under no circumstances be communicated to third parties. In accordance with the rules on the protection of personal data (Article 34 of the French Data Protection Act of 6 January 1978, Directives 95/46 and 97/66), you have the right to access, rectify, and delete data concerning you. To exercise this right, to object to receiving any commercial messages, or for any rectification, please contact us by email, available in the contact section.',
+      name: 'protectionOfPersonalDataLane1',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Cookie Usage`
+  String get cookieUsage {
+    return Intl.message(
+      'Cookie Usage',
+      name: 'cookieUsage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The user is informed that when visiting the Site, a cookie may be automatically installed on their browser software. A cookie consists of a block of data that does not allow the user to be identified but allows information relating to the user's navigation on the Site to be recorded in order to carry out analyses of Site traffic, all with the aim of improving the quality of the Site.`
+  String get cookieUsageLane1 {
+    return Intl.message(
+      'The user is informed that when visiting the Site, a cookie may be automatically installed on their browser software. A cookie consists of a block of data that does not allow the user to be identified but allows information relating to the user\'s navigation on the Site to be recorded in order to carry out analyses of Site traffic, all with the aim of improving the quality of the Site.',
+      name: 'cookieUsageLane1',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The user has the right to access, rectify or delete personal data communicated via a cookie under the conditions indicated above.`
+  String get cookieUsageLane2 {
+    return Intl.message(
+      'The user has the right to access, rectify or delete personal data communicated via a cookie under the conditions indicated above.',
+      name: 'cookieUsageLane2',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `External Links`
+  String get externalLinks {
+    return Intl.message(
+      'External Links',
+      name: 'externalLinks',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The MyMangatheque website may contain links to external sites. We are not responsible for the content and privacy practices of these sites. These links are provided as a service to users of the Site or the websites of its subsidiaries and affiliated entities. The decision to activate links is solely up to the users.`
+  String get externalLinksLane1 {
+    return Intl.message(
+      'The MyMangatheque website may contain links to external sites. We are not responsible for the content and privacy practices of these sites. These links are provided as a service to users of the Site or the websites of its subsidiaries and affiliated entities. The decision to activate links is solely up to the users.',
+      name: 'externalLinksLane1',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Contact, Rights and Update Date`
+  String get contactRightsAndUpdateDate {
+    return Intl.message(
+      'Contact, Rights and Update Date',
+      name: 'contactRightsAndUpdateDate',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Contact`
+  String get contact {
+    return Intl.message('Contact', name: 'contact', desc: '', args: []);
+  }
+
+  /// `For any questions or complaints, please contact us at one of the following email addresses: mymangatheque@gmail.com or contact@mymangatheque.com .`
+  String get contactLane1 {
+    return Intl.message(
+      'For any questions or complaints, please contact us at one of the following email addresses: mymangatheque@gmail.com or contact@mymangatheque.com .',
+      name: 'contactLane1',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Applicable Law and Competent Jurisdiction`
+  String get applicableLawAndCompetentJurisdiction {
+    return Intl.message(
+      'Applicable Law and Competent Jurisdiction',
+      name: 'applicableLawAndCompetentJurisdiction',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `These legal notices are subject to French law. In the event of a dispute, the French courts will have sole jurisdiction.`
+  String get applicableLawAndCompetentJurisdictionLane1 {
+    return Intl.message(
+      'These legal notices are subject to French law. In the event of a dispute, the French courts will have sole jurisdiction.',
+      name: 'applicableLawAndCompetentJurisdictionLane1',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Last Update Date`
+  String get lastUpdateDate {
+    return Intl.message(
+      'Last Update Date',
+      name: 'lastUpdateDate',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Scan EAN`
+  String get scanEAN {
+    return Intl.message('Scan EAN', name: 'scanEAN', desc: '', args: []);
+  }
+
+  /// `Open Scan`
+  String get openScan {
+    return Intl.message('Open Scan', name: 'openScan', desc: '', args: []);
   }
 }
 
