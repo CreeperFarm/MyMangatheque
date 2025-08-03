@@ -151,7 +151,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               onTap: () {
                 pickUploadImage();
               },
-              child: GetUserProfilePicture(file: user.avatar!),
+              child: GetUserProfilePicture(
+                file: user.avatar!,
+              ),
             ),
             const Padding(padding: EdgeInsets.only(bottom: 25)),
             MyLine(width: MediaQuery.of(context).size.width, vertical: 10),
@@ -469,7 +471,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   },
                 ),
               ),
-            )
+            ),
           ],
         ),
       ),
