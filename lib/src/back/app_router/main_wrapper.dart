@@ -7,9 +7,12 @@ import 'package:glass_kit/glass_kit.dart';
 import 'package:go_router/go_router.dart';
 import 'package:keyboard_detection/keyboard_detection.dart';
 import 'package:mymangatheque/l10n/app_localizations.dart';
+import 'package:mymangatheque/src/back/services/pocketbase.dart';
 import 'package:mymangatheque/src/const/own_icon.dart';
 import 'package:mymangatheque/src/front/components/my_drawer.dart';
 import 'package:mymangatheque/src/front/components/my_drawer_tile.dart';
+import 'package:mymangatheque/src/function/auto_push_or_go.dart';
+import 'package:mymangatheque/src/models/get_user_information.dart';
 import 'package:url_launcher/link.dart';
 
 class MainWrapper extends ConsumerStatefulWidget {
@@ -158,23 +161,55 @@ class _MainWrapperState extends ConsumerState<MainWrapper> {
                           children: [
                             GestureDetector(
                               onTap: () {
-                                context.go('/profile');
+                                pushOrGo(context, '/profile');
                               },
-                              /*
-                  TODO: Check if the user is connected,
-                   if he is then show him his profile picture and the text 'Mon Compte',
-                   else show him the icon of a user and the text 'Se connecter'.
-              */
                               child: Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    SvgPicture.asset('assets/icons/user.svg',
-                                        width: 30, height: 30, colorFilter: ColorFilter.mode(Theme.of(context).colorScheme.primary, BlendMode.srcIn)),
-                                    Text(AppLocalizations.of(context)!.logIn,
-                                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary)),
-                                  ],
+                                padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 25),
+                                child: StreamBuilder(
+                                  stream: PocketBaseConnector().listenToUserChanges(),
+                                  builder: (context, snapshot) {
+                                    final isLoggedIn = PocketBaseConnector().isLoggedIn();
+                                    if (isLoggedIn) {
+                                      final user = PocketBaseConnector().getConnectedUser();
+                                      return Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          user?.avatar != null
+                                              ? GetUserProfilePicture(
+                                                  file: user!.avatar!,
+                                                  width: 30,
+                                                  height: 30,
+                                                )
+                                              : SvgPicture.asset(
+                                                  'assets/icons/user.svg',
+                                                  width: 30,
+                                                  height: 30,
+                                                  colorFilter: ColorFilter.mode(Theme.of(context).colorScheme.primary, BlendMode.srcIn),
+                                                ),
+                                          Text(
+                                            user?.username ?? '',
+                                            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary),
+                                          ),
+                                        ],
+                                      );
+                                    } else {
+                                      return Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          SvgPicture.asset(
+                                            'assets/icons/user.svg',
+                                            width: 30,
+                                            height: 30,
+                                            colorFilter: ColorFilter.mode(Theme.of(context).colorScheme.primary, BlendMode.srcIn),
+                                          ),
+                                          Text(
+                                            localizations.logIn,
+                                            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary),
+                                          ),
+                                        ],
+                                      );
+                                    }
+                                  },
                                 ),
                               ),
                             ),

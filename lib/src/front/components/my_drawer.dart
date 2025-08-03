@@ -72,11 +72,6 @@ class _MyDrawerState extends State<MyDrawer> {
                 onTap: () {
                   pushOrGo(context, '/profile');
                 },
-                /*
-                  TODO: Check if the user is connected,
-                   if he is then show him his profile picture and the text 'Mon Compte',
-                   else show him the icon of a user and the text 'Se connecter'.
-              */
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 25),
                   child: StreamBuilder(

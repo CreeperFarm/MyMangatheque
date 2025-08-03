@@ -146,6 +146,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "availability": m2,
     "birthdayDateIs": m3,
     "boxSet": MessageLookupByLibrary.simpleMessage("Coffret"),
+    "buildAppVersionImpossibleToRetreive": MessageLookupByLibrary.simpleMessage(
+      "Impossible de récupérer la version de l\'application et la version du build.",
+    ),
     "buyOn": m4,
     "chooseVolumeLanguage": MessageLookupByLibrary.simpleMessage(
       "Veuillez sélectionner la langue du volume.",

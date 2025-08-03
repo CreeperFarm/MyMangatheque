@@ -471,5 +471,6 @@
   "applicableLawAndCompetentJurisdictionLane1": "Les présentes mentions légales sont soumises au droit français. En cas de litige, les tribunaux français seront seuls compétents.",
   "lastUpdateDate": "Date de dernière mise à jour",
   "scanEAN": "Scan EAN",
-  "openScan": "Ouvrir le scan"
+  "openScan": "Ouvrir le scan",
+  "buildAppVersionImpossibleToRetreive": "Impossible de récupérer la version de l'application et la version du build."
 }

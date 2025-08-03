@@ -63,7 +63,7 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
   @override
   void initState() {
     bookLinkVolumeController.text =
-        '[{"available": "En Stock","seller": "amazon", "url": ""},{"available": "En Stock","seller": "bdfugue", "url": "https://www.bdfugue.com/a/?ean=${eanVolumeController.text}&ref=W0WZrth4"}]';
+        '[{"available": "inStock","seller": "amazon", "url": ""},{"available": "En Stock","seller": "bdfugue", "url": "https://www.bdfugue.com/a/?ean=${eanVolumeController.text}&ref=W0WZrth4"}]';
     infoVolumeController.text = '{"pageNumber": }';
     super.initState();
   }

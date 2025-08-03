@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mymangatheque/l10n/app_localizations.dart';
+import 'package:mymangatheque/src/back/provider/last_ean.dart';
 import 'package:mymangatheque/src/back/services/pocketbase.dart';
 import 'package:mymangatheque/src/function/auto_push_or_go.dart';
 import 'package:simple_barcode_scanner/simple_barcode_scanner.dart';
@@ -78,13 +79,14 @@ class _ScanEanPageState extends ConsumerState<ScanEanPage> {
                   );
                   setState(() {
                     if (res is String) {
+                      ref.read(lastEANProvider.notifier).setLastEAN(res);
                       ean = res;
                     }
                   });
                 },
                 child: Text(localizations.openScan),
               ),
-              Text(ean ?? "No data"),
+              Text(ref.read(lastEANProvider) ?? "No data"),
             ],
           ),
         );

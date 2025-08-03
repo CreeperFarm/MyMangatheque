@@ -1669,6 +1669,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Open Scan'**
   String get openScan;
+
+  /// No description provided for @buildAppVersionImpossibleToRetreive.
+  ///
+  /// In en, this message translates to:
+  /// **'Impossible to retrieve the build and app version.'**
+  String get buildAppVersionImpossibleToRetreive;
 }
 
 class _AppLocalizationsDelegate

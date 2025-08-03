@@ -2306,6 +2306,16 @@ class AppLocalizations {
   String get openScan {
     return Intl.message('Open Scan', name: 'openScan', desc: '', args: []);
   }
+
+  /// `Impossible to retrieve the build and app version.`
+  String get buildAppVersionImpossibleToRetreive {
+    return Intl.message(
+      'Impossible to retrieve the build and app version.',
+      name: 'buildAppVersionImpossibleToRetreive',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

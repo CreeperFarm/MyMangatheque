@@ -1071,4 +1071,8 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get openScan => 'Open Scan';
+
+  @override
+  String get buildAppVersionImpossibleToRetreive =>
+      'Impossible to retrieve the build and app version.';
 }

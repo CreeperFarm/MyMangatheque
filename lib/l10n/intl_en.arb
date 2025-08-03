@@ -470,5 +470,6 @@
   "applicableLawAndCompetentJurisdictionLane1": "These legal notices are subject to French law. In the event of a dispute, the French courts will have sole jurisdiction.",
   "lastUpdateDate": "Last Update Date",
   "scanEAN": "Scan EAN",
-  "openScan": "Open Scan"
+  "openScan": "Open Scan",
+  "buildAppVersionImpossibleToRetreive": "Impossible to retrieve the build and app version."
 }
