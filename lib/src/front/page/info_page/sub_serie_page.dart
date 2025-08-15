@@ -145,12 +145,12 @@ class _SubSeriePageState extends State<SubSeriePage> {
                           fontWeight: FontWeight.w300,
                         ),
                       ),
-                      (volumes[0]["support"].toString() == "manga")
+                      (data['support'] == null || data['support'] == "manga")
                           ? SizedBox()
                           : Padding(
                               padding: const EdgeInsets.symmetric(vertical: 5),
                               child: Text(
-                                volumes[0]["support"].toString().replaceAll('-', ' '),
+                                localizations.supportIs(data['support'].toString()),
                                 style: const TextStyle(
                                   fontSize: 30,
                                   fontWeight: FontWeight.w200,

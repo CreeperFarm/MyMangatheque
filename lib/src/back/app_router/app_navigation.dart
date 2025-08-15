@@ -7,6 +7,7 @@ import 'package:mymangatheque/src/front/dev_page/component_show_page.dart';
 import 'package:mymangatheque/src/front/page/admin_pages/admin_create_page.dart';
 import 'package:mymangatheque/src/front/page/admin_pages/admin_home.dart';
 import 'package:mymangatheque/src/front/page/admin_pages/admin_login_page.dart';
+import 'package:mymangatheque/src/front/page/admin_pages/admin_statistics.dart';
 import 'package:mymangatheque/src/front/page/auth/delete_account_page.dart'; // Import DeleteAccountPage
 import 'package:mymangatheque/src/front/page/auth/forgot_password_page.dart';
 import 'package:mymangatheque/src/front/page/auth/modify_password_page.dart';
@@ -118,6 +119,12 @@ class AppNavigation {
                         return ComponentShowPage(key: state.pageKey);
                       }),
                   GoRoute(
+                      path: 'static_page',
+                      name: 'Static Page',
+                      builder: (context, state) {
+                        return StatisticsPage(key: state.pageKey);
+                      }),
+                  GoRoute(
                       path: 'mentions_legales',
                       name: 'Mentions Légales',
                       builder: (context, state) {
@@ -160,6 +167,13 @@ class AppNavigation {
                           name: 'Admin Create',
                           builder: (context, state) {
                             return AdminCreatePage(key: state.pageKey);
+                          },
+                        ),
+                        GoRoute(
+                          path: 'static_page',
+                          name: 'Admin Static Page',
+                          builder: (context, state) {
+                            return StatisticsPage(key: state.pageKey);
                           },
                         ),
                       ]),

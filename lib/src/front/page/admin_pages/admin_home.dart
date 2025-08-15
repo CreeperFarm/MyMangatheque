@@ -50,7 +50,11 @@ class AdminHomePage extends ConsumerWidget {
                       await Clipboard.setData(ClipboardData(text: lastEAN));
                       // copied successfully
                     },
-                  )
+                  ),
+                  ElevatedButton(
+                    child: Text("Stats"),
+                    onPressed: () => pushOrGo(context, '/admin/static_page'),
+                  ),
                 ],
               ),
             ),

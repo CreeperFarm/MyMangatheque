@@ -8,6 +8,7 @@ import 'dart:ui';
 import 'package:dart_date/dart_date.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_custom_tabs/flutter_custom_tabs.dart';
+import 'package:http/http.dart' as http;
 import 'package:http/http.dart';
 import 'package:mymangatheque/l10n/app_localizations.dart';
 import 'package:mymangatheque/src/back/services/utils.dart';
@@ -404,6 +405,15 @@ class PocketBaseConnector {
         .then((value) => value.items);
   }
 
+  Future<List<RecordModel>> getCollectionFullDataWithFilter(String collectionId, String query) {
+    return _pocketBase
+        .collection(collectionId)
+        .getFullList(
+          filter: query,
+        )
+        .then((value) => value);
+  }
+
   Future<List<RecordModel>> getCollectionDataWithFilterExpand(String collectionId, String query, String expand) {
     return _pocketBase
         .collection(collectionId)
@@ -432,6 +442,32 @@ class PocketBaseConnector {
           await getCollectionData(collectionId),
         );
     return subject.stream;
+  }
+
+  Future<int> getNewRegisterLast24h() {
+    return http.get(Uri.parse('https://api.mymangatheque.com/newRegisterLast24h')).then((response) {
+      if (response.statusCode == 200) {
+        return int.parse(json.decode(response.body)["count"].toString());
+      } else {
+        throw Exception('Failed to load new register');
+      }
+    }).catchError((e) {
+      debugPrint(e.toString());
+      return 0; // Return 0 if an error occurs
+    });
+  }
+
+  Future<String> getNewRegisterLastMonth() {
+    return http.get(Uri.parse('https://api.mymangatheque.com/newRegisterLastMonth')).then((response) {
+      if (response.statusCode == 200) {
+        return response.body;
+      } else {
+        throw Exception('Failed to load new register');
+      }
+    }).catchError((e) {
+      debugPrint(e.toString());
+      return "";
+    });
   }
 
   Future<int> getNumberOwnedManga(String id) async {
@@ -604,6 +640,10 @@ class PocketBaseConnector {
 
   Future<String> getAppVersion() async {
     return PackageInfo.fromPlatform().then((value) => value.version).toString();
+  }
+
+  PocketBase connector() {
+    return _pocketBase;
   }
 
   Future<String> get appVersion async => await PackageInfo.fromPlatform().then((value) => value.version);

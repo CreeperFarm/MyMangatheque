@@ -93,6 +93,7 @@ dependencies:
   shared_preferences: ^2.5.3
   url_strategy: ^0.3.0
   intl_utils: ^2.8.11
+  fl_chart: ^1.0.0
 
   # Need triage
 
