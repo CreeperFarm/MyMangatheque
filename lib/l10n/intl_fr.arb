@@ -472,5 +472,6 @@
   "lastUpdateDate": "Date de dernière mise à jour",
   "scanEAN": "Scan EAN",
   "openScan": "Ouvrir le scan",
-  "buildAppVersionImpossibleToRetreive": "Impossible de récupérer la version de l'application et la version du build."
+  "buildAppVersionImpossibleToRetreive": "Impossible de récupérer la version de l'application et la version du build.",
+  "allVolumesOwned": "Vous possedez tous les tomes de volumes. Vous les possédez tous 👏."
 }

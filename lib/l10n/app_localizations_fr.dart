@@ -1083,4 +1083,8 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get buildAppVersionImpossibleToRetreive =>
       'Impossible de récupérer la version de l\'application et la version du build.';
+
+  @override
+  String get allVolumesOwned =>
+      'Vous possedez tous les tomes de volumes. Vous les possédez tous 👏.';
 }

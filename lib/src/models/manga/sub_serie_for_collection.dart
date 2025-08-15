@@ -25,6 +25,14 @@ class SubSerieForCollection {
     );
   }
 
+  removeVolume(Volume volume) {
+    volumes.removeWhere((v) => v.id == volume.id);
+  }
+
+  containsVolume(Volume volume) {
+    return volumes.any((v) => v.id == volume.id);
+  }
+
   Map<String, dynamic> toJson() {
     return {
       'id': id,

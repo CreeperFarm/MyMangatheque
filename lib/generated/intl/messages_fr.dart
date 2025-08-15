@@ -102,6 +102,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "adultContentWarning": MessageLookupByLibrary.simpleMessage(
       "Avertissement de contenu adulte",
     ),
+    "allVolumesOwned": MessageLookupByLibrary.simpleMessage(
+      "Vous possedez tous les tomes de volumes. Vous les possédez tous 👏.",
+    ),
     "allVolumesReaded": MessageLookupByLibrary.simpleMessage(
       "Vous avez lu tous les tomes possédés.",
     ),

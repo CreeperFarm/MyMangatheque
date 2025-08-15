@@ -1675,6 +1675,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Impossible to retrieve the build and app version.'**
   String get buildAppVersionImpossibleToRetreive;
+
+  /// No description provided for @allVolumesOwned.
+  ///
+  /// In en, this message translates to:
+  /// **'You own all the volumes of your collection.'**
+  String get allVolumesOwned;
 }
 
 class _AppLocalizationsDelegate

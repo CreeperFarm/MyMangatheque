@@ -2316,6 +2316,16 @@ class AppLocalizations {
       args: [],
     );
   }
+
+  /// `You own all the volumes of your collection.`
+  String get allVolumesOwned {
+    return Intl.message(
+      'You own all the volumes of your collection.',
+      name: 'allVolumesOwned',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {
