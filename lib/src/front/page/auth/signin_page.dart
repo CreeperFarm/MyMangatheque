@@ -8,6 +8,7 @@ import 'package:mymangatheque/src/front/components/my_button.dart';
 import 'package:mymangatheque/src/front/components/my_scroll_column.dart';
 import 'package:mymangatheque/src/front/components/my_square_tile.dart';
 import 'package:mymangatheque/src/front/components/my_textfield.dart';
+import 'package:mymangatheque/src/function/auto_push_or_go.dart';
 import 'package:mymangatheque/src/function/show_message_function.dart';
 
 class SignInPage extends StatefulWidget {
@@ -139,7 +140,7 @@ class _SignInPageState extends State<SignInPage> {
               MyButton(
                 text: localizations.logIn,
                 onTap: () => connector.loginWithEmail(emailController.text, passwordController.text, context).then((value) {
-                  context.go('/profile');
+                  pushOrGo(context, "/profile");
                 }).catchError((e) {
                   showMessage(e.toString(), context);
                 }),

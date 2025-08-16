@@ -10,6 +10,7 @@ import 'package:mymangatheque/src/front/components/my_button.dart';
 import 'package:mymangatheque/src/front/components/my_scroll_column.dart';
 import 'package:mymangatheque/src/front/components/my_square_tile.dart';
 import 'package:mymangatheque/src/front/components/my_textfield.dart';
+import 'package:mymangatheque/src/function/auto_push_or_go.dart';
 import 'package:mymangatheque/src/function/show_message_function.dart';
 import 'package:pocketbase/pocketbase.dart';
 
@@ -42,21 +43,22 @@ class _SignUpPageState extends State<SignUpPage> {
     connector.createUser(usernameController.text, emailController.text, passwordController.text, passwordVerifierController.text, selectedGender.text,
         selectedBDayDate.add(const Duration(hours: 1)).toUtc().toString(), context);
     connector.sendVerification(emailController.text);
+    connector.findUser(emailController.text);
     await connector.updateUserData(emailController.text);
-    context.go('/profile');
+    pushOrGo(context, '/profile');
   }
 
   void signUp(AppLocalizations localizations) async {
     if (passwordController.text.length < 8) {
-      print('Password must be at least 8 characters');
+      debugPrint('Password must be at least 8 characters');
       errorText = localizations.passwordMinLength;
       return showMessage(errorText, context);
     } else if (!emailController.text.contains('@')) {
-      print('Invalid email');
+      debugPrint('Invalid email');
       errorText = localizations.invalidEmail;
       return showMessage(errorText, context);
     } else if (usernameController.text.length < 3) {
-      print('Username must be at least 3 characters');
+      debugPrint('Username must be at least 3 characters');
       errorText = localizations.usernameMinLength;
       return showMessage(errorText, context);
     } else {
@@ -107,8 +109,14 @@ class _SignUpPageState extends State<SignUpPage> {
                 const SizedBox(height: 10),
 
                 // Locker Icon
-                SvgPicture.asset('assets/icons/locker.svg',
-                    height: 75, colorFilter: ColorFilter.mode(Theme.of(context).colorScheme.primary, BlendMode.srcIn)),
+                SvgPicture.asset(
+                  'assets/icons/locker.svg',
+                  height: 75,
+                  colorFilter: ColorFilter.mode(
+                    Theme.of(context).colorScheme.primary,
+                    BlendMode.srcIn,
+                  ),
+                ),
 
                 const SizedBox(height: 15),
 
