@@ -12,6 +12,7 @@ import 'package:http/http.dart' as http;
 import 'package:http/http.dart';
 import 'package:mymangatheque/l10n/app_localizations.dart';
 import 'package:mymangatheque/src/back/services/utils.dart';
+import 'package:mymangatheque/src/function/auto_push_or_go.dart';
 import 'package:mymangatheque/src/function/show_message_function.dart';
 import 'package:mymangatheque/src/models/local_storage/local_storage.dart';
 import 'package:mymangatheque/src/models/local_storage/service_locator.dart';
@@ -186,6 +187,7 @@ class PocketBaseConnector {
         debugPrint(e.toString());
       }
       await closeCustomTabs();
+      pushOrGo(context, '/profile');
       alreadyClick = 0;
     } else {
       showMessage(AppLocalizations.of(context)!.pleaseWait, context);

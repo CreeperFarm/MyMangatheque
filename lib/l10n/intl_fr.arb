@@ -21,7 +21,7 @@
     }
   },
   "alphabeticalOrder": "Ordre alphabétique",
-  "lastRealease": "Dernière sortie",
+  "lastRelease": "Dernière sortie",
   "completeLibrary": "Compléter",
   "desiredLibrary": "Envies",
   "readPile": "Pile à lire",
@@ -291,7 +291,7 @@
   "orContinueWith": "Ou continuez avec",
   "createAccount": "Créer un compte",
   "noAccountYet": "Vous n'avez pas encore de compte ?",
-  "alreadyHaveAccount": "Vous avez déjà un compte ?",
+  "alreadyHaveAnAccount": "Vous avez déjà un compte ?",
   "passwordMinLength": "Le mot de passe doit comporter au moins 8 caractères.",
   "usernameMinLength": "Le pseudo doit comporter au moins 3 caractères.",
   "username": "Pseudo",
@@ -473,5 +473,18 @@
   "scanEAN": "Scan EAN",
   "openScan": "Ouvrir le scan",
   "buildAppVersionImpossibleToRetreive": "Impossible de récupérer la version de l'application et la version du build.",
-  "allVolumesOwned": "Vous possedez tous les tomes de volumes. Vous les possédez tous 👏."
+  "allVolumesOwned": "Vous possedez tous les tomes de volumes. Vous les possédez tous 👏.",
+  "unknownError": "Une erreur inconnue s'est produite.",
+  "errorOccurredMessage": "Une erreur s'est produite : {message}",
+  "@errorOccurredMessage": {
+    "description": "Un message d'erreur indiquant qu'une erreur s'est produite",
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "error404": "Erreur 404",
+  "pageNotFound": "Page non trouvée",
+  "goHome": "Aller à l'accueil"
 }

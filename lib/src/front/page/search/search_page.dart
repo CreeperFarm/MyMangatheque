@@ -5,9 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mymangatheque/src/back/provider/search_filter_provider.dart';
 import 'package:mymangatheque/src/back/services/pocketbase.dart';
-import 'package:mymangatheque/src/const/own_icon.dart';
 import 'package:mymangatheque/src/front/components/my_line.dart';
 import 'package:mymangatheque/src/function/auto_push_or_go.dart';
+import 'package:youtube_player_iframe/youtube_player_iframe.dart';
 
 class SearchPage extends ConsumerStatefulWidget {
   const SearchPage({super.key});
@@ -102,6 +102,12 @@ class _SearchPageState extends ConsumerState<SearchPage> {
 
     searchResultsList();
 
+    final _controller = YoutubePlayerController.fromVideoId(
+      videoId: '9lNZ_Rnr7Jc', // Bad Apple video ID
+      autoPlay: true,
+      params: const YoutubePlayerParams(showFullscreenButton: false, showControls: false),
+    );
+
     return Scaffold(
       appBar: AppBar(
         title: Row(
@@ -118,7 +124,8 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                 ),
               ),
             ),
-            PopupMenuButton<String>(
+            // TODO: Create searchFilterProvider and manage the selected filter
+            /*PopupMenuButton<String>(
               icon: OwnIcon(iconColor: Theme.of(context).colorScheme.primary, iconName: "filter_right"),
               onSelected: (String result) {
                 setState(() {
@@ -162,13 +169,16 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                   ),
                 ),
               ],
-            ),
+            ),*/
           ],
         ),
       ),
       body: (_searchController.text.toLowerCase() == 'bad apple')
           ? Center(
-              child: Text('Bad Apple'),
+              child: YoutubePlayer(
+                controller: _controller,
+                aspectRatio: 4 / 3,
+              ),
             ) // TODO: Add the bad apple video
           : (_resultsList.isEmpty)
               ? Center(

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mymangatheque/l10n/app_localizations.dart';
 import 'package:mymangatheque/src/back/services/pocketbase.dart';
@@ -120,7 +119,7 @@ class _SignInPageState extends State<SignInPage> {
               SizedBox(
                 width: MediaQuery.of(context).size.width,
                 child: TextButton(
-                  onPressed: () => GoRouter.of(context).go('/profile/forgot_password'),
+                  onPressed: () => pushOrGo(context, "/profile/forgot_password"),
                   style: const ButtonStyle(
                     alignment: Alignment.centerRight,
                     padding: WidgetStatePropertyAll(EdgeInsets.all(0)),
@@ -140,6 +139,7 @@ class _SignInPageState extends State<SignInPage> {
               MyButton(
                 text: localizations.logIn,
                 onTap: () => connector.loginWithEmail(emailController.text, passwordController.text, context).then((value) {
+                  setState(() {});
                   pushOrGo(context, "/profile");
                 }).catchError((e) {
                   showMessage(e.toString(), context);
@@ -186,7 +186,6 @@ class _SignInPageState extends State<SignInPage> {
                     onTap: () => {
                       debugPrint("Google Sign In got clicked"),
                       connector.signInWithGoogle(context),
-                      context.go('/profile'),
                     },
                   ),
 
@@ -210,11 +209,12 @@ class _SignInPageState extends State<SignInPage> {
                     ),
                     const SizedBox(width: 4),
                     TextButton(
-                        onPressed: () => GoRouter.of(context).go('/profile/signup'),
-                        child: Text(
-                          localizations.createAccount,
-                          style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold),
-                        )),
+                      onPressed: () => pushOrGo(context, '/profile/signup'),
+                      child: Text(
+                        localizations.createAccount,
+                        style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold),
+                      ),
+                    ),
                   ],
                 ),
               ),

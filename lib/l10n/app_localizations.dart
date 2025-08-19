@@ -1681,6 +1681,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'You own all the volumes of your collection.'**
   String get allVolumesOwned;
+
+  /// No description provided for @unknownError.
+  ///
+  /// In en, this message translates to:
+  /// **'An unknown error occurred.'**
+  String get unknownError;
+
+  /// An error message indicating that an error occurred
+  ///
+  /// In en, this message translates to:
+  /// **'An error occurred : {message} .'**
+  String errorOccurredMessage(String message);
+
+  /// No description provided for @error404.
+  ///
+  /// In en, this message translates to:
+  /// **'Error 404'**
+  String get error404;
+
+  /// No description provided for @pageNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Page Not Found'**
+  String get pageNotFound;
+
+  /// No description provided for @goHome.
+  ///
+  /// In en, this message translates to:
+  /// **'Go Home'**
+  String get goHome;
 }
 
 class _AppLocalizationsDelegate

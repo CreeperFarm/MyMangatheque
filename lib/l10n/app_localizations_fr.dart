@@ -58,7 +58,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get alphabeticalOrder => 'Ordre alphabétique';
 
   @override
-  String get lastRelease => 'Last Release';
+  String get lastRelease => 'Dernière sortie';
 
   @override
   String get completeLibrary => 'Compléter';
@@ -659,7 +659,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get noAccountYet => 'Vous n\'avez pas encore de compte ?';
 
   @override
-  String get alreadyHaveAnAccount => 'Already have an account?';
+  String get alreadyHaveAnAccount => 'Vous avez déjà un compte ?';
 
   @override
   String get passwordMinLength =>
@@ -1087,4 +1087,21 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get allVolumesOwned =>
       'Vous possedez tous les tomes de volumes. Vous les possédez tous 👏.';
+
+  @override
+  String get unknownError => 'Une erreur inconnue s\'est produite.';
+
+  @override
+  String errorOccurredMessage(String message) {
+    return 'Une erreur s\'est produite : $message';
+  }
+
+  @override
+  String get error404 => 'Erreur 404';
+
+  @override
+  String get pageNotFound => 'Page non trouvée';
+
+  @override
+  String get goHome => 'Aller à l\'accueil';
 }

@@ -94,6 +94,7 @@ dependencies:
   url_strategy: ^0.3.0
   intl_utils: ^2.8.11
   fl_chart: ^1.0.0
+  youtube_player_iframe: ^5.2.2
 
   # Need triage
 

@@ -1078,4 +1078,21 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get allVolumesOwned => 'You own all the volumes of your collection.';
+
+  @override
+  String get unknownError => 'An unknown error occurred.';
+
+  @override
+  String errorOccurredMessage(String message) {
+    return 'An error occurred : $message .';
+  }
+
+  @override
+  String get error404 => 'Error 404';
+
+  @override
+  String get pageNotFound => 'Page Not Found';
+
+  @override
+  String get goHome => 'Go Home';
 }

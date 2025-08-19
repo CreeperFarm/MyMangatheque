@@ -1,7 +1,6 @@
 import 'package:date_field/date_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mymangatheque/l10n/app_localizations.dart';
 import 'package:mymangatheque/src/back/services/pocketbase.dart';
@@ -63,6 +62,7 @@ class _SignUpPageState extends State<SignUpPage> {
       return showMessage(errorText, context);
     } else {
       signingUpProcess();
+      return;
     }
   }
 
@@ -352,7 +352,6 @@ class _SignUpPageState extends State<SignUpPage> {
                       imagePath: 'assets/images/google.png',
                       onTap: () => {
                         connector.signInWithGoogle(context),
-                        context.go('/profile'),
                       },
                     ),
 
@@ -376,7 +375,7 @@ class _SignUpPageState extends State<SignUpPage> {
                       ),
                       const SizedBox(width: 4),
                       TextButton(
-                        onPressed: () => context.go('/profile/signin'),
+                        onPressed: () => pushOrGo(context, '/profile/signin'),
                         child: Text(
                           localizations.signIn,
                           style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold),

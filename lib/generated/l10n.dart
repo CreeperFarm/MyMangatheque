@@ -2326,6 +2326,46 @@ class AppLocalizations {
       args: [],
     );
   }
+
+  /// `An unknown error occurred.`
+  String get unknownError {
+    return Intl.message(
+      'An unknown error occurred.',
+      name: 'unknownError',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `An error occurred : {message} .`
+  String errorOccurredMessage(String message) {
+    return Intl.message(
+      'An error occurred : $message .',
+      name: 'errorOccurredMessage',
+      desc: 'An error message indicating that an error occurred',
+      args: [message],
+    );
+  }
+
+  /// `Error 404`
+  String get error404 {
+    return Intl.message('Error 404', name: 'error404', desc: '', args: []);
+  }
+
+  /// `Page Not Found`
+  String get pageNotFound {
+    return Intl.message(
+      'Page Not Found',
+      name: 'pageNotFound',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Go Home`
+  String get goHome {
+    return Intl.message('Go Home', name: 'goHome', desc: '', args: []);
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

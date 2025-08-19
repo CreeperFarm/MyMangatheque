@@ -198,48 +198,54 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
               ),
             ],
           ),
-          bottom: TabBar(
-              mouseCursor: SystemMouseCursors.click,
-              indicatorSize: TabBarIndicatorSize.label,
-              indicatorPadding: const EdgeInsets.symmetric(vertical: 5, horizontal: 0),
-              indicatorWeight: 1,
-              indicator: BoxDecoration(
-                borderRadius: BorderRadius.circular(360),
-                color: Theme.of(context).colorScheme.primary,
+          bottom: PreferredSize(
+            preferredSize: const Size.fromHeight(kToolbarHeight),
+            child: Center(
+              child: TabBar(
+                mouseCursor: SystemMouseCursors.click,
+                indicatorSize: TabBarIndicatorSize.label,
+                indicatorPadding: const EdgeInsets.symmetric(vertical: 5, horizontal: 0),
+                indicatorWeight: 1,
+                indicator: BoxDecoration(
+                  borderRadius: BorderRadius.circular(360),
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                isScrollable: true,
+                splashBorderRadius: BorderRadius.circular(360),
+                tabAlignment: TabAlignment.center,
+                tabs: [
+                  Tab(
+                    child: MyTabBarItem(
+                      tabText: localizations.readPile,
+                      colorIn: Theme.of(context).colorScheme.surface,
+                      colorOut: Theme.of(context).colorScheme.primary,
+                    ),
+                  ),
+                  Tab(
+                    child: MyTabBarItem(
+                      tabText: localizations.collection,
+                      colorIn: Theme.of(context).colorScheme.surface,
+                      colorOut: Theme.of(context).colorScheme.primary,
+                    ),
+                  ),
+                  Tab(
+                    child: MyTabBarItem(
+                      tabText: localizations.completeLibrary,
+                      colorIn: Theme.of(context).colorScheme.surface,
+                      colorOut: Theme.of(context).colorScheme.primary,
+                    ),
+                  ),
+                  Tab(
+                    child: MyTabBarItem(
+                      tabText: localizations.desiredLibrary,
+                      colorIn: Theme.of(context).colorScheme.surface,
+                      colorOut: Theme.of(context).colorScheme.primary,
+                    ),
+                  ),
+                ],
               ),
-              isScrollable: true,
-              splashBorderRadius: BorderRadius.circular(360),
-              tabAlignment: TabAlignment.start,
-              tabs: [
-                Tab(
-                  child: MyTabBarItem(
-                    tabText: localizations.readPile,
-                    colorIn: Theme.of(context).colorScheme.surface,
-                    colorOut: Theme.of(context).colorScheme.primary,
-                  ),
-                ),
-                Tab(
-                  child: MyTabBarItem(
-                    tabText: localizations.collection,
-                    colorIn: Theme.of(context).colorScheme.surface,
-                    colorOut: Theme.of(context).colorScheme.primary,
-                  ),
-                ),
-                Tab(
-                  child: MyTabBarItem(
-                    tabText: localizations.completeLibrary,
-                    colorIn: Theme.of(context).colorScheme.surface,
-                    colorOut: Theme.of(context).colorScheme.primary,
-                  ),
-                ),
-                Tab(
-                  child: MyTabBarItem(
-                    tabText: localizations.desiredLibrary,
-                    colorIn: Theme.of(context).colorScheme.surface,
-                    colorOut: Theme.of(context).colorScheme.primary,
-                  ),
-                ),
-              ]),
+            ),
+          ),
         ),
         body: TabBarView(
           physics: const NeverScrollableScrollPhysics(),

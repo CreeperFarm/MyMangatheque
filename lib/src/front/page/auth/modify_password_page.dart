@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:go_router/go_router.dart';
 import 'package:mymangatheque/l10n/app_localizations.dart';
 import 'package:mymangatheque/src/back/services/pocketbase.dart';
 import 'package:mymangatheque/src/front/components/my_button.dart';
 import 'package:mymangatheque/src/front/components/my_scroll_column.dart';
 import 'package:mymangatheque/src/front/components/my_textfield.dart';
+import 'package:mymangatheque/src/function/auto_push_or_go.dart';
 import 'package:mymangatheque/src/function/show_message_function.dart';
 
 // ignore_for_file: use_build_context_synchronously
@@ -95,7 +95,7 @@ class _ModifyPasswordPageState extends State<ModifyPasswordPage> {
     }
 
     if (connector.getConnectedUser() == null) {
-      context.go('/profile/signin');
+      pushOrGo(context, "/profile/signin");
     }
     return Scaffold(
       appBar: AppBar(
@@ -177,7 +177,7 @@ class _ModifyPasswordPageState extends State<ModifyPasswordPage> {
                 ),
                 const SizedBox(height: 11),
                 MyButton(
-                  text: "localizations.modifyPassword",
+                  text: localizations.modifyPassword,
                   onTap: () {
                     // Verify if all field is complete
                     if (_formKey.currentState!.validate()) {

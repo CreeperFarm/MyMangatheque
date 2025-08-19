@@ -472,5 +472,18 @@
   "scanEAN": "Scan EAN",
   "openScan": "Open Scan",
   "buildAppVersionImpossibleToRetreive": "Impossible to retrieve the build and app version.",
-  "allVolumesOwned": "You own all the volumes of your collection."
+  "allVolumesOwned": "You own all the volumes of your collection.",
+  "unknownError": "An unknown error occurred.",
+  "errorOccurredMessage": "An error occurred : {message} .",
+  "@errorOccurredMessage": {
+    "description": "An error message indicating that an error occurred",
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "error404": "Error 404",
+  "pageNotFound": "Page Not Found",
+  "goHome": "Go Home"
 }

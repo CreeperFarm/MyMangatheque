@@ -14,6 +14,7 @@ import 'package:mymangatheque/src/front/page/auth/modify_password_page.dart';
 import 'package:mymangatheque/src/front/page/auth/signin_page.dart';
 import 'package:mymangatheque/src/front/page/auth/signup_page.dart';
 import 'package:mymangatheque/src/front/page/discover_page.dart';
+import 'package:mymangatheque/src/front/page/error_page.dart';
 import 'package:mymangatheque/src/front/page/home_page.dart';
 import 'package:mymangatheque/src/front/page/info_page/author_page.dart';
 import 'package:mymangatheque/src/front/page/info_page/editor_page.dart';
@@ -367,5 +368,11 @@ class AppNavigation {
         ],
       ),
     ],
+
+    // 👇 This handles unknown routes
+    errorBuilder: (context, state) => ErrorPage(
+      error: state.error,
+      key: state.pageKey,
+    ),
   );
 }
