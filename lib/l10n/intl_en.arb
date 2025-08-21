@@ -485,5 +485,7 @@
   },
   "error404": "Error 404",
   "pageNotFound": "Page Not Found",
-  "goHome": "Go Home"
+  "goHome": "Go Home",
+  "allVolumesReadedSubSeries": "You have read all the volumes of this sub-series.",
+  "noVolumeOwned": "You do not own any volumes, you can add them buy searching in the search page or by scanning their ean (Comming soon...)."
 }

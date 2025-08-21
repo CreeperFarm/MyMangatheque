@@ -1095,4 +1095,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get goHome => 'Go Home';
+
+  @override
+  String get allVolumesReadedSubSeries =>
+      'You have read all the volumes of this sub-series.';
+
+  @override
+  String get noVolumeOwned =>
+      'You do not own any volumes, you can add them buy searching in the search page or by scanning their ean (Comming soon...).';
 }

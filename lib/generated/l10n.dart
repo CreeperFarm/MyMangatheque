@@ -2366,6 +2366,26 @@ class AppLocalizations {
   String get goHome {
     return Intl.message('Go Home', name: 'goHome', desc: '', args: []);
   }
+
+  /// `You have read all the volumes of this sub-series.`
+  String get allVolumesReadedSubSeries {
+    return Intl.message(
+      'You have read all the volumes of this sub-series.',
+      name: 'allVolumesReadedSubSeries',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `You do not own any volumes, you can add them buy searching in the search page or by scanning their ean (Comming soon...).`
+  String get noVolumeOwned {
+    return Intl.message(
+      'You do not own any volumes, you can add them buy searching in the search page or by scanning their ean (Comming soon...).',
+      name: 'noVolumeOwned',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

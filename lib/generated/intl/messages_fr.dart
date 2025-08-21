@@ -110,6 +110,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "allVolumesReaded": MessageLookupByLibrary.simpleMessage(
       "Vous avez lu tous les tomes possédés.",
     ),
+    "allVolumesReadedSubSeries": MessageLookupByLibrary.simpleMessage(
+      "Vous avez lu tous les tomes de cette sous-série 👏.",
+    ),
     "alphabeticalOrder": MessageLookupByLibrary.simpleMessage(
       "Ordre alphabétique",
     ),
@@ -326,6 +329,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "noConnection": MessageLookupByLibrary.simpleMessage(
       "Aucune connexion Internet",
+    ),
+    "noVolumeOwned": MessageLookupByLibrary.simpleMessage(
+      "Vous ne possédez aucun tome dans votre collection, vous pouvez en ajouter via la page de recherche ou en scannant les codes barres des tomes que vous possédez.",
     ),
     "novel": MessageLookupByLibrary.simpleMessage("Roman"),
     "november": MessageLookupByLibrary.simpleMessage("Novembre"),

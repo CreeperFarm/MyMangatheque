@@ -108,6 +108,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "allVolumesReaded": MessageLookupByLibrary.simpleMessage(
       "You have read all the volumes you own.",
     ),
+    "allVolumesReadedSubSeries": MessageLookupByLibrary.simpleMessage(
+      "You have read all the volumes of this sub-series.",
+    ),
     "alphabeticalOrder": MessageLookupByLibrary.simpleMessage(
       "Alphabetical Order",
     ),
@@ -313,6 +316,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Don\'t have an account yet?",
     ),
     "noConnection": MessageLookupByLibrary.simpleMessage("No connection"),
+    "noVolumeOwned": MessageLookupByLibrary.simpleMessage(
+      "You do not own any volumes, you can add them buy searching in the search page or by scanning their ean (Comming soon...).",
+    ),
     "novel": MessageLookupByLibrary.simpleMessage("Novel"),
     "november": MessageLookupByLibrary.simpleMessage("November"),
     "numberOfPages": MessageLookupByLibrary.simpleMessage("Number of Pages"),

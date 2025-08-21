@@ -486,5 +486,7 @@
   },
   "error404": "Erreur 404",
   "pageNotFound": "Page non trouvée",
-  "goHome": "Aller à l'accueil"
+  "goHome": "Aller à l'accueil",
+  "allVolumesReadedSubSeries": "Vous avez lu tous les tomes de cette sous-série 👏.",
+  "noVolumeOwned": "Vous ne possédez aucun tome dans votre collection, vous pouvez en ajouter via la page de recherche ou en scannant les codes barres des tomes que vous possédez."
 }

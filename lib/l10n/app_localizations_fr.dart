@@ -1104,4 +1104,12 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get goHome => 'Aller à l\'accueil';
+
+  @override
+  String get allVolumesReadedSubSeries =>
+      'Vous avez lu tous les tomes de cette sous-série 👏.';
+
+  @override
+  String get noVolumeOwned =>
+      'Vous ne possédez aucun tome dans votre collection, vous pouvez en ajouter via la page de recherche ou en scannant les codes barres des tomes que vous possédez.';
 }

@@ -188,57 +188,72 @@ class _ReadPileTabState extends ConsumerState<ReadPileTab> {
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
-                      child: Text(
-                        localizations.volumeReadedOverSeriesX(
-                          numberVolumeReaded(readSubSeriesList[i].volumes),
-                          readSubSeriesList[i].numberOwnedVolumes,
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 10, left: 10, right: 10),
-                      child: SizedBox(
-                        width: MediaQuery.of(context).size.width,
-                        height: (readSubSeriesList[i].numberOwnedVolumes - numberVolumeReaded(readSubSeriesList[i].volumes) != 0) ? 100 : 0,
-                        child: Stack(
-                          children: [
-                            for (var j = 0; j < readSubSeriesList[i].numberOwnedVolumes - numberVolumeReaded(readSubSeriesList[i].volumes); j++)
-                              (j == 0)
-                                  ? ClipRRect(
-                                      borderRadius: BorderRadius.circular(10.0),
-                                      child: Image.network(
-                                        notReadedSubSeriesList[i].volumes[j].image,
-                                        width: 65,
-                                      ),
-                                    )
-                                  : Positioned(
-                                      left: j * 45.0,
-                                      child: Container(
-                                        decoration: BoxDecoration(
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.9),
-                                              spreadRadius: 1,
-                                              blurRadius: 2,
-                                              offset: const Offset(0, 1),
-                                            ),
-                                          ],
-                                        ),
-                                        child: ClipRRect(
-                                          borderRadius: BorderRadius.circular(10.0),
-                                          child: Image.network(
-                                            notReadedSubSeriesList[i].volumes[j].image,
-                                            width: 65,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                          ],
-                        ),
-                      ),
-                    ),
+                    (numberVolumeReaded(readSubSeriesList[i].volumes) == readSubSeriesList[i].numberOwnedVolumes)
+                        ? Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                            child: Text(
+                              localizations.allVolumesReadedSubSeries,
+                            ),
+                          )
+                        : Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 10),
+                                child: Text(
+                                  localizations.volumeReadedOverSeriesX(
+                                    numberVolumeReaded(readSubSeriesList[i].volumes),
+                                    readSubSeriesList[i].numberOwnedVolumes,
+                                  ),
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(top: 10, left: 10, right: 10),
+                                child: SizedBox(
+                                  width: MediaQuery.of(context).size.width,
+                                  height: (readSubSeriesList[i].numberOwnedVolumes - numberVolumeReaded(readSubSeriesList[i].volumes) != 0) ? 100 : 0,
+                                  child: Stack(
+                                    children: [
+                                      for (var j = 0;
+                                          j < readSubSeriesList[i].numberOwnedVolumes - numberVolumeReaded(readSubSeriesList[i].volumes);
+                                          j++)
+                                        (j == 0)
+                                            ? ClipRRect(
+                                                borderRadius: BorderRadius.circular(10.0),
+                                                child: Image.network(
+                                                  notReadedSubSeriesList[i].volumes[j].image,
+                                                  width: 65,
+                                                ),
+                                              )
+                                            : Positioned(
+                                                left: j * 45.0,
+                                                child: Container(
+                                                  decoration: BoxDecoration(
+                                                    boxShadow: [
+                                                      BoxShadow(
+                                                        color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.9),
+                                                        spreadRadius: 1,
+                                                        blurRadius: 2,
+                                                        offset: const Offset(0, 1),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  child: ClipRRect(
+                                                    borderRadius: BorderRadius.circular(10.0),
+                                                    child: Image.network(
+                                                      notReadedSubSeriesList[i].volumes[j].image,
+                                                      width: 65,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                     MyLine(
                       width: MediaQuery.of(context).size.width,
                       vertical: 10,

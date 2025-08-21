@@ -1711,6 +1711,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Go Home'**
   String get goHome;
+
+  /// No description provided for @allVolumesReadedSubSeries.
+  ///
+  /// In en, this message translates to:
+  /// **'You have read all the volumes of this sub-series.'**
+  String get allVolumesReadedSubSeries;
+
+  /// No description provided for @noVolumeOwned.
+  ///
+  /// In en, this message translates to:
+  /// **'You do not own any volumes, you can add them buy searching in the search page or by scanning their ean (Comming soon...).'**
+  String get noVolumeOwned;
 }
 
 class _AppLocalizationsDelegate
