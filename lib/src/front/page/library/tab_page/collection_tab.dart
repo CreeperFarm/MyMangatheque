@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mymangatheque/l10n/app_localizations.dart';
@@ -29,7 +31,6 @@ class _CollectionTabState extends ConsumerState<CollectionTab> {
 
   int getNumberVolume() {
     final subSeries = ref.watch(mangaOwnedProvider);
-    debugPrint(subSeries.toString());
     int number = 0;
     for (var subSerie in subSeries) {
       number += subSerie.numberOwnedVolumes;
@@ -118,7 +119,7 @@ class _CollectionTabState extends ConsumerState<CollectionTab> {
                                     width: MediaQuery.of(context).size.width - 65,
                                     child: Stack(
                                       children: [
-                                        for (var i = 0; i < subSerie.volumes.length; i++)
+                                        for (var i = 0; i < min(9, subSerie.volumes.length); i++)
                                           (i == 0)
                                               ? ClipRRect(
                                                   borderRadius: BorderRadius.circular(10.0),

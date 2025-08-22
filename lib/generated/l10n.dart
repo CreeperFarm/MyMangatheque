@@ -2386,6 +2386,37 @@ class AppLocalizations {
       args: [],
     );
   }
+
+  /// `You do not follow any series, you can follow them by searching in the search page.`
+  String get noFollowedSubSerie {
+    return Intl.message(
+      'You do not follow any series, you can follow them by searching in the search page.',
+      name: 'noFollowedSubSerie',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Total of {count, plural, =0 {Volume} =1{Volume} other {Volumes}}`
+  String subSerieVolumeNumber(num count) {
+    return Intl.message(
+      'Total of ${Intl.plural(count, zero: 'Volume', one: 'Volume', other: 'Volumes')}',
+      name: 'subSerieVolumeNumber',
+      desc: 'A message that indicates the number of volumes in a sub-series',
+      args: [count],
+    );
+  }
+
+  /// `{author, select, error{} other{By {author}}}`
+  String subSerieFromAuthor(String author) {
+    return Intl.select(
+      author,
+      {'error': '', 'other': 'By $author'},
+      name: 'subSerieFromAuthor',
+      desc: 'A message that indicates the author of a sub-series',
+      args: [author],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

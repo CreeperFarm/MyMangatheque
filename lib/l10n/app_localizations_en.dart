@@ -1103,4 +1103,37 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get noVolumeOwned =>
       'You do not own any volumes, you can add them buy searching in the search page or by scanning their ean (Comming soon...).';
+
+  @override
+  String get noFollowedSubSerie =>
+      'You do not follow any series, you can follow them by searching in the search page.';
+
+  @override
+  String subSerieVolumeNumber(num count) {
+    final intl.NumberFormat countNumberFormat = intl.NumberFormat.compact(
+      locale: localeName,
+    );
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Volumes',
+      one: 'Volume',
+      zero: 'Volume',
+    );
+    return 'Total of $_temp0';
+  }
+
+  @override
+  String subSerieFromAuthor(String author) {
+    String _temp0 = intl.Intl.selectLogic(
+      author,
+      {
+        'error': '',
+        'other': 'By $author',
+      },
+    );
+    return '$_temp0';
+  }
 }

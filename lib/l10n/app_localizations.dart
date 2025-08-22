@@ -1723,6 +1723,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'You do not own any volumes, you can add them buy searching in the search page or by scanning their ean (Comming soon...).'**
   String get noVolumeOwned;
+
+  /// No description provided for @noFollowedSubSerie.
+  ///
+  /// In en, this message translates to:
+  /// **'You do not follow any series, you can follow them by searching in the search page.'**
+  String get noFollowedSubSerie;
+
+  /// A message that indicates the number of volumes in a sub-series
+  ///
+  /// In en, this message translates to:
+  /// **'Total of {count, plural, =0 {Volume} =1{Volume} other {Volumes}}'**
+  String subSerieVolumeNumber(num count);
+
+  /// A message that indicates the author of a sub-series
+  ///
+  /// In en, this message translates to:
+  /// **'{author, select, error{} other{By {author}}}'**
+  String subSerieFromAuthor(String author);
 }
 
 class _AppLocalizationsDelegate

@@ -428,6 +428,16 @@ class PocketBaseConnector {
         .then((value) => value.items);
   }
 
+  Future<List<RecordModel>> getCollectionFullDataWithFilterExpand(String collectionId, String query, String expand) {
+    return _pocketBase
+        .collection(collectionId)
+        .getFullList(
+          filter: query,
+          expand: expand,
+        )
+        .then((value) => value);
+  }
+
   // Get the data from a collection and listen to the changes
   Stream<List<RecordModel>> getCollectionDataListener(String collectionId) {
     PublishSubject<List<RecordModel>> subject = PublishSubject<List<RecordModel>>();

@@ -1,17 +1,13 @@
 import 'package:mymangatheque/src/models/manga/volume.dart';
 
 class SubSerieForCollection {
-  SubSerieForCollection({
-    required this.id,
-    required this.title,
-    required this.numberOfVolumes,
-    required this.numberOwnedVolumes,
-    required this.volumes,
-  });
+  SubSerieForCollection(
+      {required this.id, required this.title, required this.numberOfVolumes, required this.numberOwnedVolumes, required this.volumes, this.cover});
 
   final String id;
   final String title;
   final int numberOfVolumes;
+  final String? cover;
   int numberOwnedVolumes;
   List<Volume> volumes;
 
@@ -34,12 +30,23 @@ class SubSerieForCollection {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'title': title,
-      'numberOfVolumes': numberOfVolumes,
-      'numberOwnedVolumes': numberOwnedVolumes,
-      'volumes': volumes.map((x) => x.toJson()).toList(),
-    };
+    if (cover == null) {
+      return {
+        'id': id,
+        'title': title,
+        'numberOfVolumes': numberOfVolumes,
+        'numberOwnedVolumes': numberOwnedVolumes,
+        'volumes': volumes.map((x) => x.toJson()).toList(),
+      };
+    } else {
+      return {
+        'id': id,
+        'title': title,
+        'numberOfVolumes': numberOfVolumes,
+        'numberOwnedVolumes': numberOwnedVolumes,
+        'volumes': volumes.map((x) => x.toJson()).toList(),
+        'cover': cover,
+      };
+    }
   }
 }

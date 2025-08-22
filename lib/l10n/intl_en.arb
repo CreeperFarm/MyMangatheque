@@ -487,5 +487,25 @@
   "pageNotFound": "Page Not Found",
   "goHome": "Go Home",
   "allVolumesReadedSubSeries": "You have read all the volumes of this sub-series.",
-  "noVolumeOwned": "You do not own any volumes, you can add them buy searching in the search page or by scanning their ean (Comming soon...)."
+  "noVolumeOwned": "You do not own any volumes, you can add them buy searching in the search page or by scanning their ean (Comming soon...).",
+  "noFollowedSubSerie": "You do not follow any series, you can follow them by searching in the search page.",
+  "subSerieVolumeNumber": "Total of {count, plural, =0 {Volume} =1{Volume} other {Volumes}}",
+  "@subSerieVolumeNumber": {
+    "description": "A message that indicates the number of volumes in a sub-series",
+    "placeholders": {
+      "count": {
+        "type": "num",
+        "format": "compact"
+      }
+    }
+  },
+  "subSerieFromAuthor": "{author, select, error{} other{By {author}}}",
+  "@subSerieFromAuthor": {
+    "description": "A message that indicates the author of a sub-series",
+    "placeholders": {
+      "author": {
+        "type": "String"
+      }
+    }
+  }
 }

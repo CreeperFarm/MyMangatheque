@@ -1112,4 +1112,37 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get noVolumeOwned =>
       'Vous ne possédez aucun tome dans votre collection, vous pouvez en ajouter via la page de recherche ou en scannant les codes barres des tomes que vous possédez.';
+
+  @override
+  String get noFollowedSubSerie =>
+      'Vous ne suivez aucune sous-série, vous pouvez en suivre via la page de recherche.';
+
+  @override
+  String subSerieVolumeNumber(num count) {
+    final intl.NumberFormat countNumberFormat = intl.NumberFormat.compact(
+      locale: localeName,
+    );
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countString tomes',
+      one: '1 tome',
+      zero: '0 tome',
+    );
+    return 'Total de $_temp0';
+  }
+
+  @override
+  String subSerieFromAuthor(String author) {
+    String _temp0 = intl.Intl.selectLogic(
+      author,
+      {
+        'error': '',
+        'other': 'De $author',
+      },
+    );
+    return '$_temp0';
+  }
 }

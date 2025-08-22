@@ -1,10 +1,12 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mymangatheque/l10n/app_localizations.dart';
 import 'package:mymangatheque/src/back/provider/manga_owned_provider.dart';
 import 'package:mymangatheque/src/back/services/pocketbase.dart';
+import 'package:mymangatheque/src/const/own_icon.dart';
 import 'package:mymangatheque/src/front/components/my_line.dart';
 import 'package:mymangatheque/src/front/components/my_scroll_column.dart';
 import 'package:mymangatheque/src/front/components/my_tome_number_show.dart';
@@ -76,7 +78,6 @@ class _CompleteLibTabState extends ConsumerState<CompleteLibTab> {
         ),
       );
       for (int j = 0; j < notOwnedSubSeriesList.length; j++) {
-        debugPrint(notOwnedSubSeriesList[j].volumes.toString());
         if (notOwnedSubSeriesList[j].id == subSerie.id) {
           for (int i = 0; i < notOwnedSubSeriesList[j].volumes.length; i++) {
             Volume volume = notOwnedSubSeriesList[j].volumes[i];
@@ -84,7 +85,6 @@ class _CompleteLibTabState extends ConsumerState<CompleteLibTab> {
             if (subSerie.containsVolume(volume)) {
               volumeNotOwned++;
               notOwnedSubSeriesList[j].removeVolume(volume);
-              debugPrint("Removed : ${volume.title}");
             } else {
               volumeNotOwned++;
             }
@@ -212,89 +212,103 @@ class _CompleteLibTabState extends ConsumerState<CompleteLibTab> {
                 )
               : SizedBox(),
           for (var i = 0; i < notOwnedSubSeriesList.length; i++)
-            InkWell(
-              onTap: () {
-                pushOrGo(context, '/library/sub_serie/${notOwnedSubSeriesList[i].id}');
-              },
-              child: Container(
-                constraints: BoxConstraints(
-                  maxWidth: MediaQuery.of(context).size.width,
+            Column(
+              children: [
+                InkWell(
+                  onTap: () {
+                    pushOrGo(context, '/library/sub_serie/${notOwnedSubSeriesList[i].id}');
+                  },
+                  child: Container(
+                    constraints: BoxConstraints(
+                      maxWidth: MediaQuery.of(context).size.width,
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                                child: Text(
+                                  notOwnedSubSeriesList[i].title.replaceAll(' - Edition Standard', ''),
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  softWrap: true,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 10),
+                                child: Text(
+                                  localizations.volumeOwnedOverX(
+                                    notOwnedSubSeriesList[i].numberOwnedVolumes,
+                                    notOwnedSubSeriesList[i].numberOfVolumes,
+                                  ),
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(top: 10, left: 10, right: 10),
+                                child: SizedBox(
+                                  width: MediaQuery.of(context).size.width,
+                                  height: (notOwnedSubSeriesList[i].numberOwnedVolumes != 0) ? 100 : 0,
+                                  child: Stack(
+                                    children: [
+                                      for (var j = 0; j < min(9, notOwnedSubSeriesList[i].volumes.length); j++)
+                                        (j == 0)
+                                            ? ClipRRect(
+                                                borderRadius: BorderRadius.circular(10.0),
+                                                child: Image.network(
+                                                  notOwnedSubSeriesList[i].volumes[j].image,
+                                                  width: 65,
+                                                ),
+                                              )
+                                            : Positioned(
+                                                left: j * 45.0,
+                                                child: Container(
+                                                  decoration: BoxDecoration(
+                                                    boxShadow: [
+                                                      BoxShadow(
+                                                        color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.9),
+                                                        spreadRadius: 1,
+                                                        blurRadius: 2,
+                                                        offset: const Offset(0, 1),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  child: ClipRRect(
+                                                    borderRadius: BorderRadius.circular(10.0),
+                                                    child: Image.network(
+                                                      notOwnedSubSeriesList[i].volumes[j].image,
+                                                      width: 65,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        OwnIcon(
+                          iconColor: Theme.of(context).colorScheme.primary,
+                          iconName: 'arrow-right',
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                      child: Text(
-                        notOwnedSubSeriesList[i].title.replaceAll(' - Edition Standard', ''),
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        softWrap: true,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
-                      child: Text(
-                        localizations.volumeOwnedOverX(
-                          notOwnedSubSeriesList[i].numberOwnedVolumes,
-                          notOwnedSubSeriesList[i].numberOfVolumes,
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 10, left: 10, right: 10),
-                      child: SizedBox(
-                        width: MediaQuery.of(context).size.width,
-                        height: (notOwnedSubSeriesList[i].numberOwnedVolumes != 0) ? 100 : 0,
-                        child: Stack(
-                          children: [
-                            for (var j = 0; j < notOwnedSubSeriesList[i].volumes.length; j++)
-                              (j == 0)
-                                  ? ClipRRect(
-                                      borderRadius: BorderRadius.circular(10.0),
-                                      child: Image.network(
-                                        notOwnedSubSeriesList[i].volumes[j].image,
-                                        width: 65,
-                                      ),
-                                    )
-                                  : Positioned(
-                                      left: j * 45.0,
-                                      child: Container(
-                                        decoration: BoxDecoration(
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.9),
-                                              spreadRadius: 1,
-                                              blurRadius: 2,
-                                              offset: const Offset(0, 1),
-                                            ),
-                                          ],
-                                        ),
-                                        child: ClipRRect(
-                                          borderRadius: BorderRadius.circular(10.0),
-                                          child: Image.network(
-                                            notOwnedSubSeriesList[i].volumes[j].image,
-                                            width: 65,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    MyLine(
-                      width: MediaQuery.of(context).size.width,
-                      vertical: 10,
-                      horizontal: 0,
-                    ),
-                  ],
+                MyLine(
+                  width: MediaQuery.of(context).size.width,
+                  vertical: 10,
+                  horizontal: 0,
                 ),
-              ),
+              ],
             ),
         ],
       ),

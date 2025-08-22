@@ -18,7 +18,7 @@ class MangaOwnedNotifier extends Notifier<Set<SubSerieForCollection>> {
     Set<SubSerieForCollection>? temp = await storage.getOwnedSubSerie(); // Get the data from the local storage
 
     try {
-      final result = await PocketBaseConnector().getCollectionDataWithFilterExpand(
+      final result = await PocketBaseConnector().getCollectionFullDataWithFilterExpand(
         'owned',
         "user='${PocketBaseConnector().getConnectedUser()!.id}'",
         'volume.sub_series.editor',

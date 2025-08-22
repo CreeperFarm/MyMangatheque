@@ -64,23 +64,29 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m16(seller) => "Sold and shipped by ${seller}";
 
-  static String m17(support) =>
+  static String m17(author) =>
+      "${Intl.select(author, {'error': '', 'other': 'By ${author}'})}";
+
+  static String m18(count) =>
+      "Total of ${Intl.plural(count, zero: 'Volume', one: 'Volume', other: 'Volumes')}";
+
+  static String m19(support) =>
       "${Intl.select(support, {'manga': 'Manga', 'novel': 'Novel', 'artbook': 'Artbook', 'lightNovel': 'Light Novel', 'boxSet': 'Box Set', 'other': 'Other'})}";
 
-  static String m18(username) => "Your username is ${username}";
+  static String m20(username) => "Your username is ${username}";
 
-  static String m19(count) => "Volume ${count}";
+  static String m21(count) => "Volume ${count}";
 
-  static String m20(count) =>
+  static String m22(count) =>
       "${Intl.plural(count, zero: 'You own 0 volume', one: 'You own 1 volume', other: 'You own ${count} volumes')}";
 
-  static String m21(owned, total) =>
+  static String m23(owned, total) =>
       "${Intl.plural(owned, zero: '0 volume', one: '1 volume', other: '${owned} volumes')} owned over ${Intl.plural(total, zero: '0 volume', one: '1 volume', other: '${total} volumes')}";
 
-  static String m22(readed, total) =>
+  static String m24(readed, total) =>
       "${Intl.plural(readed, zero: '0 volume', one: '1 volume', other: '${readed} volumes')} read over ${Intl.plural(total, zero: '0 volume', one: '1 volume', other: '${total} volumes')}.";
 
-  static String m23(readed, total) =>
+  static String m25(readed, total) =>
       "${Intl.plural(readed, zero: '0 volume', one: '1 volume', other: '${readed} volumes')} read over ${Intl.plural(total, zero: '0 volume', one: '1 volume', other: '${total} volumes')} you own.";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -316,6 +322,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Don\'t have an account yet?",
     ),
     "noConnection": MessageLookupByLibrary.simpleMessage("No connection"),
+    "noFollowedSubSerie": MessageLookupByLibrary.simpleMessage(
+      "You do not follow any series, you can follow them by searching in the search page.",
+    ),
     "noVolumeOwned": MessageLookupByLibrary.simpleMessage(
       "You do not own any volumes, you can add them buy searching in the search page or by scanning their ean (Comming soon...).",
     ),
@@ -498,12 +507,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "signUpPage": MessageLookupByLibrary.simpleMessage("Sign Up Page"),
     "soldAndShippedBy": m16,
     "spanish": MessageLookupByLibrary.simpleMessage("Spanish"),
+    "subSerieFromAuthor": m17,
+    "subSerieVolumeNumber": m18,
     "subSeries": MessageLookupByLibrary.simpleMessage("Sub-Series"),
     "subSeriesDoesNotExist": MessageLookupByLibrary.simpleMessage(
       "The sub-series does not exist.",
     ),
     "summary": MessageLookupByLibrary.simpleMessage("Summary"),
-    "supportIs": m17,
+    "supportIs": m19,
     "systemMode": MessageLookupByLibrary.simpleMessage("System Mode"),
     "thirdPartyContent": MessageLookupByLibrary.simpleMessage(
       "Third-Party Content",
@@ -531,7 +542,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "You have successfully logged in.",
     ),
     "username": MessageLookupByLibrary.simpleMessage("Username"),
-    "usernameIs": m18,
+    "usernameIs": m20,
     "usernameMinLength": MessageLookupByLibrary.simpleMessage(
       "Username must be at least 3 characters long.",
     ),
@@ -560,13 +571,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "volumeNotAvailableForSale": MessageLookupByLibrary.simpleMessage(
       "This volume is not available for sale.",
     ),
-    "volumeNum": m19,
+    "volumeNum": m21,
     "volumeNumber": MessageLookupByLibrary.simpleMessage("Volume Number"),
-    "volumeOwnedNumber": m20,
-    "volumeOwnedOverX": m21,
+    "volumeOwnedNumber": m22,
+    "volumeOwnedOverX": m23,
     "volumePrice": MessageLookupByLibrary.simpleMessage("Volume Price"),
-    "volumeReadedOverSeriesX": m22,
-    "volumeReadedOverX": m23,
+    "volumeReadedOverSeriesX": m24,
+    "volumeReadedOverX": m25,
     "volumeSeriesId": MessageLookupByLibrary.simpleMessage("Volume Series ID"),
     "volumeSubSeriesId": MessageLookupByLibrary.simpleMessage(
       "Volume Sub-Series ID",

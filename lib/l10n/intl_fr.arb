@@ -488,5 +488,25 @@
   "pageNotFound": "Page non trouvée",
   "goHome": "Aller à l'accueil",
   "allVolumesReadedSubSeries": "Vous avez lu tous les tomes de cette sous-série 👏.",
-  "noVolumeOwned": "Vous ne possédez aucun tome dans votre collection, vous pouvez en ajouter via la page de recherche ou en scannant les codes barres des tomes que vous possédez."
+  "noVolumeOwned": "Vous ne possédez aucun tome dans votre collection, vous pouvez en ajouter via la page de recherche ou en scannant les codes barres des tomes que vous possédez.",
+  "noFollowedSubSerie": "Vous ne suivez aucune sous-série, vous pouvez en suivre via la page de recherche.",
+  "subSerieVolumeNumber": "Total de {count, plural, =0 {0 tome} =1{1 tome} other {{count} tomes}}",
+  "@subSerieVolumeNumber": {
+    "description": "Un message qui affiche le nombre de tomes dans une sous-série",
+    "placeholders": {
+      "count": {
+        "type": "num",
+        "format": "compact"
+      }
+    }
+  },
+  "subSerieFromAuthor": "{author, select, error{} other{De {author}}}",
+  "@subSerieFromAuthor": {
+    "description": "Un message qui affiche le nom de l'auteur de la sous-série",
+    "placeholders": {
+      "author": {
+        "type": "String"
+      }
+    }
+  }
 }
