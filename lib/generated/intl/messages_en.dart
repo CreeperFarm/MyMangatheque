@@ -95,6 +95,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "accountEmail": MessageLookupByLibrary.simpleMessage(
       "Email of the Account",
     ),
+    "accountHaveBeenDeleted": MessageLookupByLibrary.simpleMessage(
+      "Your account has been successfully deleted.",
+    ),
     "add": MessageLookupByLibrary.simpleMessage("Add"),
     "adminHomePage": MessageLookupByLibrary.simpleMessage("Admin Home Page"),
     "adminHomePageDescription": MessageLookupByLibrary.simpleMessage(
@@ -133,6 +136,9 @@ class MessageLookup extends MessageLookupByLibrary {
           "These legal notices are subject to French law. In the event of a dispute, the French courts will have sole jurisdiction.",
         ),
     "april": MessageLookupByLibrary.simpleMessage("April"),
+    "areYouSureDeleteAccount": MessageLookupByLibrary.simpleMessage(
+      "Are you sure you want to delete your account? This action cannot be undone. All your data will be permanently deleted.",
+    ),
     "artbook": MessageLookupByLibrary.simpleMessage("Artbook"),
     "august": MessageLookupByLibrary.simpleMessage("August"),
     "authFailed": MessageLookupByLibrary.simpleMessage(
@@ -165,6 +171,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Impossible to retrieve the build and app version.",
     ),
     "buyOn": m4,
+    "cancel": MessageLookupByLibrary.simpleMessage("Cancel"),
     "chooseVolumeLanguage": MessageLookupByLibrary.simpleMessage(
       "Please choose the language of the volume",
     ),
@@ -177,6 +184,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "collection": MessageLookupByLibrary.simpleMessage("Collection"),
     "completeLibrary": MessageLookupByLibrary.simpleMessage("Complete"),
+    "confirm": MessageLookupByLibrary.simpleMessage("Confirm"),
     "confirmNewPassword": MessageLookupByLibrary.simpleMessage(
       "Confirm New Password",
     ),
@@ -236,6 +244,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Enter your email to receive a link to reset your password.",
     ),
     "error404": MessageLookupByLibrary.simpleMessage("Error 404"),
+    "errorDeleteAccount": MessageLookupByLibrary.simpleMessage(
+      "An error occurred, your account has not been deleted, you have been log out of your account.",
+    ),
     "errorInitializing": m6,
     "errorOccurred": MessageLookupByLibrary.simpleMessage(
       "An error occurred, please try again later.",
@@ -332,6 +343,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "november": MessageLookupByLibrary.simpleMessage("November"),
     "numberOfPages": MessageLookupByLibrary.simpleMessage("Number of Pages"),
     "october": MessageLookupByLibrary.simpleMessage("October"),
+    "ok": MessageLookupByLibrary.simpleMessage("OK"),
     "oldPassword": MessageLookupByLibrary.simpleMessage("Old Password"),
     "openScan": MessageLookupByLibrary.simpleMessage("Open Scan"),
     "orContinueWith": MessageLookupByLibrary.simpleMessage("Or continue with"),

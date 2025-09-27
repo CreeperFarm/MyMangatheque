@@ -1,7 +1,9 @@
 import 'package:date_field/date_field.dart';
+import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import 'package:mymangatheque/l10n/app_localizations.dart';
 import 'package:mymangatheque/src/back/services/pocketbase.dart';
 import 'package:mymangatheque/src/const/own_icon.dart';
@@ -39,8 +41,8 @@ class _SignUpPageState extends State<SignUpPage> {
   void signingUpProcess() async {
     PocketBaseConnector connector = PocketBaseConnector();
 
-    connector.createUser(usernameController.text, emailController.text, passwordController.text, passwordVerifierController.text, selectedGender.text,
-        selectedBDayDate.add(const Duration(hours: 1)).toUtc().toString(), context);
+    await connector.createUser(usernameController.text, emailController.text, passwordController.text, passwordVerifierController.text,
+        selectedGender.text, selectedBDayDate.add(const Duration(hours: 1)).toUtc().toString(), context);
     connector.sendVerification(emailController.text);
     connector.findUser(emailController.text);
     await connector.updateUserData(emailController.text);
@@ -186,6 +188,7 @@ class _SignUpPageState extends State<SignUpPage> {
                               ),
                             ),
                             border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(25),
                               borderSide: BorderSide(
                                 color: Theme.of(context).colorScheme.primary,
                               ),
@@ -211,6 +214,7 @@ class _SignUpPageState extends State<SignUpPage> {
                               ),
                             ),
                             border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(25),
                               borderSide: BorderSide(
                                 color: Theme.of(context).colorScheme.primary,
                               ),
@@ -221,12 +225,15 @@ class _SignUpPageState extends State<SignUpPage> {
                             ),
                             hintText: localizations.yourBirthday,
                           ),
+                          dateFormat: DateFormat.yMMMMd(Localizations.localeOf(context).languageCode),
                           cupertinoDatePickerOptions: CupertinoDatePickerOptions(
-                              modalTitleText: localizations.selectDate,
-                              style: CupertinoDatePickerOptionsStyle(
-                                  modalTitle: TextStyle(
+                            modalTitleText: localizations.selectDate,
+                            style: CupertinoDatePickerOptionsStyle(
+                              modalTitle: TextStyle(
                                 color: Theme.of(context).colorScheme.primary,
-                              ))),
+                              ),
+                            ),
+                          ),
                           mode: DateTimeFieldPickerMode.date,
                           firstDate: DateTime(1900, 1, 1),
                           lastDate: DateTime(DateTime.now().year - 7, DateTime.now().month, DateTime.now().day),
@@ -247,15 +254,14 @@ class _SignUpPageState extends State<SignUpPage> {
 
                       const SizedBox(height: 11),
 
-                      DropdownButtonFormField(
-                          padding: EdgeInsets.symmetric(horizontal: 5.0),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 5.0),
+                        child: DropdownButtonFormField2(
+                          isExpanded: true,
                           decoration: InputDecoration(
-                            errorBorder: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                color: Theme.of(context).colorScheme.error,
-                              ),
-                            ),
+                            contentPadding: const EdgeInsets.symmetric(vertical: 16),
                             border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(25),
                               borderSide: BorderSide(
                                 color: Theme.of(context).colorScheme.primary,
                               ),
@@ -263,7 +269,6 @@ class _SignUpPageState extends State<SignUpPage> {
                             labelStyle: TextStyle(
                               color: Theme.of(context).colorScheme.onPrimary,
                             ),
-                            hintText: localizations.yourGender,
                           ),
                           items: [
                             DropdownMenuItem(
@@ -279,7 +284,13 @@ class _SignUpPageState extends State<SignUpPage> {
                               child: Text(localizations.other),
                             ),
                           ],
-                          icon: OwnIcon(iconColor: Theme.of(context).colorScheme.primary, iconName: 'arrow-down'),
+                          hint: Text(
+                            localizations.yourGender,
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                          ),
+                          //icon: OwnIcon(iconColor: Theme.of(context).colorScheme.primary, iconName: 'arrow-down'),
                           validator: (value) {
                             if (value == null) {
                               return localizations.provideYourGender;
@@ -290,7 +301,25 @@ class _SignUpPageState extends State<SignUpPage> {
                             setState(() {
                               selectedGender.text = value.toString();
                             });
-                          }),
+                          },
+                          buttonStyleData: const ButtonStyleData(
+                            padding: EdgeInsets.only(right: 6),
+                          ),
+                          iconStyleData: IconStyleData(
+                            icon: OwnIcon(iconColor: Theme.of(context).colorScheme.primary, iconName: 'arrow-down'),
+                            iconSize: 24,
+                          ),
+                          dropdownStyleData: DropdownStyleData(
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).colorScheme.secondary,
+                              borderRadius: BorderRadius.circular(25),
+                            ),
+                          ),
+                          menuItemStyleData: const MenuItemStyleData(
+                            padding: EdgeInsets.symmetric(horizontal: 16),
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),

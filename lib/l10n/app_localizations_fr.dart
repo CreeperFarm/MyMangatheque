@@ -1145,4 +1145,25 @@ class AppLocalizationsFr extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get areYouSureDeleteAccount =>
+      'Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible et entraînera la suppression de toutes vos données, y compris votre collection, vos séries suivies et vos informations de profil.';
+
+  @override
+  String get cancel => 'Annuler';
+
+  @override
+  String get confirm => 'Confirmer';
+
+  @override
+  String get ok => 'OK';
+
+  @override
+  String get accountHaveBeenDeleted =>
+      'Votre compte a été supprimé avec succès.';
+
+  @override
+  String get errorDeleteAccount =>
+      'Une erreur est survenue lors de la suppression de votre compte. Veuillez réessayer plus tard.';
 }

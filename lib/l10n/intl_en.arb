@@ -507,5 +507,11 @@
         "type": "String"
       }
     }
-  }
+  },
+  "areYouSureDeleteAccount": "Are you sure you want to delete your account? This action cannot be undone. All your data will be permanently deleted.",
+  "cancel": "Cancel",
+  "confirm": "Confirm",
+  "ok": "OK",
+  "accountHaveBeenDeleted": "Your account has been successfully deleted.",
+  "errorDeleteAccount": "An error occurred, your account has not been deleted, you have been log out of your account."
 }

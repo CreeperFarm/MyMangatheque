@@ -2417,6 +2417,51 @@ class AppLocalizations {
       args: [author],
     );
   }
+
+  /// `Are you sure you want to delete your account? This action cannot be undone. All your data will be permanently deleted.`
+  String get areYouSureDeleteAccount {
+    return Intl.message(
+      'Are you sure you want to delete your account? This action cannot be undone. All your data will be permanently deleted.',
+      name: 'areYouSureDeleteAccount',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Cancel`
+  String get cancel {
+    return Intl.message('Cancel', name: 'cancel', desc: '', args: []);
+  }
+
+  /// `Confirm`
+  String get confirm {
+    return Intl.message('Confirm', name: 'confirm', desc: '', args: []);
+  }
+
+  /// `OK`
+  String get ok {
+    return Intl.message('OK', name: 'ok', desc: '', args: []);
+  }
+
+  /// `Your account has been successfully deleted.`
+  String get accountHaveBeenDeleted {
+    return Intl.message(
+      'Your account has been successfully deleted.',
+      name: 'accountHaveBeenDeleted',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `An error occurred, your account has not been deleted, you have been log out of your account.`
+  String get errorDeleteAccount {
+    return Intl.message(
+      'An error occurred, your account has not been deleted, you have been log out of your account.',
+      name: 'errorDeleteAccount',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

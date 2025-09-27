@@ -93,6 +93,9 @@ class MessageLookup extends MessageLookupByLibrary {
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
     "accountCreatedOn": m0,
     "accountEmail": MessageLookupByLibrary.simpleMessage("Email du compte"),
+    "accountHaveBeenDeleted": MessageLookupByLibrary.simpleMessage(
+      "Votre compte a été supprimé avec succès.",
+    ),
     "add": MessageLookupByLibrary.simpleMessage("Ajouter"),
     "adminHomePage": MessageLookupByLibrary.simpleMessage(
       "Page d\'accueil de l\'administrateur",
@@ -135,6 +138,9 @@ class MessageLookup extends MessageLookupByLibrary {
           "Les présentes mentions légales sont soumises au droit français. En cas de litige, les tribunaux français seront seuls compétents.",
         ),
     "april": MessageLookupByLibrary.simpleMessage("Avril"),
+    "areYouSureDeleteAccount": MessageLookupByLibrary.simpleMessage(
+      "Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible et entraînera la suppression de toutes vos données, y compris votre collection, vos séries suivies et vos informations de profil.",
+    ),
     "artbook": MessageLookupByLibrary.simpleMessage("Artbook"),
     "august": MessageLookupByLibrary.simpleMessage("Août"),
     "authFailed": MessageLookupByLibrary.simpleMessage(
@@ -167,6 +173,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Impossible de récupérer la version de l\'application et la version du build.",
     ),
     "buyOn": m4,
+    "cancel": MessageLookupByLibrary.simpleMessage("Annuler"),
     "chooseVolumeLanguage": MessageLookupByLibrary.simpleMessage(
       "Veuillez sélectionner la langue du volume.",
     ),
@@ -179,6 +186,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "collection": MessageLookupByLibrary.simpleMessage("Collection"),
     "completeLibrary": MessageLookupByLibrary.simpleMessage("Compléter"),
+    "confirm": MessageLookupByLibrary.simpleMessage("Confirmer"),
     "confirmNewPassword": MessageLookupByLibrary.simpleMessage(
       "Confirmer le nouveau mot de passe",
     ),
@@ -242,6 +250,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Entrez votre email pour recevoir un lien pour réinitialiser votre mot de passe.",
     ),
     "error404": MessageLookupByLibrary.simpleMessage("Erreur 404"),
+    "errorDeleteAccount": MessageLookupByLibrary.simpleMessage(
+      "Une erreur est survenue lors de la suppression de votre compte. Veuillez réessayer plus tard.",
+    ),
     "errorInitializing": m6,
     "errorOccurred": MessageLookupByLibrary.simpleMessage(
       "Une erreur est survenue, veuillez réessayer plus tard.",
@@ -346,6 +357,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "november": MessageLookupByLibrary.simpleMessage("Novembre"),
     "numberOfPages": MessageLookupByLibrary.simpleMessage("Nombre de pages"),
     "october": MessageLookupByLibrary.simpleMessage("Octobre"),
+    "ok": MessageLookupByLibrary.simpleMessage("OK"),
     "oldPassword": MessageLookupByLibrary.simpleMessage("Ancien mot de passe"),
     "openScan": MessageLookupByLibrary.simpleMessage("Ouvrir le scan"),
     "orContinueWith": MessageLookupByLibrary.simpleMessage("Ou continuez avec"),

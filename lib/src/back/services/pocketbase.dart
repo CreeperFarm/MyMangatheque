@@ -291,7 +291,7 @@ class PocketBaseConnector {
       "role": "user"
     };
 
-    return _pocketBase
+    final id = await _pocketBase
         .collection('users')
         .create(body: body)
         .catchError((e) {
@@ -304,6 +304,10 @@ class PocketBaseConnector {
           await sendVerification(email);
           return id;
         });
+
+    await PocketBaseConnector().loginWithEmail(email, password, context);
+
+    return id;
   }
 
   sendVerification(String email) {

@@ -278,7 +278,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   decoration: const InputDecoration(
                     border: OutlineInputBorder(),
                   ),
-                  value: theme,
+                  initialValue: theme,
                   onChanged: (value) {
                     if (value == 'light') {
                       AdaptiveTheme.of(context).setLight();
@@ -348,7 +348,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),
                 ),
-                value: language,
+                initialValue: language,
                 onChanged: (value) {
                   ref.read(languageRepositoryProvider).setLanguage(value!);
                   setState(() {});
@@ -415,9 +415,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               text: localizations.dangerZone,
             ),
             MyIconTextButton(
-              function: () => signUserOut(
-                text: localizations.deleteAccountFailed,
-              ),
+              function: () => pushOrGo(context, "/delete_account"),
               color: Colors.red,
               iconName: 'delete',
               text: localizations.deleteAccount,

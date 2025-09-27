@@ -1136,4 +1136,25 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get areYouSureDeleteAccount =>
+      'Are you sure you want to delete your account? This action cannot be undone. All your data will be permanently deleted.';
+
+  @override
+  String get cancel => 'Cancel';
+
+  @override
+  String get confirm => 'Confirm';
+
+  @override
+  String get ok => 'OK';
+
+  @override
+  String get accountHaveBeenDeleted =>
+      'Your account has been successfully deleted.';
+
+  @override
+  String get errorDeleteAccount =>
+      'An error occurred, your account has not been deleted, you have been log out of your account.';
 }

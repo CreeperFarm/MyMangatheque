@@ -1741,6 +1741,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{author, select, error{} other{By {author}}}'**
   String subSerieFromAuthor(String author);
+
+  /// No description provided for @areYouSureDeleteAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete your account? This action cannot be undone. All your data will be permanently deleted.'**
+  String get areYouSureDeleteAccount;
+
+  /// No description provided for @cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancel;
+
+  /// No description provided for @confirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get confirm;
+
+  /// No description provided for @ok.
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get ok;
+
+  /// No description provided for @accountHaveBeenDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account has been successfully deleted.'**
+  String get accountHaveBeenDeleted;
+
+  /// No description provided for @errorDeleteAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'An error occurred, your account has not been deleted, you have been log out of your account.'**
+  String get errorDeleteAccount;
 }
 
 class _AppLocalizationsDelegate
