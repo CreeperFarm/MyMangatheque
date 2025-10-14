@@ -5,9 +5,9 @@ etc.
 
 [![wakatime](https://wakatime.com/badge/github/CreeperFarm/MyMangatheque.svg)](https://wakatime.com/badge/github/CreeperFarm/MyMangatheque)
 
-####Modification of the icons :
+#### Modification of the icons :
 Modify the files name in `pubspec.yaml` and modify this :
-```yaml```
+```yaml
 flutter_launcher_icons:
     android: true
     min_sdk_android: 19
@@ -26,7 +26,7 @@ flutter_launcher_icons:
 And then run this command : 
 `flutter pub get && dart run flutter_launcher_icons`
 
-####Build App Android Obfuscated :
+#### Build App Android Obfuscated :
 `flutter build appbundle --obfuscate --split-debug-info out/android`
 
 ## Getting Started
