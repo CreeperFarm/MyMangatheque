@@ -1,7 +1,6 @@
-# MyMangaTheque
+# MyMangathèque
 
-Une application pour mettre les mangas que l'on a, a lu, nos envies manga, les mangas qui sortent,
-etc.
+Une application pour mettre les mangas que l'on a, a lu, nos envies manga, les mangas qui sortent, etc.
 
 [![wakatime](https://wakatime.com/badge/github/CreeperFarm/MyMangatheque.svg)](https://wakatime.com/badge/github/CreeperFarm/MyMangatheque)
 
@@ -30,3 +29,14 @@ And then run this command :
 `flutter build appbundle --obfuscate --split-debug-info out/android`
 
 ## Getting Started
+
+#### To launch the app for the first time
+
+1. First download this repository and open it into your IDE.
+2. Run those commands :
+```bash
+flutter pub get
+dart run flutter_launcher_icons
+```
+3. To launch the app in chrome run this command : `flutter run web`. To launch app on mobile run `flutter run` and then select where you want to launch the app
+4. The app compile and then launch if no error occured
