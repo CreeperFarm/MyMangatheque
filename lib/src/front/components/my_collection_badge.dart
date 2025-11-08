@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 
+import 'package:mymangatheque/l10n/app_localizations.dart';
+
 class MyCollectionBadge extends StatelessWidget {
-  const MyCollectionBadge({super.key});
+  AppLocalizations localizations;
+  MyCollectionBadge({required this.localizations, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +26,7 @@ class MyCollectionBadge extends StatelessWidget {
               size: 18,
             ),
             Text(
-              'Possédé',
+              localizations.owned,
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 14,

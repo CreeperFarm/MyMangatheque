@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:mymangatheque/l10n/app_localizations.dart';
 import 'package:mymangatheque/src/back/services/pocketbase.dart';
 import 'package:mymangatheque/src/front/components/my_author_tile.dart';
 import 'package:mymangatheque/src/front/components/my_editor_show.dart';
@@ -10,6 +10,7 @@ import 'package:mymangatheque/src/front/components/my_line.dart';
 import 'package:mymangatheque/src/front/components/my_picture_display.dart';
 import 'package:mymangatheque/src/front/components/my_scroll_column.dart';
 import 'package:mymangatheque/src/front/components/my_volume_tile.dart';
+import 'package:mymangatheque/src/function/auto_push_or_go.dart';
 
 class SubSeriePage extends StatefulWidget {
   final String serieId;
@@ -46,6 +47,16 @@ class _SubSeriePageState extends State<SubSeriePage> {
 
   @override
   Widget build(BuildContext context) {
+    // Get localization - return early if not available
+    var localizations = AppLocalizations.of(context);
+    if (localizations == null) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
     return FutureBuilder(
       future: PocketBaseConnector().getOneExpand(
         'sub_series',
@@ -70,7 +81,7 @@ class _SubSeriePageState extends State<SubSeriePage> {
               backgroundColor: Colors.transparent,
             ),
             body: Center(
-              child: const Text("Aucune connexion"),
+              child: Text(localizations.noConnection),
             ),
           );
         }
@@ -134,12 +145,12 @@ class _SubSeriePageState extends State<SubSeriePage> {
                           fontWeight: FontWeight.w300,
                         ),
                       ),
-                      (volumes[0]["support"].toString() == "manga")
+                      (data['support'] == null || data['support'] == "manga")
                           ? SizedBox()
                           : Padding(
                               padding: const EdgeInsets.symmetric(vertical: 5),
                               child: Text(
-                                volumes[0]["support"].toString().replaceAll('-', ' '),
+                                localizations.supportIs(data['support'].toString()),
                                 style: const TextStyle(
                                   fontSize: 30,
                                   fontWeight: FontWeight.w200,
@@ -186,7 +197,8 @@ class _SubSeriePageState extends State<SubSeriePage> {
                                       });
                                     }
                                   } else {
-                                    context.push(
+                                    pushOrGo(
+                                      context,
                                       '/profile/signin',
                                     );
                                   }
@@ -196,7 +208,7 @@ class _SubSeriePageState extends State<SubSeriePage> {
                                   children: [
                                     (!isSubSeriesFollowed) ? Icon(Icons.bookmark_border) : Icon(Icons.bookmark),
                                     Text(
-                                      (!isSubSeriesFollowed) ? 'Suivre' : 'Suivie',
+                                      (!isSubSeriesFollowed) ? localizations.follow : localizations.followed,
                                       style: TextStyle(
                                         fontSize: 15,
                                         color:
@@ -221,7 +233,7 @@ class _SubSeriePageState extends State<SubSeriePage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Genres :',
+                              '${localizations.genres} :',
                               style: const TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
@@ -252,7 +264,7 @@ class _SubSeriePageState extends State<SubSeriePage> {
                               ? Padding(
                                   padding: const EdgeInsets.symmetric(vertical: 5),
                                   child: Text(
-                                    'Auteur :',
+                                    '${localizations.author} :',
                                     style: const TextStyle(
                                       fontSize: 20,
                                       fontWeight: FontWeight.bold,
@@ -262,7 +274,7 @@ class _SubSeriePageState extends State<SubSeriePage> {
                               : Padding(
                                   padding: const EdgeInsets.symmetric(vertical: 5),
                                   child: Text(
-                                    'Auteurs :',
+                                    '${localizations.authors} :',
                                     style: const TextStyle(
                                       fontSize: 20,
                                       fontWeight: FontWeight.bold,
@@ -297,7 +309,7 @@ class _SubSeriePageState extends State<SubSeriePage> {
                               ? Padding(
                                   padding: const EdgeInsets.symmetric(vertical: 5),
                                   child: Text(
-                                    'Volume :',
+                                    '${localizations.volume} :',
                                     style: const TextStyle(
                                       fontSize: 20,
                                       fontWeight: FontWeight.bold,
@@ -307,7 +319,7 @@ class _SubSeriePageState extends State<SubSeriePage> {
                               : Padding(
                                   padding: const EdgeInsets.symmetric(vertical: 5),
                                   child: Text(
-                                    'Volumes :',
+                                    '${localizations.volumes} :',
                                     style: const TextStyle(
                                       fontSize: 20,
                                       fontWeight: FontWeight.bold,
@@ -322,22 +334,16 @@ class _SubSeriePageState extends State<SubSeriePage> {
                                     future: connector.isVolumeOwned(connector.getConnectedUser()!.id, volumes[i]['id']),
                                     builder: (BuildContext context, snapshot) {
                                       if (snapshot.connectionState == ConnectionState.done && snapshot.hasData) {
-                                        if (snapshot.data == true) {
-                                          return MyVolumeTile(
-                                            volumeData: volumes[i],
-                                            isVolumeOwned: true,
-                                            initRoute: widget.initRoute,
-                                          );
-                                        } else {
-                                          return MyVolumeTile(
-                                            volumeData: volumes[i],
-                                            isVolumeOwned: false,
-                                            initRoute: widget.initRoute,
-                                          );
-                                        }
+                                        return MyVolumeTile(
+                                          volumeData: volumes[i],
+                                          subSerieData: series,
+                                          isVolumeOwned: snapshot.data,
+                                          initRoute: widget.initRoute,
+                                        );
                                       } else {
                                         return MyVolumeTile(
                                           volumeData: volumes[i],
+                                          subSerieData: series,
                                           isVolumeOwned: false,
                                           initRoute: widget.initRoute,
                                         );
@@ -345,6 +351,7 @@ class _SubSeriePageState extends State<SubSeriePage> {
                                     })
                                 : MyVolumeTile(
                                     volumeData: volumes[i],
+                                    subSerieData: series,
                                     isVolumeOwned: false,
                                     initRoute: widget.initRoute,
                                   ),
@@ -370,7 +377,7 @@ class _SubSeriePageState extends State<SubSeriePage> {
                                     horizontal: 0,
                                   ),
                                   Text(
-                                    'Éditeur :',
+                                    '${localizations.editor} :',
                                     style: const TextStyle(
                                       fontSize: 20,
                                       fontWeight: FontWeight.bold,
@@ -396,7 +403,7 @@ class _SubSeriePageState extends State<SubSeriePage> {
               backgroundColor: Colors.transparent,
             ),
             body: Center(
-              child: const Text("La sous-série n'existe pas"),
+              child: Text(localizations.subSeriesDoesNotExist),
             ),
           );
         }

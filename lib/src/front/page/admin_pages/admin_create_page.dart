@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mymangatheque/l10n/app_localizations.dart' show AppLocalizations;
 import 'package:mymangatheque/src/back/services/pocketbaseadmin.dart';
 import 'package:mymangatheque/src/front/page/admin_pages/admin_login_page.dart';
 import 'package:mymangatheque/src/front/page/admin_pages/create_page/admin_create_author.dart';
@@ -10,6 +11,16 @@ class AdminCreatePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Get localization - return early if not available
+    var localizations = AppLocalizations.of(context);
+    if (localizations == null) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
     PocketBaseAdminConnector connector = PocketBaseAdminConnector();
     if (connector.isLoggedIn()) {
       return DefaultTabController(
@@ -20,12 +31,12 @@ class AdminCreatePage extends StatelessWidget {
             bottom: TabBar(
               isScrollable: true,
               tabs: [
-                Tab(text: "Serie"),
-                Tab(text: "SubSerie"),
-                Tab(text: "Volume"),
-                Tab(text: "Auteur"),
-                Tab(text: "Éditeur"),
-                Tab(text: "Genre"),
+                Tab(text: localizations.series),
+                Tab(text: localizations.subSeries),
+                Tab(text: localizations.volume),
+                Tab(text: localizations.author),
+                Tab(text: localizations.editor),
+                Tab(text: localizations.genre),
               ],
             ),
           ),

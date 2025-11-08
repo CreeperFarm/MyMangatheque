@@ -1,14 +1,19 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mymangatheque/l10n/app_localizations.dart';
+import 'package:mymangatheque/src/back/provider/manga_owned_provider.dart';
 import 'package:mymangatheque/src/back/provider/search_filter_provider.dart';
 import 'package:mymangatheque/src/back/provider/search_order_provider.dart';
+import 'package:mymangatheque/src/back/services/pocketbase.dart';
 import 'package:mymangatheque/src/const/own_icon.dart';
 import 'package:mymangatheque/src/front/components/my_tab_bar_item.dart';
+import 'package:mymangatheque/src/front/page/auth/signin_page.dart';
 import 'package:mymangatheque/src/front/page/library/tab_page/collection_tab.dart';
 import 'package:mymangatheque/src/front/page/library/tab_page/complete_lib_tab.dart';
 import 'package:mymangatheque/src/front/page/library/tab_page/envy_tab.dart';
 import 'package:mymangatheque/src/front/page/library/tab_page/read_pile_tab.dart';
+import 'package:mymangatheque/src/function/show_message_function.dart';
 
 class LibraryPage extends ConsumerStatefulWidget {
   const LibraryPage({super.key});
@@ -18,6 +23,7 @@ class LibraryPage extends ConsumerStatefulWidget {
 }
 
 class _LibraryPageState extends ConsumerState<LibraryPage> {
+  final connector = PocketBaseConnector();
   List _allResults = [];
   List _resultsList = [];
   final TextEditingController _searchController = TextEditingController();
@@ -28,14 +34,6 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
 
   getClientStream() async {
     var order = ref.watch(searchOrderProvider);
-    /*var data = await FirebaseFirestore.instance
-        .collection('manga')
-        .orderBy(order, descending: order == 'releaseDate' ? true : false)
-        .get();
-
-    setState(() {
-      _allResults = data.docs;
-    });*/
   }
 
   _onSearchChanged() {
@@ -69,9 +67,32 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
     super.didChangeDependencies();
   }
 
+  Future<void> initData() async {
+    try {
+      await ref.read(mangaOwnedProvider.notifier).initData().then((value) {
+        if (value) {
+          setState(() {});
+        } else {
+          showMessage(
+            AppLocalizations.of(context)!.errorInitializing(
+              AppLocalizations.of(context)!.dataUndercase,
+            ),
+            context,
+          );
+        }
+      });
+    } catch (e) {
+      debugPrint(e.toString());
+      showMessage(
+        AppLocalizations.of(context)!.errorOccurred,
+        context,
+      );
+    }
+  }
+
   @override
   void dispose() {
-    _searchController.removeListener(() {});
+    _searchController.removeListener(_onSearchChanged);
     _searchController.dispose();
     super.dispose();
   }
@@ -79,15 +100,30 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
   @override
   void initState() {
     super.initState();
+
     ref.read(searchOrderProvider);
+    ref.read(mangaOwnedProvider);
+
     getClientStream();
     _searchController.addListener(_onSearchChanged);
   }
 
   @override
   Widget build(BuildContext context) {
-    final selectedOrder = ref.watch(searchOrderProvider);
+    // Get localization - return early if not available
+    var localizations = AppLocalizations.of(context);
+    if (localizations == null) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
 
+    if (!connector.isLoggedIn()) {
+      return SignInPage();
+    }
+    final selectedOrder = ref.watch(searchOrderProvider);
     searchResultsList();
 
     return DefaultTabController(
@@ -100,7 +136,7 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
               Expanded(
                 child: CupertinoSearchTextField(
                   controller: _searchController,
-                  placeholder: 'Recherche',
+                  placeholder: localizations.search,
                   placeholderStyle: TextStyle(
                     color: Theme.of(context).colorScheme.primary,
                   ),
@@ -133,8 +169,8 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             if (selectedOrder == 'manga') const Icon(Icons.check) else const Padding(padding: EdgeInsets.only(right: 0)),
-                            const Text(
-                              'Ordre Alphabétique',
+                            Text(
+                              localizations.alphabeticalOrder,
                               textAlign: TextAlign.right,
                             ),
                           ],
@@ -142,64 +178,74 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
                       ),
                     ),
                     PopupMenuItem<String>(
-                        value: 'releaseDate',
-                        child: SizedBox(
-                          width: 175,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              if (selectedOrder == 'releaseDate') const Icon(Icons.check) else const Padding(padding: EdgeInsets.only(right: 0)),
-                              const Text('Dernière Sortie'),
-                            ],
-                          ),
-                        )),
+                      value: 'releaseDate',
+                      child: SizedBox(
+                        width: 175,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            if (selectedOrder == 'releaseDate') const Icon(Icons.check) else const Padding(padding: EdgeInsets.only(right: 0)),
+                            Text(
+                              localizations.lastRelease,
+                              textAlign: TextAlign.right,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
             ],
           ),
-          bottom: TabBar(
-              mouseCursor: SystemMouseCursors.click,
-              indicatorSize: TabBarIndicatorSize.label,
-              indicatorPadding: const EdgeInsets.symmetric(vertical: 5, horizontal: 0),
-              indicatorWeight: 1,
-              indicator: BoxDecoration(
-                borderRadius: BorderRadius.circular(360),
-                color: Theme.of(context).colorScheme.primary,
+          bottom: PreferredSize(
+            preferredSize: const Size.fromHeight(kToolbarHeight),
+            child: Center(
+              child: TabBar(
+                mouseCursor: SystemMouseCursors.click,
+                indicatorSize: TabBarIndicatorSize.label,
+                indicatorPadding: const EdgeInsets.symmetric(vertical: 5, horizontal: 0),
+                indicatorWeight: 1,
+                indicator: BoxDecoration(
+                  borderRadius: BorderRadius.circular(360),
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                isScrollable: true,
+                splashBorderRadius: BorderRadius.circular(360),
+                tabAlignment: TabAlignment.center,
+                tabs: [
+                  Tab(
+                    child: MyTabBarItem(
+                      tabText: localizations.readPile,
+                      colorIn: Theme.of(context).colorScheme.surface,
+                      colorOut: Theme.of(context).colorScheme.primary,
+                    ),
+                  ),
+                  Tab(
+                    child: MyTabBarItem(
+                      tabText: localizations.collection,
+                      colorIn: Theme.of(context).colorScheme.surface,
+                      colorOut: Theme.of(context).colorScheme.primary,
+                    ),
+                  ),
+                  Tab(
+                    child: MyTabBarItem(
+                      tabText: localizations.completeLibrary,
+                      colorIn: Theme.of(context).colorScheme.surface,
+                      colorOut: Theme.of(context).colorScheme.primary,
+                    ),
+                  ),
+                  Tab(
+                    child: MyTabBarItem(
+                      tabText: localizations.desiredLibrary,
+                      colorIn: Theme.of(context).colorScheme.surface,
+                      colorOut: Theme.of(context).colorScheme.primary,
+                    ),
+                  ),
+                ],
               ),
-              isScrollable: true,
-              splashBorderRadius: BorderRadius.circular(360),
-              tabAlignment: TabAlignment.start,
-              tabs: [
-                Tab(
-                  child: MyTabBarItem(
-                    tabText: "Pile à lire",
-                    colorIn: Theme.of(context).colorScheme.surface,
-                    colorOut: Theme.of(context).colorScheme.primary,
-                  ),
-                ),
-                Tab(
-                  child: MyTabBarItem(
-                    tabText: "Collection",
-                    colorIn: Theme.of(context).colorScheme.surface,
-                    colorOut: Theme.of(context).colorScheme.primary,
-                  ),
-                ),
-                Tab(
-                  child: MyTabBarItem(
-                    tabText: "Compléter",
-                    colorIn: Theme.of(context).colorScheme.surface,
-                    colorOut: Theme.of(context).colorScheme.primary,
-                  ),
-                ),
-                Tab(
-                  child: MyTabBarItem(
-                    tabText: "Envies",
-                    colorIn: Theme.of(context).colorScheme.surface,
-                    colorOut: Theme.of(context).colorScheme.primary,
-                  ),
-                ),
-              ]),
+            ),
+          ),
         ),
         body: TabBarView(
           physics: const NeverScrollableScrollPhysics(),

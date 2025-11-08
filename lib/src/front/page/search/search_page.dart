@@ -3,11 +3,11 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:mymangatheque/src/back/provider/search_filter_provider.dart';
 import 'package:mymangatheque/src/back/services/pocketbase.dart';
-import 'package:mymangatheque/src/const/own_icon.dart';
 import 'package:mymangatheque/src/front/components/my_line.dart';
+import 'package:mymangatheque/src/function/auto_push_or_go.dart';
+import 'package:youtube_player_iframe/youtube_player_iframe.dart';
 
 class SearchPage extends ConsumerStatefulWidget {
   const SearchPage({super.key});
@@ -23,20 +23,22 @@ class _SearchPageState extends ConsumerState<SearchPage> {
   final PocketBaseConnector connector = PocketBaseConnector();
 
   getClientStream() async {
-    var data = await connector.getCollectionFullListOrder('series', 'title');
+    var data = await connector.getCollectionFullListOrderExpanded('series', 'title', 'authors');
     /*var data = await FirebaseFirestore.instance
         .collection('manga')
         .orderBy(ref.watch(searchFilterProvider))
         .get();*/
+    print(data);
     setState(() {
       _allResults = data;
     });
   }
 
-  Future<String> getAllAuthorsName(List authorsId) async {
+  String getAllAuthorsName(List authorsExpanded) {
+    print(authorsExpanded);
     var authors = [];
-    for (var authorId in authorsId) {
-      authors.add(await connector.getAuthorName(authorId));
+    for (var i = 0; i < authorsExpanded.length; i++) {
+      authors.add(authorsExpanded[i]['name']);
     }
     return authors.join(" et ");
   }
@@ -100,6 +102,12 @@ class _SearchPageState extends ConsumerState<SearchPage> {
 
     searchResultsList();
 
+    final _controller = YoutubePlayerController.fromVideoId(
+      videoId: '9lNZ_Rnr7Jc', // Bad Apple video ID
+      autoPlay: true,
+      params: const YoutubePlayerParams(showFullscreenButton: false, showControls: false),
+    );
+
     return Scaffold(
       appBar: AppBar(
         title: Row(
@@ -116,7 +124,8 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                 ),
               ),
             ),
-            PopupMenuButton<String>(
+            // TODO: Create searchFilterProvider and manage the selected filter
+            /*PopupMenuButton<String>(
               icon: OwnIcon(iconColor: Theme.of(context).colorScheme.primary, iconName: "filter_right"),
               onSelected: (String result) {
                 setState(() {
@@ -160,13 +169,16 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                   ),
                 ),
               ],
-            ),
+            ),*/
           ],
         ),
       ),
       body: (_searchController.text.toLowerCase() == 'bad apple')
           ? Center(
-              child: Text('Bad Apple'),
+              child: YoutubePlayer(
+                controller: _controller,
+                aspectRatio: 4 / 3,
+              ),
             ) // TODO: Add the bad apple video
           : (_resultsList.isEmpty)
               ? Center(
@@ -179,97 +191,90 @@ class _SearchPageState extends ConsumerState<SearchPage> {
                   itemBuilder: (context, index) {
                     if (selectedFilter == 'manga') {
                       final manga = json.decode(_resultsList[index].toString());
-                      return FutureBuilder(
-                        future: getAllAuthorsName(manga['authors']),
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState == ConnectionState.waiting) {
-                            return const Center(
-                              child: Padding(
-                                padding: EdgeInsets.all(8.0),
-                                child: CircularProgressIndicator(),
-                              ),
-                            );
-                          } else if (snapshot.hasError) {
-                            return const Center(
-                              child: Text('Error'),
-                            );
-                          } else {
-                            return Column(
+                      return Column(
+                        children: [
+                          ListTile(
+                            title: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                ListTile(
-                                  title: Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Row(
+                                Row(
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.only(right: 10),
+                                      child: SizedBox(
+                                        width: 50,
+                                        child: ClipRRect(
+                                          borderRadius: BorderRadius.circular(10.0),
+                                          child: Image.network(
+                                            'https://api.mymangatheque.com/api/files/utbujxtz8wtq0ar/${manga['id'].toString()}/${manga['image'].toString()}',
+                                            width: 50,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      width: MediaQuery.of(context).size.width -
+                                          (MediaQuery.of(context).padding.left + MediaQuery.of(context).padding.right + 124),
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
-                                          Padding(
-                                            padding: const EdgeInsets.only(right: 10),
-                                            child: SizedBox(
-                                              width: 50,
-                                              child: Image.network(
-                                                'https://api.mymangatheque.com/api/files/utbujxtz8wtq0ar/${manga['id'].toString()}/${manga['image'].toString()}',
-                                                width: 50,
-                                              ),
+                                          Text(
+                                            manga['title'],
+                                            softWrap: false,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 17,
+                                              color: Theme.of(context).colorScheme.primary,
                                             ),
                                           ),
-                                          Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                textLength(manga['title'], 30),
-                                                style: TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 17,
-                                                  color: Theme.of(context).colorScheme.primary,
-                                                ),
-                                              ),
-                                              // manga['author'].toString()
+                                          // manga['author'].toString()
 
-                                              Text(
-                                                textLength(snapshot.data, 35),
-                                                style: TextStyle(
-                                                  color: Theme.of(context).colorScheme.primary,
-                                                  fontSize: 14,
-                                                ),
-                                              ),
-                                              Text(
-                                                DateTime.parse(manga['first_publication']).year.toString(),
-                                                style: TextStyle(
-                                                  color: Theme.of(context).colorScheme.primary,
-                                                  fontSize: 14,
-                                                ),
-                                              )
-                                            ],
+                                          Text(
+                                            getAllAuthorsName(manga['expand']['authors']),
+                                            softWrap: false,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(
+                                              color: Theme.of(context).colorScheme.primary,
+                                              fontSize: 14,
+                                            ),
                                           ),
+                                          Text(
+                                            DateTime.parse(manga['first_publication']).year.toString(),
+                                            style: TextStyle(
+                                              color: Theme.of(context).colorScheme.primary,
+                                              fontSize: 14,
+                                            ),
+                                          )
                                         ],
                                       ),
-                                      Icon(
-                                        Icons.arrow_forward_ios,
-                                        color: Theme.of(context).colorScheme.primary,
-                                      ),
-                                    ],
-                                  ),
-                                  onTap: () {
-                                    context.go('/search/serie/${manga['id']}');
-                                  },
+                                    ),
+                                  ],
                                 ),
-                                (index != _resultsList.length - 1)
-                                    ? MyLine(
-                                        width: MediaQuery.of(context).size.width,
-                                        vertical: 0,
-                                      )
-                                    : const Padding(
-                                        padding: EdgeInsets.only(bottom: 0),
-                                      ),
+                                Icon(
+                                  Icons.arrow_forward_ios,
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
                               ],
-                            );
-                          }
-                        },
+                            ),
+                            onTap: () {
+                              pushOrGo(context, '/search/serie/${manga['id']}');
+                            },
+                          ),
+                          (index != _resultsList.length - 1)
+                              ? MyLine(
+                                  width: MediaQuery.of(context).size.width,
+                                  vertical: 0,
+                                )
+                              : const Padding(
+                                  padding: EdgeInsets.only(bottom: 60),
+                                ),
+                        ],
                       );
                     } else if (selectedFilter == 'author') {
                       return Text("Author" "WIP");
                     } else {
-                      return Text("Author" "WIP");
+                      return Text("Editor" "WIP");
                     }
                   },
                 ),

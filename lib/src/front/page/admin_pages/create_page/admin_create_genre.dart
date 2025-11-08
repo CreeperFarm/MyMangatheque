@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:mymangatheque/src/back/services/pocketbase.dart';
+import 'package:mymangatheque/l10n/app_localizations.dart';
 import 'package:mymangatheque/src/back/services/pocketbaseadmin.dart';
 import 'package:mymangatheque/src/front/components/my_button.dart';
 import 'package:mymangatheque/src/front/components/my_scroll_column.dart';
@@ -26,6 +26,16 @@ class _AdminCreateGenrePageState extends State<AdminCreateGenrePage> {
 
   @override
   Widget build(BuildContext context) {
+    // Get localization - return early if not available
+    var localizations = AppLocalizations.of(context);
+    if (localizations == null) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
     PocketBaseAdminConnector connector = PocketBaseAdminConnector();
     return MyScrollColumn(
       scrollPadding: const EdgeInsets.symmetric(horizontal: 10),
@@ -33,7 +43,7 @@ class _AdminCreateGenrePageState extends State<AdminCreateGenrePage> {
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 10),
           child: Text(
-            "Créer un genre",
+            localizations.createGenre,
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
@@ -47,14 +57,14 @@ class _AdminCreateGenrePageState extends State<AdminCreateGenrePage> {
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 child: MyTextField(
                   controller: genreController,
-                  labelText: "Nom du genre",
-                  errorMessage: "Veuillez entrer le nom du genre",
+                  labelText: localizations.genreName,
+                  errorMessage: localizations.provideGenreName,
                 ),
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 child: MyButton(
-                  text: "Créer",
+                  text: localizations.genreAdd,
                   onTap: () async {
                     final data = jsonDecode((await connector.getCollectionFullList('genres')).toString());
                     var genreAlreadyExists = false;
@@ -67,9 +77,9 @@ class _AdminCreateGenrePageState extends State<AdminCreateGenrePage> {
                     });
                     if (!genreAlreadyExists) {
                       connector.createGenre(genreController.text);
-                      showMessage("Le genre à été créer", context);
+                      showMessage(localizations.genreAddSuccess, context);
                     } else {
-                      showMessage('Ce genre existe déjà', context);
+                      showMessage(localizations.genreDuplicate, context);
                     }
                   },
                 ),

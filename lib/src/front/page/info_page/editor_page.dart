@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:mymangatheque/l10n/app_localizations.dart';
 import 'package:mymangatheque/src/back/services/pocketbase.dart';
 import 'package:mymangatheque/src/front/components/my_line.dart';
 import 'package:mymangatheque/src/front/components/my_scroll_column.dart';
@@ -21,6 +22,16 @@ class _EditorPageState extends State<EditorPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Get localization - return early if not available
+    var localizations = AppLocalizations.of(context);
+    if (localizations == null) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
     return FutureBuilder(
         future: connector.getOneExpand('editors', widget.editorId, 'series.editors'),
         builder: (BuildContext context, snapshot) {
@@ -32,12 +43,13 @@ class _EditorPageState extends State<EditorPage> {
 
           if (snapshot.connectionState == ConnectionState.none) {
             return Center(
-              child: const Text("Aucune connexion"),
+              child: Text(localizations.noConnection),
             );
           }
           if (snapshot.hasError) {
+            debugPrint("Error: ${snapshot.error}");
             return Center(
-              child: const Text("Une erreur est survenue"),
+              child: Text(localizations.errorOccurred),
             );
           }
           if (snapshot.hasData && snapshot.data != null) {
@@ -88,39 +100,36 @@ class _EditorPageState extends State<EditorPage> {
                           vertical: 10,
                           horizontal: 0,
                         ),
-                        (series == null)
-                            ? SizedBox()
-                            : Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      (series.length == 1) ? 'Série :' : 'Séries :',
-                                      style: const TextStyle(
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.w300,
-                                      ),
-                                    ),
-                                    ListView(
-                                      shrinkWrap: true,
-                                      children: [
-                                        for (var i = 0; i < series.length; i += 1)
-                                          Column(
-                                            children: [
-                                              MySeriesTile(
-                                                seriesData: series[i],
-                                                initRoute: widget.initRoute,
-                                              ),
-                                              if (i != series.length - 1)
-                                                MyLine(width: MediaQuery.of(context).size.width, vertical: 0, horizontal: 10),
-                                            ],
-                                          ),
-                                      ],
-                                    ),
-                                  ],
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                localizations.seriesCount(series.length),
+                                style: const TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w300,
                                 ),
                               ),
+                              ListView(
+                                shrinkWrap: true,
+                                children: [
+                                  for (var i = 0; i < series.length; i += 1)
+                                    Column(
+                                      children: [
+                                        MySeriesTile(
+                                          seriesData: series[i],
+                                          initRoute: widget.initRoute,
+                                        ),
+                                        if (i != series.length - 1) MyLine(width: MediaQuery.of(context).size.width, vertical: 0, horizontal: 10),
+                                      ],
+                                    ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -130,10 +139,13 @@ class _EditorPageState extends State<EditorPage> {
           } else {
             return Scaffold(
               appBar: AppBar(
-                title: Text("La série n'existe pas"),
-              ),
+                  title: Text(
+                localizations.editorDoesNotExist,
+              )),
               body: Center(
-                child: const Text("La série n'existe pas"),
+                child: Text(
+                  localizations.editorDoesNotExist,
+                ),
               ),
             );
           }

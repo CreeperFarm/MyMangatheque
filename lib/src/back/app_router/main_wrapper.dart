@@ -6,9 +6,13 @@ import 'package:flutter_svg/svg.dart';
 import 'package:glass_kit/glass_kit.dart';
 import 'package:go_router/go_router.dart';
 import 'package:keyboard_detection/keyboard_detection.dart';
+import 'package:mymangatheque/l10n/app_localizations.dart';
+import 'package:mymangatheque/src/back/services/pocketbase.dart';
 import 'package:mymangatheque/src/const/own_icon.dart';
 import 'package:mymangatheque/src/front/components/my_drawer.dart';
 import 'package:mymangatheque/src/front/components/my_drawer_tile.dart';
+import 'package:mymangatheque/src/function/auto_push_or_go.dart';
+import 'package:mymangatheque/src/models/get_user_information.dart';
 import 'package:url_launcher/link.dart';
 
 class MainWrapper extends ConsumerStatefulWidget {
@@ -22,12 +26,6 @@ class MainWrapper extends ConsumerStatefulWidget {
   @override
   ConsumerState<MainWrapper> createState() => _MainWrapperState();
 }
-
-List<String> navIcons = ["home", "collection", "search", "calendar", "user"];
-
-List<String> navTitle = ["Accueil", "Collection", "Recherche", "Planning", "Profil"];
-
-List<String> navRoute = ["/", "/library", "/search", "/planning", "/profile"];
 
 class _MainWrapperState extends ConsumerState<MainWrapper> {
   int selectedIndex = 0;
@@ -77,6 +75,23 @@ class _MainWrapperState extends ConsumerState<MainWrapper> {
 
   @override
   Widget build(BuildContext context) {
+    // Get localization - return early if not available
+    var localizations = AppLocalizations.of(context);
+    if (localizations == null) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
+    // TODO : restore the planning page.
+    //List<String> navIcons = ["home", "collection", "search", "calendar", "user"];
+    const List<String> navIcons = ["home", "collection", "search", "user"];
+    //List<String> navTitle = ["Accueil", "Collection", "Recherche", "Planning", "Profil"];
+    List<String> navTitle = [localizations.home, localizations.collection, localizations.search, localizations.profile];
+    //List<String> navRoute = ["/", "/library", "/search", "/planning", "/profile"];
+    const List<String> navRoute = ["/", "/library", "/search", "/profile"];
     // This is to change color when starting the app
     /*Timer(const Duration(milliseconds: 50), () {
       if (AdaptiveTheme.of(context).mode.isSystem) {
@@ -133,7 +148,7 @@ class _MainWrapperState extends ConsumerState<MainWrapper> {
                             Column(
                               children: (navIcons).map((iconName) {
                                 int index = navIcons.indexOf(iconName);
-                                if (navTitle[index] == "Profil") {
+                                if (navIcons[index] == "user") {
                                   return const Padding(padding: EdgeInsets.zero);
                                 } else {
                                   return MyDrawerTile(title: navTitle[index], icon: iconName, goTo: navRoute[index], pop: false);
@@ -146,33 +161,65 @@ class _MainWrapperState extends ConsumerState<MainWrapper> {
                           children: [
                             GestureDetector(
                               onTap: () {
-                                context.go('/profile');
+                                pushOrGo(context, '/profile');
                               },
-                              /*
-                  TODO: Check if the user is connected,
-                   if he is then show him his profile picture and the text 'Mon Compte',
-                   else show him the icon of a user and the text 'Se connecter'.
-              */
                               child: Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    SvgPicture.asset('assets/icons/user.svg',
-                                        width: 30, height: 30, colorFilter: ColorFilter.mode(Theme.of(context).colorScheme.primary, BlendMode.srcIn)),
-                                    Text('Se Connecter',
-                                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary)),
-                                  ],
+                                padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 25),
+                                child: StreamBuilder(
+                                  stream: PocketBaseConnector().listenToUserChanges(),
+                                  builder: (context, snapshot) {
+                                    final isLoggedIn = PocketBaseConnector().isLoggedIn();
+                                    if (isLoggedIn) {
+                                      final user = PocketBaseConnector().getConnectedUser();
+                                      return Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          user?.avatar != null
+                                              ? GetUserProfilePicture(
+                                                  file: user!.avatar!,
+                                                  width: 30,
+                                                  height: 30,
+                                                )
+                                              : SvgPicture.asset(
+                                                  'assets/icons/user.svg',
+                                                  width: 30,
+                                                  height: 30,
+                                                  colorFilter: ColorFilter.mode(Theme.of(context).colorScheme.primary, BlendMode.srcIn),
+                                                ),
+                                          Text(
+                                            user?.username ?? '',
+                                            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary),
+                                          ),
+                                        ],
+                                      );
+                                    } else {
+                                      return Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          SvgPicture.asset(
+                                            'assets/icons/user.svg',
+                                            width: 30,
+                                            height: 30,
+                                            colorFilter: ColorFilter.mode(Theme.of(context).colorScheme.primary, BlendMode.srcIn),
+                                          ),
+                                          Text(
+                                            localizations.logIn,
+                                            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary),
+                                          ),
+                                        ],
+                                      );
+                                    }
+                                  },
                                 ),
                               ),
                             ),
                             Link(
-                              uri: Uri.parse("https://mymangatheque.com/mentions_legales"),
+                              uri: Uri.parse("https://mymangatheque.com/legal_notice"),
                               builder: (context, link) {
                                 return InkWell(
                                   onTap: link,
                                   child: Text(
-                                    "Mentions légales",
+                                    AppLocalizations.of(context)!.legalNotice,
                                     style: TextStyle(
                                       color: Theme.of(context).colorScheme.primary,
                                     ),
@@ -193,17 +240,16 @@ class _MainWrapperState extends ConsumerState<MainWrapper> {
             ));
           } else if (constraints.maxWidth > 600) {
             return Scaffold(
-                appBar: AppBar(),
-                drawer: MyDrawer(
-                  navIcons: navIcons,
-                  navTitle: navTitle,
-                  navRoute: navRoute,
-                ),
-                body: Stack(
-                  children: [
-                    widget.navigationShell,
-                  ],
-                ));
+              appBar: AppBar(),
+              drawer: MyDrawer(
+                navIcons: navIcons,
+                navTitle: navTitle,
+                navRoute: navRoute,
+                profileText: localizations.profile,
+                logInText: localizations.logIn,
+              ),
+              body: widget.navigationShell,
+            );
           } else if (constraints.maxWidth < 600 && keyboardActive) {
             return Scaffold(
               body: Stack(
@@ -219,76 +265,71 @@ class _MainWrapperState extends ConsumerState<MainWrapper> {
                   widget.navigationShell,
                   Align(
                     alignment: Alignment.bottomCenter,
-                    child: navBar(),
+                    child: GlassContainer.clearGlass(
+                      gradient: LinearGradient(
+                        colors: [
+                          Theme.of(context).colorScheme.primary.withAlpha(10),
+                          Theme.of(context).colorScheme.primary.withAlpha(10),
+                        ],
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                      ),
+                      height: 60,
+                      margin: const EdgeInsets.only(bottom: 32, left: 16, right: 16),
+                      borderColor: Colors.transparent,
+                      borderRadius: const BorderRadius.all(Radius.circular(100)),
+                      shadowColor: Colors.black.withAlpha(20),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: navIcons.map((iconName) {
+                          int index = navIcons.indexOf(iconName);
+                          bool isSelected = selectedIndex == index;
+                          return Material(
+                            color: Colors.transparent,
+                            child: GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  selectedIndex = index;
+                                  _goBranch(index);
+                                });
+                              },
+                              child: Column(
+                                children: [
+                                  Container(
+                                    alignment: Alignment.center,
+                                    margin: const EdgeInsets.only(
+                                      top: 10,
+                                      bottom: 0,
+                                      right: 22,
+                                      left: 22,
+                                    ),
+                                    child: OwnIcon(
+                                      iconName: isSelected ? '$iconName-active' : iconName,
+                                      iconColor: Theme.of(context).colorScheme.primary,
+                                    ),
+                                  ),
+                                  Text(
+                                    navTitle[index],
+                                    style: TextStyle(
+                                      color: Theme.of(context).colorScheme.primary,
+                                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ),
                   ),
                 ],
               ),
             );
           }
         },
-      ),
-    );
-  }
-
-  //NavBar
-  Widget navBar() {
-    return GlassContainer.clearGlass(
-      gradient: LinearGradient(
-        colors: [
-          Theme.of(context).colorScheme.primary.withAlpha(10),
-          Theme.of(context).colorScheme.primary.withAlpha(10),
-        ],
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-      ),
-      height: 60,
-      margin: const EdgeInsets.only(bottom: 32, left: 16, right: 16),
-      borderColor: Colors.transparent,
-      borderRadius: const BorderRadius.all(Radius.circular(100)),
-      shadowColor: Colors.black.withAlpha(20),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: navIcons.map((iconName) {
-          int index = navIcons.indexOf(iconName);
-          bool isSelected = selectedIndex == index;
-          return Material(
-            color: Colors.transparent,
-            child: GestureDetector(
-              onTap: () {
-                setState(() {
-                  selectedIndex = index;
-                  _goBranch(index);
-                });
-              },
-              child: Column(
-                children: [
-                  Container(
-                    alignment: Alignment.center,
-                    margin: const EdgeInsets.only(
-                      top: 10,
-                      bottom: 0,
-                      right: 22,
-                      left: 22,
-                    ),
-                    child: OwnIcon(
-                      iconName: isSelected ? '$iconName-active' : iconName,
-                      iconColor: Theme.of(context).colorScheme.primary,
-                    ),
-                  ),
-                  Text(
-                    navTitle[index],
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.primary,
-                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                      fontSize: 12,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        }).toList(),
       ),
     );
   }

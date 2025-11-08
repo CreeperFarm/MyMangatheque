@@ -4,10 +4,12 @@ import 'package:date_field/date_field.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:mymangatheque/l10n/app_localizations.dart';
 import 'package:mymangatheque/src/back/services/pocketbaseadmin.dart';
 import 'package:mymangatheque/src/front/components/my_button.dart';
 import 'package:mymangatheque/src/front/components/my_scroll_column.dart';
 import 'package:mymangatheque/src/front/components/my_textfield.dart';
+import 'package:mymangatheque/src/function/show_message_function.dart';
 import 'package:simple_barcode_scanner/simple_barcode_scanner.dart';
 
 class AdminCreateVolumePage extends StatefulWidget {
@@ -28,7 +30,7 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
   final TextEditingController languageVolumeController = TextEditingController(); // Field (*) : language
   final TextEditingController supportVolumeController = TextEditingController(); // Field (*) : support
   final TextEditingController genreJapVolumeController = TextEditingController(); // Field : genre_jap
-  final TextEditingController resumeVolumeController = TextEditingController(); // Field (*) : resume
+  final TextEditingController summaryVolumeController = TextEditingController(); // Field (*) : resume
   final TextEditingController imagePathVolumeController = TextEditingController(); // Field : image
   final TextEditingController imageNameVolumeController = TextEditingController(); // Field : image
   final TextEditingController bookLinkVolumeController = TextEditingController(); // Field (*) : book_link
@@ -61,7 +63,7 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
   @override
   void initState() {
     bookLinkVolumeController.text =
-        '[{"available": "En Stock","seller": "amazon", "url": ""},{"available": "En Stock","seller": "bdfugue", "url": "https://www.bdfugue.com/a/?ean=${eanVolumeController.text}&ref=W0WZrth4"}]';
+        '[{"available": "inStock","seller": "amazon", "url": ""},{"available": "En Stock","seller": "bdfugue", "url": "https://www.bdfugue.com/a/?ean=${eanVolumeController.text}&ref=W0WZrth4"}]';
     infoVolumeController.text = '{"pageNumber": }';
     super.initState();
   }
@@ -75,7 +77,7 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
     languageVolumeController.dispose();
     supportVolumeController.dispose();
     genreJapVolumeController.dispose();
-    resumeVolumeController.dispose();
+    summaryVolumeController.dispose();
     imagePathVolumeController.dispose();
     imageNameVolumeController.dispose();
     bookLinkVolumeController.dispose();
@@ -90,6 +92,16 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
 
   @override
   Widget build(BuildContext context) {
+    // Get localization - return early if not available
+    var localizations = AppLocalizations.of(context);
+    if (localizations == null) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
     final PocketBaseAdminConnector adminConnector = PocketBaseAdminConnector();
     return MyScrollColumn(
       scrollPadding: const EdgeInsets.symmetric(horizontal: 10),
@@ -97,7 +109,7 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 10),
           child: Text(
-            "Créer un Volume",
+            localizations.createVolume,
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
@@ -140,14 +152,14 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
               ),
               MyTextField(
                 controller: titleVolumeController,
-                labelText: "Nom du Volume",
-                errorMessage: "Veuillez entrer le nom du volume!",
+                labelText: localizations.volumeTitle,
+                errorMessage: localizations.provideVolumeTitle,
                 verticalPadding: 5,
               ),
               MyTextField(
                 controller: numberVolumeController,
-                labelText: "Numéro du Volume",
-                errorMessage: "Veuillez entrer le numéro du volume!",
+                labelText: localizations.volumeNumber,
+                errorMessage: localizations.provideVolumeNumber,
                 verticalPadding: 5,
               ),
               Row(
@@ -155,10 +167,12 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
                   Expanded(
                     child: MyTextField(
                       controller: eanVolumeController,
-                      labelText: "EAN du Volume",
+                      labelText: localizations.volumeEAN,
                       keyboardType: TextInputType.number,
-                      errorMessage: "Veuillez entrer l'EAN du volume!",
+                      errorMessage: localizations.provideVolumeEAN,
                       verticalPadding: 5,
+                      minLength: 13,
+                      maxLength: 13,
                     ),
                   ),
                   IconButton(
@@ -184,26 +198,26 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
               ),
               MyTextField(
                 controller: priceVolumeController,
-                labelText: "Prix du Volume",
-                errorMessage: "Veuillez entrer le prix du volume!",
+                labelText: localizations.volumePrice,
+                errorMessage: localizations.provideVolumePrice,
                 verticalPadding: 5,
               ),
               MyTextField(
-                controller: resumeVolumeController,
-                labelText: "Résumé du Volume",
-                errorMessage: "Veuillez entrer le résumé du volume!",
+                controller: summaryVolumeController,
+                labelText: localizations.volumeSummary,
+                errorMessage: localizations.provideVolumeSummary,
                 verticalPadding: 5,
               ),
               MyTextField(
                 controller: bookLinkVolumeController,
-                labelText: "Lien du Volume",
-                errorMessage: "Veuillez entrer le lien du volume!",
+                labelText: localizations.volumeLink,
+                errorMessage: localizations.provideVolumeLink,
                 verticalPadding: 5,
               ),
               MyTextField(
                 controller: infoVolumeController,
-                labelText: "Informations du Volume",
-                errorMessage: "Veuillez entrer les informations du volume!",
+                labelText: localizations.volumeInfo,
+                errorMessage: localizations.provideVolumeInfo,
                 verticalPadding: 5,
               ),
               Row(
@@ -219,7 +233,7 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 10.0),
                     child: Text(
-                      "Contenu pour adulte",
+                      localizations.adultContent,
                       style: TextStyle(
                         fontSize: 16,
                       ),
@@ -233,27 +247,27 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
                   items: [
                     DropdownMenuItem(
                       value: "fr",
-                      child: const Text("🇫🇷 Français"),
+                      child: Text("🇫🇷 ${localizations.french}"),
                     ),
                     DropdownMenuItem(
                       value: "en",
-                      child: Text("🇺🇸 Anglais"),
+                      child: Text("🇺🇸 ${localizations.english}"),
                     ),
                     DropdownMenuItem(
                       value: "sp",
-                      child: Text("🇪🇸 Espagnol"),
+                      child: Text("🇪🇸 ${localizations.spanish}"),
                     ),
                     DropdownMenuItem(
                       value: "de",
-                      child: Text("🇩🇪 Allemand"),
+                      child: Text("🇩🇪 ${localizations.german}"),
                     ),
                     DropdownMenuItem(
                       value: "it",
-                      child: Text("🇮🇹 Italien"),
+                      child: Text("🇮🇹 ${localizations.italian}"),
                     ),
                     DropdownMenuItem(
-                      value: "ja",
-                      child: Text("🇯🇵 Japonais"),
+                      value: "jp",
+                      child: Text("🇯🇵 ${localizations.japanese}"),
                     ),
                   ],
                   onChanged: (value) {
@@ -271,11 +285,11 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
                     labelStyle: TextStyle(
                       color: Theme.of(context).colorScheme.onPrimary,
                     ),
-                    hintText: "Langue du Volume",
+                    hintText: localizations.volumeLanguage,
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return "Veuillez entrer la langue du volume!";
+                      return localizations.chooseVolumeLanguage;
                     } else {
                       return null;
                     }
@@ -288,32 +302,32 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
                   items: [
                     DropdownMenuItem(
                       value: "manga",
-                      child: const Text("Manga"),
+                      child: Text(localizations.manga),
                     ),
                     DropdownMenuItem(
-                      value: "Roman",
-                      child: Text("Roman"),
+                      value: "novel",
+                      child: Text(localizations.novel),
                     ),
                     DropdownMenuItem(
-                      value: "Artbook",
-                      child: Text("ArtBook"),
+                      value: "artbook",
+                      child: Text(localizations.artbook),
                     ),
                     DropdownMenuItem(
-                      value: "Light-Novel",
-                      child: Text("Light Novel"),
+                      value: "lightNovel",
+                      child: Text(localizations.lightNovel),
                     ),
                     DropdownMenuItem(
-                      value: "Coffret",
-                      child: Text("Coffret"),
+                      value: "boxSet",
+                      child: Text(localizations.boxSet),
                     ),
                     DropdownMenuItem(
-                      value: "autre",
-                      child: Text("Autre"),
+                      value: "other",
+                      child: Text(localizations.other),
                     ),
                   ],
                   onChanged: (value) {
                     setState(() {
-                      genreJapVolumeController.text = value.toString();
+                      supportVolumeController.text = value.toString();
                     });
                   },
                   decoration: InputDecoration(
@@ -326,11 +340,11 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
                     labelStyle: TextStyle(
                       color: Theme.of(context).colorScheme.onPrimary,
                     ),
-                    hintText: "Support du Volume",
+                    hintText: localizations.volumeSupport,
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return "Veuillez entrer le support du volume!";
+                      return localizations.chooseVolumeSupport;
                     } else {
                       return null;
                     }
@@ -360,7 +374,7 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
                   ],
                   onChanged: (value) {
                     setState(() {
-                      supportVolumeController.text = value.toString();
+                      genreJapVolumeController.text = value.toString();
                     });
                   },
                   decoration: InputDecoration(
@@ -372,7 +386,7 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
                     labelStyle: TextStyle(
                       color: Theme.of(context).colorScheme.onPrimary,
                     ),
-                    hintText: "Genre du Volume",
+                    hintText: localizations.genreName,
                   ),
                 ),
               ),
@@ -394,10 +408,10 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
                     labelStyle: TextStyle(
                       color: Theme.of(context).colorScheme.onPrimary,
                     ),
-                    hintText: "Date de publication",
+                    hintText: localizations.publicationDate,
                   ),
                   cupertinoDatePickerOptions: CupertinoDatePickerOptions(
-                    modalTitleText: "Sélectionnez la date",
+                    modalTitleText: localizations.selectDate,
                     style: CupertinoDatePickerOptionsStyle(
                       modalTitle: TextStyle(
                         color: Theme.of(context).colorScheme.primary,
@@ -408,7 +422,7 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
                   initialPickerDateTime: DateTime.now(),
                   validator: (value) {
                     if (value == null) {
-                      return "Veuillez entrer la date de publication!";
+                      return localizations.pleaseSelectDate;
                     }
                     return null;
                   },
@@ -421,17 +435,17 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
               ),
               MyTextField(
                 controller: serieVolumeController,
-                labelText: "Id de la série du Volume",
-                errorMessage: "Veuillez entrer l'id série du volume!",
+                labelText: localizations.volumeSeriesId,
+                errorMessage: localizations.provideVolumeSeriesId,
                 verticalPadding: 5,
                 horizontalPadding: 0,
                 customValidator: (value) async {
                   if (value == null || value.isEmpty) {
-                    return "Veuillez entrer l'id de la série du volume!";
+                    return localizations.provideVolumeSeriesId;
                   } else {
                     // Check if the id is a serie
                     if (await adminConnector.checkIfExist('series', 'id', value)) {
-                      return "Veuillez entrer l'id de série valide!";
+                      return localizations.provideValidVolumeSeriesId;
                     } else {
                       return null;
                     }
@@ -440,17 +454,17 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
               ),
               MyTextField(
                 controller: subSerieVolumeController,
-                labelText: "Id de la sous-série du Volume",
-                errorMessage: "Veuillez entrer l'id sous-série du volume!",
+                labelText: localizations.volumeSubSeriesId,
+                errorMessage: localizations.provideVolumeSubSeriesId,
                 verticalPadding: 5,
                 horizontalPadding: 0,
                 customValidator: (value) async {
                   if (value == null || value.isEmpty) {
-                    return "Veuillez entrer l'id de la sous-série du volume!";
+                    return localizations.provideVolumeSubSeriesId;
                   } else {
                     // Check if the id is a serie
                     if (await adminConnector.checkIfExist('sub_series', 'id', value)) {
-                      return "Veuillez entrer l'id de sous-série valide!";
+                      return localizations.provideValidVolumeSubSeriesId;
                     } else {
                       return null;
                     }
@@ -459,17 +473,17 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
               ),
               MyTextField(
                 controller: editorVolumeController,
-                labelText: "Id de l'éditeur du Volume",
-                errorMessage: "Veuillez entrer l'id de l'éditeur du volume!",
+                labelText: localizations.volumeEditorId,
+                errorMessage: localizations.provideVolumeEditorId,
                 verticalPadding: 5,
                 horizontalPadding: 0,
                 customValidator: (value) async {
                   if (value == null || value.isEmpty) {
-                    return "Veuillez entrer l'id de l'éditeur du volume!";
+                    return localizations.provideVolumeEditorId;
                   } else {
                     // Check if the id is a serie
                     if (await adminConnector.checkIfExist('editors', 'id', value)) {
-                      return "Veuillez entrer l'id de l'éditeur du volume!";
+                      return localizations.provideValidVolumeEditorId;
                     } else {
                       return null;
                     }
@@ -478,53 +492,58 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
               ),
               MyTextField(
                 controller: authorsVolumeController,
-                labelText: "Ids des auteurs du Volume",
-                errorMessage: "Veuillez entrer au moins un id des auteurs du volume!",
+                labelText: localizations.volumeAuthorsIds,
+                errorMessage: localizations.provideVolumeAuthorsIds,
                 verticalPadding: 5,
                 horizontalPadding: 0,
               ),
               MyTextField(
                 controller: containsVolumeController,
-                labelText: "Contenu du Volume",
-                errorMessage: "Veuillez entrer le contenu du volume!",
+                labelText: localizations.contentOfBoxSet,
+                errorMessage: localizations.provideContentOfBoxSet,
                 verticalPadding: 5,
                 horizontalPadding: 0,
                 customValidator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return null;
+                  if (supportVolumeController.text == "boxSet" && (value == null || value.isEmpty)) {
+                    return localizations.provideContentOfBoxSet;
                   } else {
                     return null;
                   }
                 },
               ),
               MyButton(
-                text: "Créer le volume",
+                text: localizations.volumeAdd,
                 verticalPadding: 10,
                 horizontalPadding: 0,
                 onTap: () {
                   if (Form.of(context).validate()) {
-                    adminConnector.createVolume(
-                      {
-                        "title": titleVolumeController.text,
-                        "tome_number": int.parse(numberVolumeController.text),
-                        "price": priceVolumeController.text,
-                        "over18": over18,
-                        "resume": resumeVolumeController.text,
-                        "book_link": jsonEncode(bookLinkVolumeController.text),
-                        "release": release.toIso8601String(),
-                        "ean": int.parse(eanVolumeController.text),
-                        (languageVolumeController.text != "") ? "language" : languageVolumeController.text: null,
-                        "sub_series": subSerieVolumeController.text,
-                        "series": serieVolumeController.text,
-                        "authors": authorsVolumeController.text,
-                        (containsVolumeController.text != "") ? "contain" : containsVolumeController.text: null,
-                        (infoVolumeController.text != "") ? "info" : jsonEncode(infoVolumeController.text): null,
-                        "support": supportVolumeController.text,
-                        (genreJapVolumeController.text != "") ? "genre_jap" : genreJapVolumeController.text: null,
-                      },
-                      imageNameVolumeController.text,
-                      imagePathVolumeController.text,
-                    );
+                    try {
+                      adminConnector.createVolume(
+                        {
+                          "title": titleVolumeController.text,
+                          "tome_number": int.parse(numberVolumeController.text),
+                          "price": priceVolumeController.text,
+                          "over18": over18,
+                          "resume": summaryVolumeController.text,
+                          "book_link": jsonEncode(bookLinkVolumeController.text),
+                          "release": release.toIso8601String(),
+                          "ean": int.parse(eanVolumeController.text),
+                          "language": (languageVolumeController.text != "") ? languageVolumeController.text : null,
+                          "sub_series": subSerieVolumeController.text,
+                          "series": serieVolumeController.text,
+                          "authors": authorsVolumeController.text,
+                          "contain": (containsVolumeController.text != "") ? containsVolumeController.text : null,
+                          "info": (infoVolumeController.text != "") ? jsonEncode(infoVolumeController.text) : null,
+                          "support": supportVolumeController.text,
+                          "genre_jap": (genreJapVolumeController.text != "") ? genreJapVolumeController.text : null,
+                        },
+                        imageNameVolumeController.text,
+                        imagePathVolumeController.text,
+                      );
+                      showMessage(localizations.volumeAddSuccess, context);
+                    } catch (e) {
+                      showMessage(localizations.volumeAddError, context);
+                    }
                   }
                 },
               )

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mymangatheque/l10n/app_localizations.dart';
 
 class MyTextField extends StatelessWidget {
   final TextEditingController controller;
@@ -12,8 +13,12 @@ class MyTextField extends StatelessWidget {
   final FocusNode? focusNode;
   final Function? customValidator;
   final Function? customOnChanged;
+  final int? minLength;
+  final String? minLengthErrorMessage;
+  final int? maxLength;
+  final String? maxLengthErrorMessage;
 
-  const MyTextField({
+  MyTextField({
     required this.controller,
     required this.labelText,
     required this.errorMessage,
@@ -25,11 +30,25 @@ class MyTextField extends StatelessWidget {
     this.focusNode,
     this.customValidator,
     this.customOnChanged,
+    this.minLength,
+    this.minLengthErrorMessage,
+    this.maxLength,
+    this.maxLengthErrorMessage,
     super.key,
   });
 
   @override
   Widget build(BuildContext context) {
+    // Get localization - return early if not available
+    var localizations = AppLocalizations.of(context);
+    if (localizations == null) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: horizontalPadding ?? 5.0, vertical: verticalPadding ?? 0.0),
       child: TextFormField(
@@ -40,12 +59,16 @@ class MyTextField extends StatelessWidget {
         validator: (customValidator != null)
             ? (value) => customValidator!(value)
             : (value) {
-                if (value == null || value.isEmpty) {
-                  return errorMessage;
-                } else if (skipEmptyVerification != null && skipEmptyVerification!) {
+                if (skipEmptyVerification != null && skipEmptyVerification!) {
                   return null;
+                } else if (value == null || value.isEmpty) {
+                  return errorMessage;
+                } else if (minLength != null && value.length < minLength!) {
+                  return minLengthErrorMessage ?? localizations.minLengthNotReached(minLength!);
+                } else if (maxLength != null && value.length > maxLength!) {
+                  return maxLengthErrorMessage ?? localizations.maxLengthExceeded(maxLength!);
                 } else if (value.length < 6 && obscureText!) {
-                  return "Votre mot de passe doit contenir au moins 6 caractères!";
+                  return localizations.passwordTooShort;
                 } else {
                   return null;
                 }
@@ -58,6 +81,7 @@ class MyTextField extends StatelessWidget {
             ),
           ),
           border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(25),
             borderSide: BorderSide(
               color: Theme.of(context).colorScheme.primary,
             ),

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:mymangatheque/l10n/app_localizations.dart';
 import 'package:mymangatheque/src/back/services/pocketbase.dart';
 import 'package:mymangatheque/src/front/components/my_author_tile.dart';
 import 'package:mymangatheque/src/front/components/my_genres_show.dart';
@@ -24,6 +25,16 @@ class _SeriePageState extends State<SeriePage> {
 
   @override
   Widget build(BuildContext context) {
+    // Get localization - return early if not available
+    var localizations = AppLocalizations.of(context);
+    if (localizations == null) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
     return FutureBuilder(
         future: connector.getOneExpand('series', widget.serieId, 'sub_series.volumes,sub_series.editor,genres,authors'),
         builder: (BuildContext context, snapshot) {
@@ -35,12 +46,13 @@ class _SeriePageState extends State<SeriePage> {
 
           if (snapshot.connectionState == ConnectionState.none) {
             return Center(
-              child: const Text("Aucune connexion"),
+              child: Text(localizations.noConnection),
             );
           }
           if (snapshot.hasError) {
+            debugPrint("Error: ${snapshot.error}");
             return Center(
-              child: const Text("Une erreur est survenue"),
+              child: Text(localizations.errorOccurred),
             );
           }
           if (snapshot.hasData && snapshot.data != null) {
@@ -92,7 +104,7 @@ class _SeriePageState extends State<SeriePage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Genres :',
+                                '${localizations.genres} :',
                                 style: const TextStyle(
                                   fontSize: 20,
                                   fontWeight: FontWeight.bold,
@@ -123,14 +135,14 @@ class _SeriePageState extends State<SeriePage> {
                               ? SizedBox()
                               : (subSeries.length == 1)
                                   ? Text(
-                                      'Edition :',
+                                      "${localizations.editor} :",
                                       style: const TextStyle(
                                         fontSize: 20,
                                         fontWeight: FontWeight.bold,
                                       ),
                                     )
                                   : Text(
-                                      'Editions :',
+                                      "${localizations.editors} :",
                                       style: const TextStyle(
                                         fontSize: 20,
                                         fontWeight: FontWeight.bold,
@@ -164,7 +176,7 @@ class _SeriePageState extends State<SeriePage> {
                                 ? Padding(
                                     padding: const EdgeInsets.symmetric(vertical: 5),
                                     child: Text(
-                                      'Auteur :',
+                                      "${localizations.author} :",
                                       style: const TextStyle(
                                         fontSize: 20,
                                         fontWeight: FontWeight.bold,
@@ -174,7 +186,7 @@ class _SeriePageState extends State<SeriePage> {
                                 : Padding(
                                     padding: const EdgeInsets.symmetric(vertical: 5),
                                     child: Text(
-                                      'Auteurs :',
+                                      "${localizations.authors} :",
                                       style: const TextStyle(
                                         fontSize: 20,
                                         fontWeight: FontWeight.bold,
@@ -207,10 +219,10 @@ class _SeriePageState extends State<SeriePage> {
           } else {
             return Scaffold(
               appBar: AppBar(
-                title: Text("La série n'existe pas"),
+                title: Text(localizations.seriesDoesNotExist),
               ),
               body: Center(
-                child: const Text("La série n'existe pas"),
+                child: Text(localizations.seriesDoesNotExist),
               ),
             );
           }

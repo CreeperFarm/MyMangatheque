@@ -8,14 +8,15 @@ class MyScrollColumn extends StatelessWidget {
   final MainAxisSize? columnMainAxisSize;
   final CrossAxisAlignment? columnCrossAxisAlignment;
 
-  MyScrollColumn(
-      {required this.children,
-      this.scrollDirection,
-      this.scrollPadding,
-      this.columnMainAxisAlignment,
-      this.columnMainAxisSize,
-      this.columnCrossAxisAlignment,
-      super.key});
+  const MyScrollColumn({
+    required this.children,
+    this.scrollDirection,
+    this.scrollPadding,
+    this.columnMainAxisAlignment,
+    this.columnMainAxisSize,
+    this.columnCrossAxisAlignment,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -28,6 +29,7 @@ class MyScrollColumn extends StatelessWidget {
           mainAxisAlignment: columnMainAxisAlignment != null ? columnMainAxisAlignment! : MainAxisAlignment.start,
           crossAxisAlignment: columnCrossAxisAlignment != null ? columnCrossAxisAlignment! : CrossAxisAlignment.start,
           children: [
+            (constraints.maxWidth > 600 ? const SizedBox(height: 15) : const SizedBox(height: 0)),
             for (var child in children) child,
             (constraints.maxWidth < 600 ? const SizedBox(height: 92) : const SizedBox(height: 15)),
           ],

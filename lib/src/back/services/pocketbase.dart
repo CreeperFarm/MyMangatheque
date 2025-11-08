@@ -2,15 +2,17 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:ui';
 
 // Importing other libraries
 import 'package:dart_date/dart_date.dart';
-import 'package:fetch_client/fetch_client.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_custom_tabs/flutter_custom_tabs.dart';
+import 'package:http/http.dart' as http;
 import 'package:http/http.dart';
+import 'package:mymangatheque/l10n/app_localizations.dart';
 import 'package:mymangatheque/src/back/services/utils.dart';
+import 'package:mymangatheque/src/function/auto_push_or_go.dart';
 import 'package:mymangatheque/src/function/show_message_function.dart';
 import 'package:mymangatheque/src/models/local_storage/local_storage.dart';
 import 'package:mymangatheque/src/models/local_storage/service_locator.dart';
@@ -19,12 +21,15 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:pocketbase/pocketbase.dart';
 import 'package:rxdart/rxdart.dart';
 
+import 'factories/factory_mobile.dart' if (dart.library.html) 'factories/factory_web.dart';
+
 // Exporting the classes
 export 'package:mymangatheque/src/models/file.dart';
 export 'package:mymangatheque/src/models/user.dart';
 
 class PocketBaseConnector {
   late PocketBase _pocketBase;
+  int alreadyClick = 0;
 
   Future<void> init() async {
     final storage = getIt<LocalStorage>();
@@ -36,18 +41,35 @@ class PocketBaseConnector {
       clear: storage.deleteToken,
     );
 
-    _pocketBase = PocketBase(
-      'https://api.mymangatheque.com',
-      httpClientFactory: kIsWeb ? () => FetchClient(mode: RequestMode.cors) : null,
-      lang: 'fr-FR',
-      authStore: customAuthStore,
-    );
+    try {
+      _pocketBase = PocketBase(
+        'https://api.mymangatheque.com',
+        lang: 'fr-FR',
+        httpClientFactory: httpClientFactory.getHttpClient(),
+        authStore: customAuthStore,
+      );
 
-    if (_pocketBase.authStore.isValid) {
-      final authRecord = await _pocketBase.collection('users').authRefresh();
-      final authInfo = json.decode(authRecord.toString());
-      _connectedUser.add(await findUser(authInfo['record']['email']));
-    } else {}
+      if (_pocketBase.authStore.isValid) {
+        try {
+          final authRecord = await _pocketBase.collection('users').authRefresh();
+          final authInfo = json.decode(authRecord.toString());
+          _connectedUser.add(await findUser(authInfo['record']['email']));
+        } catch (e) {
+          debugPrint(e.toString());
+        }
+      } else {}
+    } on SocketException {
+      AlertDialog.adaptive(
+        title: Text("No Connection"),
+        content: Text("No Connection"),
+      );
+    } catch (e) {
+      AlertDialog.adaptive(
+        title: Text("An error occurred"),
+        content: Text("An error occurred"),
+      );
+      debugPrint(e.toString());
+    }
   }
 
   // Singleton
@@ -60,8 +82,11 @@ class PocketBaseConnector {
   final BehaviorSubject<User?> _connectedUser = BehaviorSubject<User?>();
 
   PocketBaseConnector._internal()
-      : _pocketBase =
-            PocketBase('https://api.mymangatheque.com', httpClientFactory: kIsWeb ? () => FetchClient(mode: RequestMode.cors) : null, lang: 'fr-FR');
+      : _pocketBase = PocketBase(
+          'https://api.mymangatheque.com',
+          httpClientFactory: httpClientFactory.getHttpClient(),
+          lang: PlatformDispatcher.instance.locale.languageCode == 'fr' ? 'fr-FR' : 'en-US',
+        );
 
   Future<void> refresh() async {
     if (!_pocketBase.authStore.isValid) {
@@ -102,62 +127,71 @@ class PocketBaseConnector {
 
   // Sign in with Google (all-in-one)
   signInWithGoogle(context) async {
-    try {
-      PocketBaseConnector().logOut();
-      _pocketBase.authStore.clear();
-      final authData = await _pocketBase.collection('users').authWithOAuth2(
-        'google',
-        (url) async {
-          await _launchUrl(url, context);
-        },
-      );
-      debugPrint(authData.toString());
-      dynamic authData2 = await json.decode(authData.toString());
+    if (alreadyClick == 0) {
+      alreadyClick = 1;
+      try {
+        PocketBaseConnector().logOut();
+        _pocketBase.authStore.clear();
+        final authData = await _pocketBase.collection('users').authWithOAuth2(
+          'google',
+          (url) async {
+            await _launchUrl(url, context);
+          },
+        );
+        debugPrint(authData.toString());
+        dynamic authData2 = await json.decode(authData.toString());
 
-      if (_pocketBase.authStore.isValid) {
-        if (DateTime.parse(authData2['record']['created']) >= DateTime.now().subtract(const Duration(minutes: 1))) {
-          var data = authData2['meta']['rawUser'];
-          try {
-            /*var imageId = await ImageDownloader.downloadImage(data['picture']);
+        if (_pocketBase.authStore.isValid) {
+          if (DateTime.parse(authData2['record']['created']) >= DateTime.now().subtract(const Duration(minutes: 1))) {
+            var data = authData2['meta']['rawUser'];
+            try {
+              /*var imageId = await ImageDownloader.downloadImage(data['picture']);
         if (imageId == null) {
           return;
         }
         var fileName = await ImageDownloader.findName(imageId);
         var path = await ImageDownloader.findPath(imageId);*/
-            var body = <String, dynamic>{
-              "email": data['email'],
-              "username": data['name'],
-              "birthday": DateTime.now().toString(),
-              "gender": "other",
-              "role": "user",
-              "emailVisibility": true,
-            };
+              var body = <String, dynamic>{
+                "email": data['email'],
+                "username": data['name'],
+                "birthday": DateTime.now().toIso8601String(),
+                "gender": "other",
+                "role": "user",
+                "emailVisibility": true,
+              };
 
-            // Upload the image of the user
-            await _pocketBase.collection('users').update(
-                  authData2['record']['id'],
-                  body: body,
-                );
-            _pocketBase.realtime.unsubscribe('users');
-            await sendVerification(data['email']);
-          } catch (e) {
-            debugPrint(e.toString());
-            showMessage("Un erreur est survenue.", context);
+              // Upload the image of the user
+              await _pocketBase.collection('users').update(
+                    authData2['record']['id'],
+                    body: body,
+                  );
+              _pocketBase.realtime.unsubscribe('users');
+              await sendVerification(data['email']);
+            } catch (e) {
+              debugPrint(e.toString());
+              showMessage("Un erreur est survenue.", context);
+            }
+          } else {
+            debugPrint('User already exists');
           }
+          print(authData2);
+          _connectedUser.add(await findUser(authData2['meta']['rawUser']['email'].toString().toLowerCase()));
+
+          _pocketBase.realtime.unsubscribe('users');
         } else {
-          debugPrint('User already exists');
+          debugPrint('User isn\'t connected');
+          showMessage(AppLocalizations.of(context)!.userLoginFailed, context);
         }
-        _connectedUser.add(await findUser(authData2['meta']['rawUser']['email'].toString().toLowerCase()));
-        _pocketBase.realtime.unsubscribe('users');
-      } else {
-        debugPrint('User isn\'t connected');
-        showMessage('Une erreur est survenue', context);
+      } catch (e) {
+        showMessage(AppLocalizations.of(context)!.errorOccurred, context);
+        debugPrint(e.toString());
       }
-    } catch (e) {
-      showMessage(e.toString(), context);
-      debugPrint(e.toString());
+      await closeCustomTabs();
+      pushOrGo(context, '/profile');
+      alreadyClick = 0;
+    } else {
+      showMessage(AppLocalizations.of(context)!.pleaseWait, context);
     }
-    await closeCustomTabs();
   }
 
   // Login the user with email and password
@@ -167,11 +201,12 @@ class PocketBaseConnector {
 
       _connectedUser.add(await findUser(email.toLowerCase()));
 
-      showMessage("Vous êtes connecté(e).", context);
+      showMessage(AppLocalizations.of(context)!.userLoginSuccess, context);
 
       return _connectedUser.value;
-    } catch (err, context) {
-      showMessage(err.toString(), context);
+    } catch (err) {
+      showMessage(AppLocalizations.of(context)!.errorOccurred, context);
+      debugPrint(err.toString());
       return null;
     }
   }
@@ -190,6 +225,8 @@ class PocketBaseConnector {
   void logOut() {
     _pocketBase.authStore.clear();
     _connectedUser.add(null);
+    LocalStorage().deleteToken();
+    LocalStorage().deleteOwnedSubSerie();
   }
 
   // Reset Password
@@ -197,13 +234,12 @@ class PocketBaseConnector {
     try {
       await _pocketBase.collection('users').requestPasswordReset(email);
       Navigator.pop(context);
-      return showMessage(
-          'Un lien vous as été envoyé par mail pour la réinitialisation de votre mots de passe, veuillez verifier vos spams.', context);
+      return showMessage(AppLocalizations.of(context)!.emailResetSent, context);
     } catch (e) {
       if (e.toString().contains('Must be a valid email address')) {
-        return showMessage('Veuillez entrer une adresse email valide.', context);
+        return showMessage(AppLocalizations.of(context)!.invalidEmail, context);
       } else {
-        return showMessage('Une erreur est arrivé.', context);
+        return showMessage(AppLocalizations.of(context)!.errorOccurred, context);
       }
     }
   }
@@ -214,13 +250,13 @@ class PocketBaseConnector {
       _pocketBase.authStore.clear();
       loginWithEmail(email, oldPassword, context);
       await _pocketBase.collection('users').confirmPasswordReset(_pocketBase.authStore.token, newPassword, newPassword);
-      return showMessage('Votre mots de passe a bien été modifié.', context);
+      return showMessage(AppLocalizations.of(context)!.modifyPasswordSuccess, context);
     } catch (e) {
-      print(e);
+      debugPrint(e.toString());
       if (e.toString().contains('Must be a valid email address')) {
-        return showMessage('Veuillez entrer une adresse email valide.', context);
+        return showMessage(AppLocalizations.of(context)!.invalidEmail, context);
       } else {
-        return showMessage('Une erreur est arrivé.', context);
+        return showMessage(AppLocalizations.of(context)!.errorOccurred, context);
       }
     }
   }
@@ -255,12 +291,12 @@ class PocketBaseConnector {
       "role": "user"
     };
 
-    return _pocketBase
+    final id = await _pocketBase
         .collection('users')
         .create(body: body)
         .catchError((e) {
-          print(e);
-          showMessage('Une erreur est arrivé $e', context);
+          debugPrint(e);
+          showMessage(AppLocalizations.of(context)!.errorOccurred, context);
           return e;
         })
         .then((value) => value.id)
@@ -268,6 +304,10 @@ class PocketBaseConnector {
           await sendVerification(email);
           return id;
         });
+
+    await PocketBaseConnector().loginWithEmail(email, password, context);
+
+    return id;
   }
 
   sendVerification(String email) {
@@ -282,12 +322,20 @@ class PocketBaseConnector {
   Future<User?> findUser(String email) async {
     assert(email.isNotEmpty);
     debugPrint('Finding user with email $email');
-    var value2 = await _pocketBase.collection('users').getFirstListItem('email="$email"');
-    print(value2.data);
     debugPrint('User found with email $email');
     return _pocketBase.collection('users').getFirstListItem('email="$email"').then(
-          (value) => User.fromJSON(value.id, value.collectionId, value.data, value.created, value.updated, value.data['birthday']),
+      (value) {
+        debugPrint('User found with email $email and data retrieved and parsed.');
+        return User.fromJSON(
+          value.id,
+          value.collectionId,
+          value.data,
+          value.data["created"],
+          value.data["updated"],
+          value.data["birthday"],
         );
+      },
+    );
   }
 
   // Update the avatar of the user
@@ -299,8 +347,9 @@ class PocketBaseConnector {
         filename: fileName,
       )
     ]).catchError((e) {
-      print(e.toString());
-      showMessage('Une erreur est arrivé', context);
+      debugPrint(e.toString());
+      showMessage(AppLocalizations.of(context)!.errorOccurred, context);
+      return e;
     });
   }
 
@@ -343,6 +392,13 @@ class PocketBaseConnector {
         );
   }
 
+  Future<List<RecordModel>> getCollectionFullListOrderExpanded(String collectionId, String order, String expand) {
+    return _pocketBase.collection(collectionId).getFullList(
+          sort: order,
+          expand: expand,
+        );
+  }
+
   // Get the data from a collection with a filter
   Future<List<RecordModel>> getCollectionDataWithFilter(String collectionId, String query) {
     return _pocketBase
@@ -353,6 +409,15 @@ class PocketBaseConnector {
           filter: query,
         )
         .then((value) => value.items);
+  }
+
+  Future<List<RecordModel>> getCollectionFullDataWithFilter(String collectionId, String query) {
+    return _pocketBase
+        .collection(collectionId)
+        .getFullList(
+          filter: query,
+        )
+        .then((value) => value);
   }
 
   Future<List<RecordModel>> getCollectionDataWithFilterExpand(String collectionId, String query, String expand) {
@@ -367,6 +432,16 @@ class PocketBaseConnector {
         .then((value) => value.items);
   }
 
+  Future<List<RecordModel>> getCollectionFullDataWithFilterExpand(String collectionId, String query, String expand) {
+    return _pocketBase
+        .collection(collectionId)
+        .getFullList(
+          filter: query,
+          expand: expand,
+        )
+        .then((value) => value);
+  }
+
   // Get the data from a collection and listen to the changes
   Stream<List<RecordModel>> getCollectionDataListener(String collectionId) {
     PublishSubject<List<RecordModel>> subject = PublishSubject<List<RecordModel>>();
@@ -376,13 +451,39 @@ class PocketBaseConnector {
     });
 
     subject.onCancel = () {
-      print('on cancel');
+      debugPrint('on cancel');
       subscription.cancel();
     };
     subject.onListen = () async => subject.add(
           await getCollectionData(collectionId),
         );
     return subject.stream;
+  }
+
+  Future<int> getNewRegisterLast24h() {
+    return http.get(Uri.parse('https://api.mymangatheque.com/newRegisterLast24h')).then((response) {
+      if (response.statusCode == 200) {
+        return int.parse(json.decode(response.body)["count"].toString());
+      } else {
+        throw Exception('Failed to load new register');
+      }
+    }).catchError((e) {
+      debugPrint(e.toString());
+      return 0; // Return 0 if an error occurs
+    });
+  }
+
+  Future<String> getNewRegisterLastMonth() {
+    return http.get(Uri.parse('https://api.mymangatheque.com/newRegisterLastMonth')).then((response) {
+      if (response.statusCode == 200) {
+        return response.body;
+      } else {
+        throw Exception('Failed to load new register');
+      }
+    }).catchError((e) {
+      debugPrint(e.toString());
+      return "";
+    });
   }
 
   Future<int> getNumberOwnedManga(String id) async {
@@ -397,7 +498,7 @@ class PocketBaseConnector {
       // Get the number of manga owned by the user
       count = result.length;
     } catch (e) {
-      print(e);
+      debugPrint(e.toString());
     }
 
     return count; // Return the number of manga owned by the user
@@ -414,7 +515,7 @@ class PocketBaseConnector {
       // Get the number of manga fav by the user
       count = result.length;
     } catch (e) {
-      print(e);
+      debugPrint(e.toString());
     }
 
     return count; // Return the number of manga fav by the user
@@ -557,9 +658,13 @@ class PocketBaseConnector {
     return PackageInfo.fromPlatform().then((value) => value.version).toString();
   }
 
+  PocketBase connector() {
+    return _pocketBase;
+  }
+
   Future<String> get appVersion async => await PackageInfo.fromPlatform().then((value) => value.version);
 
   Future<String> get buildVersion async => await PackageInfo.fromPlatform().then((value) => value.buildNumber);
 
-  String get serverUrl => _pocketBase.baseUrl;
+  String get serverUrl => _pocketBase.baseURL;
 }

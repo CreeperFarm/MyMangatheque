@@ -1,0 +1,518 @@
+{
+  "@@locale": "fr",
+  "english": "Anglais",
+  "french": "Français",
+  "spanish": "Espagnol",
+  "italian": "Italien",
+  "german": "Allemand",
+  "japanese": "Japonais",
+  "helloWorld": "Bonjour le monde !",
+  "home": "Accueil",
+  "collection": "Collection",
+  "search": "Recherche",
+  "profile": "Profil",
+  "pronoun": "{gender, select, male{il} female{elle} other{iel}}",
+  "@pronoun": {
+    "description": "Un message genré",
+    "placeholders": {
+      "gender": {
+        "type": "String"
+      }
+    }
+  },
+  "alphabeticalOrder": "Ordre alphabétique",
+  "lastRelease": "Dernière sortie",
+  "completeLibrary": "Compléter",
+  "desiredLibrary": "Envies",
+  "readPile": "Pile à lire",
+  "favorite": "Favori",
+  "discover": "Découvrir",
+  "dataUndercase": "des données",
+  "authFailed": "Email ou mot de passe incorrect.",
+  "passwordTooShort": "Le mot de passe doit comporter au moins 6 caractères.",
+  "userLoginFailed": "Une erreur est survenue, vous n\\'avez pas été connecter à votre compte.",
+  "userLoginSuccess": "Vous êtes connecté avec succès.",
+  "errorOccurred": "Une erreur est survenue, veuillez réessayer plus tard.",
+  "errorInitializing": "Une erreur s'est produite lors de l'initialisation {object}.",
+  "@errorInitializing": {
+    "description": "Un message d'erreur indiquant qu'une erreur s'est produite lors de l'initialisation d'un objet",
+    "placeholders": {
+      "object": {
+        "type": "String"
+      }
+    }
+  },
+  "pleaseWait": "Veuillez patienter...",
+  "emailResetSent": "Un email de réinitialisation de mot de passe a été envoyé à votre adresse email.",
+  "invalidEmail": "L'adresse email est invalide.",
+  "modifyPasswordSuccess": "Mot de passe modifié avec succès.",
+  "logIn": "Se connecter",
+  "logInWithGoogle": "Se connecter avec Google",
+  "logInWithApple": "Se connecter avec Apple",
+  "logInSuccess": "Vous êtes connecté avec succès.",
+  "logInFailed": "Une erreur est survenue, vous n'avez pas été connecté à votre compte.",
+  "logOut": "Se déconnecter",
+  "logOutSuccess": "Vous êtes déconnecté avec succès.",
+  "logOutFailed": "Une erreur est survenue, vous n'avez pas été déconnecté.",
+  "minLengthNotReached": "Le nombre minimum de caractères requis est {minLength}.",
+  "@minLengthNotReached": {
+    "description": "Un message d'erreur indiquant que la longueur minimale n'a pas été atteinte",
+    "placeholders": {
+      "minLength": {
+        "type": "num",
+        "format": "compact"
+      }
+    }
+  },
+  "maxLengthExceeded": "Le nombre maximum de caractères autorisés est {maxLength}.",
+  "@maxLengthExceeded": {
+    "description": "Un message d'erreur indiquant que la longueur maximale a été dépassée",
+    "placeholders": {
+      "maxLength": {
+        "type": "num",
+        "format": "compact"
+      }
+    }
+  },
+  "legalNotice": "Mentions légales",
+  "january": "Janvier",
+  "february": "Février",
+  "march": "Mars",
+  "april": "Avril",
+  "may": "Mai",
+  "june": "Juin",
+  "july": "Juillet",
+  "august": "Août",
+  "september": "Septembre",
+  "october": "Octobre",
+  "november": "Novembre",
+  "december": "Décembre",
+  "profileSettings": "Page de profil et réglages",
+  "emailIs": "Votre email est {email}",
+  "@emailIs": {
+    "description": "Un message qui inclut l'email de l'utilisateur",
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "usernameIs": "Votre pseudo est {username}",
+  "@usernameIs": {
+    "description": "Un message qui inclut le pseudo de l'utilisateur",
+    "placeholders": {
+      "username": {
+        "type": "String"
+      }
+    }
+  },
+  "accountCreatedOn": "Compte créé le {date}",
+  "@accountCreatedOn": {
+    "description": "Un message qui inclut la date de création du compte",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "birthdayDateIs": "Votre anniversaire est le {date}",
+  "@birthdayDateIs": {
+    "description": "Un message qui inclut la date d'anniversaire de l'utilisateur",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "volumeOwnedNumber": "{count, plural, =0 {Vous possédez 0 volume} =1{Vous possédez un volume} other {Vous possédez {count} volumes}}",
+  "@volumeOwnedNumber": {
+    "description": "Un message qui indique le nombre de volumes possédés par l'utilisateur",
+    "placeholders": {
+      "count": {
+        "type": "num",
+        "format": "compact"
+      }
+    }
+  },
+  "favoriteSeriesNumber": "{count, plural, =0 {Vous avez 0 série} =1{Vous avez une série} other {Vous avez {count} séries}} en favoris",
+  "@favoriteSeriesNumber": {
+    "description": "Un message qui indique le nombre de séries favorites de l'utilisateur",
+    "placeholders": {
+      "count": {
+        "type": "num",
+        "format": "compact"
+      }
+    }
+  },
+  "lightMode": "Thème clair",
+  "darkMode": "Thème sombre",
+  "systemMode": "Thème du système",
+  "clearCache": "Vider le cache",
+  "clearCacheSuccess": "Cache vidé avec succès.",
+  "modifyPassword": "Modifier le mot de passe",
+  "dangerZone": "Zone de danger",
+  "deleteAccount": "Supprimer le compte",
+  "deleteAccountConfirmation": "Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.",
+  "deleteAccountSuccess": "Compte supprimé avec succès.",
+  "deleteAccountFailed": "Une erreur est survenue, votre compte n'a pas été supprimé, vous avez été déconnecté.",
+  "appVersionAndAppBuildVersion": "Version de l'application : {appVersion} & version du build : {buildVersion}",
+  "@appVersionAndAppBuildVersion": {
+    "description": "Un message qui affiche la version de l'application et la version du build",
+    "placeholders": {
+      "appVersion": {
+        "type": "String"
+      },
+      "buildVersion": {
+        "type": "String"
+      }
+    }
+  },
+  "volumeNum": "Tome {count}",
+  "@volumeNum": {
+    "description": "Un message qui affiche le numéro du volume",
+    "placeholders": {
+      "count": {
+        "type": "num",
+        "format": "compact"
+      }
+    }
+  },
+  "owned": "Possédé",
+  "volume": "Tome",
+  "series": "Série",
+  "edition": "Édition",
+  "author": "Auteur",
+  "publisher": "Éditeur",
+  "publicationDate": "Date de publication",
+  "isbn": "ISBN",
+  "scanner": "Scanner",
+  "scannerDescription": "Scanner les codes-barres des volumes pour les ajouter à votre collection.",
+  "createAuthor": "Créer un auteur",
+  "authorName": "Nom de l'auteur",
+  "provideAuthorName": "Veuillez fournir le nom de l'auteur.",
+  "authorJobs": "Métiers de l'auteur (séparé par des virgules)",
+  "provideAuthorJobs": "Veuillez fournir les métiers de l'auteur (séparés par des virgules).",
+  "seriesIdOfAuthor": "ID de la série de l'auteur",
+  "provideSeriesIdOfAuthor": "Veuillez fournir le(s) ID(s) de la série de l'auteur.",
+  "authorAdd": "Ajouter l'auteur",
+  "authorAddSuccess": "Auteur ajouté avec succès.",
+  "authorDuplicate": "Un auteur avec ce nom existe déjà.",
+  "createGenre": "Créer un genre",
+  "genreName": "Nom du genre",
+  "provideGenreName": "Veuillez fournir le nom du genre.",
+  "genreAdd": "Ajouter le genre",
+  "genreAddSuccess": "Genre ajouté avec succès.",
+  "genreDuplicate": "Un genre avec ce nom existe déjà.",
+  "createVolume": "Créer un volume",
+  "volumeTitle": "Titre du volume",
+  "provideVolumeTitle": "Veuillez fournir le titre du volume.",
+  "volumeNumber": "Numéro du volume",
+  "provideVolumeNumber": "Veuillez fournir le numéro du volume.",
+  "volumeEAN": "EAN du volume",
+  "provideVolumeEAN": "Veuillez fournir l'EAN du volume.",
+  "volumePrice": "Prix du volume",
+  "provideVolumePrice": "Veuillez fournir le prix du volume.",
+  "volumeSummary": "Résumé du volume",
+  "provideVolumeSummary": "Veuillez fournir le résumé du volume.",
+  "volumeLink": "Lien du volume",
+  "provideVolumeLink": "Veuillez fournir le lien du volume.",
+  "volumeInfo": "Informations sur le volume",
+  "provideVolumeInfo": "Veuillez fournir les informations sur le volume.",
+  "adultContent": "Contenu adulte",
+  "adultContentWarning": "Avertissement de contenu adulte",
+  "volumeLanguage": "Langue du volume",
+  "chooseVolumeLanguage": "Veuillez sélectionner la langue du volume.",
+  "manga": "Manga",
+  "novel": "Roman",
+  "artbook": "Artbook",
+  "lightNovel": "Light Novel",
+  "boxSet": "Coffret",
+  "other": "Autre",
+  "supportIs": "{support, select, manga{Manga} novel{Roman} artbook{Artbook} lightNovel{Light Novel} boxSet{Coffret} other{Other}}",
+  "@supportIs": {
+    "description": "Un message qui affiche le type de support du volume",
+    "placeholders": {
+      "support": {
+        "type": "String"
+      }
+    }
+  },
+  "volumeSupport": "Support du volume",
+  "chooseVolumeSupport": "Veuillez sélectionner le support du volume.",
+  "selectDate": "Sélectionner la date",
+  "pleaseSelectDate": "Veuillez sélectionner une date.",
+  "volumeSeriesId": "ID de la série du volume",
+  "provideVolumeSeriesId": "Veuillez fournir l'ID de la série du volume.",
+  "provideValidVolumeSeriesId": "Veuillez fournir un ID de série de volume valide.",
+  "volumeSubSeriesId": "ID de la sous-série du volume",
+  "provideVolumeSubSeriesId": "Veuillez fournir l'ID de la sous-série du volume.",
+  "provideValidVolumeSubSeriesId": "Veuillez fournir un ID de sous-série de volume valide.",
+  "volumeEditorId": "ID de l'éditeur du volume",
+  "provideVolumeEditorId": "Veuillez fournir l'ID de l'éditeur du volume",
+  "provideValidVolumeEditorId": "Veuillez fournir un ID d'éditeur de volume valide.",
+  "volumeAuthorsIds": "IDs des auteurs du volume",
+  "provideVolumeAuthorsIds": "Veuillez fournir les IDs des auteurs du volume.",
+  "contentOfBoxSet": "Contenu du coffret",
+  "provideContentOfBoxSet": "Veuillez fournir le contenu du coffret.",
+  "volumeAdd": "Ajouter un volume",
+  "volumeAddSuccess": "Volume ajouté avec succès.",
+  "volumeAddError": "Une erreur est survenue, le volume n'a pas été ajouté.",
+  "subSeries": "Sous-séries",
+  "editor": "Éditeur",
+  "genre": "Genre",
+  "adminHomePage": "Page d'accueil de l'administrateur",
+  "adminHomePageDescription": "Bienvenue sur la page d'accueil de l'administrateur. Ici, vous pouvez gérer les auteurs, les genres, les volumes et plus encore.",
+  "adminLoginPage": "Page de connexion administrateur",
+  "yourEmail": "Votre email",
+  "provideYourEmail": "Veuillez entrer votre email.",
+  "yourPassword": "Votre mot de passe",
+  "provideYourPassword": "Veuillez entrer votre mot de passe.",
+  "adminLoginSuccess": "Vous êtes connecté en tant qu'administrateur avec succès.",
+  "passwordForgot": "Mot de passe oublié ?",
+  "passwordReset": "Réinitialisation du mot de passe",
+  "enterEmailForSendingEmailReset": "Entrez votre email pour recevoir un lien pour réinitialiser votre mot de passe.",
+  "accountEmail": "Email du compte",
+  "provideAccountEmail": "Veuillez fournir l'email du compte.",
+  "provideValidAccountEmail": "Veuillez fournir un email de compte valide.",
+  "oldPassword": "Ancien mot de passe",
+  "provideOldPassword": "Veuillez fournir votre ancien mot de passe.",
+  "newPassword": "Nouveau mot de passe",
+  "provideNewPassword": "Veuillez fournir votre nouveau mot de passe.",
+  "confirmPassword": "Confirmer le mot de passe",
+  "confirmNewPassword": "Confirmer le nouveau mot de passe",
+  "provideConfirmNewPassword": "Veuillez confirmer votre nouveau mot de passe.",
+  "passwordsDoNotMatch": "Les mots de passe ne correspondent pas.",
+  "signInPage": "Page de connexion",
+  "signIn": "Se connecter",
+  "signUpPage": "Page d'inscription",
+  "signUp": "Créer un compte",
+  "whyLogInDescription": "Connectez-vous pour pouvoir sauvegarder vos mangas favoris et dans votre collection et vous éviter les doublons.",
+  "whySignUpDescription": "Inscrivez-vous pour pouvoir sauvegarder vos mangas favoris et dans votre collection et vous éviter les doublons.",
+  "orContinueWith": "Ou continuez avec",
+  "createAccount": "Créer un compte",
+  "noAccountYet": "Vous n'avez pas encore de compte ?",
+  "alreadyHaveAnAccount": "Vous avez déjà un compte ?",
+  "passwordMinLength": "Le mot de passe doit comporter au moins 8 caractères.",
+  "usernameMinLength": "Le pseudo doit comporter au moins 3 caractères.",
+  "username": "Pseudo",
+  "provideUsername": "Veuillez entrer un pseudo.",
+  "pleaseConfirmPassword": "Veuillez confirmer votre mot de passe.",
+  "confirmYourPassword": "Confirmer votre mot de passe",
+  "yourBirthday": "Votre anniversaire",
+  "provideYourBirthday": "Veuillez fournir votre date d'anniversaire.",
+  "yourGender": "Votre genre",
+  "provideYourGender": "Veuillez fournir votre genre.",
+  "male": "Homme",
+  "female": "Femme",
+  "loading": "Chargement...",
+  "loadingData": "Chargement des données...",
+  "noConnection": "Aucune connexion Internet",
+  "jobsName": "{job, select, writerMen{Écrivain} writerWomen{Écrivaine} artistMen{Dessinateur} artistWomen{Dessinatrice} editorMen{Éditeur} editorWomen{Éditrice} illustratorMen{Illustrateur} illustratorWomen{Illustratrice} scriptwriterMen{Scénariste} scriptwriterWomen{Scénariste} authorMen{Auteur} authorWomen{Auteure} mangakaMen{Mangaka} mangakaWomen{Mangaka} charaDesignMen{Chara Design} charaDesignWomen{Chara Design} other{Other}}",
+  "@jobsName": {
+    "description": "Un message qui affiche le nom du métier de l'auteur",
+    "placeholders": {
+      "job": {
+        "type": "String"
+      }
+    }
+  },
+  "seriesCount": "{count, plural, =0 {Série} =1{Série} other {Séries}}",
+  "@seriesCount": {
+    "description": "Un message qui affiche le nombre de séries",
+    "placeholders": {
+      "count": {
+        "type": "num",
+        "format": "compact"
+      }
+    }
+  },
+  "authorDoesNotExist": "L'auteur n'existe pas.",
+  "seriesDoesNotExist": "La série n'existe pas.",
+  "subSeriesDoesNotExist": "La sous-série n'existe pas.",
+  "volumeDoesNotExist": "Le tome n'existe pas.",
+  "editorDoesNotExist": "L'éditeur n'existe pas.",
+  "genres": "Genres",
+  "editors": "Éditeurs",
+  "authors": "Auteurs",
+  "volumes": "Tomes",
+  "follow": "Suivre",
+  "followed": "Suivi",
+  "add": "Ajouter",
+  "remove": "Retirer",
+  "read": "Lire",
+  "readed": "Lu",
+  "summary": "Résumé",
+  "seeMore": "Voir plus",
+  "seeLess": "Voir moins",
+  "volumeNotAvailableAnymore": "Malheureusement, ce volume n'est plus disponible.",
+  "volumeNotAvailableForSale": "Malheureusement, ce volume n'est pas disponible à la vente.",
+  "price": "Prix",
+  "availability": "{availability, select, inStock{En Stock} available{Disponible} unavailable{Indisponible} onPreorder{En Précommande} other{{availability}}}",
+  "@availability": {
+    "description": "Un message qui affiche la disponibilité du volume",
+    "placeholders": {
+      "availability": {
+        "type": "String"
+      }
+    }
+  },
+  "shippingUnderDays": "Expédition sous {days} jours",
+  "@shippingUnderDays": {
+    "description": "Un message qui affiche le délai d'expédition",
+    "placeholders": {
+      "days": {
+        "type": "num",
+        "format": "compact"
+      }
+    }
+  },
+  "shippingUnderWeeks": "Expédition sous {count, select, 0{0 semaine} 1{1 semaine} other{{count} semaines}}",
+  "@shippingUnderWeeks": {
+    "description": "Un message qui affiche le délai d'expédition en semaines",
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "soldAndShippedBy": "Vendu et expédié par {seller}",
+  "@soldAndShippedBy": {
+    "description": "Un message qui affiche le vendeur et l'expéditeur du volume",
+    "placeholders": {
+      "seller": {
+        "type": "String"
+      }
+    }
+  },
+  "buyOn": "Acheter sur {store}",
+  "@buyOn": {
+    "description": "Un message qui affiche le nom du magasin où acheter le volume",
+    "placeholders": {
+      "store": {
+        "type": "String"
+      }
+    }
+  },
+  "informations": "Informations",
+  "ean": "EAN",
+  "numberOfPages": "Nombre de pages",
+  "volumeOwnedOverX": "{owned, plural, =0 {0 tome possédé} =1{1 tome possédé} other {{owned} tomes possédés}} sur {total, plural, =0 {0 tome} =1{1 tome} other {{total} tomes}}",
+  "@volumeOwnedOverX": {
+    "description": "Un message qui affiche le nombre de tomes possédés sur le nombre total de tomes",
+    "placeholders": {
+      "owned": {
+        "type": "num",
+        "format": "compact"
+      },
+      "total": {
+        "type": "num",
+        "format": "compact"
+      }
+    }
+  },
+  "volumeReadedOverX": "{readed, plural, =0 {0 tome lu} =1{1 tome lu} other {{readed} tomes lus}} sur {total, plural, =0 {0 tome possédé} =1{1 tome possédé} other {{total} tomes possédés}}.",
+  "@volumeReadedOverX": {
+    "description": "Un message qui affiche le nombre de tomes lus sur le nombre total de tomes possédés",
+    "placeholders": {
+      "readed": {
+        "type": "num",
+        "format": "compact"
+      },
+      "total": {
+        "type": "num",
+        "format": "compact"
+      }
+    }
+  },
+  "volumeReadedOverSeriesX": "{readed, plural, =0 {0 tome lu} =1{1 tome lu} other {{readed} tomes lus}} sur {total, plural, =0 {0 tome} =1{1 tome} other {{total} tomes}}.",
+  "@volumeReadedOverSeriesX": {
+    "description": "Un message qui affiche le nombre de tomes lus sur le nombre total de tomes de la série",
+    "placeholders": {
+      "readed": {
+        "type": "num",
+        "format": "compact"
+      },
+      "total": {
+        "type": "num",
+        "format": "compact"
+      }
+    }
+  },
+  "zeroVolumesOwned": "Vous ne possédez aucun tome.",
+  "allVolumesReaded": "Vous avez lu tous les tomes possédés.",
+  "preamble": "Préambule",
+  "preambleLane1": "Les informations et recommandations ( « Informations » ) disponibles sur ce site web ( ou aussi « le Site » ) vous sont proposées en toute bonne foi. Ces informations sont censées être correctes au moment où vous en prenez connaissance. Toutefois, MyMangatheque ou ses filiales et entités affiliées ne sont pas garantes du caractère exhaustif et de l'exactitude des Informations. Vous assumez pleinement les risques liés au crédit que vous leur accordez.",
+  "preambleLane2": "Les Informations vous sont fournies à la condition que vous, ou toute autre personne les récent, puissiez déterminer leur intérêt pour un objectif précis avant de les utiliser. En aucun cas, MyMangatheque ou ses filiales et entités affiliées ne seront responsables des dommages susceptibles de résultée du crédit accordé à ces informations, de leur utilisation ou de l'utilisation d'un produit auquel elles font référence.",
+  "preambleLane3": "Les Informations ne doivent pas être considérées comme des recommandations pour l'utilisation d'informations, de produits, de procédures, d'équipements ou de formulations qui seraient en contradiction avec un brevet, un copyright ou une marque déposée.",
+  "preambleLane4": "MyMangatheque ou ses filiales et entités affiliées déclineraient toute responsabilité si l'utilisation des Informations venait de contrevenir à un brevet, une marque déposée ou plus généralement un droit de propriété intellectuelle quelconque.",
+  "preambleLane5": "Aucune garantit, expresse ou implicite, n'est donnée quant à la nature marchande des informations fournies, ni quant à leur adéquation à une finalité déterminée, ainsi qu'en ce qui concerne les produits auxquels il est fait référence dans ces informations.",
+  "preambleLane6": "En aucun cas, MyMangatheque ou ses filiales et entités affiliées ne s'engagent à mettre à jour ou à corriger les Informations qui seront diffusées par elles sur Internet ou sur leurs serveurs web. De même, MyMangatheque ou ses filiales et entités affiliées se réservent le droit de modifier ou de corriger le contenu de leurs sites à tout moment et sans préavis.",
+  "intellectualProperty": "Propriété intellectuelle",
+  "authorRights": "Droits d'auteur",
+  "authorRightsLane1": "MyMangatheque et son contenu (textes, images, vidéos, etc.) sont protégés par les lois sur la propriété intellectuelle en vigueur en France. Toute reproduction, représentation, modification, publication, adaptation de tout ou partie des éléments du site, quel que soit le moyen ou le procédé utilisé, est interdite, sauf autorisation écrite préalable ou à titre personnel comme challenge de code mais sans publication.",
+  "thirdPartyContent": "Contenu tiers",
+  "thirdPartyContentLane1": "Les contenus tiers utilisés sur le site MyMangatheque appartiennent à leurs auteurs respectifs.",
+  "personalData": "Données personnelles",
+  "userContent": "Contenu utilisateur",
+  "userContentLane1": "L’Utilisateur est seul responsable du Contenu Utilisateur qu’il met en ligne via le Service, ainsi que des textes et/ou opinions qu’il formule. L'Utilisateur cède expressément et gracieusement à MyMangatheque tout droits de propriété intellectuelle y afférant et notamment le droit de reproduction, de représentation et d'adaptation, pour la durée légale de protection des droits d'auteur. Il s’engage notamment à ce que ces données ne soient pas de nature à porter atteinte aux intérêts légitimes de tiers quels qu’ils soient. À ce titre, il garantit MyMangatheque contre tout recours, fondés directement ou indirectement sur ces propos et/ou données, susceptibles d’être intentés par quiconque à l’encontre de MyMangatheque. Il s’engage en particulier à prendre en charge le paiement des sommes, quelles qu’elles soient, résultant du recours d'un tiers à l'encontre de MyMangatheque, y compris les honoraires d’avocat et frais de justice.",
+  "userContentLane2": "MyMangatheque se réserve le droit de supprimer tout ou partie du Contenu Utilisateur, à tout moment et pour quelque raison que ce soit, sans avertissement ou justification préalable. L'Utilisateur ne pourra faire valoir aucune réclamation à ce titre.",
+  "userContentLane3": "MyMangatheque collecte et traite des données personnelles dans le respect de la réglementation en vigueur, notamment du Règlement Général sur la Protection des Données (RGPD).",
+  "protectionOfPersonalData": "Protection des données personnelles",
+  "protectionOfPersonalDataLane1": "Vos données personnelles sont uniquement destinées à MyMangatheque. Elles ne seront en aucun cas communiquées à des tiers. Au regard des règles de protection des données personnelles (article 34 de Loi « Informatiques et Libertés » du 6 Janvier 1978, directives 95/46 et 97/66), vous disposez d'un droit d'accès, de rectification et de suppression des données qui vous concernent. Pour l'exercer, pour vous opposer à la réception de tout message commercial ou pour toute rectification, adressez-vous par mail, présent dans la rubrique contact.",
+  "cookieUsage": "Utilisation des cookies",
+  "cookieUsageLane1": "L'utilisateur est informé, qu’à l’occasion d’une visite sur le Site, un cookie peut s'installer automatiquement sur son logiciel de navigation. Un cookie consiste en un bloc de données qui ne permet pas d'identifier l'utilisateur mais permet d’enregistrer des informations relatives à la navigation de celui-ci sur le Site afin de procéder à des analyses de fréquentation du Site, le tout pour améliorer la qualité du Site.",
+  "cookieUsageLane2": "L'utilisateur dispose d'un droit d'accès, de rectification ou de suppression des données personnelles communiquées par le biais d’un cookie dans les conditions indiquées ci-dessus.",
+  "externalLinks": "Liens externes",
+  "externalLinksLane1": "Le site web MyMangatheque peut contenir des liens vers des sites externes. Nous déclinons toute responsabilité quant au contenu et aux pratiques de confidentialité de ces sites. Ces liens sont proposés aux utilisateurs du Site ou des sites web de ses filiales et entités affiliées en tant que service. La décision d'activer les liens appartient exclusivement aux utilisateurs.",
+  "contactRightsAndUpdateDate": "Contact, Droit et Date de Mise à Jour",
+  "contact": "Contact",
+  "contactLane1": "Pour toute question ou réclamation, veuillez nous contacter à l'une des adresses mail suivante : mymangatheque@gmail.com ou contact@mymangatheque.com .",
+  "applicableLawAndCompetentJurisdiction": "Droit applicable et Juridiction compétente",
+  "applicableLawAndCompetentJurisdictionLane1": "Les présentes mentions légales sont soumises au droit français. En cas de litige, les tribunaux français seront seuls compétents.",
+  "lastUpdateDate": "Date de dernière mise à jour",
+  "scanEAN": "Scan EAN",
+  "openScan": "Ouvrir le scan",
+  "buildAppVersionImpossibleToRetreive": "Impossible de récupérer la version de l'application et la version du build.",
+  "allVolumesOwned": "Vous possedez tous les tomes de volumes. Vous les possédez tous 👏.",
+  "unknownError": "Une erreur inconnue s'est produite.",
+  "errorOccurredMessage": "Une erreur s'est produite : {message}",
+  "@errorOccurredMessage": {
+    "description": "Un message d'erreur indiquant qu'une erreur s'est produite",
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "error404": "Erreur 404",
+  "pageNotFound": "Page non trouvée",
+  "goHome": "Aller à l'accueil",
+  "allVolumesReadedSubSeries": "Vous avez lu tous les tomes de cette sous-série 👏.",
+  "noVolumeOwned": "Vous ne possédez aucun tome dans votre collection, vous pouvez en ajouter via la page de recherche ou en scannant les codes barres des tomes que vous possédez.",
+  "noFollowedSubSerie": "Vous ne suivez aucune sous-série, vous pouvez en suivre via la page de recherche.",
+  "subSerieVolumeNumber": "Total de {count, plural, =0 {0 tome} =1{1 tome} other {{count} tomes}}",
+  "@subSerieVolumeNumber": {
+    "description": "Un message qui affiche le nombre de tomes dans une sous-série",
+    "placeholders": {
+      "count": {
+        "type": "num",
+        "format": "compact"
+      }
+    }
+  },
+  "subSerieFromAuthor": "{author, select, error{} other{De {author}}}",
+  "@subSerieFromAuthor": {
+    "description": "Un message qui affiche le nom de l'auteur de la sous-série",
+    "placeholders": {
+      "author": {
+        "type": "String"
+      }
+    }
+  },
+  "areYouSureDeleteAccount": "Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible et entraînera la suppression de toutes vos données, y compris votre collection, vos séries suivies et vos informations de profil.",
+  "cancel": "Annuler",
+  "confirm": "Confirmer",
+  "ok": "OK",
+  "accountHaveBeenDeleted": "Votre compte a été supprimé avec succès.",
+  "errorDeleteAccount": "Une erreur est survenue lors de la suppression de votre compte. Veuillez réessayer plus tard."
+}

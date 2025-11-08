@@ -6,10 +6,6 @@
 		<true/>
 		<key>CFBundleDevelopmentRegion</key>
 		<string>$(DEVELOPMENT_LANGUAGE)</string>
-		<key>CFBundleLocalizations</key>
-        <array>
-          <string>fr</string>
-        </array>
 		<key>CFBundleDisplayName</key>
 		<string>MyMangatheque</string>
 		<key>CFBundleExecutable</key>
@@ -18,6 +14,10 @@
 		<string>com.mymangatheque</string>
 		<key>CFBundleInfoDictionaryVersion</key>
 		<string>6.0</string>
+		<key>CFBundleLocalizations</key>
+		<array>
+			<string>fr</string>
+		</array>
 		<key>CFBundleName</key>
 		<string>mymangatheque</string>
 		<key>CFBundlePackageType</key>
@@ -39,21 +39,21 @@
 		</array>
 		<key>CFBundleVersion</key>
 		<string>$(FLUTTER_BUILD_NUMBER)</string>
+		<key>LSApplicationQueriesSchemes</key>
+		<array>
+			<string>https</string>
+			<string>http</string>
+		</array>
 		<key>LSRequiresIPhoneOS</key>
 		<true/>
+		<key>NSAppTransportSecurity</key>
+		<dict/>
 		<key>NSCameraUsageDescription</key>
 		<string>Used for the scan of barcode of the book</string>
-		<key>NSPhotoLibraryUsageDescription</key>
-		<string>Used to get the Profile Picture</string>
 		<key>NSPhotoLibraryAddUsageDescription</key>
 		<string>Used to get the Profile Picture</string>
-		<key>io.flutter.embedded_views_preview</key>
-        <true/>
-		<key>LSApplicationQueriesSchemes</key>
-        <array>
-          <string>https</string>
-          <string>http</string>
-        </array>
+		<key>NSPhotoLibraryUsageDescription</key>
+		<string>Used to get the Profile Picture</string>
 		<key>UIApplicationSupportsIndirectInputEvents</key>
 		<true/>
 		<key>UILaunchStoryboardName</key>
@@ -71,5 +71,7 @@
 			<string>UIInterfaceOrientationPortrait</string>
 			<string>UIInterfaceOrientationPortraitUpsideDown</string>
 		</array>
+		<key>io.flutter.embedded_views_preview</key>
+		<true/>
 	</dict>
 </plist>

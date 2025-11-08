@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:mymangatheque/src/const/own_icon.dart';
+import 'package:mymangatheque/src/function/auto_push_or_go.dart';
 
 class MyEditorShow extends StatelessWidget {
   final Map<String, dynamic> editor;
@@ -16,7 +16,10 @@ class MyEditorShow extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {
-        context.push('${(initRoute == "/") ? "" : initRoute}/editor/${editor['id'].toString()}');
+        pushOrGo(
+          context,
+          '${(initRoute == "/") ? "" : initRoute}/editor/${editor['id'].toString()}',
+        );
       },
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,

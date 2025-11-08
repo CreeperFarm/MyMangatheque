@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:mymangatheque/l10n/app_localizations.dart';
 import 'package:mymangatheque/src/back/services/pocketbase.dart';
 import 'package:mymangatheque/src/front/components/my_button.dart';
 import 'package:mymangatheque/src/front/components/my_scroll_column.dart';
 import 'package:mymangatheque/src/front/components/my_square_tile.dart';
 import 'package:mymangatheque/src/front/components/my_textfield.dart';
+import 'package:mymangatheque/src/function/auto_push_or_go.dart';
 import 'package:mymangatheque/src/function/show_message_function.dart';
 
 class SignInPage extends StatefulWidget {
@@ -51,11 +52,20 @@ class _SignInPageState extends State<SignInPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Get localization - return early if not available
+    var localizations = AppLocalizations.of(context);
+    if (localizations == null) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          //TODO: Mettre AppBar title en français ou supprimer
-          "Sign-In Page",
+          localizations.signInPage,
           style: GoogleFonts.poppins(),
         ),
         elevation: 0.0,
@@ -74,7 +84,7 @@ class _SignInPageState extends State<SignInPage> {
               const SizedBox(height: 15),
 
               Text(
-                "Connectez-vous pour pouvoir sauvegarder vos mangas favoris et dans votre collection et vous éviter les doublons.",
+                localizations.whyLogInDescription,
                 textAlign: TextAlign.center,
                 style: GoogleFonts.poppins(
                   color: Theme.of(context).colorScheme.primary,
@@ -89,9 +99,9 @@ class _SignInPageState extends State<SignInPage> {
                   // Email field
                   MyTextField(
                     controller: emailController,
-                    labelText: "Votre Email",
+                    labelText: localizations.yourEmail,
                     obscureText: false,
-                    errorMessage: "Veuillez enter votre email!",
+                    errorMessage: localizations.provideYourEmail,
                   ),
 
                   const SizedBox(height: 15),
@@ -99,9 +109,9 @@ class _SignInPageState extends State<SignInPage> {
                   // Password field
                   MyTextField(
                     controller: passwordController,
-                    labelText: "Votre Mot de passe",
+                    labelText: localizations.yourPassword,
                     obscureText: true,
-                    errorMessage: "Veuillez entrer votre mot de passe!",
+                    errorMessage: localizations.provideYourPassword,
                   ),
                 ],
               ),
@@ -109,13 +119,13 @@ class _SignInPageState extends State<SignInPage> {
               SizedBox(
                 width: MediaQuery.of(context).size.width,
                 child: TextButton(
-                  onPressed: () => GoRouter.of(context).go('/profile/forgot_password'),
+                  onPressed: () => pushOrGo(context, "/profile/forgot_password"),
                   style: const ButtonStyle(
                     alignment: Alignment.centerRight,
                     padding: WidgetStatePropertyAll(EdgeInsets.all(0)),
                   ),
                   child: Text(
-                    "Mot de passe oublié ?",
+                    localizations.passwordForgot,
                     textAlign: TextAlign.right,
                     style: GoogleFonts.poppins(
                       fontWeight: FontWeight.bold,
@@ -127,9 +137,10 @@ class _SignInPageState extends State<SignInPage> {
 
               // Display sign in button
               MyButton(
-                text: "Se connecter",
+                text: localizations.logIn,
                 onTap: () => connector.loginWithEmail(emailController.text, passwordController.text, context).then((value) {
-                  context.go('/profile');
+                  setState(() {});
+                  pushOrGo(context, "/profile");
                 }).catchError((e) {
                   showMessage(e.toString(), context);
                 }),
@@ -148,7 +159,7 @@ class _SignInPageState extends State<SignInPage> {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8.0),
                     child: Text(
-                      "Ou continuer avec",
+                      localizations.orContinueWith,
                       style: TextStyle(
                         color: Theme.of(context).colorScheme.primary,
                       ),
@@ -175,7 +186,6 @@ class _SignInPageState extends State<SignInPage> {
                     onTap: () => {
                       debugPrint("Google Sign In got clicked"),
                       connector.signInWithGoogle(context),
-                      context.go('/profile'),
                     },
                   ),
 
@@ -194,16 +204,17 @@ class _SignInPageState extends State<SignInPage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      "Pas encore de compte ?",
+                      localizations.noAccountYet,
                       style: TextStyle(color: Theme.of(context).colorScheme.primary),
                     ),
                     const SizedBox(width: 4),
                     TextButton(
-                        onPressed: () => GoRouter.of(context).go('/profile/signup'),
-                        child: const Text(
-                          "Créer en un maintenant",
-                          style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold),
-                        )),
+                      onPressed: () => pushOrGo(context, '/profile/signup'),
+                      child: Text(
+                        localizations.createAccount,
+                        style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold),
+                      ),
+                    ),
                   ],
                 ),
               ),

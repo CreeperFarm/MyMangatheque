@@ -1,24 +1,29 @@
 import 'package:flutter/cupertino.dart';
 import 'package:go_router/go_router.dart';
-import 'package:mymangatheque/main.dart';
 import 'package:mymangatheque/src/back/app_router/main_wrapper.dart';
-import 'package:mymangatheque/src/back/app_router/redirect_to_page.dart';
+// REMOVE THIS IMPORT: import 'package:mymangatheque/src/back/app_router/redirect_to_page.dart';
+import 'package:mymangatheque/src/back/services/pocketbase.dart'; // Import PocketBaseConnector
 import 'package:mymangatheque/src/front/dev_page/component_show_page.dart';
 import 'package:mymangatheque/src/front/page/admin_pages/admin_create_page.dart';
 import 'package:mymangatheque/src/front/page/admin_pages/admin_home.dart';
 import 'package:mymangatheque/src/front/page/admin_pages/admin_login_page.dart';
+import 'package:mymangatheque/src/front/page/admin_pages/admin_statistics.dart';
+import 'package:mymangatheque/src/front/page/auth/delete_account_page.dart'; // Import DeleteAccountPage
 import 'package:mymangatheque/src/front/page/auth/forgot_password_page.dart';
 import 'package:mymangatheque/src/front/page/auth/modify_password_page.dart';
 import 'package:mymangatheque/src/front/page/auth/signin_page.dart';
 import 'package:mymangatheque/src/front/page/auth/signup_page.dart';
 import 'package:mymangatheque/src/front/page/discover_page.dart';
+import 'package:mymangatheque/src/front/page/error_page.dart';
+import 'package:mymangatheque/src/front/page/home_page.dart';
 import 'package:mymangatheque/src/front/page/info_page/author_page.dart';
 import 'package:mymangatheque/src/front/page/info_page/editor_page.dart';
 import 'package:mymangatheque/src/front/page/info_page/serie_page.dart';
 import 'package:mymangatheque/src/front/page/info_page/sub_serie_page.dart';
 import 'package:mymangatheque/src/front/page/info_page/volume_page.dart';
+import 'package:mymangatheque/src/front/page/library/library_page.dart';
 import 'package:mymangatheque/src/front/page/mentions_legales_page.dart';
-import 'package:mymangatheque/src/front/page/planning/planning_page.dart';
+import 'package:mymangatheque/src/front/page/profile/profile_page.dart'; // Import ProfilePage
 import 'package:mymangatheque/src/front/page/scan_ean_page.dart';
 import 'package:mymangatheque/src/front/page/search/search_page.dart';
 
@@ -34,11 +39,14 @@ class AppNavigation {
   static final _rootNavigatorProfile = GlobalKey<NavigatorState>(debugLabel: 'shellProfile');
 
   //GoRouter Config
-  static final GoRouter router = GoRouter(navigatorKey: _rootNavigatorKey, initialLocation: initR, routes: <RouteBase>[
-    // MainWrapper Route
-    StatefulShellRoute.indexedStack(
+  static final GoRouter router = GoRouter(
+    navigatorKey: _rootNavigatorKey,
+    initialLocation: initR,
+    routes: <RouteBase>[
+      // MainWrapper Route
+      StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
-          return MainWrapper(navigationShell: navigationShell);
+          return MainWrapper(navigationShell: navigationShell, key: state.pageKey);
         },
         branches: <StatefulShellBranch>[
           StatefulShellBranch(navigatorKey: _rootNavigatorHome, routes: [
@@ -112,16 +120,34 @@ class AppNavigation {
                         return ComponentShowPage(key: state.pageKey);
                       }),
                   GoRoute(
+                      path: 'static_page',
+                      name: 'Static Page',
+                      builder: (context, state) {
+                        return StatisticsPage(key: state.pageKey);
+                      }),
+                  GoRoute(
                       path: 'mentions_legales',
                       name: 'Mentions Légales',
                       builder: (context, state) {
                         return MentionsLegalesPage(key: state.pageKey);
                       }),
                   GoRoute(
+                      path: 'legal_notice',
+                      name: 'Legal Notice',
+                      builder: (context, state) {
+                        return MentionsLegalesPage(key: state.pageKey);
+                      }),
+                  // Modified to directly handle the redirect logic for delete account
+                  GoRoute(
                       path: 'delete_account',
                       name: 'Suppression du compte',
                       builder: (context, state) {
-                        return RedirectToDelete(key: state.pageKey);
+                        // Directly check login status and return the appropriate page
+                        if (PocketBaseConnector().isLoggedIn()) {
+                          return const DeleteAccountPage();
+                        } else {
+                          return const SignInPage();
+                        }
                       }),
                   GoRoute(
                       path: 'admin',
@@ -144,6 +170,13 @@ class AppNavigation {
                             return AdminCreatePage(key: state.pageKey);
                           },
                         ),
+                        GoRoute(
+                          path: 'static_page',
+                          name: 'Admin Static Page',
+                          builder: (context, state) {
+                            return StatisticsPage(key: state.pageKey);
+                          },
+                        ),
                       ]),
                 ]),
           ]),
@@ -154,7 +187,7 @@ class AppNavigation {
                   path: '/library',
                   name: 'Mangathèque',
                   builder: (context, state) {
-                    return RedirectToLibrary(key: state.pageKey);
+                    return LibraryPage(key: state.pageKey);
                   },
                   routes: [
                     GoRoute(
@@ -278,58 +311,18 @@ class AppNavigation {
                       })
                 ])
           ]),
-          StatefulShellBranch(routes: [
-            GoRoute(
-                path: '/planning',
-                name: 'Planning',
-                builder: (context, state) {
-                  return PlanningPage(
-                    key: state.pageKey,
-                  );
-                },
-                routes: [
-                  GoRoute(
-                      path: 'editor/:id',
-                      name: 'Editor Planning',
-                      builder: (context, state) {
-                        return EditorPage(
-                          editorId: state.pathParameters['id']!,
-                          initRoute: '/planning',
-                          key: state.pageKey,
-                        );
-                      }),
-                  GoRoute(
-                      path: 'author/:id',
-                      name: 'Author Planning',
-                      builder: (context, state) {
-                        return AuthorPage(authorName: state.pathParameters['id']!, initRoute: '/planning', key: state.pageKey);
-                      }),
-                  GoRoute(
-                      path: 'serie/:id',
-                      name: 'Series Planning',
-                      builder: (context, state) {
-                        return SeriePage(serieId: state.pathParameters['id']!, initRoute: '/planning', key: state.pageKey);
-                      }),
-                  GoRoute(
-                      path: 'sub_serie/:id',
-                      name: 'Sub-Series Planning',
-                      builder: (context, state) {
-                        return SubSeriePage(serieId: state.pathParameters['id']!, initRoute: '/planning', key: state.pageKey);
-                      }),
-                  GoRoute(
-                      path: 'volume/:id',
-                      name: 'Volume Planning',
-                      builder: (context, state) {
-                        return VolumePage(volumeId: state.pathParameters['id']!, initRoute: '/planning', key: state.pageKey);
-                      })
-                ])
-          ]),
-          StatefulShellBranch(navigatorKey: _rootNavigatorProfile, routes: [
-            GoRoute(
+          StatefulShellBranch(
+            navigatorKey: _rootNavigatorProfile,
+            routes: [
+              GoRoute(
                 path: '/profile',
                 name: 'Profile',
                 builder: (context, state) {
-                  return RedirectToProfile(key: state.pageKey);
+                  if (PocketBaseConnector().isLoggedIn()) {
+                    return const ProfilePage();
+                  } else {
+                    return const SignInPage();
+                  }
                 },
                 routes: [
                   GoRoute(
@@ -356,8 +349,30 @@ class AppNavigation {
                       builder: (context, state) {
                         return ForgotPasswordPage(key: state.pageKey);
                       }),
-                ])
-          ]),
-        ]),
-  ]);
+                  GoRoute(
+                      path: 'mentions_legales',
+                      name: 'Mentions Légales Profile',
+                      builder: (context, state) {
+                        return MentionsLegalesPage(key: state.pageKey);
+                      }),
+                  GoRoute(
+                      path: 'legal_notice',
+                      name: 'Legal Notice Profile',
+                      builder: (context, state) {
+                        return MentionsLegalesPage(key: state.pageKey);
+                      }),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+    ],
+
+    // 👇 This handles unknown routes
+    errorBuilder: (context, state) => ErrorPage(
+      error: state.error,
+      key: state.pageKey,
+    ),
+  );
 }

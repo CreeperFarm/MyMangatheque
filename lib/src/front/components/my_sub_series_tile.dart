@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:mymangatheque/src/const/own_icon.dart';
+import 'package:mymangatheque/src/function/auto_push_or_go.dart';
 
 class MySubSeriesTile extends StatelessWidget {
   final Map<String, dynamic> data;
@@ -22,7 +22,7 @@ class MySubSeriesTile extends StatelessWidget {
     });
     return InkWell(
       onTap: () {
-        context.push('${(initRoute == "/") ? "" : initRoute}/sub_serie/${data['id'].toString()}');
+        pushOrGo(context, '${(initRoute == "/") ? "" : initRoute}/sub_serie/${data['id'].toString()}');
       },
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -30,15 +30,15 @@ class MySubSeriesTile extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 5),
-                child: SizedBox(
-                    width: MediaQuery.of(context).size.width - 75,
-                    child: Text(
-                      '${data['title'].toString().replaceFirst(data['title'] + ' - ', '')} • ${data['expand']['editor']['name'].toString()}',
-                      softWrap: false,
-                      overflow: TextOverflow.ellipsis,
-                    )),
+              SizedBox(
+                width: MediaQuery.of(context).size.width - (MediaQuery.of(context).padding.left + MediaQuery.of(context).padding.right + 44),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 5),
+                  child: Text(
+                    '${data['title'].toString().replaceFirst(data['title'] + ' - ', '')} • ${data['expand']['editor']['name'].toString()}',
+                    softWrap: true,
+                  ),
+                ),
               ),
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,

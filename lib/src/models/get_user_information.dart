@@ -3,33 +3,12 @@ import 'package:http/http.dart' as http;
 import 'package:mymangatheque/src/back/services/pocketbase.dart';
 import 'package:path/path.dart';
 
-class GetUserInfo extends StatelessWidget {
-  final String beforeText;
-  final String afterText;
-
-  const GetUserInfo(
-      {required this.beforeText, required this.afterText, super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        mainAxisSize: MainAxisSize.max,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(beforeText),
-          Text(afterText),
-        ],
-      ),
-    );
-  }
-}
-
 class GetUserProfilePicture extends StatelessWidget {
   final PocketBaseFile file;
+  final double? height;
+  final double? width;
 
-  const GetUserProfilePicture({required this.file, Key? key}) : super(key: key);
+  const GetUserProfilePicture({required this.file, this.height, this.width, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -76,8 +55,8 @@ class GetUserProfilePicture extends StatelessWidget {
         borderRadius: BorderRadius.circular(150.0),
         child: Image.asset(
           'assets/images/unknown.webp',
-          height: 175,
-          width: 175,
+          height: height ?? 175,
+          width: width ?? 175,
           fit: BoxFit.cover,
         ),
       ),
@@ -90,8 +69,8 @@ class GetUserProfilePicture extends StatelessWidget {
         borderRadius: BorderRadius.circular(150.0),
         child: Image.network(
           url,
-          height: 175,
-          width: 175,
+          height: height ?? 175,
+          width: width ?? 175,
           fit: BoxFit.cover,
         ),
       ),

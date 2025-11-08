@@ -1,24 +1,42 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import 'package:mymangatheque/src/const/const_info.dart';
+import 'package:intl/intl.dart';
+import 'package:mymangatheque/l10n/app_localizations.dart';
 import 'package:mymangatheque/src/const/own_icon.dart';
+import 'package:mymangatheque/src/function/auto_push_or_go.dart';
 
 import 'my_collection_badge.dart';
 
 class MyVolumeTile extends StatelessWidget {
   final Map<String, dynamic> volumeData;
+  final Map<String, dynamic>? subSerieData;
   final String initRoute;
   final bool? isVolumeOwned;
 
-  const MyVolumeTile({required this.volumeData, required this.initRoute, this.isVolumeOwned, super.key});
+  MyVolumeTile({
+    required this.volumeData,
+    required this.subSerieData,
+    required this.initRoute,
+    this.isVolumeOwned,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
+    // Get localization - return early if not available
+    var localizations = AppLocalizations.of(context);
+    if (localizations == null) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
     final DateTime release = DateTime.parse(volumeData['release']);
     return Padding(
       padding: const EdgeInsets.all(5.0),
       child: InkWell(
-        onTap: () => context.push('$initRoute/volume/${volumeData['id'].toString()}'),
+        onTap: () => pushOrGo(context, '$initRoute/volume/${volumeData['id'].toString()}'),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -41,7 +59,7 @@ class MyVolumeTile extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Tome ${volumeData['tome_number']}',
+                        '${localizations.volume} ${volumeData['tome_number']}',
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -50,18 +68,20 @@ class MyVolumeTile extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                       ),
                       Text(
-                        '${release.day} ${month[release.month.toString()]} ${release.year}',
+                        DateFormat.yMMMMd(localizations.localeName).format(release),
                         style: const TextStyle(
                           fontSize: 13,
                         ),
                         softWrap: false,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      (isVolumeOwned == null && !isVolumeOwned!)
+                      (!subSerieData!.containsKey(volumeData['sub_serie_id'].toString()) && isVolumeOwned != true)
                           ? SizedBox()
                           : Padding(
                               padding: const EdgeInsets.only(top: 1.0),
-                              child: MyCollectionBadge(),
+                              child: MyCollectionBadge(
+                                localizations: localizations,
+                              ),
                             ),
                     ],
                   ),

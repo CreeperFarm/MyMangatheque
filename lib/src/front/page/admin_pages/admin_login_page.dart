@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:mymangatheque/l10n/app_localizations.dart';
 import 'package:mymangatheque/src/back/services/pocketbaseadmin.dart';
 import 'package:mymangatheque/src/front/components/my_button.dart';
 import 'package:mymangatheque/src/front/components/my_scroll_column.dart';
@@ -29,10 +30,20 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Get localization - return early if not available
+    var localizations = AppLocalizations.of(context);
+    if (localizations == null) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          "Page de connexion Admin",
+          localizations.adminLoginPage,
           style: GoogleFonts.poppins(),
         ),
       ),
@@ -55,9 +66,9 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
               // Email field
               MyTextField(
                 controller: emailController,
-                labelText: "Votre Email",
+                labelText: localizations.yourEmail,
                 obscureText: false,
-                errorMessage: "Veuillez enter votre email!",
+                errorMessage: localizations.provideYourEmail,
               ),
 
               const SizedBox(height: 15),
@@ -65,9 +76,9 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
               // Password field
               MyTextField(
                 controller: passwordController,
-                labelText: "Votre Mot de passe",
+                labelText: localizations.yourPassword,
                 obscureText: true,
-                errorMessage: "Veuillez entrer votre mot de passe!",
+                errorMessage: localizations.provideYourPassword,
               ),
             ],
           ),
@@ -76,7 +87,7 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
           ),
           // Display sign in button
           MyButton(
-            text: "Se connecter",
+            text: localizations.logIn,
             onTap: () async {
               try {
                 await connector.loginAsAdmin(emailController.text, passwordController.text, context).then((value) async {
@@ -84,7 +95,7 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
                     setState(() {});
                     await Future.delayed(Duration(milliseconds: 250));
                     GoRouter.of(context).push('/admin');
-                    showMessage("You're successfully connected to admins' pages", context);
+                    showMessage(localizations.adminLoginSuccess, context);
                   }
                 });
               } catch (e) {

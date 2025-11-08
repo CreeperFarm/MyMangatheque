@@ -1,14 +1,17 @@
 import 'package:date_field/date_field.dart';
+import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
+import 'package:mymangatheque/l10n/app_localizations.dart';
 import 'package:mymangatheque/src/back/services/pocketbase.dart';
 import 'package:mymangatheque/src/const/own_icon.dart';
 import 'package:mymangatheque/src/front/components/my_button.dart';
 import 'package:mymangatheque/src/front/components/my_scroll_column.dart';
 import 'package:mymangatheque/src/front/components/my_square_tile.dart';
 import 'package:mymangatheque/src/front/components/my_textfield.dart';
+import 'package:mymangatheque/src/function/auto_push_or_go.dart';
 import 'package:mymangatheque/src/function/show_message_function.dart';
 import 'package:pocketbase/pocketbase.dart';
 
@@ -38,28 +41,30 @@ class _SignUpPageState extends State<SignUpPage> {
   void signingUpProcess() async {
     PocketBaseConnector connector = PocketBaseConnector();
 
-    connector.createUser(usernameController.text, emailController.text, passwordController.text, passwordVerifierController.text, selectedGender.text,
-        selectedBDayDate.add(const Duration(hours: 1)).toUtc().toString(), context);
+    await connector.createUser(usernameController.text, emailController.text, passwordController.text, passwordVerifierController.text,
+        selectedGender.text, selectedBDayDate.add(const Duration(hours: 1)).toUtc().toString(), context);
     connector.sendVerification(emailController.text);
+    connector.findUser(emailController.text);
     await connector.updateUserData(emailController.text);
-    context.go('/profile');
+    pushOrGo(context, '/profile');
   }
 
-  void signUp() async {
+  void signUp(AppLocalizations localizations) async {
     if (passwordController.text.length < 8) {
-      print('Password must be at least 8 characters');
-      errorText = 'Password must be at least 8 characters';
+      debugPrint('Password must be at least 8 characters');
+      errorText = localizations.passwordMinLength;
       return showMessage(errorText, context);
     } else if (!emailController.text.contains('@')) {
-      print('Invalid email');
-      errorText = 'Invalid email';
+      debugPrint('Invalid email');
+      errorText = localizations.invalidEmail;
       return showMessage(errorText, context);
     } else if (usernameController.text.length < 3) {
-      print('Username must be at least 3 characters');
-      errorText = 'Username must be at least 3 characters';
+      debugPrint('Username must be at least 3 characters');
+      errorText = localizations.usernameMinLength;
       return showMessage(errorText, context);
     } else {
       signingUpProcess();
+      return;
     }
   }
 
@@ -77,12 +82,22 @@ class _SignUpPageState extends State<SignUpPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Get localization - return early if not available
+    var localizations = AppLocalizations.of(context);
+    if (localizations == null) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
     final PocketBaseConnector connector = PocketBaseConnector();
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          //TODO: Mettre AppBar title en français ou supprimer
-          "Sign-Up Page",
+          localizations.signUpPage,
           style: GoogleFonts.poppins(),
         ),
         elevation: 0.0,
@@ -96,13 +111,19 @@ class _SignUpPageState extends State<SignUpPage> {
                 const SizedBox(height: 10),
 
                 // Locker Icon
-                SvgPicture.asset('assets/icons/locker.svg',
-                    height: 75, colorFilter: ColorFilter.mode(Theme.of(context).colorScheme.primary, BlendMode.srcIn)),
+                SvgPicture.asset(
+                  'assets/icons/locker.svg',
+                  height: 75,
+                  colorFilter: ColorFilter.mode(
+                    Theme.of(context).colorScheme.primary,
+                    BlendMode.srcIn,
+                  ),
+                ),
 
                 const SizedBox(height: 15),
 
                 Text(
-                  "Inscrivez-vous pour pouvoir sauvegarder vos mangas favoris et dans votre collection",
+                  localizations.whySignUpDescription,
                   textAlign: TextAlign.center,
                   style: GoogleFonts.poppins(
                     color: Theme.of(context).colorScheme.primary,
@@ -117,9 +138,9 @@ class _SignUpPageState extends State<SignUpPage> {
                       // Display Name field
                       MyTextField(
                         controller: usernameController,
-                        labelText: "Pseudo",
+                        labelText: localizations.username,
                         obscureText: false,
-                        errorMessage: "Veuillez entrer un pseudo!",
+                        errorMessage: localizations.provideUsername,
                       ),
 
                       const SizedBox(height: 11),
@@ -127,9 +148,9 @@ class _SignUpPageState extends State<SignUpPage> {
                       // Email field
                       MyTextField(
                         controller: emailController,
-                        labelText: "Votre Email",
+                        labelText: localizations.yourEmail,
                         obscureText: false,
-                        errorMessage: "Veuillez enter votre email!",
+                        errorMessage: localizations.provideYourEmail,
                       ),
 
                       const SizedBox(height: 11),
@@ -137,9 +158,9 @@ class _SignUpPageState extends State<SignUpPage> {
                       // Password field
                       MyTextField(
                         controller: passwordController,
-                        labelText: "Votre mot de passe",
+                        labelText: localizations.yourPassword,
                         obscureText: true,
-                        errorMessage: "Veuillez entrer votre mot de passe!",
+                        errorMessage: localizations.provideYourPassword,
                       ),
 
                       const SizedBox(height: 11),
@@ -153,10 +174,10 @@ class _SignUpPageState extends State<SignUpPage> {
                           obscureText: true,
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return "Veuillez confirmer votre mot de passe!";
+                              return localizations.pleaseConfirmPassword;
                             }
                             if (value != passwordController.text) {
-                              return "Vos mots de passe ne correspondent pas";
+                              return localizations.passwordsDoNotMatch;
                             }
                             return null;
                           },
@@ -167,6 +188,7 @@ class _SignUpPageState extends State<SignUpPage> {
                               ),
                             ),
                             border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(25),
                               borderSide: BorderSide(
                                 color: Theme.of(context).colorScheme.primary,
                               ),
@@ -175,7 +197,7 @@ class _SignUpPageState extends State<SignUpPage> {
                             labelStyle: TextStyle(
                               color: Theme.of(context).colorScheme.onPrimary,
                             ),
-                            hintText: "Confirmer le mot de passe",
+                            hintText: localizations.confirmYourPassword,
                           ),
                         ),
                       ),
@@ -192,6 +214,7 @@ class _SignUpPageState extends State<SignUpPage> {
                               ),
                             ),
                             border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(25),
                               borderSide: BorderSide(
                                 color: Theme.of(context).colorScheme.primary,
                               ),
@@ -200,21 +223,24 @@ class _SignUpPageState extends State<SignUpPage> {
                             labelStyle: TextStyle(
                               color: Theme.of(context).colorScheme.onPrimary,
                             ),
-                            hintText: "Votre date de naissance",
+                            hintText: localizations.yourBirthday,
                           ),
+                          dateFormat: DateFormat.yMMMMd(Localizations.localeOf(context).languageCode),
                           cupertinoDatePickerOptions: CupertinoDatePickerOptions(
-                              modalTitleText: "Sélectionnez la date",
-                              style: CupertinoDatePickerOptionsStyle(
-                                  modalTitle: TextStyle(
+                            modalTitleText: localizations.selectDate,
+                            style: CupertinoDatePickerOptionsStyle(
+                              modalTitle: TextStyle(
                                 color: Theme.of(context).colorScheme.primary,
-                              ))),
+                              ),
+                            ),
+                          ),
                           mode: DateTimeFieldPickerMode.date,
                           firstDate: DateTime(1900, 1, 1),
                           lastDate: DateTime(DateTime.now().year - 7, DateTime.now().month, DateTime.now().day),
                           initialPickerDateTime: DateTime(DateTime.now().year - 7, DateTime.now().month, DateTime.now().day),
                           validator: (value) {
                             if (value == null) {
-                              return "Veuillez entrer votre date de naissance";
+                              return localizations.provideYourBirthday;
                             }
                             return null;
                           },
@@ -228,15 +254,14 @@ class _SignUpPageState extends State<SignUpPage> {
 
                       const SizedBox(height: 11),
 
-                      DropdownButtonFormField(
-                          padding: EdgeInsets.symmetric(horizontal: 5.0),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 5.0),
+                        child: DropdownButtonFormField2(
+                          isExpanded: true,
                           decoration: InputDecoration(
-                            errorBorder: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                color: Theme.of(context).colorScheme.error,
-                              ),
-                            ),
+                            contentPadding: const EdgeInsets.symmetric(vertical: 16),
                             border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(25),
                               borderSide: BorderSide(
                                 color: Theme.of(context).colorScheme.primary,
                               ),
@@ -244,26 +269,31 @@ class _SignUpPageState extends State<SignUpPage> {
                             labelStyle: TextStyle(
                               color: Theme.of(context).colorScheme.onPrimary,
                             ),
-                            hintText: "Votre genre",
                           ),
-                          items: const [
+                          items: [
                             DropdownMenuItem(
-                              value: "men",
-                              child: Text("Homme"),
+                              value: "male",
+                              child: Text(localizations.male),
                             ),
                             DropdownMenuItem(
-                              value: "women",
-                              child: Text("Femme"),
+                              value: "female",
+                              child: Text(localizations.female),
                             ),
                             DropdownMenuItem(
                               value: "other",
-                              child: Text("Autre"),
+                              child: Text(localizations.other),
                             ),
                           ],
-                          icon: OwnIcon(iconColor: Theme.of(context).colorScheme.primary, iconName: 'arrow-down'),
+                          hint: Text(
+                            localizations.yourGender,
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                          ),
+                          //icon: OwnIcon(iconColor: Theme.of(context).colorScheme.primary, iconName: 'arrow-down'),
                           validator: (value) {
                             if (value == null) {
-                              return "Veuillez choisir votre genre";
+                              return localizations.provideYourGender;
                             }
                             return null;
                           },
@@ -271,7 +301,25 @@ class _SignUpPageState extends State<SignUpPage> {
                             setState(() {
                               selectedGender.text = value.toString();
                             });
-                          }),
+                          },
+                          buttonStyleData: const ButtonStyleData(
+                            padding: EdgeInsets.only(right: 6),
+                          ),
+                          iconStyleData: IconStyleData(
+                            icon: OwnIcon(iconColor: Theme.of(context).colorScheme.primary, iconName: 'arrow-down'),
+                            iconSize: 24,
+                          ),
+                          dropdownStyleData: DropdownStyleData(
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).colorScheme.secondary,
+                              borderRadius: BorderRadius.circular(25),
+                            ),
+                          ),
+                          menuItemStyleData: const MenuItemStyleData(
+                            padding: EdgeInsets.symmetric(horizontal: 16),
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -280,14 +328,14 @@ class _SignUpPageState extends State<SignUpPage> {
 
                 // Button who create the account
                 MyButton(
-                  text: "Créer un compte",
+                  text: localizations.createAccount,
                   onTap: () async {
                     // Verify if all field is complete
                     if (_formKey.currentState!.validate()) {
                       if (passwordController.text != passwordVerifierController.text) {
-                        errorText = "Vos mots de passe ne correspondent pas";
+                        errorText = localizations.passwordsDoNotMatch;
                       } else {
-                        signUp();
+                        signUp(localizations);
                       }
                     }
                   },
@@ -307,7 +355,7 @@ class _SignUpPageState extends State<SignUpPage> {
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8.0),
                       child: Text(
-                        "Ou continuer avec",
+                        localizations.orContinueWith,
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.primary,
                         ),
@@ -333,7 +381,6 @@ class _SignUpPageState extends State<SignUpPage> {
                       imagePath: 'assets/images/google.png',
                       onTap: () => {
                         connector.signInWithGoogle(context),
-                        context.go('/profile'),
                       },
                     ),
 
@@ -352,14 +399,14 @@ class _SignUpPageState extends State<SignUpPage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        "J'ai déjà un compte ?",
+                        localizations.alreadyHaveAnAccount,
                         style: TextStyle(color: Theme.of(context).colorScheme.primary),
                       ),
                       const SizedBox(width: 4),
                       TextButton(
-                        onPressed: () => context.go('/profile/signin'),
-                        child: const Text(
-                          "Se connecter",
+                        onPressed: () => pushOrGo(context, '/profile/signin'),
+                        child: Text(
+                          localizations.signIn,
                           style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold),
                         ),
                       ),

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:mymangatheque/src/const/own_icon.dart';
+import 'package:mymangatheque/src/function/auto_push_or_go.dart';
 
 class MySeriesTile extends StatelessWidget {
   final Map<String, dynamic> seriesData;
@@ -48,7 +48,7 @@ class MySeriesTile extends StatelessWidget {
         ),
       ),
       onTap: () {
-        context.push('${(initRoute == "/") ? "" : initRoute}/serie/${seriesData['id']}');
+        pushOrGo(context, '${(initRoute == "/") ? "" : initRoute}/serie/${seriesData['id']}');
       },
     );
   }

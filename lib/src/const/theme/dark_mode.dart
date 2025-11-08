@@ -6,12 +6,17 @@ ThemeData darkMode = ThemeData(
     onSurface: Colors.grey.shade200,
     primary: const Color.fromARGB(255, 255, 255, 255),
     onPrimary: Colors.grey.shade900,
-    primaryContainer: Colors.grey.shade800, // Background color of the container
-    onPrimaryContainer: Colors.grey.shade200, // Text/Icon color in the container
+
+    // Background color of the container
+    primaryContainer: Colors.grey.shade800,
+
+    // Text/Icon color in the container
+    onPrimaryContainer: Colors.grey.shade200,
     secondary: const Color.fromARGB(255, 30, 30, 30),
     onSecondary: Colors.grey.shade400,
     tertiary: const Color.fromARGB(255, 47, 47, 47),
     onTertiary: Colors.white10,
-    inversePrimary: Colors.grey.shade300
+    inversePrimary: Colors.grey.shade300,
+    tertiaryFixed: const Color(0xFF1780A3),
   ),
 );
