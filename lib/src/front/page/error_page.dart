@@ -23,7 +23,7 @@ class ErrorPage extends ConsumerWidget {
       );
     }
 
-    if (error == null && error?.message == null) {
+    if (error == null || error?.message == null) {
       return Scaffold(
         appBar: AppBar(
           title: Text(localizations.unknownError),
