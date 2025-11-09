@@ -66,9 +66,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   }
 
   // Get the number of owned manga
-  getNumberOfMangaOwned() async {
+  Future<void> getNumberOfMangaOwned() async {
     try {
-      int countMangaOwned = await connector.getNumberOwnedManga(connector.getConnectedUser()!.id);
+      int countMangaOwned =
+          await connector.getNumberOwnedManga(connector.getConnectedUser()!.id);
       setState(() {
         numberMangaOwned = countMangaOwned;
       });
@@ -78,9 +79,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   }
 
   // Get the number of favorite series
-  getNumberOfSeriesFav() async {
+  Future<void> getNumberOfSeriesFav() async {
     try {
-      int countSerieFav = await connector.getNumberFavSerie(connector.getConnectedUser()!.id);
+      int countSerieFav =
+          await connector.getNumberFavSerie(connector.getConnectedUser()!.id);
       setState(() {
         numberSerieFav = countSerieFav;
       });
@@ -89,7 +91,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     }
   }
 
-  DateTime selectedBDayDate = DateTime(DateTime.now().year - 7, DateTime.now().month, DateTime.now().day);
+  DateTime selectedBDayDate = DateTime(
+      DateTime.now().year - 7, DateTime.now().month, DateTime.now().day);
 
   @override
   void initState() {
@@ -178,7 +181,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               child: SingleChildScrollView(
                 child: Text(
                   localizations.accountCreatedOn(
-                    DateFormat.yMMMMd(Localizations.localeOf(context).languageCode).format(
+                    DateFormat.yMMMMd(
+                            Localizations.localeOf(context).languageCode)
+                        .format(
                       connector.getConnectedUser()!.created,
                     ),
                   ),
@@ -191,7 +196,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               child: SingleChildScrollView(
                 child: Text(
                   localizations.birthdayDateIs(
-                    DateFormat.yMMMMd(Localizations.localeOf(context).languageCode).format(
+                    DateFormat.yMMMMd(
+                            Localizations.localeOf(context).languageCode)
+                        .format(
                       connector.getConnectedUser()!.birthday,
                     ),
                   ),
@@ -214,7 +221,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 ),
               ),
             ),
-            MyLine(width: MediaQuery.of(context).size.width, vertical: 10), // Drop Down Menu du DarkMode
+            MyLine(
+                width: MediaQuery.of(context).size.width,
+                vertical: 10), // Drop Down Menu du DarkMode
             Container(
               padding: const EdgeInsets.all(10),
               margin: const EdgeInsets.symmetric(horizontal: 5),
@@ -308,7 +317,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: DropdownButtonFormField(
+              child: DropdownButtonFormField<Language>(
                 items: [
                   DropdownMenuItem(
                     value: Language.english,
@@ -349,8 +358,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   border: OutlineInputBorder(),
                 ),
                 initialValue: language,
-                onChanged: (value) {
-                  ref.read(languageRepositoryProvider).setLanguage(value!);
+                onChanged: (Language? value) {
+                  if (value == null) return;
+                  ref.read(languageRepositoryProvider).setLanguage(value);
                   setState(() {});
                 },
               ),
@@ -370,7 +380,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 child: Row(
                   children: [
                     const Padding(padding: EdgeInsets.only(right: 16)),
-                    OwnIcon(iconColor: Theme.of(context).colorScheme.primary, iconName: 'trash'),
+                    OwnIcon(
+                        iconColor: Theme.of(context).colorScheme.primary,
+                        iconName: 'trash'),
                     const Padding(padding: EdgeInsets.only(right: 9)),
                     Text(localizations.clearCache),
                   ],
@@ -445,8 +457,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                       return FutureBuilder(
                         future: connector.buildVersion,
                         builder: (context, snapshot) {
-                          if (snapshot.connectionState == ConnectionState.done) {
-                            final String buildVersion = snapshot.data.toString();
+                          if (snapshot.connectionState ==
+                              ConnectionState.done) {
+                            final String buildVersion =
+                                snapshot.data.toString();
                             return Column(
                               children: [
                                 Text(
