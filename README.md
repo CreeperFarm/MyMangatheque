@@ -28,6 +28,27 @@ And then run this command :
 #### Build App Android Obfuscated :
 `flutter build appbundle --obfuscate --split-debug-info out/android`
 
+#### Changelog Management :
+The project uses an automated changelog generation system that updates `CHANGELOG.md` when the version in `pubspec.yaml` changes.
+
+**Automatic Update (via GitHub Actions):**
+- When you push a commit that changes the version in `pubspec.yaml`, the GitHub Actions workflow will automatically:
+  - Detect the version change
+  - Update `CHANGELOG.md` with a new version entry
+  - Commit the changes back to the repository
+
+**Manual Update:**
+To manually update the changelog, run:
+```bash
+./scripts/update_changelog.sh
+```
+This script will:
+- Read the current version from `pubspec.yaml`
+- Add a new entry to `CHANGELOG.md` if the version doesn't already exist
+- Provide a template for you to fill in the changes
+
+After running the script, review and update the changelog entries with your specific changes before committing.
+
 ## Getting Started
 
 #### To launch the app for the first time

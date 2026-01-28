@@ -1,0 +1,101 @@
+name: Update Changelog
+
+on:
+  push:
+    branches:
+      - '**'
+    paths:
+      - 'pubspec.yaml'
+  pull_request:
+    branches:
+      - '**'
+    paths:
+      - 'pubspec.yaml'
+
+jobs:
+  update-changelog:
+    runs-on: ubuntu-latest
+    # Only run on pushes, not on pull requests to avoid duplicate runs
+    if: github.event_name == 'push'
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2  # Fetch last 2 commits to compare
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      
+      - name: Check for version change and update changelog
+        id: check_version
+        run: |
+          # Get the current version from pubspec.yaml
+          CURRENT_VERSION=$(grep "^version:" pubspec.yaml | awk '{print $2}')
+          echo "Current version: $CURRENT_VERSION"
+          
+          # Get the previous version from the previous commit
+          git show HEAD~1:pubspec.yaml > pubspec.old.yaml 2>/dev/null || echo "version: 0.0.0+0" > pubspec.old.yaml
+          PREVIOUS_VERSION=$(grep "^version:" pubspec.old.yaml | awk '{print $2}')
+          echo "Previous version: $PREVIOUS_VERSION"
+          
+          # Check if version has changed
+          if [ "$CURRENT_VERSION" != "$PREVIOUS_VERSION" ]; then
+            echo "Version changed from $PREVIOUS_VERSION to $CURRENT_VERSION"
+            echo "version_changed=true" >> $GITHUB_OUTPUT
+            echo "new_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+            
+            # Get current date
+            CURRENT_DATE=$(date +%Y-%m-%d)
+            
+            # Create new changelog entry
+            NEW_ENTRY="## [$CURRENT_VERSION] - $CURRENT_DATE\n\n### Added\n- Version bump to $CURRENT_VERSION\n\n### Changed\n- Update version in pubspec.yaml\n"
+            
+            # Check if CHANGELOG.md exists
+            if [ ! -f CHANGELOG.md ]; then
+              # Create new CHANGELOG.md
+              echo -e "# Changelog\n\nAll notable changes to this project will be documented in this file.\n\nThe format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),\nand this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).\n\n$NEW_ENTRY" > CHANGELOG.md
+            else
+              # Insert new entry after the header (after the first occurrence of "## [")
+              # First, let's check if there's already a version section
+              if grep -q "## \[" CHANGELOG.md; then
+                # Insert before the first version entry
+                awk -v new_entry="$NEW_ENTRY" '
+                  /^## \[/ && !inserted {
+                    print new_entry
+                    inserted=1
+                  }
+                  {print}
+                ' CHANGELOG.md > CHANGELOG.tmp && mv CHANGELOG.tmp CHANGELOG.md
+              else
+                # Append to the end of the file
+                echo -e "\n$NEW_ENTRY" >> CHANGELOG.md
+              fi
+            fi
+            
+            echo "Changelog updated successfully"
+          else
+            echo "No version change detected"
+            echo "version_changed=false" >> $GITHUB_OUTPUT
+          fi
+          
+          # Cleanup
+          rm -f pubspec.old.yaml
+      
+      - name: Commit changelog changes
+        if: steps.check_version.outputs.version_changed == 'true'
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add CHANGELOG.md
+          git commit -m "docs: update CHANGELOG.md for version ${{ steps.check_version.outputs.new_version }}" || echo "No changes to commit"
+      
+      - name: Push changes
+        if: steps.check_version.outputs.version_changed == 'true'
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref }}
