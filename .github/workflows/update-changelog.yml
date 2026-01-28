@@ -6,17 +6,10 @@ on:
       - '**'
     paths:
       - 'pubspec.yaml'
-  pull_request:
-    branches:
-      - '**'
-    paths:
-      - 'pubspec.yaml'
 
 jobs:
   update-changelog:
     runs-on: ubuntu-latest
-    # Only run on pushes, not on pull requests to avoid duplicate runs
-    if: github.event_name == 'push'
 
     steps:
       - name: Checkout repository
@@ -24,11 +17,6 @@ jobs:
         with:
           fetch-depth: 2  # Fetch last 2 commits to compare
           token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.x'
 
       - name: Check for version change and update changelog
         id: check_version
@@ -52,38 +40,53 @@ jobs:
             # Get current date
             CURRENT_DATE=$(date +%Y-%m-%d)
 
-            # Create new changelog entry
-            NEW_ENTRY="## [$CURRENT_VERSION] - $CURRENT_DATE\n\n"
-            NEW_ENTRY+="### Added\n- Version bump to $CURRENT_VERSION\n\n"
-            NEW_ENTRY+="### Changed\n- Update version in pubspec.yaml\n"
+            # Create new changelog entry in a temporary file
+            cat > changelog_entry.tmp << EOF
+          ## [$CURRENT_VERSION] - $CURRENT_DATE
+
+          ### Added
+          - Version bump to $CURRENT_VERSION
+
+          ### Changed
+          - Update version in pubspec.yaml
+
+          EOF
 
             # Check if CHANGELOG.md exists
             if [ ! -f CHANGELOG.md ]; then
               # Create new CHANGELOG.md
-              HEADER="# Changelog\n\n"
-              HEADER+="All notable changes to this project will be documented "
-              HEADER+="in this file.\n\n"
-              HEADER+="The format is based on [Keep a Changelog]"
-              HEADER+="(https://keepachangelog.com/en/1.0.0/),\n"
-              HEADER+="and this project adheres to [Semantic Versioning]"
-              HEADER+="(https://semver.org/spec/v2.0.0.html).\n\n"
-              echo -e "$HEADER$NEW_ENTRY" > CHANGELOG.md
+              cat > CHANGELOG.md << 'HEREDOC'
+          # Changelog
+
+          All notable changes to this project will be documented in this file.
+
+          The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+          and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+          HEREDOC
+              cat changelog_entry.tmp >> CHANGELOG.md
             else
               # Insert new entry before the first version entry
               if grep -q "## \[" CHANGELOG.md; then
                 # Insert before the first version entry
-                awk -v new_entry="$NEW_ENTRY" '
+                awk '
                   /^## \[/ && !inserted {
-                    print new_entry
+                    while ((getline line < "changelog_entry.tmp") > 0) {
+                      print line
+                    }
+                    close("changelog_entry.tmp")
                     inserted=1
                   }
                   {print}
                 ' CHANGELOG.md > CHANGELOG.tmp && mv CHANGELOG.tmp CHANGELOG.md
               else
                 # Append to the end of the file
-                echo -e "\n$NEW_ENTRY" >> CHANGELOG.md
+                cat changelog_entry.tmp >> CHANGELOG.md
               fi
             fi
+
+            # Cleanup
+            rm -f changelog_entry.tmp
 
             echo "Changelog updated successfully"
           else
@@ -102,8 +105,7 @@ jobs:
           git config --local user.name "github-actions[bot]"
           git add CHANGELOG.md
           VERSION="${{ steps.check_version.outputs.new_version }}"
-          git commit -m "docs: update CHANGELOG.md for version $VERSION" \
-            || echo "No changes to commit"
+          git commit -m "docs: update CHANGELOG.md for version $VERSION [skip ci]"
 
       - name: Push changes
         if: steps.check_version.outputs.version_changed == 'true'

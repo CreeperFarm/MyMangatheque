@@ -8,12 +8,27 @@ set -e
 # Colors for output
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
+RED='\033[0;31m'
 NC='\033[0m' # No Color
 
 echo -e "${YELLOW}Updating CHANGELOG.md...${NC}"
 
+# Check if pubspec.yaml exists
+if [ ! -f pubspec.yaml ]; then
+  echo -e "${RED}Error: pubspec.yaml not found!${NC}"
+  echo "Please run this script from the root of the project."
+  exit 1
+fi
+
 # Get the current version from pubspec.yaml
 CURRENT_VERSION=$(grep "^version:" pubspec.yaml | awk '{print $2}')
+
+# Check if version was found
+if [ -z "$CURRENT_VERSION" ]; then
+  echo -e "${RED}Error: Could not find version in pubspec.yaml${NC}"
+  exit 1
+fi
+
 echo "Current version: $CURRENT_VERSION"
 
 # Get current date
@@ -46,9 +61,10 @@ else
     echo "Please manually update the changelog entry if needed."
   else
     echo -e "${YELLOW}Adding new version entry to CHANGELOG.md...${NC}"
-    
-    # Create new changelog entry
-    NEW_ENTRY="## [$CURRENT_VERSION] - $CURRENT_DATE
+
+    # Create new changelog entry in a temporary file
+    cat > changelog_entry.tmp << EOF
+## [$CURRENT_VERSION] - $CURRENT_DATE
 
 ### Added
 - Version bump to $CURRENT_VERSION
@@ -59,23 +75,29 @@ else
 ### Fixed
 - Bug fixes and improvements
 
-"
-    
+EOF
+
     # Insert new entry after the header (before the first version entry)
     if grep -q "## \[" CHANGELOG.md; then
       # Insert before the first version entry
-      awk -v new_entry="$NEW_ENTRY" '
+      awk '
         /^## \[/ && !inserted {
-          print new_entry
+          while ((getline line < "changelog_entry.tmp") > 0) {
+            print line
+          }
+          close("changelog_entry.tmp")
           inserted=1
         }
         {print}
       ' CHANGELOG.md > CHANGELOG.tmp && mv CHANGELOG.tmp CHANGELOG.md
     else
       # Append to the end of the file
-      echo -e "\n$NEW_ENTRY" >> CHANGELOG.md
+      cat changelog_entry.tmp >> CHANGELOG.md
     fi
-    
+
+    # Cleanup
+    rm -f changelog_entry.tmp
+
     echo -e "${GREEN}CHANGELOG.md updated successfully!${NC}"
   fi
 fi
