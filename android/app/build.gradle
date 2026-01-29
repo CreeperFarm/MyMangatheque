@@ -12,6 +12,14 @@ if (localPropertiesFile.exists()) {
     }
 }
 
+def envProperties = new Properties()
+def envFile = rootProject.file('../.env')
+if (envFile.exists()) {
+    envFile.withReader('UTF-8') { reader ->
+        envProperties.load(reader)
+    }
+}
+
 def flutterVersionCode = localProperties.getProperty('flutter.versionCode')
 if (flutterVersionCode == null) {
     flutterVersionCode = '1'
@@ -31,7 +39,7 @@ if (keystorePropertiesFile.exists()) {
 android {
     namespace "com.mymangatheque"
     compileSdkVersion 36
-    ndkVersion = "25.1.8937393"
+    ndkVersion = "27.0.12077973"
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -60,10 +68,10 @@ android {
 
     signingConfigs {
         release {
-            keyAlias = keystoreProperties['keyAlias']
-            keyPassword = keystoreProperties['keyPassword']
-            storeFile = keystoreProperties['storeFile'] ? file(keystoreProperties['storeFile']) : null
-            storePassword = keystoreProperties['storePassword']
+            keyAlias = envProperties['keyAlias']
+            keyPassword = envProperties['keyPassword']
+            storeFile = envProperties['storeFile'] ? file(envProperties['storeFile']) : null
+            storePassword = envProperties['storePassword']
         }
     }
 
