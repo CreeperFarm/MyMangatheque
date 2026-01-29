@@ -25,12 +25,12 @@ jobs:
         run: flutter pub get
 
       - name: Create Keystore and Env file
-          run:
-            echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > android/upload-keystore.jks
-            echo "storePassword=${{ secrets.STORE_PASSWORD }}" > .env
-            echo "keyPassword=${{ secrets.KEY_PASSWORD }}" >> .env
-            echo "keyAlias=${{ secrets.KEY_ALIAS }}" >> .env
-            echo "storeFile=../upload-keystore.jks" >> .env
+        run:
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > android/upload-keystore.jks
+          echo "storePassword=${{ secrets.STORE_PASSWORD }}" > .env
+          echo "keyPassword=${{ secrets.KEY_PASSWORD }}" >> .env
+          echo "keyAlias=${{ secrets.KEY_ALIAS }}" >> .env
+          echo "storeFile=../upload-keystore.jks" >> .env
 
       - name: Build AAB
         run: flutter build appbundle --obfuscate --split-debug-info out/android --release
