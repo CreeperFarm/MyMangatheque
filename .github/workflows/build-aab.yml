@@ -9,7 +9,7 @@ permissions:
 
 jobs:
   build-aab:
-    name: Build APK
+    name: Build AAB
     runs-on: ubuntu-latest
 
     steps:
