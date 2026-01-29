@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 0.0.1+9
+version: 0.0.1+10
 
 
 environment:
@@ -46,6 +46,7 @@ dependencies:
   flutter_svg: ^2.0.17
   glass_kit: ^4.0.1 # For the glass effect
   sliding_clipped_nav_bar: ^3.1.1 # For the bottom navigation bar
+  video_player: ^2.5.1 # For video playback
 
   # Theme dependency
   adaptive_theme: ^3.7.0
@@ -82,19 +83,18 @@ dependencies:
 
   # For some functionalities
   keyboard_detection: ^0.8.1
-  package_info_plus: ^8.1.2
+  package_info_plus: ^9.0.0
   flutter_custom_tabs: ^2.1.0
 
   # Other dependency
   fetch_client: ^1.1.2
-  google_fonts: ^6.2.1
+  google_fonts: ^8.0.0
   once: ^1.7.0
   connectivity_plus: ^7.0.0
   shared_preferences: ^2.5.3
   url_strategy: ^0.3.0
   intl_utils: ^2.8.11
   fl_chart: ^1.0.0
-  youtube_player_iframe: ^5.2.2
   dropdown_button2: ^2.3.9
 
   # Need triage
@@ -117,7 +117,7 @@ dev_dependencies:
 # Display Splash Screen
 flutter_native_splash:
   background_image: assets/images/splash_bg.png
-  image: assets/images/logow_nobg.png
+  image: assets/logo/logow_nobg.png
 
 # Display Icon for the app
 flutter_launcher_icons:
@@ -125,12 +125,12 @@ flutter_launcher_icons:
   min_sdk_android: 19
   ios: true
   remove_alpha_ios: true
-  image_path: "assets/images/logo_app.png"
+  image_path: "assets/logo/logo_app.png"
   # adaptive_icon_background: "assets/images/logo_background.png"
   # adaptive_icon_foreground: "assets/images/logo_foreground.png"
   web:
     generate: true
-    image_path: "assets/images/logo_app.png"
+    image_path: "assets/logo/logo_app.png"
     background_color: "#000b4b6c"
     theme_color: "#0b4b6c"
 
@@ -153,7 +153,8 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/images/
-    - assets/svg/
+    - assets/videos/
+    - assets/logo/
     - assets/icons/
     - assets/images/theme/
     - assets/

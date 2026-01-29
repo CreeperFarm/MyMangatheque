@@ -3,15 +3,15 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 class OwnIcon extends StatelessWidget {
   Color iconColor;
-  final String iconName;
+  final String iconSrc;
   final double? height;
 
-  OwnIcon({required this.iconColor, required this.iconName, this.height, super.key});
+  OwnIcon({required this.iconColor, required this.iconSrc, this.height, super.key});
 
   @override
   Widget build(BuildContext context) {
     return SvgPicture.asset(
-      'assets/icons/$iconName.svg',
+      iconSrc,
       colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
       height: height?.toDouble(),
     );

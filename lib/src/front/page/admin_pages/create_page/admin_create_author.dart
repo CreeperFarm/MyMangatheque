@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mymangatheque/l10n/app_localizations.dart';
 import 'package:mymangatheque/src/back/services/pocketbaseadmin.dart';
+import 'package:mymangatheque/src/const/assets.dart';
 import 'package:mymangatheque/src/front/components/my_button.dart';
 import 'package:mymangatheque/src/front/components/my_scroll_column.dart';
 import 'package:mymangatheque/src/front/components/my_textfield.dart';
@@ -87,7 +88,7 @@ class _AdminCreateAuthorPageState extends State<AdminCreateAuthorPage> {
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(20.0),
                         child: Image.asset(
-                          imagePathAuthorController.text != "" ? imagePathAuthorController.text : 'assets/images/unknown.webp',
+                          imagePathAuthorController.text != "" ? imagePathAuthorController.text : Assets.images.unknown,
                           width: MediaQuery.of(context).size.width * 0.4,
                           fit: BoxFit.cover,
                         ),

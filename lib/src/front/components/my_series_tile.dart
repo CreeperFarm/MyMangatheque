@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mymangatheque/src/const/assets.dart';
 import 'package:mymangatheque/src/const/own_icon.dart';
 import 'package:mymangatheque/src/function/auto_push_or_go.dart';
 
@@ -26,7 +27,7 @@ class MySeriesTile extends StatelessWidget {
       ),
       trailing: OwnIcon(
         iconColor: Theme.of(context).colorScheme.primary,
-        iconName: 'arrow-right',
+        iconSrc: Assets.icons.arrowRight,
       ),
       subtitle: Padding(
         padding: const EdgeInsets.symmetric(vertical: 5.0),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mymangatheque/l10n/app_localizations.dart';
 import 'package:mymangatheque/src/back/provider/search_filter_provider.dart';
+import 'package:mymangatheque/src/const/assets.dart';
 import 'package:mymangatheque/src/const/own_icon.dart';
 
 class DiscoverPage extends ConsumerStatefulWidget {
@@ -63,7 +64,7 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage> {
           children: [
             Text(localizations.discover),
             PopupMenuButton<String>(
-              icon: OwnIcon(iconColor: Theme.of(context).colorScheme.primary, iconName: "filter_right"),
+              icon: OwnIcon(iconColor: Theme.of(context).colorScheme.primary, iconSrc: Assets.icons.filterRight),
               onSelected: (String result) {
                 setState(() {
                   changeFilter(result);

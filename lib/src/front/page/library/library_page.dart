@@ -6,6 +6,7 @@ import 'package:mymangatheque/src/back/provider/manga_owned_provider.dart';
 import 'package:mymangatheque/src/back/provider/search_filter_provider.dart';
 import 'package:mymangatheque/src/back/provider/search_order_provider.dart';
 import 'package:mymangatheque/src/back/services/pocketbase.dart';
+import 'package:mymangatheque/src/const/assets.dart';
 import 'package:mymangatheque/src/const/own_icon.dart';
 import 'package:mymangatheque/src/front/components/my_tab_bar_item.dart';
 import 'package:mymangatheque/src/front/page/auth/signin_page.dart';
@@ -148,7 +149,7 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
               SizedBox(
                 width: 50,
                 child: PopupMenuButton(
-                  icon: OwnIcon(iconColor: Theme.of(context).colorScheme.primary, iconName: "filter_right"),
+                  icon: OwnIcon(iconColor: Theme.of(context).colorScheme.primary, iconSrc: Assets.icons.filterRight),
                   onSelected: (String result) {
                     setState(() {
                       changeOrder(result);

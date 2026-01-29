@@ -8,6 +8,7 @@ import 'package:mymangatheque/l10n/app_localizations.dart';
 import 'package:mymangatheque/src/back/language/language.dart';
 import 'package:mymangatheque/src/back/language/language_repository.dart';
 import 'package:mymangatheque/src/back/services/pocketbase.dart';
+import 'package:mymangatheque/src/const/assets.dart';
 import 'package:mymangatheque/src/const/own_icon.dart';
 import 'package:mymangatheque/src/front/components/my_icon_text_button.dart';
 import 'package:mymangatheque/src/front/components/my_line.dart';
@@ -68,8 +69,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   // Get the number of owned manga
   Future<void> getNumberOfMangaOwned() async {
     try {
-      int countMangaOwned =
-          await connector.getNumberOwnedManga(connector.getConnectedUser()!.id);
+      int countMangaOwned = await connector.getNumberOwnedManga(connector.getConnectedUser()!.id);
       setState(() {
         numberMangaOwned = countMangaOwned;
       });
@@ -81,8 +81,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   // Get the number of favorite series
   Future<void> getNumberOfSeriesFav() async {
     try {
-      int countSerieFav =
-          await connector.getNumberFavSerie(connector.getConnectedUser()!.id);
+      int countSerieFav = await connector.getNumberFavSerie(connector.getConnectedUser()!.id);
       setState(() {
         numberSerieFav = countSerieFav;
       });
@@ -91,8 +90,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     }
   }
 
-  DateTime selectedBDayDate = DateTime(
-      DateTime.now().year - 7, DateTime.now().month, DateTime.now().day);
+  DateTime selectedBDayDate = DateTime(DateTime.now().year - 7, DateTime.now().month, DateTime.now().day);
 
   @override
   void initState() {
@@ -181,9 +179,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               child: SingleChildScrollView(
                 child: Text(
                   localizations.accountCreatedOn(
-                    DateFormat.yMMMMd(
-                            Localizations.localeOf(context).languageCode)
-                        .format(
+                    DateFormat.yMMMMd(Localizations.localeOf(context).languageCode).format(
                       connector.getConnectedUser()!.created,
                     ),
                   ),
@@ -196,9 +192,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               child: SingleChildScrollView(
                 child: Text(
                   localizations.birthdayDateIs(
-                    DateFormat.yMMMMd(
-                            Localizations.localeOf(context).languageCode)
-                        .format(
+                    DateFormat.yMMMMd(Localizations.localeOf(context).languageCode).format(
                       connector.getConnectedUser()!.birthday,
                     ),
                   ),
@@ -221,9 +215,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 ),
               ),
             ),
-            MyLine(
-                width: MediaQuery.of(context).size.width,
-                vertical: 10), // Drop Down Menu du DarkMode
+            MyLine(width: MediaQuery.of(context).size.width, vertical: 10), // Drop Down Menu du DarkMode
             Container(
               padding: const EdgeInsets.all(10),
               margin: const EdgeInsets.symmetric(horizontal: 5),
@@ -237,7 +229,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                       child: Row(
                         children: [
                           Image.asset(
-                            'assets/images/theme/light-icon.png',
+                            Assets.images.theme.lightIcon,
                             width: 20,
                           ),
                           const Padding(
@@ -254,7 +246,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                       child: Row(
                         children: [
                           Image.asset(
-                            'assets/images/theme/dark-icon.png',
+                            Assets.images.theme.darkIcon,
                             width: 20,
                           ),
                           const Padding(
@@ -271,7 +263,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                       child: Row(
                         children: [
                           Image.asset(
-                            'assets/images/theme/auto-icon.png',
+                            Assets.images.theme.autoIcon,
                             width: 20,
                           ),
                           const Padding(
@@ -324,7 +316,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                     child: Row(
                       children: [
                         Image.asset(
-                          'assets/images/us.png',
+                          Assets.images.us,
                           width: 20,
                         ),
                         const Padding(
@@ -340,8 +332,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                     value: Language.french,
                     child: Row(
                       children: [
-                        SvgPicture.asset(
-                          'assets/images/fr.svg',
+                        Image.asset(
+                          Assets.images.fr,
                           width: 20,
                         ),
                         const Padding(
@@ -380,9 +372,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 child: Row(
                   children: [
                     const Padding(padding: EdgeInsets.only(right: 16)),
-                    OwnIcon(
-                        iconColor: Theme.of(context).colorScheme.primary,
-                        iconName: 'trash'),
+                    OwnIcon(iconColor: Theme.of(context).colorScheme.primary, iconSrc: Assets.icons.trash),
                     const Padding(padding: EdgeInsets.only(right: 9)),
                     Text(localizations.clearCache),
                   ],
@@ -403,7 +393,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                     ),
                     OwnIcon(
                       iconColor: Theme.of(context).colorScheme.primary,
-                      iconName: 'lock',
+                      iconSrc: Assets.icons.lock,
                     ),
                     const Padding(
                       padding: EdgeInsets.only(right: 9),
@@ -420,7 +410,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             MyIconTextButton(
               function: () => signUserOut(text: localizations.logOutSuccess),
               color: Colors.red,
-              iconName: 'logout',
+              iconSrc: Assets.icons.logOut,
               text: localizations.logOut,
             ),
             MyTextDivider(
@@ -429,7 +419,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             MyIconTextButton(
               function: () => pushOrGo(context, "/delete_account"),
               color: Colors.red,
-              iconName: 'delete',
+              iconSrc: Assets.icons.delete,
               text: localizations.deleteAccount,
             ),
             MyLine(
@@ -457,10 +447,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                       return FutureBuilder(
                         future: connector.buildVersion,
                         builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.done) {
-                            final String buildVersion =
-                                snapshot.data.toString();
+                          if (snapshot.connectionState == ConnectionState.done) {
+                            final String buildVersion = snapshot.data.toString();
                             return Column(
                               children: [
                                 Text(

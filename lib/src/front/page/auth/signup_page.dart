@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:mymangatheque/l10n/app_localizations.dart';
 import 'package:mymangatheque/src/back/services/pocketbase.dart';
+import 'package:mymangatheque/src/const/assets.dart';
 import 'package:mymangatheque/src/const/own_icon.dart';
 import 'package:mymangatheque/src/front/components/my_button.dart';
 import 'package:mymangatheque/src/front/components/my_scroll_column.dart';
@@ -112,7 +113,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
                 // Locker Icon
                 SvgPicture.asset(
-                  'assets/icons/locker.svg',
+                  Assets.icons.locker,
                   height: 75,
                   colorFilter: ColorFilter.mode(
                     Theme.of(context).colorScheme.primary,
@@ -306,7 +307,7 @@ class _SignUpPageState extends State<SignUpPage> {
                             padding: EdgeInsets.only(right: 6),
                           ),
                           iconStyleData: IconStyleData(
-                            icon: OwnIcon(iconColor: Theme.of(context).colorScheme.primary, iconName: 'arrow-down'),
+                            icon: OwnIcon(iconColor: Theme.of(context).colorScheme.primary, iconSrc: Assets.icons.arrowDown),
                             iconSize: 24,
                           ),
                           dropdownStyleData: DropdownStyleData(
@@ -378,7 +379,7 @@ class _SignUpPageState extends State<SignUpPage> {
                   children: [
                     // Google Button
                     SquareTile(
-                      imagePath: 'assets/images/google.png',
+                      imagePath: Assets.images.google,
                       onTap: () => {
                         connector.signInWithGoogle(context),
                       },

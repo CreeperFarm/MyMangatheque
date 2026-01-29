@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mymangatheque/l10n/app_localizations.dart';
 import 'package:mymangatheque/src/back/provider/manga_owned_provider.dart';
 import 'package:mymangatheque/src/back/services/pocketbase.dart';
+import 'package:mymangatheque/src/const/assets.dart';
 import 'package:mymangatheque/src/const/own_icon.dart';
 import 'package:mymangatheque/src/front/components/my_line.dart';
 import 'package:mymangatheque/src/front/components/my_tome_number_show.dart';
@@ -251,7 +252,7 @@ class _EnvyTabState extends ConsumerState<EnvyTab> {
                             ),
                             OwnIcon(
                               iconColor: Theme.of(context).colorScheme.primary,
-                              iconName: 'arrow-right',
+                              iconSrc: Assets.icons.arrowRight,
                             ),
                           ],
                         ),

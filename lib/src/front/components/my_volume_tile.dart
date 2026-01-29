@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:mymangatheque/l10n/app_localizations.dart';
+import 'package:mymangatheque/src/const/assets.dart';
 import 'package:mymangatheque/src/const/own_icon.dart';
 import 'package:mymangatheque/src/function/auto_push_or_go.dart';
 
@@ -90,7 +91,7 @@ class MyVolumeTile extends StatelessWidget {
             ),
             OwnIcon(
               iconColor: Theme.of(context).colorScheme.primary,
-              iconName: 'arrow-right',
+              iconSrc: Assets.icons.arrowRight,
             ),
           ],
         ),
