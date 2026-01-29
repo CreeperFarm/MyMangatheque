@@ -25,7 +25,7 @@ jobs:
         run: flutter pub get
 
       - name: Create Keystore and Env file
-          run: |
+          run: 
             # 1. Decode the Keystore file
             echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > android/upload-keystore.jks
             
