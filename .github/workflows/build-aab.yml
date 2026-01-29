@@ -2,14 +2,14 @@ name: Build AAB
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main,dev ]
 
 permissions:
   contents: read
 
 jobs:
   build-aab:
-    name: Build APK
+    name: Build AAB
     runs-on: ubuntu-latest
 
     steps:
