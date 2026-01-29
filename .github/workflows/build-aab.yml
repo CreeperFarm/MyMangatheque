@@ -2,7 +2,7 @@ name: Build AAB
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main,dev ]
 
 permissions:
   contents: read
