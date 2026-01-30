@@ -2,7 +2,7 @@ name: Build AAB
 
 on:
   push:
-    branches: [ main,dev ]
+    branches: [ main ]
 
 permissions:
   contents: read
@@ -46,5 +46,5 @@ jobs:
       - name: Upload AAB
         uses: actions/upload-artifact@v4
         with:
-          name: app-release-apk
+          name: app-release-aab
           path: build/app/outputs/bundle/release/app-release.aab
