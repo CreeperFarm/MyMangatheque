@@ -32,7 +32,7 @@ jobs:
           KEY_PASS: ${{ secrets.KEY_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
         run: |
-          openssl aes-256-cbc -d -in android/keystore.enc -out android/upload-keystore.jks -k "$DECRYPT_PASS" -pbkdf2
+          openssl aes-256-cbc -d -in android/app/keystore.enc -out android/upload-keystore.jks -k "$DECRYPT_PASS" -pbkdf2
           echo "Verifying keystore integrity..."
           keytool -list -v -keystore android/upload-keystore.jks -storepass "$STORE_PASS" -alias "$KEY_ALIAS
           touch .env
