@@ -26,13 +26,20 @@ jobs:
         run: flutter pub get
 
       - name: Create Keystore and Env file
+        env:
+          DECRYPT_PASS: ${{ secrets.KEYSTORE_DECRYPTION_PASSWORD }}
+          STORE_PASS: ${{ secrets.STORE_PASSWORD }}
+          KEY_PASS: ${{ secrets.KEY_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
         run: |
-          openssl aes-256-cbc -d -in android/app/keystore.enc -out android/upload-keystore.jks -k "${{ secrets.KEYSTORE_DECRYPTION_PASSWORD }}" -pbkdf2
-          echo "storePassword=${{ secrets.STORE_PASSWORD }}" > .env
-          echo "keyPassword=${{ secrets.KEY_PASSWORD }}" >> .env
-          echo "keyAlias=${{ secrets.KEY_ALIAS }}" >> .env
+          openssl aes-256-cbc -d -in android/keystore.enc -out android/upload-keystore.jks -k "$DECRYPT_PASS" -pbkdf2
+          echo "Verifying keystore integrity..."
+          keytool -list -v -keystore android/upload-keystore.jks -storepass "$STORE_PASS" -alias "$KEY_ALIAS
+          touch .env
+          echo "storePassword=$STORE_PASS" >> .env
+          echo "keyPassword=$KEY_PASS" >> .env
+          echo "keyAlias=$KEY_ALIAS" >> .env
           echo "storeFile=../upload-keystore.jks" >> .env
-          ls -lh android/upload-keystore.jks
 
       - name: Build AAB
         run: flutter build appbundle --obfuscate --split-debug-info out/android --release
