@@ -48,3 +48,4 @@ ios/Podfile.lock
 
 # Don't publish keys
 /keysigning/
+.env

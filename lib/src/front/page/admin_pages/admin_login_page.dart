@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mymangatheque/l10n/app_localizations.dart';
 import 'package:mymangatheque/src/back/services/pocketbaseadmin.dart';
+import 'package:mymangatheque/src/const/assets.dart';
 import 'package:mymangatheque/src/front/components/my_button.dart';
 import 'package:mymangatheque/src/front/components/my_scroll_column.dart';
 import 'package:mymangatheque/src/front/components/my_textfield.dart';
@@ -58,7 +59,7 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(30.0),
                   child: Image.asset(
-                    'assets/images/logo_app.png',
+                    Assets.logo.blueToneAndWhiteSquare,
                     width: 200,
                   ),
                 ),

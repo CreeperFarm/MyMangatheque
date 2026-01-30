@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:mymangatheque/l10n/app_localizations.dart';
 import 'package:mymangatheque/src/back/services/pocketbase.dart';
+import 'package:mymangatheque/src/const/assets.dart';
 import 'package:mymangatheque/src/front/components/my_button.dart';
 import 'package:mymangatheque/src/front/components/my_scroll_column.dart';
 import 'package:mymangatheque/src/front/components/my_textfield.dart';
@@ -108,8 +109,14 @@ class _ModifyPasswordPageState extends State<ModifyPasswordPage> {
           Center(
             child: Column(
               children: [
-                SvgPicture.asset('assets/icons/locker.svg',
-                    height: 200, colorFilter: ColorFilter.mode(Theme.of(context).colorScheme.primary, BlendMode.srcIn)),
+                SvgPicture.asset(
+                  Assets.icons.locker,
+                  height: 200,
+                  colorFilter: ColorFilter.mode(
+                    Theme.of(context).colorScheme.primary,
+                    BlendMode.srcIn,
+                  ),
+                ),
                 const SizedBox(height: 11),
                 Text(
                   localizations.modifyPassword,

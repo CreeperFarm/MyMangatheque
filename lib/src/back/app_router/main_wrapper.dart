@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 import 'package:keyboard_detection/keyboard_detection.dart';
 import 'package:mymangatheque/l10n/app_localizations.dart';
 import 'package:mymangatheque/src/back/services/pocketbase.dart';
+import 'package:mymangatheque/src/const/assets.dart';
 import 'package:mymangatheque/src/const/own_icon.dart';
 import 'package:mymangatheque/src/front/components/my_drawer.dart';
 import 'package:mymangatheque/src/front/components/my_drawer_tile.dart';
@@ -52,17 +53,17 @@ class _MainWrapperState extends ConsumerState<MainWrapper> {
     );
 
     // One time callback
-    keyboardDetectionController.addCallback((state) {
+    keyboardDetectionController.registerCallback((state) {
       return false;
     });
 
     // Looped callback
-    keyboardDetectionController.addCallback((state) {
+    keyboardDetectionController.registerCallback((state) {
       return true;
     });
 
     // Looped with future callback
-    keyboardDetectionController.addCallback((state) async {
+    keyboardDetectionController.registerCallback((state) async {
       await Future.delayed(const Duration(milliseconds: 100));
       print('Listen to onChanged with looped future Callback: $state');
 
@@ -87,7 +88,19 @@ class _MainWrapperState extends ConsumerState<MainWrapper> {
 
     // TODO : restore the planning page.
     //List<String> navIcons = ["home", "collection", "search", "calendar", "user"];
-    const List<String> navIcons = ["home", "collection", "search", "user"];
+    List<String> navIconsSrc = [
+      Assets.icons.home,
+      Assets.icons.collection,
+      Assets.icons.search,
+      Assets.icons.user,
+    ];
+    // Active versions of the icons for the bottom navigation
+    List<String> navIconsActive = [
+      Assets.icons.homeActive,
+      Assets.icons.collectionActive,
+      Assets.icons.searchActive,
+      Assets.icons.userActive,
+    ];
     //List<String> navTitle = ["Accueil", "Collection", "Recherche", "Planning", "Profil"];
     List<String> navTitle = [localizations.home, localizations.collection, localizations.search, localizations.profile];
     //List<String> navRoute = ["/", "/library", "/search", "/planning", "/profile"];
@@ -107,6 +120,17 @@ class _MainWrapperState extends ConsumerState<MainWrapper> {
         changeThemeColor(lightBgColor, lightTextColor, ref);
       }
     });*/
+
+    // Helper to build icon asset path
+    String iconPath(String imageSrc, {bool active = false}) {
+      if (active) {
+        int index = navIconsSrc.indexOf(imageSrc);
+        return navIconsActive[index];
+      } else {
+        return imageSrc;
+      }
+    }
+
     return KeyboardDetection(
       controller: keyboardDetectionController,
       child: LayoutBuilder(
@@ -138,7 +162,7 @@ class _MainWrapperState extends ConsumerState<MainWrapper> {
                                       children: [
                                         ClipRRect(
                                           borderRadius: BorderRadius.circular(10),
-                                          child: Image.asset('assets/images/logo_app.png', width: 50, height: 50),
+                                          child: Image.asset(Assets.logo.blueToneAndWhiteSquare, width: 50, height: 50),
                                         ),
                                         const Text('MyMangathèque', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                                       ],
@@ -146,12 +170,13 @@ class _MainWrapperState extends ConsumerState<MainWrapper> {
                                   )),
                             ),
                             Column(
-                              children: (navIcons).map((iconName) {
-                                int index = navIcons.indexOf(iconName);
-                                if (navIcons[index] == "user") {
+                              children: (navIconsSrc).map((iconSrc) {
+                                int index = navIconsSrc.indexOf(iconSrc);
+                                // Compare to the actual asset constant for the user icon
+                                if (iconSrc == Assets.icons.user) {
                                   return const Padding(padding: EdgeInsets.zero);
                                 } else {
-                                  return MyDrawerTile(title: navTitle[index], icon: iconName, goTo: navRoute[index], pop: false);
+                                  return MyDrawerTile(title: navTitle[index], iconSrc: iconSrc, goTo: navRoute[index], pop: false);
                                 }
                               }).toList(),
                             ),
@@ -181,7 +206,7 @@ class _MainWrapperState extends ConsumerState<MainWrapper> {
                                                   height: 30,
                                                 )
                                               : SvgPicture.asset(
-                                                  'assets/icons/user.svg',
+                                                  Assets.icons.user,
                                                   width: 30,
                                                   height: 30,
                                                   colorFilter: ColorFilter.mode(Theme.of(context).colorScheme.primary, BlendMode.srcIn),
@@ -197,7 +222,7 @@ class _MainWrapperState extends ConsumerState<MainWrapper> {
                                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                         children: [
                                           SvgPicture.asset(
-                                            'assets/icons/user.svg',
+                                            Assets.icons.user,
                                             width: 30,
                                             height: 30,
                                             colorFilter: ColorFilter.mode(Theme.of(context).colorScheme.primary, BlendMode.srcIn),
@@ -242,7 +267,7 @@ class _MainWrapperState extends ConsumerState<MainWrapper> {
             return Scaffold(
               appBar: AppBar(),
               drawer: MyDrawer(
-                navIcons: navIcons,
+                navIcons: navIconsSrc,
                 navTitle: navTitle,
                 navRoute: navRoute,
                 profileText: localizations.profile,
@@ -282,8 +307,8 @@ class _MainWrapperState extends ConsumerState<MainWrapper> {
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: navIcons.map((iconName) {
-                          int index = navIcons.indexOf(iconName);
+                        children: navIconsSrc.map((iconName) {
+                          int index = navIconsSrc.indexOf(iconName);
                           bool isSelected = selectedIndex == index;
                           return Material(
                             color: Colors.transparent,
@@ -305,7 +330,7 @@ class _MainWrapperState extends ConsumerState<MainWrapper> {
                                       left: 22,
                                     ),
                                     child: OwnIcon(
-                                      iconName: isSelected ? '$iconName-active' : iconName,
+                                      iconSrc: iconPath(iconName, active: isSelected),
                                       iconColor: Theme.of(context).colorScheme.primary,
                                     ),
                                   ),

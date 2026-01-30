@@ -3,18 +3,18 @@ import 'package:mymangatheque/src/const/own_icon.dart';
 
 class MyIconTextLabel extends StatelessWidget {
   final Color? iconAndTextColor;
-  final String iconName;
+  final String iconSrc;
   final String text;
   final double? heightIcon;
 
-  const MyIconTextLabel({required this.iconName, required this.text, this.iconAndTextColor, this.heightIcon, super.key});
+  const MyIconTextLabel({required this.iconSrc, required this.text, this.iconAndTextColor, this.heightIcon, super.key});
 
   @override
   Widget build(BuildContext context) {
     return Row(children: [
       OwnIcon(
         iconColor: (iconAndTextColor != null) ? iconAndTextColor! : Theme.of(context).colorScheme.primary,
-        iconName: iconName,
+        iconSrc: iconSrc,
         height: heightIcon,
       ),
       Text(

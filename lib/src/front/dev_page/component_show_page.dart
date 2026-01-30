@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mymangatheque/l10n/app_localizations.dart';
+import 'package:mymangatheque/src/const/assets.dart';
 import 'package:mymangatheque/src/front/components/my_button.dart';
 import 'package:mymangatheque/src/front/components/my_icon_text_button.dart';
 import 'package:mymangatheque/src/front/components/my_line.dart';
@@ -77,15 +78,15 @@ class ComponentShowPage extends StatelessWidget {
               ),
             ),
             const Text('SquareTile(imagePath: imagePath (in local storage), onTap: () {})'),
-            Padding(padding: const EdgeInsets.all(10), child: SquareTile(imagePath: 'assets/images/google.png', onTap: () {})),
+            Padding(padding: const EdgeInsets.all(10), child: SquareTile(imagePath: Assets.images.google, onTap: () {})),
             const Text('MyScrollColumn(children: [list of widgets]) to get a scrolling page column'),
-            const Text('MyIconButton(function: Function, color: Color, iconName: String), to show a button with an icon and text'),
+            const Text('MyIconButton(function: Function, color: Color, iconSrc: String), to show a button with an icon and text'),
             Padding(
               padding: const EdgeInsets.all(10),
               child: MyIconTextButton(
                 function: () {},
                 color: Colors.blue,
-                iconName: 'home',
+                iconSrc: Assets.icons.home,
                 text: 'text',
               ),
             ),

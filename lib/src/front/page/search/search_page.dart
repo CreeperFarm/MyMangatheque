@@ -5,9 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mymangatheque/src/back/provider/search_filter_provider.dart';
 import 'package:mymangatheque/src/back/services/pocketbase.dart';
+import 'package:mymangatheque/src/const/assets.dart';
 import 'package:mymangatheque/src/front/components/my_line.dart';
 import 'package:mymangatheque/src/function/auto_push_or_go.dart';
-import 'package:youtube_player_iframe/youtube_player_iframe.dart';
+import 'package:video_player/video_player.dart';
 
 class SearchPage extends ConsumerStatefulWidget {
   const SearchPage({super.key});
@@ -22,20 +23,23 @@ class _SearchPageState extends ConsumerState<SearchPage> {
   final TextEditingController _searchController = TextEditingController();
   final PocketBaseConnector connector = PocketBaseConnector();
 
-  getClientStream() async {
+  VideoPlayerController? _videoController;
+  Future<void>? _initializeVideoFuture;
+
+  void getClientStream() async {
     var data = await connector.getCollectionFullListOrderExpanded('series', 'title', 'authors');
     /*var data = await FirebaseFirestore.instance
         .collection('manga')
         .orderBy(ref.watch(searchFilterProvider))
         .get();*/
-    print(data);
+    debugPrint(data.toString());
     setState(() {
       _allResults = data;
     });
   }
 
   String getAllAuthorsName(List authorsExpanded) {
-    print(authorsExpanded);
+    debugPrint(authorsExpanded.toString());
     var authors = [];
     for (var i = 0; i < authorsExpanded.length; i++) {
       authors.add(authorsExpanded[i]['name']);
@@ -43,19 +47,32 @@ class _SearchPageState extends ConsumerState<SearchPage> {
     return authors.join(" et ");
   }
 
-  _onSearchChanged() {
+  void _onSearchChanged() {
     searchResultsList();
+
+    // Pause the Bad Apple video when the search is no longer 'bad apple',
+    // and resume it when the search becomes 'bad apple' again.
+    final query = _searchController.text.toLowerCase().trim();
+    if (query != 'bad apple') {
+      if (_videoController != null && _videoController!.value.isInitialized && _videoController!.value.isPlaying) {
+        _videoController!.pause();
+      }
+    } else {
+      if (_videoController != null && _videoController!.value.isInitialized && !_videoController!.value.isPlaying) {
+        _videoController!.play();
+      }
+    }
   }
 
-  String textLength(text, length) {
+  String textLength(String text, int length) {
     if (text.length > length) {
-      return text.substring(0, length) + "...";
+      return "${text.substring(0, length)}...";
     } else {
       return text;
     }
   }
 
-  searchResultsList() {
+  void searchResultsList() {
     var showResults = [];
     //var filter = ref.watch(searchFilterProvider); // TODO: Create searchFilterProvider
 
@@ -79,6 +96,11 @@ class _SearchPageState extends ConsumerState<SearchPage> {
   void dispose() {
     _searchController.removeListener(() {});
     _searchController.dispose();
+    if (_videoController != null) {
+      _videoController!.pause();
+      _videoController!.dispose();
+      _videoController = null;
+    }
     super.dispose();
   }
 
@@ -96,17 +118,44 @@ class _SearchPageState extends ConsumerState<SearchPage> {
     super.initState();
   }
 
+  /// Construit un lecteur vidéo pour la vidéo locale « assets/videos/bad-apple.mp4 ».
+  /// L'initialisation est faite paresseusement : le contrôleur est créé la première
+  /// fois que cette méthode est appelée. La vidéo est lancée automatiquement et mise en
+  /// boucle.
+  Widget _buildBadApplePlayer() {
+    if (_videoController == null) {
+      _videoController = VideoPlayerController.asset(Assets.videos.badApple);
+      _initializeVideoFuture = _videoController!.initialize().then((_) {
+        _videoController!.setLooping(true);
+        _videoController!.play();
+        // Après l'initialisation on demande un rebuild pour que l'AspectRatio prenne la bonne taille
+        setState(() {});
+      });
+    }
+
+    return FutureBuilder<void>(
+      future: _initializeVideoFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.done && _videoController != null) {
+          final aspect = _videoController!.value.aspectRatio;
+          return AspectRatio(
+            aspectRatio: aspect > 0 ? aspect : 4 / 3,
+            child: VideoPlayer(_videoController!),
+          );
+        } else {
+          return const Center(child: CircularProgressIndicator());
+        }
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final selectedFilter = ref.watch(searchFilterProvider);
 
     searchResultsList();
 
-    final _controller = YoutubePlayerController.fromVideoId(
-      videoId: '9lNZ_Rnr7Jc', // Bad Apple video ID
-      autoPlay: true,
-      params: const YoutubePlayerParams(showFullscreenButton: false, showControls: false),
-    );
+    //TODO : Add the bad apple video from assets
 
     return Scaffold(
       appBar: AppBar(
@@ -175,10 +224,7 @@ class _SearchPageState extends ConsumerState<SearchPage> {
       ),
       body: (_searchController.text.toLowerCase() == 'bad apple')
           ? Center(
-              child: YoutubePlayer(
-                controller: _controller,
-                aspectRatio: 4 / 3,
-              ),
+              child: _buildBadApplePlayer(),
             ) // TODO: Add the bad apple video
           : (_resultsList.isEmpty)
               ? Center(

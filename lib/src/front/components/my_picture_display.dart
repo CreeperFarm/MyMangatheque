@@ -38,7 +38,7 @@ class MyPictureDisplay extends StatelessWidget {
                     filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
                     child: Container(
                       alignment: Alignment.center,
-                      color: Colors.grey.withOpacity(0.4),
+                      color: Colors.grey.withValues(alpha: 0.4),
                     ),
                   ),
                 ],

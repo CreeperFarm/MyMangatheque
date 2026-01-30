@@ -3,6 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mymangatheque/l10n/app_localizations.dart';
 import 'package:mymangatheque/src/back/services/pocketbase.dart';
+import 'package:mymangatheque/src/const/assets.dart';
 import 'package:mymangatheque/src/front/components/my_button.dart';
 import 'package:mymangatheque/src/front/components/my_scroll_column.dart';
 import 'package:mymangatheque/src/front/components/my_square_tile.dart';
@@ -78,8 +79,14 @@ class _SignInPageState extends State<SignInPage> {
               const SizedBox(height: 10),
 
               // Locker Icon
-              SvgPicture.asset('assets/icons/locker.svg',
-                  height: 100, colorFilter: ColorFilter.mode(Theme.of(context).colorScheme.primary, BlendMode.srcIn)),
+              SvgPicture.asset(
+                Assets.icons.locker,
+                height: 100,
+                colorFilter: ColorFilter.mode(
+                  Theme.of(context).colorScheme.primary,
+                  BlendMode.srcIn,
+                ),
+              ),
 
               const SizedBox(height: 15),
 
@@ -182,7 +189,7 @@ class _SignInPageState extends State<SignInPage> {
                 children: [
                   // Google Button
                   SquareTile(
-                    imagePath: 'assets/images/google.png',
+                    imagePath: Assets.images.google,
                     onTap: () => {
                       debugPrint("Google Sign In got clicked"),
                       connector.signInWithGoogle(context),

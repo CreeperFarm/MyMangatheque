@@ -12,7 +12,7 @@ class ErrorPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final language = ref.watch(languageProvider);
+    //final language = ref.watch(languageProvider);
     // Get localization - return early if not available
     var localizations = AppLocalizations.of(context);
     if (localizations == null) {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mymangatheque/l10n/app_localizations.dart';
+import 'package:mymangatheque/src/const/assets.dart';
 import 'package:mymangatheque/src/const/own_icon.dart';
 import 'package:mymangatheque/src/front/components/my_line.dart';
 import 'package:simple_barcode_scanner/simple_barcode_scanner.dart';
@@ -59,7 +60,7 @@ class MyTomeNumberShow extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          OwnIcon(iconColor: Theme.of(context).colorScheme.primary, iconName: 'barcode'),
+                          OwnIcon(iconColor: Theme.of(context).colorScheme.primary, iconSrc: Assets.icons.barcode),
                           SizedBox(width: 5),
                           Text(
                             localizations.scanner,

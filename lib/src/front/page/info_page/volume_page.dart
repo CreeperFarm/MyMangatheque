@@ -5,6 +5,7 @@ import 'package:flutter_custom_tabs/flutter_custom_tabs_lite.dart';
 import 'package:intl/intl.dart';
 import 'package:mymangatheque/l10n/app_localizations.dart';
 import 'package:mymangatheque/src/back/services/pocketbase.dart';
+import 'package:mymangatheque/src/const/assets.dart';
 import 'package:mymangatheque/src/const/own_icon.dart';
 import 'package:mymangatheque/src/front/components/my_author_tile.dart';
 import 'package:mymangatheque/src/front/components/my_editor_show.dart';
@@ -636,7 +637,7 @@ class _VolumePageState extends State<VolumePage> {
                                                                   offset: const Offset(0, 3.5),
                                                                   child: OwnIcon(
                                                                     iconColor: Theme.of(context).colorScheme.primary,
-                                                                    iconName: 'shopping-cart',
+                                                                    iconSrc: Assets.icons.shoppingCart,
                                                                   ),
                                                                 ),
                                                                 SizedBox(
@@ -685,7 +686,7 @@ class _VolumePageState extends State<VolumePage> {
                                 : Padding(
                                     padding: const EdgeInsets.symmetric(vertical: 5),
                                     child: MyIconTextLabel(
-                                      iconName: 'calendar',
+                                      iconSrc: Assets.icons.calendar,
                                       text: '${localizations.publicationDate} : ${DateFormat.yMMMMd(localizations.localeName).format(release)}',
                                       heightIcon: 30,
                                     ),
@@ -695,7 +696,7 @@ class _VolumePageState extends State<VolumePage> {
                                 : Padding(
                                     padding: const EdgeInsets.symmetric(vertical: 5),
                                     child: MyIconTextLabel(
-                                      iconName: 'barcode',
+                                      iconSrc: Assets.icons.barcode,
                                       text: '${localizations.ean} : ${data['ean']}',
                                       heightIcon: 30,
                                     ),
@@ -705,7 +706,7 @@ class _VolumePageState extends State<VolumePage> {
                                 : Padding(
                                     padding: const EdgeInsets.symmetric(vertical: 5),
                                     child: MyIconTextLabel(
-                                      iconName: 'book_open',
+                                      iconSrc: Assets.icons.bookOpen,
                                       text: "${localizations.numberOfPages} : ${data['info']['pageNumber'].toString()}",
                                       heightIcon: 30,
                                     ),

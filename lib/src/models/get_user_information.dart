@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:mymangatheque/src/back/services/pocketbase.dart';
+import 'package:mymangatheque/src/const/assets.dart';
 import 'package:path/path.dart';
 
 class GetUserProfilePicture extends StatelessWidget {
@@ -54,7 +55,7 @@ class GetUserProfilePicture extends StatelessWidget {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(150.0),
         child: Image.asset(
-          'assets/images/unknown.webp',
+          Assets.images.unknown,
           height: height ?? 175,
           width: width ?? 175,
           fit: BoxFit.cover,

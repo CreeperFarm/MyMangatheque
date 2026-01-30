@@ -83,7 +83,7 @@ class _MyMangaShowTileState extends State<MyMangaShowTile> {
               minHeight: widget.height,
             ),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.5),
+              color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.5),
               borderRadius: BorderRadius.circular(10.0),
             ),
             child: ClipRRect(

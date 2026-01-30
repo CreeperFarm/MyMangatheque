@@ -1,0 +1,50 @@
+name: Build AAB
+
+on:
+  push:
+    branches: [ main ]
+
+permissions:
+  contents: read
+
+jobs:
+  build-aab:
+    name: Build AAB
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: "stable"
+
+      - name: Flutter pub get
+        run: flutter pub get
+
+      - name: Create Keystore and Env file
+        env:
+          DECRYPT_PASS: ${{ secrets.KEYSTORE_DECRYPTION_PASSWORD }}
+          STORE_PASS: ${{ secrets.STORE_PASSWORD }}
+          KEY_PASS: ${{ secrets.KEY_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+        run: |
+          openssl aes-256-cbc -d -in android/app/keystore.enc -out android/upload-keystore.jks -k "$DECRYPT_PASS" -pbkdf2
+          echo "Verifying keystore integrity..."
+          keytool -list -v -keystore android/upload-keystore.jks -storepass "$STORE_PASS" -alias "$KEY_ALIAS"
+          touch .env
+          echo "storePassword=$STORE_PASS" >> .env
+          echo "keyPassword=$KEY_PASS" >> .env
+          echo "keyAlias=$KEY_ALIAS" >> .env
+          echo "storeFile=../upload-keystore.jks" >> .env
+
+      - name: Build AAB
+        run: flutter build appbundle --obfuscate --split-debug-info out/android --release
+
+      - name: Upload AAB
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-release-aab
+          path: build/app/outputs/bundle/release/app-release.aab
