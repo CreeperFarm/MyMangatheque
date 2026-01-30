@@ -27,11 +27,12 @@ jobs:
       - name: Create Keystore and Env file
         run: |
           # The pipe character '|' above is crucial for multi-line commands
-          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > android/upload-keystore.jks
+          printf "%s" "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > android/upload-keystore.jks
           echo "storePassword=${{ secrets.STORE_PASSWORD }}" > .env
           echo "keyPassword=${{ secrets.KEY_PASSWORD }}" >> .env
           echo "keyAlias=${{ secrets.KEY_ALIAS }}" >> .env
           echo "storeFile=../upload-keystore.jks" >> .env
+          ls -lh android/upload-keystore.jks
 
       - name: Build AAB
         run: flutter build appbundle --obfuscate --split-debug-info out/android --release
