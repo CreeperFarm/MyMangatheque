@@ -83,21 +83,37 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                     Expanded(
                       child: ElevatedButton(
                         onPressed: () async {
+                          // Close the confirmation dialog first
+                          Navigator.of(context, rootNavigator: true).pop();
+
+                          // Safety check
+                          final user = connector.getConnectedUser();
+                          if (user == null) {
+                            showMessage(localizations.errorOccurred, context);
+                            if (!kIsWeb) {
+                              Navigator.of(context).pop();
+                            } else {
+                              pushOrGo(context, "/profile");
+                            }
+                            return;
+                          }
+
                           try {
-                            await connector.deleteUser(
-                              connector.getConnectedUser()!.id,
-                            );
+                            await connector.deleteUser(user.id);
+                            // After successful deletion, log out locally and notify the user
                             connector.logOut();
-                            showMessage(localizations.accountHaveBeenDeleted, context);
-                            Navigator.of(context, rootNavigator: true).pop();
+                            showMessage(localizations.deleteAccountSuccess, context);
+
                             if (!kIsWeb) {
                               Navigator.of(context).pop();
                             } else {
                               pushOrGo(context, "/profile");
                             }
                           } catch (e) {
-                            showMessage(localizations.errorDeleteAccount, context);
-                            Navigator.of(context, rootNavigator: true).pop();
+                            // If deletion failed, still log out and inform the user
+                            connector.logOut();
+                            showMessage(localizations.deleteAccountFailed, context);
+
                             if (!kIsWeb) {
                               Navigator.of(context).pop();
                             } else {

@@ -26,20 +26,20 @@ class _SearchPageState extends ConsumerState<SearchPage> {
   VideoPlayerController? _videoController;
   Future<void>? _initializeVideoFuture;
 
-  getClientStream() async {
+  void getClientStream() async {
     var data = await connector.getCollectionFullListOrderExpanded('series', 'title', 'authors');
     /*var data = await FirebaseFirestore.instance
         .collection('manga')
         .orderBy(ref.watch(searchFilterProvider))
         .get();*/
-    print(data);
+    debugPrint(data.toString());
     setState(() {
       _allResults = data;
     });
   }
 
   String getAllAuthorsName(List authorsExpanded) {
-    print(authorsExpanded);
+    debugPrint(authorsExpanded.toString());
     var authors = [];
     for (var i = 0; i < authorsExpanded.length; i++) {
       authors.add(authorsExpanded[i]['name']);
