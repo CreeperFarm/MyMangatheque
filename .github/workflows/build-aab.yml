@@ -26,8 +26,7 @@ jobs:
 
       - name: Create Keystore and Env file
         run: |
-          # The pipe character '|' above is crucial for multi-line commands
-          printf "%s" "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > android/upload-keystore.jks
+          echo "${{ secrets.ANDROID_KEYSTORE_HEX }}" | xxd -r -p > android/upload-keystore.jks
           echo "storePassword=${{ secrets.STORE_PASSWORD }}" > .env
           echo "keyPassword=${{ secrets.KEY_PASSWORD }}" >> .env
           echo "keyAlias=${{ secrets.KEY_ALIAS }}" >> .env
