@@ -26,7 +26,7 @@ jobs:
 
       - name: Create Keystore and Env file
         run: |
-          openssl aes-256-cbc -d -in android/keystore.enc -out android/app/upload-keystore.jks -k "${{ secrets.KEYSTORE_DECRYPTION_PASSWORD }}" -pbkdf2
+          openssl aes-256-cbc -d -in android/app/keystore.enc -out android/app/upload-keystore.jks -k "${{ secrets.KEYSTORE_DECRYPTION_PASSWORD }}" -pbkdf2
           echo "storePassword=${{ secrets.STORE_PASSWORD }}" > .env
           echo "keyPassword=${{ secrets.KEY_PASSWORD }}" >> .env
           echo "keyAlias=${{ secrets.KEY_ALIAS }}" >> .env
