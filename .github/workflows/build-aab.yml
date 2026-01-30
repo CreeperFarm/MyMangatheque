@@ -27,12 +27,12 @@ jobs:
 
       - name: Create Keystore and Env file
         run: |
-          openssl aes-256-cbc -d -in android/app/keystore.enc -out android/app/upload-keystore.jks -k "${{ secrets.KEYSTORE_DECRYPTION_PASSWORD }}" -pbkdf2
+          openssl aes-256-cbc -d -in android/app/keystore.enc -out android/upload-keystore.jks -k "${{ secrets.KEYSTORE_DECRYPTION_PASSWORD }}" -pbkdf2
           echo "storePassword=${{ secrets.STORE_PASSWORD }}" > .env
           echo "keyPassword=${{ secrets.KEY_PASSWORD }}" >> .env
           echo "keyAlias=${{ secrets.KEY_ALIAS }}" >> .env
           echo "storeFile=../upload-keystore.jks" >> .env
-          ls -lh android/app/upload-keystore.jks
+          ls -lh android/upload-keystore.jks
 
       - name: Build AAB
         run: flutter build appbundle --obfuscate --split-debug-info out/android --release
