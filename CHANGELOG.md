@@ -13,6 +13,7 @@ All notable changes to this project are documented in reverse chronological orde
 
 ## Summary
 
+- [0.0.1+10](#0020---friday-january-30-2026)
 - [0.0.1+9](#0019---wednesday-january-28-2026)
 - [0.0.1+8](#0018---sunday-november-9-2025)
 - [0.0.1+7](#0017---tuesday-august-19-2025)
@@ -26,6 +27,13 @@ All notable changes to this project are documented in reverse chronological orde
 ---
 
 ## Changes
+
+## [0.0.1+10] - Friday, January 30, 2026
+
+### Minor Updates
+
+- Modification of the account deletion form
+- Automatics compilation when pushing to main
 
 ## [0.0.1+9] - Wednesday, January 28, 2026
 
@@ -116,6 +124,7 @@ Toutes les modifications notables de ce projet sont documentées par ordre chron
 
 ## Sommaire
 
+- [0.0.1+10](#0020---vendredi-30-janvier-2026)
 - [0.0.1+9](#0019---mercredi-28-janvier-2026)
 - [0.0.1+8](#0018---dimanche-9-novembre-2025)
 - [0.0.1+7](#0017---mardi-19-août-2025)
@@ -129,6 +138,14 @@ Toutes les modifications notables de ce projet sont documentées par ordre chron
 ---
 
 ## Changements
+
+
+## [0.0.1+10] - Vendredi, 30 janvier 2026
+
+### Mises à jour mineures
+
+- Modifications du formulaire de suppression du compte
+- Ajout de la compilation automatique quand il y a un push sur le main
 
 ## [0.0.1+9] - Mercredi, 28 janvier 2026
 
