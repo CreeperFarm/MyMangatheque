@@ -10,7 +10,6 @@ permissions:
 jobs:
   build-aab:
     name: Build AAB
-    environment: Compile
     runs-on: ubuntu-latest
 
     steps:
