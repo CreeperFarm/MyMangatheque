@@ -43,14 +43,11 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String pronoun(String gender) {
-    String _temp0 = intl.Intl.selectLogic(
-      gender,
-      {
-        'male': 'il',
-        'female': 'elle',
-        'other': 'iel',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(gender, {
+      'male': 'il',
+      'female': 'elle',
+      'other': 'iel',
+    });
     return '$_temp0';
   }
 
@@ -466,17 +463,14 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String supportIs(String support) {
-    String _temp0 = intl.Intl.selectLogic(
-      support,
-      {
-        'manga': 'Manga',
-        'novel': 'Roman',
-        'artbook': 'Artbook',
-        'lightNovel': 'Light Novel',
-        'boxSet': 'Coffret',
-        'other': 'Other',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(support, {
+      'manga': 'Manga',
+      'novel': 'Roman',
+      'artbook': 'Artbook',
+      'lightNovel': 'Light Novel',
+      'boxSet': 'Coffret',
+      'other': 'Other',
+    });
     return '$_temp0';
   }
 
@@ -711,28 +705,25 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String jobsName(String job) {
-    String _temp0 = intl.Intl.selectLogic(
-      job,
-      {
-        'writerMen': 'Écrivain',
-        'writerWomen': 'Écrivaine',
-        'artistMen': 'Dessinateur',
-        'artistWomen': 'Dessinatrice',
-        'editorMen': 'Éditeur',
-        'editorWomen': 'Éditrice',
-        'illustratorMen': 'Illustrateur',
-        'illustratorWomen': 'Illustratrice',
-        'scriptwriterMen': 'Scénariste',
-        'scriptwriterWomen': 'Scénariste',
-        'authorMen': 'Auteur',
-        'authorWomen': 'Auteure',
-        'mangakaMen': 'Mangaka',
-        'mangakaWomen': 'Mangaka',
-        'charaDesignMen': 'Chara Design',
-        'charaDesignWomen': 'Chara Design',
-        'other': 'Other',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(job, {
+      'writerMen': 'Écrivain',
+      'writerWomen': 'Écrivaine',
+      'artistMen': 'Dessinateur',
+      'artistWomen': 'Dessinatrice',
+      'editorMen': 'Éditeur',
+      'editorWomen': 'Éditrice',
+      'illustratorMen': 'Illustrateur',
+      'illustratorWomen': 'Illustratrice',
+      'scriptwriterMen': 'Scénariste',
+      'scriptwriterWomen': 'Scénariste',
+      'authorMen': 'Auteur',
+      'authorWomen': 'Auteure',
+      'mangakaMen': 'Mangaka',
+      'mangakaWomen': 'Mangaka',
+      'charaDesignMen': 'Chara Design',
+      'charaDesignWomen': 'Chara Design',
+      'other': 'Other',
+    });
     return '$_temp0';
   }
 
@@ -820,16 +811,13 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String availability(String availability) {
-    String _temp0 = intl.Intl.selectLogic(
-      availability,
-      {
-        'inStock': 'En Stock',
-        'available': 'Disponible',
-        'unavailable': 'Indisponible',
-        'onPreorder': 'En Précommande',
-        'other': '$availability',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(availability, {
+      'inStock': 'En Stock',
+      'available': 'Disponible',
+      'unavailable': 'Indisponible',
+      'onPreorder': 'En Précommande',
+      'other': '$availability',
+    });
     return '$_temp0';
   }
 
@@ -845,14 +833,11 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String shippingUnderWeeks(String count) {
-    String _temp0 = intl.Intl.selectLogic(
-      count,
-      {
-        '0': '0 semaine',
-        '1': '1 semaine',
-        'other': '$count semaines',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(count, {
+      '0': '0 semaine',
+      '1': '1 semaine',
+      'other': '$count semaines',
+    });
     return 'Expédition sous $_temp0';
   }
 
@@ -1136,13 +1121,10 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String subSerieFromAuthor(String author) {
-    String _temp0 = intl.Intl.selectLogic(
-      author,
-      {
-        'error': '',
-        'other': 'De $author',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(author, {
+      'error': '',
+      'other': 'De $author',
+    });
     return '$_temp0';
   }
 

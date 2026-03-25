@@ -1,0 +1,52 @@
+name: Build
+on:
+    push:
+        branches:
+            - main
+    pull_request:
+        types: [opened, synchronize, reopened]
+jobs:
+    sonarqube:
+        name: SonarQube
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
+
+            # The analysis requires to retrieve dependencies and build successfully
+            - name: Install Flutter
+              uses: subosito/flutter-action@v2
+              with:
+                  channel: "stable"
+
+            - name: Flutter pub get
+              run: flutter pub get
+
+            - name: Create Keystore and Env file
+              env:
+                  DECRYPT_PASS: ${{ secrets.KEYSTORE_DECRYPTION_PASSWORD }}
+                  STORE_PASS: ${{ secrets.STORE_PASSWORD }}
+                  KEY_PASS: ${{ secrets.KEY_PASSWORD }}
+                  KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+              run: |
+                  openssl aes-256-cbc -d -in android/app/keystore.enc -out android/upload-keystore.jks -k "$DECRYPT_PASS" -pbkdf2
+                  echo "Verifying keystore integrity..."
+                  keytool -list -v -keystore android/upload-keystore.jks -storepass "$STORE_PASS" -alias "$KEY_ALIAS"
+                  touch .env
+                  echo "storePassword=$STORE_PASS" >> .env
+                  echo "keyPassword=$KEY_PASS" >> .env
+                  echo "keyAlias=$KEY_ALIAS" >> .env
+                  echo "storeFile=../upload-keystore.jks" >> .env
+
+            - name: Build
+              run: flutter build appbundle --obfuscate --split-debug-info out/android --release
+
+            - name: Add SonarQube config to ignore C/C++/ObjC
+              run: |
+                  echo "sonar.cpp.file.suffixes=-" >> sonar-project.properties
+                  echo "sonar.objc.file.suffixes=-" >> sonar-project.properties
+            - name: SonarQube Scan
+              uses: SonarSource/sonarqube-scan-action@v6
+              env:
+                  SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
