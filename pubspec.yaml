@@ -20,7 +20,7 @@ version: 0.0.1+10
 
 
 environment:
-  sdk: '>=3.2.0 <4.0.0'
+  sdk: '>=3.10.0 <4.0.0'
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -46,25 +46,25 @@ dependencies:
   flutter_svg: ^2.0.17
   glass_kit: ^4.0.1 # For the glass effect
   sliding_clipped_nav_bar: ^3.1.1 # For the bottom navigation bar
-  video_player: ^2.5.1 # For video playback
+  video_player: ^2.10.1 # For video playback
 
   # Theme dependency
   adaptive_theme: ^3.7.0
 
   # Dependency for Profile
-  url_launcher: ^6.3.1
-  image_picker: ^1.1.2
+  url_launcher: ^6.3.2
+  image_picker: ^1.2.1
 
   # Date dependency
   date_field: ^6.0.0
 
   # Dependency for the state management
-  flutter_riverpod: ^3.0.3
-  riverpod_annotation: ^3.0.3
+  flutter_riverpod: ^3.1.0
+  riverpod_annotation: ^4.0.0
 
   # For the routing between page
   go_router: ^17.0.0
-  riverpod: ^3.0.3
+  riverpod: ^3.1.0
 
   # For the barcode scanner
   simple_barcode_scanner: ^0.4.0
@@ -93,7 +93,7 @@ dependencies:
   connectivity_plus: ^7.0.0
   shared_preferences: ^2.5.3
   url_strategy: ^0.3.0
-  intl_utils: ^2.8.11
+  intl_utils: ^2.8.13
   fl_chart: ^1.0.0
   dropdown_button2: ^2.3.9
 
@@ -109,10 +109,10 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
-  riverpod_generator: ^3.0.3
-  build_runner: ^2.4.14
-  custom_lint: ^0.8.0
-  riverpod_lint: ^3.0.3
+  riverpod_generator: ^4.0.0
+  build_runner: ^2.10.5
+  custom_lint: ^0.8.1
+  riverpod_lint: ^3.1.0
 
 # Display Splash Screen
 flutter_native_splash:

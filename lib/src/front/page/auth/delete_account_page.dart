@@ -20,30 +20,18 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
     // Get localization - return early if not available
     var localizations = AppLocalizations.of(context);
     if (localizations == null) {
-      return const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     if (!connector.isLoggedIn()) {
       pushOrGo(context, "/profile");
-      return const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     final AlertDialog dialog = AlertDialog(
-      constraints: BoxConstraints(
-        maxHeight: 250,
-      ),
+      constraints: BoxConstraints(maxHeight: 250),
       backgroundColor: Theme.of(context).colorScheme.onPrimary,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(50),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
       elevation: 10,
       content: Padding(
         padding: const EdgeInsets.all(10.0),
@@ -54,9 +42,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
               Text(
                 localizations.areYouSureDeleteAccount,
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.primary,
-                ),
+                style: TextStyle(color: Theme.of(context).colorScheme.primary),
               ),
               SizedBox(
                 height: 40,
@@ -73,10 +59,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                             pushOrGo(context, "/profile");
                           }
                         },
-                        child: Text(
-                          localizations.cancel,
-                          textAlign: TextAlign.center,
-                        ),
+                        child: Text(localizations.cancel, textAlign: TextAlign.center),
                       ),
                     ),
                     SizedBox(width: 20),
@@ -121,21 +104,17 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                             }
                           }
                         },
-                        style: ButtonStyle(
-                          backgroundColor: WidgetStateProperty.all<Color>(Colors.red),
-                        ),
+                        style: ButtonStyle(backgroundColor: WidgetStateProperty.all<Color>(Colors.red)),
                         child: Text(
                           localizations.deleteAccount,
                           textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: Colors.white,
-                          ),
+                          style: TextStyle(color: Colors.white),
                         ),
                       ),
                     ),
                   ],
                 ),
-              )
+              ),
             ],
           ),
         ),
@@ -143,9 +122,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
     );
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(localizations.deleteAccount),
-      ),
+      appBar: AppBar(title: Text(localizations.deleteAccount)),
       body: Padding(
         padding: const EdgeInsets.all(10.0),
         child: Center(
@@ -157,29 +134,16 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                 child: Text(
                   localizations.deleteAccountConfirmation,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
               ),
               const SizedBox(height: 40),
               ElevatedButton(
                 onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) => dialog,
-                  );
+                  showDialog(context: context, builder: (BuildContext context) => dialog);
                 },
-                style: ButtonStyle(
-                  backgroundColor: WidgetStateProperty.all<Color>(Colors.red),
-                ),
-                child: Text(
-                  localizations.deleteAccount,
-                  style: TextStyle(
-                    color: Colors.white,
-                  ),
-                ),
+                style: ButtonStyle(backgroundColor: WidgetStateProperty.all<Color>(Colors.red)),
+                child: Text(localizations.deleteAccount, style: TextStyle(color: Colors.white)),
               ),
             ],
           ),
