@@ -20,7 +20,11 @@ class VolumePage extends StatefulWidget {
   final String volumeId;
   final String initRoute;
 
-  const VolumePage({required this.volumeId, required this.initRoute, super.key});
+  const VolumePage({
+    required this.volumeId,
+    required this.initRoute,
+    super.key,
+  });
 
   @override
   State<VolumePage> createState() => _VolumePageState();
@@ -42,12 +46,18 @@ class _VolumePageState extends State<VolumePage> {
 
   void _checkVolumeOwnership() async {
     if (connector.isLoggedIn()) {
-      bool owned = await connector.isVolumeOwned(connector.getConnectedUser()!.id, widget.volumeId);
+      bool owned = await connector.isVolumeOwned(
+        connector.getConnectedUser()!.id,
+        widget.volumeId,
+      );
       setState(() {
         isVolumeOwned = owned;
       });
       if (owned) {
-        bool readed = await connector.isVolumeReaded(connector.getConnectedUser()!.id, widget.volumeId);
+        bool readed = await connector.isVolumeReaded(
+          connector.getConnectedUser()!.id,
+          widget.volumeId,
+        );
         setState(() {
           isVolumeReaded = readed;
         });
@@ -61,9 +71,16 @@ class _VolumePageState extends State<VolumePage> {
 
   void _checkSubSeriesFollowing() async {
     if (connector.isLoggedIn()) {
-      final result = await connector.getOneExpand('volumes', widget.volumeId, 'sub_series');
+      final result = await connector.getOneExpand(
+        'volumes',
+        widget.volumeId,
+        'sub_series',
+      );
       final Map<String, dynamic> data = json.decode(result.toString())[0];
-      bool owned = await connector.isSubSeriesFollowed(connector.getConnectedUser()!.id, data['expand']['sub_series']['id'].toString());
+      bool owned = await connector.isSubSeriesFollowed(
+        connector.getConnectedUser()!.id,
+        data['expand']['sub_series']['id'].toString(),
+      );
       setState(() {
         isSubSeriesFollowed = owned;
       });
@@ -86,43 +103,31 @@ class _VolumePageState extends State<VolumePage> {
     // Get localization - return early if not available
     var localizations = AppLocalizations.of(context);
     if (localizations == null) {
-      return const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     return FutureBuilder(
-      future: connector.getOneExpand('volumes', widget.volumeId, 'authors,contains,editor,series.editors,sub_series'),
+      future: connector.getOneExpand(
+        'volumes',
+        widget.volumeId,
+        'authors,contains,editor,series.editors,sub_series',
+      ),
       builder: (BuildContext context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Scaffold(
-            appBar: AppBar(
-              title: Text(localizations.loading),
-            ),
-            body: const Center(
-              child: CircularProgressIndicator(),
-            ),
+            appBar: AppBar(title: Text(localizations.loading)),
+            body: const Center(child: CircularProgressIndicator()),
           );
         } else if (snapshot.connectionState == ConnectionState.none) {
           return Scaffold(
-            appBar: AppBar(
-              title: Text(localizations.noConnection),
-            ),
-            body: Center(
-              child: Text(localizations.noConnection),
-            ),
+            appBar: AppBar(title: Text(localizations.noConnection)),
+            body: Center(child: Text(localizations.noConnection)),
           );
         } else if (snapshot.hasError) {
           debugPrint(snapshot.error.toString());
           return Scaffold(
-            appBar: AppBar(
-              title: Text(localizations.errorOccurred),
-            ),
-            body: Center(
-              child: Text(localizations.errorOccurred),
-            ),
+            appBar: AppBar(title: Text(localizations.errorOccurred)),
+            body: Center(child: Text(localizations.errorOccurred)),
           );
         } else if (snapshot.hasData && snapshot.data != null) {
           // ? Declaring variables
@@ -133,7 +138,8 @@ class _VolumePageState extends State<VolumePage> {
           final Map<String, dynamic> series = data['expand']['series'];
           final Map<String, dynamic> subSeries = data['expand']['sub_series'];
           final DateTime release = DateTime.parse(data['release'].toString());
-          double widthAddAndFollowButton = MediaQuery.of(context).size.width * 0.5 - 15;
+          double widthAddAndFollowButton =
+              MediaQuery.of(context).size.width * 0.5 - 15;
 
           // ? Return Scaffold
           return Scaffold(
@@ -152,7 +158,8 @@ class _VolumePageState extends State<VolumePage> {
               columnMainAxisAlignment: MainAxisAlignment.start,
               children: [
                 MyPictureDisplay(
-                  pictureUrl: "https://api.mymangatheque.com/api/files/tnof8u6oqfepdq6/${data['id'].toString()}/${data['image'].toString()}",
+                  pictureUrl:
+                      "https://api.mymangatheque.com/api/files/tnof8u6oqfepdq6/${data['id'].toString()}/${data['image'].toString()}",
                 ),
                 Padding(
                   padding: const EdgeInsets.all(10),
@@ -172,7 +179,9 @@ class _VolumePageState extends State<VolumePage> {
                           : Padding(
                               padding: const EdgeInsets.symmetric(vertical: 5),
                               child: Text(
-                                localizations.supportIs(data['support'].toString()),
+                                localizations.supportIs(
+                                  data['support'].toString(),
+                                ),
                                 style: const TextStyle(
                                   fontSize: 30,
                                   fontWeight: FontWeight.w200,
@@ -196,18 +205,37 @@ class _VolumePageState extends State<VolumePage> {
                                   child: ElevatedButton(
                                     style: ButtonStyle(
                                       backgroundColor: (!isVolumeOwned)
-                                          ? WidgetStateProperty.all<Color>(Theme.of(context).colorScheme.surface)
-                                          : WidgetStateProperty.all<Color>(Color(0xFF1780A3)),
+                                          ? WidgetStateProperty.all<Color>(
+                                              Theme.of(
+                                                context,
+                                              ).colorScheme.surface,
+                                            )
+                                          : WidgetStateProperty.all<Color>(
+                                              Color(0xFF1780A3),
+                                            ),
                                       iconColor: (!isVolumeOwned)
-                                          ? WidgetStateProperty.all<Color>(Theme.of(context).colorScheme.primary)
-                                          : WidgetStateProperty.all<Color>(Theme.of(context).colorScheme.onPrimary),
-                                      elevation: WidgetStateProperty.all<double>(0),
+                                          ? WidgetStateProperty.all<Color>(
+                                              Theme.of(
+                                                context,
+                                              ).colorScheme.primary,
+                                            )
+                                          : WidgetStateProperty.all<Color>(
+                                              Theme.of(
+                                                context,
+                                              ).colorScheme.onPrimary,
+                                            ),
+                                      elevation:
+                                          WidgetStateProperty.all<double>(0),
                                     ),
                                     onPressed: () async {
                                       if (connector.isLoggedIn()) {
                                         if (!isVolumeOwned) {
                                           if (!isSubSeriesFollowed) {
-                                            connector.addVolumeToOwned(connector.getConnectedUser()!.id, data['id'].toString(), false);
+                                            connector.addVolumeToOwned(
+                                              connector.getConnectedUser()!.id,
+                                              data['id'].toString(),
+                                              false,
+                                            );
                                             connector.addSubSeriesToFollowed(
                                               connector.getConnectedUser()!.id,
                                               subSeries['id'].toString(),
@@ -217,33 +245,48 @@ class _VolumePageState extends State<VolumePage> {
                                               isSubSeriesFollowed = true;
                                             });
                                           } else {
-                                            connector.addVolumeToOwned(connector.getConnectedUser()!.id, data['id'].toString(), false);
+                                            connector.addVolumeToOwned(
+                                              connector.getConnectedUser()!.id,
+                                              data['id'].toString(),
+                                              false,
+                                            );
                                             setState(() {
                                               isVolumeOwned = true;
                                             });
                                           }
                                         } else {
-                                          connector.removeVolumeFromOwned(connector.getConnectedUser()!.id, data['id'].toString());
+                                          connector.removeVolumeFromOwned(
+                                            connector.getConnectedUser()!.id,
+                                            data['id'].toString(),
+                                          );
                                           setState(() {
                                             isVolumeOwned = false;
                                           });
                                         }
                                       } else {
-                                        pushOrGo(
-                                          context,
-                                          '/profile/signin',
-                                        );
+                                        pushOrGo(context, '/profile/signin');
                                       }
                                     },
                                     child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
                                       children: [
-                                        (!isVolumeOwned) ? Icon(Icons.add) : Icon(Icons.check),
+                                        (!isVolumeOwned)
+                                            ? Icon(Icons.add)
+                                            : Icon(Icons.check),
                                         Text(
-                                          (!isVolumeOwned) ? localizations.add : localizations.remove,
+                                          (!isVolumeOwned)
+                                              ? localizations.add
+                                              : localizations.remove,
                                           style: TextStyle(
                                             fontSize: 15,
-                                            color: (!isVolumeOwned) ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onPrimary,
+                                            color: (!isVolumeOwned)
+                                                ? Theme.of(
+                                                    context,
+                                                  ).colorScheme.primary
+                                                : Theme.of(
+                                                    context,
+                                                  ).colorScheme.onPrimary,
                                           ),
                                         ),
                                       ],
@@ -259,20 +302,34 @@ class _VolumePageState extends State<VolumePage> {
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(100),
                               child: Container(
-                                decoration: BoxDecoration(
-                                  color: Colors.green,
-                                ),
+                                decoration: BoxDecoration(color: Colors.green),
                                 child: Padding(
                                   padding: const EdgeInsets.all(5.0),
                                   child: ElevatedButton(
                                     style: ButtonStyle(
-                                        backgroundColor: (!isSubSeriesFollowed)
-                                            ? WidgetStateProperty.all<Color>(Theme.of(context).colorScheme.surface)
-                                            : WidgetStateProperty.all<Color>(Colors.green),
-                                        iconColor: (!isSubSeriesFollowed)
-                                            ? WidgetStateProperty.all<Color>(Theme.of(context).colorScheme.primary)
-                                            : WidgetStateProperty.all<Color>(Theme.of(context).colorScheme.onPrimary),
-                                        elevation: WidgetStateProperty.all<double>(0)),
+                                      backgroundColor: (!isSubSeriesFollowed)
+                                          ? WidgetStateProperty.all<Color>(
+                                              Theme.of(
+                                                context,
+                                              ).colorScheme.surface,
+                                            )
+                                          : WidgetStateProperty.all<Color>(
+                                              Colors.green,
+                                            ),
+                                      iconColor: (!isSubSeriesFollowed)
+                                          ? WidgetStateProperty.all<Color>(
+                                              Theme.of(
+                                                context,
+                                              ).colorScheme.primary,
+                                            )
+                                          : WidgetStateProperty.all<Color>(
+                                              Theme.of(
+                                                context,
+                                              ).colorScheme.onPrimary,
+                                            ),
+                                      elevation:
+                                          WidgetStateProperty.all<double>(0),
+                                    ),
                                     onPressed: () async {
                                       if (connector.isLoggedIn()) {
                                         if (!isSubSeriesFollowed) {
@@ -293,23 +350,29 @@ class _VolumePageState extends State<VolumePage> {
                                           });
                                         }
                                       } else {
-                                        pushOrGo(
-                                          context,
-                                          '/profile/signin',
-                                        );
+                                        pushOrGo(context, '/profile/signin');
                                       }
                                     },
                                     child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
                                       children: [
-                                        (!isSubSeriesFollowed) ? Icon(Icons.bookmark_border) : Icon(Icons.bookmark),
+                                        (!isSubSeriesFollowed)
+                                            ? Icon(Icons.bookmark_border)
+                                            : Icon(Icons.bookmark),
                                         Text(
-                                          (!isSubSeriesFollowed) ? localizations.follow : localizations.followed,
+                                          (!isSubSeriesFollowed)
+                                              ? localizations.follow
+                                              : localizations.followed,
                                           style: TextStyle(
                                             fontSize: 15,
                                             color: (!isSubSeriesFollowed)
-                                                ? Theme.of(context).colorScheme.primary
-                                                : Theme.of(context).colorScheme.onPrimary,
+                                                ? Theme.of(
+                                                    context,
+                                                  ).colorScheme.primary
+                                                : Theme.of(
+                                                    context,
+                                                  ).colorScheme.onPrimary,
                                           ),
                                         ),
                                       ],
@@ -337,13 +400,31 @@ class _VolumePageState extends State<VolumePage> {
                                       padding: const EdgeInsets.all(5.0),
                                       child: ElevatedButton.icon(
                                         style: ButtonStyle(
-                                            backgroundColor: (!isVolumeReaded)
-                                                ? WidgetStateProperty.all<Color>(Theme.of(context).colorScheme.surface)
-                                                : WidgetStateProperty.all<Color>(Colors.red),
-                                            iconColor: (!isVolumeReaded)
-                                                ? WidgetStateProperty.all<Color>(Theme.of(context).colorScheme.primary)
-                                                : WidgetStateProperty.all<Color>(Theme.of(context).colorScheme.onPrimary),
-                                            elevation: WidgetStateProperty.all<double>(0)),
+                                          backgroundColor: (!isVolumeReaded)
+                                              ? WidgetStateProperty.all<Color>(
+                                                  Theme.of(
+                                                    context,
+                                                  ).colorScheme.surface,
+                                                )
+                                              : WidgetStateProperty.all<Color>(
+                                                  Colors.red,
+                                                ),
+                                          iconColor: (!isVolumeReaded)
+                                              ? WidgetStateProperty.all<Color>(
+                                                  Theme.of(
+                                                    context,
+                                                  ).colorScheme.primary,
+                                                )
+                                              : WidgetStateProperty.all<Color>(
+                                                  Theme.of(
+                                                    context,
+                                                  ).colorScheme.onPrimary,
+                                                ),
+                                          elevation:
+                                              WidgetStateProperty.all<double>(
+                                                0,
+                                              ),
+                                        ),
                                         onPressed: () async {
                                           if (connector.isLoggedIn()) {
                                             connector.changeReadState(
@@ -362,14 +443,25 @@ class _VolumePageState extends State<VolumePage> {
                                           }
                                         },
                                         label: Text(
-                                          (!isVolumeReaded) ? localizations.read : localizations.readed,
+                                          (!isVolumeReaded)
+                                              ? localizations.read
+                                              : localizations.readed,
                                           style: TextStyle(
                                             fontSize: 15,
-                                            color:
-                                                (!isVolumeReaded) ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onPrimary,
+                                            color: (!isVolumeReaded)
+                                                ? Theme.of(
+                                                    context,
+                                                  ).colorScheme.primary
+                                                : Theme.of(
+                                                    context,
+                                                  ).colorScheme.onPrimary,
                                           ),
                                         ),
-                                        icon: (!isVolumeReaded) ? Icon(Icons.bookmark_add_rounded) : Icon(Icons.bookmark_remove_rounded),
+                                        icon: (!isVolumeReaded)
+                                            ? Icon(Icons.bookmark_add_rounded)
+                                            : Icon(
+                                                Icons.bookmark_remove_rounded,
+                                              ),
                                       ),
                                     ),
                                   ),
@@ -385,26 +477,26 @@ class _VolumePageState extends State<VolumePage> {
                       (authors.isEmpty)
                           ? SizedBox()
                           : (authors.length == 1)
-                              ? Padding(
-                                  padding: const EdgeInsets.symmetric(vertical: 5),
-                                  child: Text(
-                                    '${localizations.author} :',
-                                    style: const TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                )
-                              : Padding(
-                                  padding: const EdgeInsets.symmetric(vertical: 5),
-                                  child: Text(
-                                    '${localizations.authors} :',
-                                    style: const TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
+                          ? Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 5),
+                              child: Text(
+                                '${localizations.author} :',
+                                style: const TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
                                 ),
+                              ),
+                            )
+                          : Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 5),
+                              child: Text(
+                                '${localizations.authors} :',
+                                style: const TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
                       for (var i = 0; i < authors.length; i += 1)
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -440,26 +532,33 @@ class _VolumePageState extends State<VolumePage> {
                                   ),
                                 ),
                                 Padding(
-                                  padding: const EdgeInsets.symmetric(vertical: 5),
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 5,
+                                  ),
                                   child: Text(
                                     data['resume'].toString(),
-                                    style: const TextStyle(
-                                      fontSize: 15,
-                                    ),
+                                    style: const TextStyle(fontSize: 15),
                                     textAlign: TextAlign.justify,
                                     maxLines: (showMore) ? null : 3,
                                     softWrap: true,
-                                    overflow: (showMore) ? TextOverflow.visible : TextOverflow.ellipsis,
+                                    overflow: (showMore)
+                                        ? TextOverflow.visible
+                                        : TextOverflow.ellipsis,
                                   ),
                                 ),
                                 Padding(
-                                  padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 5,
+                                    horizontal: 10,
+                                  ),
                                   child: GestureDetector(
                                     onTap: () => setState(() {
                                       showMore = !showMore;
                                     }),
                                     child: Text(
-                                      (showMore) ? localizations.seeMore : localizations.seeLess,
+                                      (showMore)
+                                          ? localizations.seeMore
+                                          : localizations.seeLess,
                                       style: const TextStyle(
                                         color: Colors.blue,
                                         fontSize: 15,
@@ -533,7 +632,8 @@ class _VolumePageState extends State<VolumePage> {
                           : Column(
                               children: [
                                 Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text(
                                       '${localizations.price} : ${NumberFormat.currency(locale: "fr_FR", symbol: "€", decimalDigits: 2).format(data['price'])}',
@@ -568,98 +668,174 @@ class _VolumePageState extends State<VolumePage> {
                                     ? SizedBox()
                                     : Column(
                                         children: [
-                                          SizedBox(
-                                            height: 10,
-                                          ),
-                                          for (var i = 0; i < data['book_link'].length; i += 1)
-                                            (data['book_link'][i]['seller'] != "bdfugue")
+                                          SizedBox(height: 10),
+                                          for (
+                                            var i = 0;
+                                            i < data['book_link'].length;
+                                            i += 1
+                                          )
+                                            (data['book_link'][i]['seller'] !=
+                                                    "bdfugue")
                                                 ? SizedBox()
-                                                : (data['price'] == "0" || data['price'] == "-1")
-                                                    ? Text(localizations.volumeNotAvailableForSale)
-                                                    : Column(
+                                                : (data['price'] == "0" ||
+                                                      data['price'] == "-1")
+                                                ? Text(
+                                                    localizations
+                                                        .volumeNotAvailableForSale,
+                                                  )
+                                                : Column(
+                                                    children: [
+                                                      Row(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .spaceBetween,
                                                         children: [
-                                                          Row(
-                                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                                            children: [
-                                                              Text(
-                                                                (data["book_link"][i]["available"].contains("shippingUnder")! == false)
-                                                                    ? localizations.availability(data["book_link"][i]["available"])
-                                                                    : (data["book_link"][i]["available"].contains("Days"))
-                                                                        ? localizations.shippingUnderDays(
-                                                                            data["book_link"][i]["available"]
-                                                                                .replace("shippingUnder", "")
-                                                                                .replaces("days", "")
-                                                                                .replace(" ", ""),
-                                                                          )
-                                                                        : localizations.shippingUnderWeeks(
-                                                                            data["book_link"][i]["available"]
-                                                                                .replace("shippingUnder", "")
-                                                                                .replaces("week", "")
-                                                                                .replace("s", "")
-                                                                                .replace(" ", ""),
-                                                                          ),
-                                                                style: TextStyle(
-                                                                  fontSize: 15,
-                                                                  color: (data["book_link"][i]["available"] == "inStock" ||
-                                                                          data["book_link"][i]["available"] == "availanle")
-                                                                      ? Colors.green
-                                                                      : (data["book_link"][i]["available"] == "onPreorder" ||
-                                                                              data["book_link"][i]["available"] == "preorder")
-                                                                          ? Colors.blue
-                                                                          : (data["book_link"][i]["available"].contains("shippingUnder"))
-                                                                              ? Colors.orange
-                                                                              : Colors.red,
-                                                                ),
-                                                              ),
-                                                              SizedBox(
-                                                                height: 10,
-                                                              ),
-                                                              Text(
-                                                                localizations.soldAndShippedBy(
-                                                                  data["book_link"][i]["seller"].toString() == "bdfugue"
-                                                                      ? "BDFugue"
-                                                                      : data["book_link"][i]["seller"].toString(),
-                                                                ),
-                                                              ),
-                                                            ],
-                                                          ),
-                                                          ElevatedButton(
-                                                            style: ButtonStyle(
-                                                              backgroundColor: WidgetStateProperty.all<Color>(Colors.red),
+                                                          Text(
+                                                            (data["book_link"][i]["available"]
+                                                                        .contains(
+                                                                          "shippingUnder",
+                                                                        )! ==
+                                                                    false)
+                                                                ? localizations
+                                                                      .availability(
+                                                                        data["book_link"][i]["available"],
+                                                                      )
+                                                                : (data["book_link"][i]["available"]
+                                                                      .contains(
+                                                                        "Days",
+                                                                      ))
+                                                                ? localizations.shippingUnderDays(
+                                                                    data["book_link"][i]["available"]
+                                                                        .replace(
+                                                                          "shippingUnder",
+                                                                          "",
+                                                                        )
+                                                                        .replaces(
+                                                                          "days",
+                                                                          "",
+                                                                        )
+                                                                        .replace(
+                                                                          " ",
+                                                                          "",
+                                                                        ),
+                                                                  )
+                                                                : localizations.shippingUnderWeeks(
+                                                                    data["book_link"][i]["available"]
+                                                                        .replace(
+                                                                          "shippingUnder",
+                                                                          "",
+                                                                        )
+                                                                        .replaces(
+                                                                          "week",
+                                                                          "",
+                                                                        )
+                                                                        .replace(
+                                                                          "s",
+                                                                          "",
+                                                                        )
+                                                                        .replace(
+                                                                          " ",
+                                                                          "",
+                                                                        ),
+                                                                  ),
+                                                            style: TextStyle(
+                                                              fontSize: 15,
+                                                              color:
+                                                                  (data["book_link"][i]["available"] ==
+                                                                          "inStock" ||
+                                                                      data["book_link"][i]["available"] ==
+                                                                          "availanle")
+                                                                  ? Colors.green
+                                                                  : (data["book_link"][i]["available"] ==
+                                                                            "onPreorder" ||
+                                                                        data["book_link"][i]["available"] ==
+                                                                            "preorder")
+                                                                  ? Colors.blue
+                                                                  : (data["book_link"][i]["available"]
+                                                                        .contains(
+                                                                          "shippingUnder",
+                                                                        ))
+                                                                  ? Colors
+                                                                        .orange
+                                                                  : Colors.red,
                                                             ),
-                                                            onPressed: () {
-                                                              launchUrl(Uri.parse(data["book_link"][i]["url"].toString()));
-                                                            },
-                                                            child: Row(
-                                                              mainAxisAlignment: MainAxisAlignment.center,
-                                                              children: [
-                                                                Transform.translate(
-                                                                  offset: const Offset(0, 3.5),
-                                                                  child: OwnIcon(
-                                                                    iconColor: Theme.of(context).colorScheme.primary,
-                                                                    iconSrc: Assets.icons.shoppingCart,
-                                                                  ),
-                                                                ),
-                                                                SizedBox(
-                                                                  width: 10,
-                                                                ),
-                                                                Text(
-                                                                  localizations.buyOn(
-                                                                    data["book_link"][i]["seller"].toString() == "bdfugue"
-                                                                        ? "BDFugue"
-                                                                        : data["book_link"][i]["seller"].toString(),
-                                                                  ),
-                                                                  style: TextStyle(
-                                                                    color: Theme.of(context).colorScheme.primary,
-                                                                    fontWeight: FontWeight.bold,
-                                                                    fontSize: 16,
-                                                                  ),
-                                                                ),
-                                                              ],
+                                                          ),
+                                                          SizedBox(height: 10),
+                                                          Text(
+                                                            localizations.soldAndShippedBy(
+                                                              data["book_link"][i]["seller"]
+                                                                          .toString() ==
+                                                                      "bdfugue"
+                                                                  ? "BDFugue"
+                                                                  : data["book_link"][i]["seller"]
+                                                                        .toString(),
                                                             ),
                                                           ),
                                                         ],
                                                       ),
+                                                      ElevatedButton(
+                                                        style: ButtonStyle(
+                                                          backgroundColor:
+                                                              WidgetStateProperty.all<
+                                                                Color
+                                                              >(Colors.red),
+                                                        ),
+                                                        onPressed: () {
+                                                          launchUrl(
+                                                            Uri.parse(
+                                                              data["book_link"][i]["url"]
+                                                                  .toString(),
+                                                            ),
+                                                          );
+                                                        },
+                                                        child: Row(
+                                                          mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .center,
+                                                          children: [
+                                                            Transform.translate(
+                                                              offset:
+                                                                  const Offset(
+                                                                    0,
+                                                                    3.5,
+                                                                  ),
+                                                              child: OwnIcon(
+                                                                iconColor:
+                                                                    Theme.of(
+                                                                          context,
+                                                                        )
+                                                                        .colorScheme
+                                                                        .primary,
+                                                                iconSrc: Assets
+                                                                    .icons
+                                                                    .shoppingCart,
+                                                              ),
+                                                            ),
+                                                            SizedBox(width: 10),
+                                                            Text(
+                                                              localizations.buyOn(
+                                                                data["book_link"][i]["seller"]
+                                                                            .toString() ==
+                                                                        "bdfugue"
+                                                                    ? "BDFugue"
+                                                                    : data["book_link"][i]["seller"]
+                                                                          .toString(),
+                                                              ),
+                                                              style: TextStyle(
+                                                                color: Theme.of(
+                                                                  context,
+                                                                ).colorScheme.primary,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold,
+                                                                fontSize: 16,
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
                                         ],
                                       ),
                               ],
@@ -684,30 +860,39 @@ class _VolumePageState extends State<VolumePage> {
                             (data['release'] == null)
                                 ? SizedBox()
                                 : Padding(
-                                    padding: const EdgeInsets.symmetric(vertical: 5),
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 5,
+                                    ),
                                     child: MyIconTextLabel(
                                       iconSrc: Assets.icons.calendar,
-                                      text: '${localizations.publicationDate} : ${DateFormat.yMMMMd(localizations.localeName).format(release)}',
+                                      text:
+                                          '${localizations.publicationDate} : ${DateFormat.yMMMMd(localizations.localeName).format(release)}',
                                       heightIcon: 30,
                                     ),
                                   ),
                             (data['ean'] == null)
                                 ? SizedBox()
                                 : Padding(
-                                    padding: const EdgeInsets.symmetric(vertical: 5),
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 5,
+                                    ),
                                     child: MyIconTextLabel(
                                       iconSrc: Assets.icons.barcode,
-                                      text: '${localizations.ean} : ${data['ean']}',
+                                      text:
+                                          '${localizations.ean} : ${data['ean']}',
                                       heightIcon: 30,
                                     ),
                                   ),
                             (data['info'] == null)
                                 ? SizedBox()
                                 : Padding(
-                                    padding: const EdgeInsets.symmetric(vertical: 5),
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 5,
+                                    ),
                                     child: MyIconTextLabel(
                                       iconSrc: Assets.icons.bookOpen,
-                                      text: "${localizations.numberOfPages} : ${data['info']['pageNumber'].toString()}",
+                                      text:
+                                          "${localizations.numberOfPages} : ${data['info']['pageNumber'].toString()}",
                                       heightIcon: 30,
                                     ),
                                   ),
@@ -716,7 +901,9 @@ class _VolumePageState extends State<VolumePage> {
                                 : Column(
                                     children: [
                                       MyLine(
-                                        width: MediaQuery.of(context).size.width,
+                                        width: MediaQuery.of(
+                                          context,
+                                        ).size.width,
                                         vertical: 10,
                                         horizontal: 0,
                                       ), // TODO: Finir la partie contient
@@ -727,18 +914,14 @@ class _VolumePageState extends State<VolumePage> {
                       ),
                     ],
                   ),
-                )
+                ),
               ],
             ),
           );
         } else {
           return Scaffold(
-            appBar: AppBar(
-              title: Text("Le volume n'existe pas"),
-            ),
-            body: Center(
-              child: const Text("Le volume n'existe pas"),
-            ),
+            appBar: AppBar(title: Text("Le volume n'existe pas")),
+            body: Center(child: const Text("Le volume n'existe pas")),
           );
         }
       },

@@ -11,6 +11,7 @@ import 'package:mymangatheque/src/front/components/my_line.dart';
 import 'package:mymangatheque/src/front/components/my_tome_number_show.dart';
 import 'package:mymangatheque/src/function/auto_push_or_go.dart';
 import 'package:mymangatheque/src/models/manga/sub_serie_for_collection.dart';
+import 'package:mymangatheque/src/const/routes.dart';
 
 class EnvyTab extends ConsumerStatefulWidget {
   const EnvyTab({super.key});
@@ -26,8 +27,10 @@ class _EnvyTabState extends ConsumerState<EnvyTab> {
   List<SubSerieForCollection> ownedSubSeriesList = [];
   List<SubSerieForCollection> followedSubSeriesList = [];
   List authorsNameLinkSubSeriesId = [];
-  dynamic _ownedSubscription; // Subscription to listen to changes in owned manga
-  dynamic _followedSubscription; // Subscription to listen to changes in followed manga
+  dynamic
+  _ownedSubscription; // Subscription to listen to changes in owned manga
+  dynamic
+  _followedSubscription; // Subscription to listen to changes in followed manga
   dynamic ownedSubSeries;
 
   int getNumberVolumesOwnedOfSubSeries(String id) {
@@ -59,7 +62,7 @@ class _EnvyTabState extends ConsumerState<EnvyTab> {
     return authorName;
   }
 
-  displayAuthorWithSubSeriesId(String id) {
+  String displayAuthorWithSubSeriesId(String id) {
     String authorName = "error";
     for (var subSerie in authorsNameLinkSubSeriesId) {
       if (subSerie['id'] == id) {
@@ -87,12 +90,14 @@ class _EnvyTabState extends ConsumerState<EnvyTab> {
       if (getNumberVolumesOwnedOfSubSeries(followed["sub_serie"]) == 0) {
         followedSubSeriesList.add(
           SubSerieForCollection(
-              id: followed['sub_serie'],
-              title: followed['expand']['sub_serie']['title'],
-              numberOfVolumes: followed['expand']['sub_serie']['volumes'].length,
-              volumes: [],
-              numberOwnedVolumes: 0,
-              cover: 'https://api.mymangatheque.com/api/files/ofwxwbyrhy5dcor/${followed['sub_serie']}/${followed['expand']['sub_serie']['image']}'),
+            id: followed['sub_serie'],
+            title: followed['expand']['sub_serie']['title'],
+            numberOfVolumes: followed['expand']['sub_serie']['volumes'].length,
+            volumes: [],
+            numberOwnedVolumes: 0,
+            cover:
+                'https://api.mymangatheque.com/api/files/ofwxwbyrhy5dcor/${followed['sub_serie']}/${followed['expand']['sub_serie']['image']}',
+          ),
         );
         followedSubSeriesNumber += 1;
       }
@@ -101,9 +106,7 @@ class _EnvyTabState extends ConsumerState<EnvyTab> {
     for (var subSerie in followedSubSeriesList) {
       followedVolumeNumber += subSerie.numberOfVolumes;
       final author = await getAuthorNameOfSubSeries(subSerie.id);
-      authorsNameLinkSubSeriesId.add(
-        {'id': subSerie.id, 'author': author},
-      );
+      authorsNameLinkSubSeriesId.add({'id': subSerie.id, 'author': author});
     }
 
     setState(() {});
@@ -129,16 +132,22 @@ class _EnvyTabState extends ConsumerState<EnvyTab> {
   void _setupRealtimeOrFallback() {
     _cancelRealtime();
     try {
-      _ownedSubscription = connector.connector().collection('owned').subscribe('*', (event) async {
-        debugPrint("Got an event");
-        await ref.read(mangaOwnedProvider.notifier).initData();
-        _fetchData();
-      });
-      _followedSubscription = connector.connector().collection('followed').subscribe('*', (event) async {
-        debugPrint("Got an event");
-        await ref.read(mangaOwnedProvider.notifier).initData();
-        _fetchData();
-      });
+      _ownedSubscription = connector.connector().collection('owned').subscribe(
+        '*',
+        (event) async {
+          debugPrint("Got an event");
+          await ref.read(mangaOwnedProvider.notifier).initData();
+          _fetchData();
+        },
+      );
+      _followedSubscription = connector
+          .connector()
+          .collection('followed')
+          .subscribe('*', (event) async {
+            debugPrint("Got an event");
+            await ref.read(mangaOwnedProvider.notifier).initData();
+            _fetchData();
+          });
 
       debugPrint('Realtime subscriptions established.');
     } catch (e) {
@@ -172,11 +181,7 @@ class _EnvyTabState extends ConsumerState<EnvyTab> {
     // Get localization - return early if not available
     var localizations = AppLocalizations.of(context);
     if (localizations == null) {
-      return const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     return Padding(
@@ -192,10 +197,7 @@ class _EnvyTabState extends ConsumerState<EnvyTab> {
               ? Center(
                   child: Text(
                     localizations.noFollowedSubSerie,
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                 )
               : SizedBox(),
@@ -207,7 +209,7 @@ class _EnvyTabState extends ConsumerState<EnvyTab> {
                     InkWell(
                       onTap: () => pushOrGo(
                         context,
-                        '/library/sub_serie/${subSerie.id}',
+                        Routes.librarySubSerie(subSerie.id),
                       ),
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 10.0),
@@ -218,7 +220,8 @@ class _EnvyTabState extends ConsumerState<EnvyTab> {
                             ClipRRect(
                               borderRadius: BorderRadius.circular(10.0),
                               child: Image.network(
-                                subSerie.cover ?? 'https://placehold.co/514x728?text=No%20Image',
+                                subSerie.cover ??
+                                    'https://placehold.co/514x728?text=No%20Image',
                                 width: 65,
                               ),
                             ),
@@ -229,7 +232,10 @@ class _EnvyTabState extends ConsumerState<EnvyTab> {
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 children: [
                                   Text(
-                                    subSerie.title.replaceAll(' - Edition Standard', ''),
+                                    subSerie.title.replaceAll(
+                                      ' - Edition Standard',
+                                      '',
+                                    ),
                                     style: TextStyle(
                                       fontSize: 18,
                                       fontWeight: FontWeight.bold,
@@ -238,13 +244,13 @@ class _EnvyTabState extends ConsumerState<EnvyTab> {
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                   Text(
-                                    localizations.subSerieVolumeNumber(subSerie.numberOfVolumes),
+                                    localizations.subSerieVolumeNumber(
+                                      subSerie.numberOfVolumes,
+                                    ),
                                   ),
                                   Text(
                                     localizations.subSerieFromAuthor(
-                                      displayAuthorWithSubSeriesId(
-                                        subSerie.id,
-                                      ),
+                                      displayAuthorWithSubSeriesId(subSerie.id),
                                     ),
                                   ),
                                 ],
@@ -264,9 +270,9 @@ class _EnvyTabState extends ConsumerState<EnvyTab> {
                       horizontal: 0,
                     ),
                   ],
-                )
+                ),
             ],
-          )
+          ),
         ],
       ),
     );

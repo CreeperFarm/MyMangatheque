@@ -36,6 +36,10 @@ class LanguageRepository {
   }
 }
 
-final sharedPreferencesProvider = FutureProvider<SharedPreferences>((ref) => SharedPreferences.getInstance());
+final sharedPreferencesProvider = FutureProvider<SharedPreferences>(
+  (ref) => SharedPreferences.getInstance(),
+);
 
-final languageRepositoryProvider = Provider<LanguageRepository>((ref) => LanguageRepository(ref: ref));
+final languageRepositoryProvider = Provider<LanguageRepository>(
+  (ref) => LanguageRepository(ref: ref),
+);

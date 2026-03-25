@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!-- Disable cleartext traffic by default -->
+    <base-config cleartextTrafficPermitted="false" />
+
+    <!--
+        Allow cleartext only for the explicit domains required by the app.
+        Provided domains: mymangatheque.com (covers api.mymangatheque.com and appwrite.mymangatheque.com)
+        Keep this list minimal and prefer HTTPS for all endpoints.
+    -->
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">mymangatheque.com</domain>
+    </domain-config>
+</network-security-config>

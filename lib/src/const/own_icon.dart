@@ -6,7 +6,12 @@ class OwnIcon extends StatelessWidget {
   final String iconSrc;
   final double? height;
 
-  OwnIcon({required this.iconColor, required this.iconSrc, this.height, super.key});
+  OwnIcon({
+    required this.iconColor,
+    required this.iconSrc,
+    this.height,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {

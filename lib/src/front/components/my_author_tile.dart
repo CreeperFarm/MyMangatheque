@@ -8,24 +8,27 @@ class MyAuthorTile extends StatelessWidget {
   final Map<String, dynamic> authorData;
   final String initRoute;
 
-  const MyAuthorTile({required this.authorData, required this.initRoute, super.key});
+  const MyAuthorTile({
+    required this.authorData,
+    required this.initRoute,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
     // Get localization - return early if not available
     var localizations = AppLocalizations.of(context);
     if (localizations == null) {
-      return const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     return Padding(
       padding: const EdgeInsets.all(5.0),
       child: InkWell(
-        onTap: () => pushOrGo(context, '${(initRoute == "/") ? "" : initRoute}/author/${authorData['id']}'),
+        onTap: () => pushOrGo(
+          context,
+          '${(initRoute == "/") ? "" : initRoute}/author/${authorData['id']}',
+        ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -58,9 +61,18 @@ class MyAuthorTile extends StatelessWidget {
                       ),
                       Row(
                         children: [
-                          for (var i = 0; i < authorData['job'].split(', ').length; i++)
+                          for (
+                            var i = 0;
+                            i < authorData['job'].split(', ').length;
+                            i++
+                          )
                             Text(
-                              localizations.jobsName(authorData['job'].split(', ')[i]) + (i != authorData['job'].split(', ').length - 1 ? ", " : ""),
+                              localizations.jobsName(
+                                    authorData['job'].split(', ')[i],
+                                  ) +
+                                  (i != authorData['job'].split(', ').length - 1
+                                      ? ", "
+                                      : ""),
                               textAlign: TextAlign.left,
                               style: const TextStyle(fontSize: 13),
                               softWrap: true,

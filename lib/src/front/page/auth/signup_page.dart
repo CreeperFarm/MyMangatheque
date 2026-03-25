@@ -31,7 +31,11 @@ class _SignUpPageState extends State<SignUpPage> {
   final passwordController = TextEditingController();
   final passwordVerifierController = TextEditingController();
   final usernameController = TextEditingController();
-  DateTime selectedBDayDate = DateTime(DateTime.now().year - 7, DateTime.now().month, DateTime.now().day);
+  DateTime selectedBDayDate = DateTime(
+    DateTime.now().year - 7,
+    DateTime.now().month,
+    DateTime.now().day,
+  );
   final selectedGender = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
@@ -42,8 +46,15 @@ class _SignUpPageState extends State<SignUpPage> {
   void signingUpProcess() async {
     PocketBaseConnector connector = PocketBaseConnector();
 
-    await connector.createUser(usernameController.text, emailController.text, passwordController.text, passwordVerifierController.text,
-        selectedGender.text, selectedBDayDate.add(const Duration(hours: 1)).toUtc().toString(), context);
+    await connector.createUser(
+      usernameController.text,
+      emailController.text,
+      passwordController.text,
+      passwordVerifierController.text,
+      selectedGender.text,
+      selectedBDayDate.add(const Duration(hours: 1)).toUtc().toString(),
+      context,
+    );
     connector.sendVerification(emailController.text);
     connector.findUser(emailController.text);
     await connector.updateUserData(emailController.text);
@@ -86,21 +97,14 @@ class _SignUpPageState extends State<SignUpPage> {
     // Get localization - return early if not available
     var localizations = AppLocalizations.of(context);
     if (localizations == null) {
-      return const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     final PocketBaseConnector connector = PocketBaseConnector();
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          localizations.signUpPage,
-          style: GoogleFonts.poppins(),
-        ),
+        title: Text(localizations.signUpPage, style: GoogleFonts.poppins()),
         elevation: 0.0,
       ),
       body: MyScrollColumn(
@@ -167,7 +171,6 @@ class _SignUpPageState extends State<SignUpPage> {
                       const SizedBox(height: 11),
 
                       // Password Confirm field
-
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 5.0),
                         child: TextFormField(
@@ -226,19 +229,32 @@ class _SignUpPageState extends State<SignUpPage> {
                             ),
                             hintText: localizations.yourBirthday,
                           ),
-                          dateFormat: DateFormat.yMMMMd(Localizations.localeOf(context).languageCode),
-                          cupertinoDatePickerOptions: CupertinoDatePickerOptions(
-                            modalTitleText: localizations.selectDate,
-                            style: CupertinoDatePickerOptionsStyle(
-                              modalTitle: TextStyle(
-                                color: Theme.of(context).colorScheme.primary,
-                              ),
-                            ),
+                          dateFormat: DateFormat.yMMMMd(
+                            Localizations.localeOf(context).languageCode,
                           ),
+                          cupertinoDatePickerOptions:
+                              CupertinoDatePickerOptions(
+                                modalTitleText: localizations.selectDate,
+                                style: CupertinoDatePickerOptionsStyle(
+                                  modalTitle: TextStyle(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.primary,
+                                  ),
+                                ),
+                              ),
                           mode: DateTimeFieldPickerMode.date,
                           firstDate: DateTime(1900, 1, 1),
-                          lastDate: DateTime(DateTime.now().year - 7, DateTime.now().month, DateTime.now().day),
-                          initialPickerDateTime: DateTime(DateTime.now().year - 7, DateTime.now().month, DateTime.now().day),
+                          lastDate: DateTime(
+                            DateTime.now().year - 7,
+                            DateTime.now().month,
+                            DateTime.now().day,
+                          ),
+                          initialPickerDateTime: DateTime(
+                            DateTime.now().year - 7,
+                            DateTime.now().month,
+                            DateTime.now().day,
+                          ),
                           validator: (value) {
                             if (value == null) {
                               return localizations.provideYourBirthday;
@@ -260,7 +276,9 @@ class _SignUpPageState extends State<SignUpPage> {
                         child: DropdownButtonFormField2(
                           isExpanded: true,
                           decoration: InputDecoration(
-                            contentPadding: const EdgeInsets.symmetric(vertical: 16),
+                            contentPadding: const EdgeInsets.symmetric(
+                              vertical: 16,
+                            ),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(25),
                               borderSide: BorderSide(
@@ -307,7 +325,10 @@ class _SignUpPageState extends State<SignUpPage> {
                             padding: EdgeInsets.only(right: 6),
                           ),
                           iconStyleData: IconStyleData(
-                            icon: OwnIcon(iconColor: Theme.of(context).colorScheme.primary, iconSrc: Assets.icons.arrowDown),
+                            icon: OwnIcon(
+                              iconColor: Theme.of(context).colorScheme.primary,
+                              iconSrc: Assets.icons.arrowDown,
+                            ),
                             iconSize: 24,
                           ),
                           dropdownStyleData: DropdownStyleData(
@@ -333,7 +354,8 @@ class _SignUpPageState extends State<SignUpPage> {
                   onTap: () async {
                     // Verify if all field is complete
                     if (_formKey.currentState!.validate()) {
-                      if (passwordController.text != passwordVerifierController.text) {
+                      if (passwordController.text !=
+                          passwordVerifierController.text) {
                         errorText = localizations.passwordsDoNotMatch;
                       } else {
                         signUp(localizations);
@@ -380,9 +402,7 @@ class _SignUpPageState extends State<SignUpPage> {
                     // Google Button
                     SquareTile(
                       imagePath: Assets.images.google,
-                      onTap: () => {
-                        connector.signInWithGoogle(context),
-                      },
+                      onTap: () => {connector.signInWithGoogle(context)},
                     ),
 
                     // const SizedBox(width: 25),
@@ -401,14 +421,19 @@ class _SignUpPageState extends State<SignUpPage> {
                     children: [
                       Text(
                         localizations.alreadyHaveAnAccount,
-                        style: TextStyle(color: Theme.of(context).colorScheme.primary),
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
                       ),
                       const SizedBox(width: 4),
                       TextButton(
                         onPressed: () => pushOrGo(context, '/profile/signin'),
                         child: Text(
                           localizations.signIn,
-                          style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                            color: Colors.blue,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ],

@@ -4,6 +4,7 @@ import 'package:mymangatheque/l10n/app_localizations.dart';
 import 'package:mymangatheque/src/back/services/pocketbase.dart';
 import 'package:mymangatheque/src/function/auto_push_or_go.dart';
 import 'package:mymangatheque/src/function/show_message_function.dart';
+import 'package:mymangatheque/src/const/routes.dart';
 
 class DeleteAccountPage extends StatefulWidget {
   const DeleteAccountPage({super.key});
@@ -24,7 +25,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
     }
 
     if (!connector.isLoggedIn()) {
-      pushOrGo(context, "/profile");
+      pushOrGo(context, Routes.profile.base);
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
@@ -59,7 +60,10 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                             pushOrGo(context, "/profile");
                           }
                         },
-                        child: Text(localizations.cancel, textAlign: TextAlign.center),
+                        child: Text(
+                          localizations.cancel,
+                          textAlign: TextAlign.center,
+                        ),
                       ),
                     ),
                     SizedBox(width: 20),
@@ -76,7 +80,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                             if (!kIsWeb) {
                               Navigator.of(context).pop();
                             } else {
-                              pushOrGo(context, "/profile");
+                              pushOrGo(context, Routes.profile.base);
                             }
                             return;
                           }
@@ -85,26 +89,36 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                             await connector.deleteUser(user.id);
                             // After successful deletion, log out locally and notify the user
                             connector.logOut();
-                            showMessage(localizations.deleteAccountSuccess, context);
+                            showMessage(
+                              localizations.deleteAccountSuccess,
+                              context,
+                            );
 
                             if (!kIsWeb) {
                               Navigator.of(context).pop();
                             } else {
-                              pushOrGo(context, "/profile");
+                              pushOrGo(context, Routes.profile.base);
                             }
                           } catch (e) {
                             // If deletion failed, still log out and inform the user
                             connector.logOut();
-                            showMessage(localizations.deleteAccountFailed, context);
+                            showMessage(
+                              localizations.deleteAccountFailed,
+                              context,
+                            );
 
                             if (!kIsWeb) {
                               Navigator.of(context).pop();
                             } else {
-                              pushOrGo(context, "/profile");
+                              pushOrGo(context, Routes.profile.base);
                             }
                           }
                         },
-                        style: ButtonStyle(backgroundColor: WidgetStateProperty.all<Color>(Colors.red)),
+                        style: ButtonStyle(
+                          backgroundColor: WidgetStateProperty.all<Color>(
+                            Colors.red,
+                          ),
+                        ),
                         child: Text(
                           localizations.deleteAccount,
                           textAlign: TextAlign.center,
@@ -134,16 +148,27 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                 child: Text(
                   localizations.deleteAccountConfirmation,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
               const SizedBox(height: 40),
               ElevatedButton(
                 onPressed: () {
-                  showDialog(context: context, builder: (BuildContext context) => dialog);
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) => dialog,
+                  );
                 },
-                style: ButtonStyle(backgroundColor: WidgetStateProperty.all<Color>(Colors.red)),
-                child: Text(localizations.deleteAccount, style: TextStyle(color: Colors.white)),
+                style: ButtonStyle(
+                  backgroundColor: WidgetStateProperty.all<Color>(Colors.red),
+                ),
+                child: Text(
+                  localizations.deleteAccount,
+                  style: TextStyle(color: Colors.white),
+                ),
               ),
             ],
           ),

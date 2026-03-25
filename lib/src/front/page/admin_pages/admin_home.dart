@@ -16,22 +16,14 @@ class AdminHomePage extends ConsumerWidget {
     // Get localization - return early if not available
     var localizations = AppLocalizations.of(context);
     if (localizations == null) {
-      return const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     var lastEAN = ref.watch(lastEANProvider);
 
     if (PocketBaseAdminConnector().isLoggedIn()) {
       return Scaffold(
-        appBar: AppBar(
-          title: Text(
-            localizations.adminHomePage,
-          ),
-        ),
+        appBar: AppBar(title: Text(localizations.adminHomePage)),
         body: MyScrollColumn(
           children: [
             Center(
@@ -39,7 +31,10 @@ class AdminHomePage extends ConsumerWidget {
                 children: [
                   Text(localizations.adminHomePage),
                   Text(localizations.adminHomePageDescription),
-                  ElevatedButton(onPressed: () => pushOrGo(context, '/admin/create'), child: Text("Go to Admin Create Page")),
+                  ElevatedButton(
+                    onPressed: () => pushOrGo(context, '/admin/create'),
+                    child: Text("Go to Admin Create Page"),
+                  ),
                   ElevatedButton(
                     child: Text(localizations.scanEAN),
                     onPressed: () => pushOrGo(context, '/library/scan'),

@@ -13,7 +13,7 @@ class MyVolumeTile extends StatelessWidget {
   final String initRoute;
   final bool? isVolumeOwned;
 
-  MyVolumeTile({
+  const MyVolumeTile({
     required this.volumeData,
     required this.subSerieData,
     required this.initRoute,
@@ -26,18 +26,17 @@ class MyVolumeTile extends StatelessWidget {
     // Get localization - return early if not available
     var localizations = AppLocalizations.of(context);
     if (localizations == null) {
-      return const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     final DateTime release = DateTime.parse(volumeData['release']);
     return Padding(
       padding: const EdgeInsets.all(5.0),
       child: InkWell(
-        onTap: () => pushOrGo(context, '$initRoute/volume/${volumeData['id'].toString()}'),
+        onTap: () => pushOrGo(
+          context,
+          '$initRoute/volume/${volumeData['id'].toString()}',
+        ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -69,14 +68,17 @@ class MyVolumeTile extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                       ),
                       Text(
-                        DateFormat.yMMMMd(localizations.localeName).format(release),
-                        style: const TextStyle(
-                          fontSize: 13,
-                        ),
+                        DateFormat.yMMMMd(
+                          localizations.localeName,
+                        ).format(release),
+                        style: const TextStyle(fontSize: 13),
                         softWrap: false,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      (!subSerieData!.containsKey(volumeData['sub_serie_id'].toString()) && isVolumeOwned != true)
+                      (!subSerieData!.containsKey(
+                                volumeData['sub_serie_id'].toString(),
+                              ) &&
+                              isVolumeOwned != true)
                           ? SizedBox()
                           : Padding(
                               padding: const EdgeInsets.only(top: 1.0),

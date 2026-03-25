@@ -18,7 +18,8 @@ enum Language {
 final languageProvider = StateProvider<Language>((ref) {
   final String defaultLocale;
   if (kIsWeb) {
-    defaultLocale = ui.PlatformDispatcher.instance.locale.toString(); // For web, use the browser's locale
+    defaultLocale = ui.PlatformDispatcher.instance.locale
+        .toString(); // For web, use the browser's locale
   } else {
     defaultLocale = Platform.localeName; // For mobile, use the device's locale
   }

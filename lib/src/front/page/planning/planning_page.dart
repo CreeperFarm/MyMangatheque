@@ -14,15 +14,18 @@ class _PlanningPageState extends State<PlanningPage> {
 
   Future<void> getLatestManga() async {
     await connector
-        .getCollectionDataWithFilter("volumes",
-            'release?<="${DateTime.now().add(const Duration(days: 14)).toUtc()}"&&release?>="${DateTime.now().subtract(const Duration(days: 14)).toIso8601String()}"')
+        .getCollectionDataWithFilter(
+          "volumes",
+          'release?<="${DateTime.now().add(const Duration(days: 14)).toUtc()}"&&release?>="${DateTime.now().subtract(const Duration(days: 14)).toIso8601String()}"',
+        )
         .then((value) {
-      if (value.isNotEmpty && !value[0].toString().contains("statusCode: 404")) {
-        setState(() {
-          latestManga = value;
+          if (value.isNotEmpty &&
+              !value[0].toString().contains("statusCode: 404")) {
+            setState(() {
+              latestManga = value;
+            });
+          }
         });
-      }
-    });
     debugPrint(latestManga.toString());
   }
 
@@ -51,15 +54,13 @@ class _PlanningPageState extends State<PlanningPage> {
   @override
   Widget build(BuildContext context) {
     int itemPerLine = (MediaQuery.of(context).size.width / 200).toInt();
-    var itemHeight = (MediaQuery.of(context).size.height - kToolbarHeight - 24) / itemPerLine;
+    var itemHeight =
+        (MediaQuery.of(context).size.height - kToolbarHeight - 24) /
+        itemPerLine;
     var itemWidth = MediaQuery.of(context).size.width / itemPerLine;
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Planning"),
-      ),
-      body: Center(
-        child: Text("TODO: Add the planning page"),
-      ),
+      appBar: AppBar(title: Text("Planning")),
+      body: Center(child: Text("TODO: Add the planning page")),
     );
   }
 }

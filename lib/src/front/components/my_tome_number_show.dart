@@ -9,9 +9,14 @@ import 'package:simple_barcode_scanner/simple_barcode_scanner.dart';
 class MyTomeNumberShow extends StatelessWidget {
   final String tomeTotal;
   final String editionTotal;
-  AppLocalizations localizations;
+  final AppLocalizations localizations;
 
-  MyTomeNumberShow({required this.tomeTotal, required this.editionTotal, required this.localizations, super.key});
+  const MyTomeNumberShow({
+    required this.tomeTotal,
+    required this.editionTotal,
+    required this.localizations,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -21,9 +26,7 @@ class MyTomeNumberShow extends StatelessWidget {
           "$tomeTotal ${localizations.volume} • $editionTotal ${localizations.edition}",
           textAlign: TextAlign.start,
           style: GoogleFonts.adventPro(
-            textStyle: const TextStyle(
-              fontSize: 30,
-            ),
+            textStyle: const TextStyle(fontSize: 30),
           ),
         ),
         Row(
@@ -41,9 +44,14 @@ class MyTomeNumberShow extends StatelessWidget {
                     padding: const EdgeInsets.all(2.5),
                     child: ElevatedButton(
                       style: ButtonStyle(
-                          backgroundColor: WidgetStateProperty.all<Color>(Theme.of(context).colorScheme.surface),
-                          iconColor: WidgetStateProperty.all<Color>(Theme.of(context).colorScheme.primary),
-                          elevation: WidgetStateProperty.all<double>(0)),
+                        backgroundColor: WidgetStateProperty.all<Color>(
+                          Theme.of(context).colorScheme.surface,
+                        ),
+                        iconColor: WidgetStateProperty.all<Color>(
+                          Theme.of(context).colorScheme.primary,
+                        ),
+                        elevation: WidgetStateProperty.all<double>(0),
+                      ),
                       onPressed: () async {
                         await SimpleBarcodeScanner.scanBarcode(
                           context,
@@ -60,7 +68,10 @@ class MyTomeNumberShow extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          OwnIcon(iconColor: Theme.of(context).colorScheme.primary, iconSrc: Assets.icons.barcode),
+                          OwnIcon(
+                            iconColor: Theme.of(context).colorScheme.primary,
+                            iconSrc: Assets.icons.barcode,
+                          ),
                           SizedBox(width: 5),
                           Text(
                             localizations.scanner,

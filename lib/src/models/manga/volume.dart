@@ -59,7 +59,9 @@ class Volume {
       subSeries: json['subSeries'],
       series: json['series'],
       authors: List<String>.from(json['authors']),
-      contains: json['contains'] != null ? List<String>.from(json['contains']) : null,
+      contains: json['contains'] != null
+          ? List<String>.from(json['contains'])
+          : null,
       info: json['info'],
       support: json['support'],
       japGenre: json['japGenre'],

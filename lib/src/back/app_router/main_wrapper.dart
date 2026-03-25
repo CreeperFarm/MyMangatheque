@@ -19,10 +19,7 @@ import 'package:url_launcher/link.dart';
 class MainWrapper extends ConsumerStatefulWidget {
   final StatefulNavigationShell navigationShell;
 
-  const MainWrapper({
-    required this.navigationShell,
-    super.key,
-  });
+  const MainWrapper({required this.navigationShell, super.key});
 
   @override
   ConsumerState<MainWrapper> createState() => _MainWrapperState();
@@ -79,11 +76,7 @@ class _MainWrapperState extends ConsumerState<MainWrapper> {
     // Get localization - return early if not available
     var localizations = AppLocalizations.of(context);
     if (localizations == null) {
-      return const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     // TODO : restore the planning page.
@@ -102,7 +95,12 @@ class _MainWrapperState extends ConsumerState<MainWrapper> {
       Assets.icons.userActive,
     ];
     //List<String> navTitle = ["Accueil", "Collection", "Recherche", "Planning", "Profil"];
-    List<String> navTitle = [localizations.home, localizations.collection, localizations.search, localizations.profile];
+    List<String> navTitle = [
+      localizations.home,
+      localizations.collection,
+      localizations.search,
+      localizations.profile,
+    ];
     //List<String> navRoute = ["/", "/library", "/search", "/planning", "/profile"];
     const List<String> navRoute = ["/", "/library", "/search", "/profile"];
     // This is to change color when starting the app
@@ -137,132 +135,190 @@ class _MainWrapperState extends ConsumerState<MainWrapper> {
         builder: (context, constraints) {
           if (constraints.maxWidth > 1200) {
             return Scaffold(
-                body: Row(
-              children: [
-                Drawer(
-                  backgroundColor: Theme.of(context).colorScheme.onPrimary,
-                  child: SafeArea(
-                    right: false,
-                    left: false,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          children: [
-                            GestureDetector(
-                              onTap: () {
-                                context.go('/');
-                              },
-                              child: Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 25),
+              body: Row(
+                children: [
+                  Drawer(
+                    backgroundColor: Theme.of(context).colorScheme.onPrimary,
+                    child: SafeArea(
+                      right: false,
+                      left: false,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            children: [
+                              GestureDetector(
+                                onTap: () {
+                                  context.go('/');
+                                },
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 25,
+                                    vertical: 25,
+                                  ),
                                   child: SizedBox(
                                     width: double.infinity,
                                     child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceAround,
                                       children: [
                                         ClipRRect(
-                                          borderRadius: BorderRadius.circular(10),
-                                          child: Image.asset(Assets.logo.blueToneAndWhiteSquare, width: 50, height: 50),
+                                          borderRadius: BorderRadius.circular(
+                                            10,
+                                          ),
+                                          child: Image.asset(
+                                            Assets.logo.blueToneAndWhiteSquare,
+                                            width: 50,
+                                            height: 50,
+                                          ),
                                         ),
-                                        const Text('MyMangathèque', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                                        const Text(
+                                          'MyMangathèque',
+                                          style: TextStyle(
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
                                       ],
                                     ),
-                                  )),
-                            ),
-                            Column(
-                              children: (navIconsSrc).map((iconSrc) {
-                                int index = navIconsSrc.indexOf(iconSrc);
-                                // Compare to the actual asset constant for the user icon
-                                if (iconSrc == Assets.icons.user) {
-                                  return const Padding(padding: EdgeInsets.zero);
-                                } else {
-                                  return MyDrawerTile(title: navTitle[index], iconSrc: iconSrc, goTo: navRoute[index], pop: false);
-                                }
-                              }).toList(),
-                            ),
-                          ],
-                        ),
-                        Column(
-                          children: [
-                            GestureDetector(
-                              onTap: () {
-                                pushOrGo(context, '/profile');
-                              },
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 25),
-                                child: StreamBuilder(
-                                  stream: PocketBaseConnector().listenToUserChanges(),
-                                  builder: (context, snapshot) {
-                                    final isLoggedIn = PocketBaseConnector().isLoggedIn();
-                                    if (isLoggedIn) {
-                                      final user = PocketBaseConnector().getConnectedUser();
-                                      return Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          user?.avatar != null
-                                              ? GetUserProfilePicture(
-                                                  file: user!.avatar!,
-                                                  width: 30,
-                                                  height: 30,
-                                                )
-                                              : SvgPicture.asset(
-                                                  Assets.icons.user,
-                                                  width: 30,
-                                                  height: 30,
-                                                  colorFilter: ColorFilter.mode(Theme.of(context).colorScheme.primary, BlendMode.srcIn),
-                                                ),
-                                          Text(
-                                            user?.username ?? '',
-                                            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary),
-                                          ),
-                                        ],
-                                      );
-                                    } else {
-                                      return Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          SvgPicture.asset(
-                                            Assets.icons.user,
-                                            width: 30,
-                                            height: 30,
-                                            colorFilter: ColorFilter.mode(Theme.of(context).colorScheme.primary, BlendMode.srcIn),
-                                          ),
-                                          Text(
-                                            localizations.logIn,
-                                            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary),
-                                          ),
-                                        ],
-                                      );
-                                    }
-                                  },
+                                  ),
                                 ),
                               ),
-                            ),
-                            Link(
-                              uri: Uri.parse("https://mymangatheque.com/legal_notice"),
-                              builder: (context, link) {
-                                return InkWell(
-                                  onTap: link,
-                                  child: Text(
-                                    AppLocalizations.of(context)!.legalNotice,
-                                    style: TextStyle(
-                                      color: Theme.of(context).colorScheme.primary,
-                                    ),
+                              Column(
+                                children: (navIconsSrc).map((iconSrc) {
+                                  int index = navIconsSrc.indexOf(iconSrc);
+                                  // Compare to the actual asset constant for the user icon
+                                  if (iconSrc == Assets.icons.user) {
+                                    return const Padding(
+                                      padding: EdgeInsets.zero,
+                                    );
+                                  } else {
+                                    return MyDrawerTile(
+                                      title: navTitle[index],
+                                      iconSrc: iconSrc,
+                                      goTo: navRoute[index],
+                                      pop: false,
+                                    );
+                                  }
+                                }).toList(),
+                              ),
+                            ],
+                          ),
+                          Column(
+                            children: [
+                              GestureDetector(
+                                onTap: () {
+                                  pushOrGo(context, '/profile');
+                                },
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 25,
+                                    vertical: 25,
                                   ),
-                                );
-                              },
-                            ),
-                          ],
-                        )
-                      ],
+                                  child: StreamBuilder(
+                                    stream: PocketBaseConnector()
+                                        .listenToUserChanges(),
+                                    builder: (context, snapshot) {
+                                      final isLoggedIn = PocketBaseConnector()
+                                          .isLoggedIn();
+                                      if (isLoggedIn) {
+                                        final user = PocketBaseConnector()
+                                            .getConnectedUser();
+                                        return Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            user?.avatar != null
+                                                ? GetUserProfilePicture(
+                                                    file: user!.avatar!,
+                                                    width: 30,
+                                                    height: 30,
+                                                  )
+                                                : SvgPicture.asset(
+                                                    Assets.icons.user,
+                                                    width: 30,
+                                                    height: 30,
+                                                    colorFilter:
+                                                        ColorFilter.mode(
+                                                          Theme.of(
+                                                            context,
+                                                          ).colorScheme.primary,
+                                                          BlendMode.srcIn,
+                                                        ),
+                                                  ),
+                                            Text(
+                                              user?.username ?? '',
+                                              style: TextStyle(
+                                                fontSize: 20,
+                                                fontWeight: FontWeight.bold,
+                                                color: Theme.of(
+                                                  context,
+                                                ).colorScheme.primary,
+                                              ),
+                                            ),
+                                          ],
+                                        );
+                                      } else {
+                                        return Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            SvgPicture.asset(
+                                              Assets.icons.user,
+                                              width: 30,
+                                              height: 30,
+                                              colorFilter: ColorFilter.mode(
+                                                Theme.of(
+                                                  context,
+                                                ).colorScheme.primary,
+                                                BlendMode.srcIn,
+                                              ),
+                                            ),
+                                            Text(
+                                              localizations.logIn,
+                                              style: TextStyle(
+                                                fontSize: 20,
+                                                fontWeight: FontWeight.bold,
+                                                color: Theme.of(
+                                                  context,
+                                                ).colorScheme.primary,
+                                              ),
+                                            ),
+                                          ],
+                                        );
+                                      }
+                                    },
+                                  ),
+                                ),
+                              ),
+                              Link(
+                                uri: Uri.parse(
+                                  "https://mymangatheque.com/legal_notice",
+                                ),
+                                builder: (context, link) {
+                                  return InkWell(
+                                    onTap: link,
+                                    child: Text(
+                                      AppLocalizations.of(context)!.legalNotice,
+                                      style: TextStyle(
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.primary,
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-                Expanded(
-                  child: widget.navigationShell,
-                ),
-              ],
-            ));
+                  Expanded(child: widget.navigationShell),
+                ],
+              ),
+            );
           } else if (constraints.maxWidth > 600) {
             return Scaffold(
               appBar: AppBar(),
@@ -276,13 +332,7 @@ class _MainWrapperState extends ConsumerState<MainWrapper> {
               body: widget.navigationShell,
             );
           } else if (constraints.maxWidth < 600 && keyboardActive) {
-            return Scaffold(
-              body: Stack(
-                children: [
-                  widget.navigationShell,
-                ],
-              ),
-            );
+            return Scaffold(body: Stack(children: [widget.navigationShell]));
           } else {
             return Scaffold(
               body: Stack(
@@ -300,9 +350,15 @@ class _MainWrapperState extends ConsumerState<MainWrapper> {
                         end: Alignment.bottomCenter,
                       ),
                       height: 60,
-                      margin: const EdgeInsets.only(bottom: 32, left: 16, right: 16),
+                      margin: const EdgeInsets.only(
+                        bottom: 32,
+                        left: 16,
+                        right: 16,
+                      ),
                       borderColor: Colors.transparent,
-                      borderRadius: const BorderRadius.all(Radius.circular(100)),
+                      borderRadius: const BorderRadius.all(
+                        Radius.circular(100),
+                      ),
                       shadowColor: Colors.black.withAlpha(20),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
@@ -330,15 +386,24 @@ class _MainWrapperState extends ConsumerState<MainWrapper> {
                                       left: 22,
                                     ),
                                     child: OwnIcon(
-                                      iconSrc: iconPath(iconName, active: isSelected),
-                                      iconColor: Theme.of(context).colorScheme.primary,
+                                      iconSrc: iconPath(
+                                        iconName,
+                                        active: isSelected,
+                                      ),
+                                      iconColor: Theme.of(
+                                        context,
+                                      ).colorScheme.primary,
                                     ),
                                   ),
                                   Text(
                                     navTitle[index],
                                     style: TextStyle(
-                                      color: Theme.of(context).colorScheme.primary,
-                                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.primary,
+                                      fontWeight: isSelected
+                                          ? FontWeight.bold
+                                          : FontWeight.normal,
                                       fontSize: 12,
                                     ),
                                   ),

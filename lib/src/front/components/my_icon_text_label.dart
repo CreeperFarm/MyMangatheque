@@ -7,24 +7,36 @@ class MyIconTextLabel extends StatelessWidget {
   final String text;
   final double? heightIcon;
 
-  const MyIconTextLabel({required this.iconSrc, required this.text, this.iconAndTextColor, this.heightIcon, super.key});
+  const MyIconTextLabel({
+    required this.iconSrc,
+    required this.text,
+    this.iconAndTextColor,
+    this.heightIcon,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Row(children: [
-      OwnIcon(
-        iconColor: (iconAndTextColor != null) ? iconAndTextColor! : Theme.of(context).colorScheme.primary,
-        iconSrc: iconSrc,
-        height: heightIcon,
-      ),
-      Text(
-        " $text",
-        textAlign: TextAlign.center,
-        style: TextStyle(
-          fontSize: 16,
-          color: (iconAndTextColor != null) ? iconAndTextColor! : Theme.of(context).colorScheme.primary,
+    return Row(
+      children: [
+        OwnIcon(
+          iconColor: (iconAndTextColor != null)
+              ? iconAndTextColor!
+              : Theme.of(context).colorScheme.primary,
+          iconSrc: iconSrc,
+          height: heightIcon,
         ),
-      ),
-    ]);
+        Text(
+          " $text",
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 16,
+            color: (iconAndTextColor != null)
+                ? iconAndTextColor!
+                : Theme.of(context).colorScheme.primary,
+          ),
+        ),
+      ],
+    );
   }
 }

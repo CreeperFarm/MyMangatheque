@@ -73,7 +73,9 @@ class LocalStorage {
     final jsonString = prefs.getString(_ownedSubSerieKey); // Get JSON String
 
     if (jsonString == null) return null; // Return null if no data
-    return (json.decode(jsonString) as List).map((e) => SubSerieForCollection.fromJson(e)).toSet();
+    return (json.decode(jsonString) as List)
+        .map((e) => SubSerieForCollection.fromJson(e))
+        .toSet();
   }
 
   Future<void> saveOwnedSubSerie(Set<SubSerieForCollection> subSerie) async {
@@ -99,7 +101,9 @@ class LocalStorage {
 
     if (jsonString == null) return null; // Return null if no data
 
-    return (json.decode(jsonString) as List).map((e) => Serie.fromJson(e)).toSet();
+    return (json.decode(jsonString) as List)
+        .map((e) => Serie.fromJson(e))
+        .toSet();
   }
 
   Future<void> saveCacheSeries(Set<Serie> series) async {
@@ -115,9 +119,9 @@ class LocalStorage {
     debugPrint("Cache of series from local storage as been deleted.");
   }
 
-// * End of cache series ------------------------------------------------------------------------------------------
+  // * End of cache series ------------------------------------------------------------------------------------------
 
-// * Cache sub series ----------------------------------------------------------------------------------------------
+  // * Cache sub series ----------------------------------------------------------------------------------------------
   Future<Set<SubSerie>?> getCacheSubSeries() async {
     debugPrint("Retrieving cache sub series from local storage");
     final prefs = await SharedPreferences.getInstance();
@@ -125,13 +129,17 @@ class LocalStorage {
 
     if (jsonString == null) return null; // Return null if no data
 
-    return (json.decode(jsonString) as List).map((e) => SubSerie.fromJson(e)).toSet();
+    return (json.decode(jsonString) as List)
+        .map((e) => SubSerie.fromJson(e))
+        .toSet();
   }
 
   Future<void> saveCacheSubSeries(Set<SubSerie> subSeries) async {
     debugPrint("Saving cache sub series from local storage");
     final prefs = await SharedPreferences.getInstance();
-    final jsonString = json.encode(subSeries.toList()); // Convert to JSON String
+    final jsonString = json.encode(
+      subSeries.toList(),
+    ); // Convert to JSON String
     await prefs.setString(_cacheSubSeriesKey, jsonString);
   }
 
@@ -141,9 +149,9 @@ class LocalStorage {
     debugPrint("Cache of sub series from local storage as been deleted.");
   }
 
-// * End of cache sub series ----------------------------------------------------------------------------------------
+  // * End of cache sub series ----------------------------------------------------------------------------------------
 
-// * Cache volumes -------------------------------------------------------------------------------------------------
+  // * Cache volumes -------------------------------------------------------------------------------------------------
   Future<Set<Volume>?> getCacheVolumes() async {
     debugPrint("Retrieving cache volumes from local storage");
     final prefs = await SharedPreferences.getInstance();
@@ -151,7 +159,9 @@ class LocalStorage {
 
     if (jsonString == null) return null; // Return null if no data
 
-    return (json.decode(jsonString) as List).map((e) => Volume.fromJson(e)).toSet();
+    return (json.decode(jsonString) as List)
+        .map((e) => Volume.fromJson(e))
+        .toSet();
   }
 
   Future<void> saveCacheVolumes(Set<Volume> volumes) async {
@@ -167,9 +177,9 @@ class LocalStorage {
     debugPrint("Cache of volumes from local storage as been deleted.");
   }
 
-// * End of cache volumes -------------------------------------------------------------------------------------------
+  // * End of cache volumes -------------------------------------------------------------------------------------------
 
-// * Cache authors -------------------------------------------------------------------------------------------------
+  // * Cache authors -------------------------------------------------------------------------------------------------
   Future<Set<Author>?> getCacheAuthors() async {
     debugPrint("Retrieving cache authors from local storage");
     final prefs = await SharedPreferences.getInstance();
@@ -177,7 +187,9 @@ class LocalStorage {
 
     if (jsonString == null) return null; // Return null if no data
 
-    return (json.decode(jsonString) as List).map((e) => Author.fromJson(e)).toSet();
+    return (json.decode(jsonString) as List)
+        .map((e) => Author.fromJson(e))
+        .toSet();
   }
 
   Future<void> saveCacheAuthors(Set<Author> authors) async {
@@ -193,9 +205,9 @@ class LocalStorage {
     debugPrint("Cache of authors from local storage as been deleted.");
   }
 
-// * End of cache authors -------------------------------------------------------------------------------------------
+  // * End of cache authors -------------------------------------------------------------------------------------------
 
-// * Cache editors -------------------------------------------------------------------------------------------------
+  // * Cache editors -------------------------------------------------------------------------------------------------
   Future<Set<Editor>?> getCacheEditors() async {
     debugPrint("Retrieving cache editors from local storage");
     final prefs = await SharedPreferences.getInstance();
@@ -203,7 +215,9 @@ class LocalStorage {
 
     if (jsonString == null) return null; // Return null if no data
 
-    return (json.decode(jsonString) as List).map((e) => Editor.fromJson(e)).toSet();
+    return (json.decode(jsonString) as List)
+        .map((e) => Editor.fromJson(e))
+        .toSet();
   }
 
   Future<void> saveCacheEditors(Set<Editor> editors) async {
@@ -219,9 +233,9 @@ class LocalStorage {
     debugPrint("Cache of editors from local storage as been deleted.");
   }
 
-// * End of cache editors -------------------------------------------------------------------------------------------
+  // * End of cache editors -------------------------------------------------------------------------------------------
 
-// * Clear all cache ------------------------------------------------------------------------------------------------
+  // * Clear all cache ------------------------------------------------------------------------------------------------
   Future<void> clearAllCache() async {
     final prefs = await SharedPreferences.getInstance();
     prefs.remove(_cacheSeriesKey);
@@ -231,5 +245,6 @@ class LocalStorage {
     prefs.remove(_cacheEditorsKey);
     debugPrint("The whole cache from local storage as been deleted.");
   }
-// * End of clear all cache -----------------------------------------------------------------------------------------
+
+  // * End of clear all cache -----------------------------------------------------------------------------------------
 }

@@ -14,7 +14,7 @@ class MyTomeShow extends StatelessWidget {
           children: [],
         ),*/
         Text(title),
-        Text(authors)
+        Text(authors),
       ],
     );
   }

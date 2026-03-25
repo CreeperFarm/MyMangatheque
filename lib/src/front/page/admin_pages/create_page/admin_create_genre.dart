@@ -29,11 +29,7 @@ class _AdminCreateGenrePageState extends State<AdminCreateGenrePage> {
     // Get localization - return early if not available
     var localizations = AppLocalizations.of(context);
     if (localizations == null) {
-      return const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     PocketBaseAdminConnector connector = PocketBaseAdminConnector();
@@ -44,10 +40,7 @@ class _AdminCreateGenrePageState extends State<AdminCreateGenrePage> {
           padding: const EdgeInsets.symmetric(vertical: 10),
           child: Text(
             localizations.createGenre,
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
         ),
         Form(
@@ -66,7 +59,11 @@ class _AdminCreateGenrePageState extends State<AdminCreateGenrePage> {
                 child: MyButton(
                   text: localizations.genreAdd,
                   onTap: () async {
-                    final data = jsonDecode((await connector.getCollectionFullList('genres')).toString());
+                    final data = jsonDecode(
+                      (await connector.getCollectionFullList(
+                        'genres',
+                      )).toString(),
+                    );
                     var genreAlreadyExists = false;
                     data.forEach((element) {
                       if (element['name'] == genreController.text) {
@@ -86,7 +83,7 @@ class _AdminCreateGenrePageState extends State<AdminCreateGenrePage> {
               ),
             ],
           ),
-        )
+        ),
       ],
     );
   }

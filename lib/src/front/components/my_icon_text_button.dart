@@ -7,7 +7,13 @@ class MyIconTextButton extends StatelessWidget {
   final String iconSrc;
   final String text;
 
-  const MyIconTextButton({required this.function, required this.color, required this.iconSrc, required this.text, super.key});
+  const MyIconTextButton({
+    required this.function,
+    required this.color,
+    required this.iconSrc,
+    required this.text,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -21,12 +27,7 @@ class MyIconTextButton extends StatelessWidget {
               const Padding(padding: EdgeInsets.only(right: 16)),
               OwnIcon(iconColor: color, iconSrc: iconSrc),
               const Padding(padding: EdgeInsets.only(right: 9)),
-              Text(
-                text,
-                style: TextStyle(
-                  color: color,
-                ),
-              ),
+              Text(text, style: TextStyle(color: color)),
             ],
           ),
         ),

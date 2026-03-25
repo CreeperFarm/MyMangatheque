@@ -10,16 +10,24 @@ class User {
   final DateTime created;
   final DateTime updated;
 
-  User.fromJSON(this.id, String collectionId, Map<String, dynamic> json,
-      String created, String updated, String birthday)
-      : username = json['username'],
-        email = json['email'],
-        gender = json['gender'],
-        avatar = json['avatar'] != null
-            ? PocketBaseFile(
-                id: id, collectionId: collectionId, fileName: json['avatar'])
-            : null,
-        created = DateTime.parse(created),
-        updated = DateTime.parse(updated),
-        birthday = DateTime.parse(birthday);
+  User.fromJSON(
+    this.id,
+    String collectionId,
+    Map<String, dynamic> json,
+    String created,
+    String updated,
+    String birthday,
+  ) : username = json['username'],
+      email = json['email'],
+      gender = json['gender'],
+      avatar = json['avatar'] != null
+          ? PocketBaseFile(
+              id: id,
+              collectionId: collectionId,
+              fileName: json['avatar'],
+            )
+          : null,
+      created = DateTime.parse(created),
+      updated = DateTime.parse(updated),
+      birthday = DateTime.parse(birthday);
 }

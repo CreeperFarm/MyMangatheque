@@ -9,16 +9,16 @@ class PocketBaseFile {
     required String id,
     required String collectionId,
     required String fileName,
-  })  : _id = id,
-        _collectionId = collectionId,
-        _fileName = fileName;
+  }) : _id = id,
+       _collectionId = collectionId,
+       _fileName = fileName;
 
   PocketBaseFile.fromRecordModel(RecordModel model, String fieldName)
-      : this(
-          id: model.id,
-          collectionId: model.collectionId,
-          fileName: model.data[fieldName],
-        );
+    : this(
+        id: model.id,
+        collectionId: model.collectionId,
+        fileName: model.data[fieldName],
+      );
 
   String? get path => 'api/files/$_collectionId/$_id/$_fileName';
 

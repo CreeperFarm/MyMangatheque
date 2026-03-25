@@ -31,11 +31,7 @@ class _ScanEanPageState extends ConsumerState<ScanEanPage> {
     // Get localization - return early if not available
     var localizations = AppLocalizations.of(context);
     if (localizations == null) {
-      return const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     /*return Scaffold(
@@ -48,11 +44,7 @@ class _ScanEanPageState extends ConsumerState<ScanEanPage> {
     );*/
     if (!PocketBaseConnector().isLoggedIn()) {
       pushOrGo(context, '/profile/signin');
-      return const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     } else {
       if (Platform.isAndroid || Platform.isIOS) {
         dynamic ean;
@@ -96,9 +88,7 @@ class _ScanEanPageState extends ConsumerState<ScanEanPage> {
             title: const Text("Scan EAN"),
             backgroundColor: Colors.transparent,
           ),
-          body: Center(
-            child: Text("Platform not supported"),
-          ),
+          body: Center(child: Text("Platform not supported")),
         );
       }
     }

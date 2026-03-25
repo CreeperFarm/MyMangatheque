@@ -18,7 +18,7 @@ class MyTextField extends StatelessWidget {
   final int? maxLength;
   final String? maxLengthErrorMessage;
 
-  MyTextField({
+  const MyTextField({
     required this.controller,
     required this.labelText,
     required this.errorMessage,
@@ -42,15 +42,14 @@ class MyTextField extends StatelessWidget {
     // Get localization - return early if not available
     var localizations = AppLocalizations.of(context);
     if (localizations == null) {
-      return const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: horizontalPadding ?? 5.0, vertical: verticalPadding ?? 0.0),
+      padding: EdgeInsets.symmetric(
+        horizontal: horizontalPadding ?? 5.0,
+        vertical: verticalPadding ?? 0.0,
+      ),
       child: TextFormField(
         controller: controller,
         obscureText: obscureText ?? false,
@@ -64,21 +63,23 @@ class MyTextField extends StatelessWidget {
                 } else if (value == null || value.isEmpty) {
                   return errorMessage;
                 } else if (minLength != null && value.length < minLength!) {
-                  return minLengthErrorMessage ?? localizations.minLengthNotReached(minLength!);
+                  return minLengthErrorMessage ??
+                      localizations.minLengthNotReached(minLength!);
                 } else if (maxLength != null && value.length > maxLength!) {
-                  return maxLengthErrorMessage ?? localizations.maxLengthExceeded(maxLength!);
+                  return maxLengthErrorMessage ??
+                      localizations.maxLengthExceeded(maxLength!);
                 } else if (value.length < 6 && obscureText!) {
                   return localizations.passwordTooShort;
                 } else {
                   return null;
                 }
               },
-        onChanged: (customOnChanged != null) ? (value) => customOnChanged!(value) : null,
+        onChanged: (customOnChanged != null)
+            ? (value) => customOnChanged!(value)
+            : null,
         decoration: InputDecoration(
           errorBorder: OutlineInputBorder(
-            borderSide: BorderSide(
-              color: Theme.of(context).colorScheme.error,
-            ),
+            borderSide: BorderSide(color: Theme.of(context).colorScheme.error),
           ),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(25),
@@ -87,9 +88,7 @@ class MyTextField extends StatelessWidget {
             ),
           ),
           filled: true,
-          labelStyle: TextStyle(
-            color: Theme.of(context).colorScheme.onPrimary,
-          ),
+          labelStyle: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
           hintText: labelText,
         ),
       ),

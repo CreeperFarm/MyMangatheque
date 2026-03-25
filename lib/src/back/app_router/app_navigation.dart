@@ -34,9 +34,15 @@ class AppNavigation {
 
   // Private Navigator Key
   static final _rootNavigatorKey = GlobalKey<NavigatorState>();
-  static final _rootNavigatorHome = GlobalKey<NavigatorState>(debugLabel: 'shellHome');
-  static final _rootNavigatorLibrary = GlobalKey<NavigatorState>(debugLabel: 'shellLibrary');
-  static final _rootNavigatorProfile = GlobalKey<NavigatorState>(debugLabel: 'shellProfile');
+  static final _rootNavigatorHome = GlobalKey<NavigatorState>(
+    debugLabel: 'shellHome',
+  );
+  static final _rootNavigatorLibrary = GlobalKey<NavigatorState>(
+    debugLabel: 'shellLibrary',
+  );
+  static final _rootNavigatorProfile = GlobalKey<NavigatorState>(
+    debugLabel: 'shellProfile',
+  );
 
   //GoRouter Config
   static final GoRouter router = GoRouter(
@@ -46,11 +52,16 @@ class AppNavigation {
       // MainWrapper Route
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
-          return MainWrapper(navigationShell: navigationShell, key: state.pageKey);
+          return MainWrapper(
+            navigationShell: navigationShell,
+            key: state.pageKey,
+          );
         },
         branches: <StatefulShellBranch>[
-          StatefulShellBranch(navigatorKey: _rootNavigatorHome, routes: [
-            GoRoute(
+          StatefulShellBranch(
+            navigatorKey: _rootNavigatorHome,
+            routes: [
+              GoRoute(
                 path: '/',
                 name: 'Home',
                 builder: (context, state) {
@@ -58,259 +69,286 @@ class AppNavigation {
                 },
                 routes: [
                   GoRoute(
-                      path: 'editor/:id',
-                      name: 'Editor Home',
-                      builder: (context, state) {
-                        return EditorPage(
-                          editorId: state.pathParameters['id']!,
-                          initRoute: "",
-                          key: state.pageKey,
-                        );
-                      }),
+                    path: 'editor/:id',
+                    name: 'Editor Home',
+                    builder: (context, state) {
+                      return EditorPage(
+                        editorId: state.pathParameters['id']!,
+                        initRoute: "",
+                        key: state.pageKey,
+                      );
+                    },
+                  ),
                   GoRoute(
-                      path: 'author/:id',
-                      name: 'Author Home',
-                      builder: (context, state) {
-                        return AuthorPage(
-                          authorName: state.pathParameters['id']!,
-                          initRoute: "",
-                          key: state.pageKey,
-                        );
-                      }),
+                    path: 'author/:id',
+                    name: 'Author Home',
+                    builder: (context, state) {
+                      return AuthorPage(
+                        authorName: state.pathParameters['id']!,
+                        initRoute: "",
+                        key: state.pageKey,
+                      );
+                    },
+                  ),
                   GoRoute(
-                      path: 'serie/:id',
-                      name: 'Series Home',
-                      builder: (context, state) {
-                        return SeriePage(
-                          serieId: state.pathParameters['id']!,
-                          initRoute: "",
-                          key: state.pageKey,
-                        );
-                      }),
+                    path: 'serie/:id',
+                    name: 'Series Home',
+                    builder: (context, state) {
+                      return SeriePage(
+                        serieId: state.pathParameters['id']!,
+                        initRoute: "",
+                        key: state.pageKey,
+                      );
+                    },
+                  ),
                   GoRoute(
-                      path: 'sub_serie/:id',
-                      name: 'Sub-Series Home',
-                      builder: (context, state) {
-                        return SubSeriePage(
-                          serieId: state.pathParameters['id']!,
-                          initRoute: "",
-                          key: state.pageKey,
-                        );
-                      }),
+                    path: 'sub_serie/:id',
+                    name: 'Sub-Series Home',
+                    builder: (context, state) {
+                      return SubSeriePage(
+                        serieId: state.pathParameters['id']!,
+                        initRoute: "",
+                        key: state.pageKey,
+                      );
+                    },
+                  ),
                   GoRoute(
-                      path: 'volume/:id',
-                      name: 'Volume Home',
-                      builder: (context, state) {
-                        return VolumePage(
-                          volumeId: state.pathParameters['id']!,
-                          initRoute: "",
-                          key: state.pageKey,
-                        );
-                      }),
+                    path: 'volume/:id',
+                    name: 'Volume Home',
+                    builder: (context, state) {
+                      return VolumePage(
+                        volumeId: state.pathParameters['id']!,
+                        initRoute: "",
+                        key: state.pageKey,
+                      );
+                    },
+                  ),
                   GoRoute(
-                      path: 'discover',
-                      name: 'Discover',
-                      builder: (context, state) {
-                        return DiscoverPage(key: state.pageKey);
-                      }),
+                    path: 'discover',
+                    name: 'Discover',
+                    builder: (context, state) {
+                      return DiscoverPage(key: state.pageKey);
+                    },
+                  ),
                   GoRoute(
-                      path: 'devpage',
-                      name: 'DevPage',
-                      builder: (context, state) {
-                        return ComponentShowPage(key: state.pageKey);
-                      }),
+                    path: 'devpage',
+                    name: 'DevPage',
+                    builder: (context, state) {
+                      return ComponentShowPage(key: state.pageKey);
+                    },
+                  ),
                   GoRoute(
-                      path: 'static_page',
-                      name: 'Static Page',
-                      builder: (context, state) {
-                        return StatisticsPage(key: state.pageKey);
-                      }),
+                    path: 'static_page',
+                    name: 'Static Page',
+                    builder: (context, state) {
+                      return StatisticsPage(key: state.pageKey);
+                    },
+                  ),
                   GoRoute(
-                      path: 'mentions_legales',
-                      name: 'Mentions Légales',
-                      builder: (context, state) {
-                        return MentionsLegalesPage(key: state.pageKey);
-                      }),
+                    path: 'mentions_legales',
+                    name: 'Mentions Légales',
+                    builder: (context, state) {
+                      return MentionsLegalesPage(key: state.pageKey);
+                    },
+                  ),
                   GoRoute(
-                      path: 'legal_notice',
-                      name: 'Legal Notice',
-                      builder: (context, state) {
-                        return MentionsLegalesPage(key: state.pageKey);
-                      }),
+                    path: 'legal_notice',
+                    name: 'Legal Notice',
+                    builder: (context, state) {
+                      return MentionsLegalesPage(key: state.pageKey);
+                    },
+                  ),
                   // Modified to directly handle the redirect logic for delete account
                   GoRoute(
-                      path: 'delete_account',
-                      name: 'Suppression du compte',
-                      builder: (context, state) {
-                        // Directly check login status and return the appropriate page
-                        if (PocketBaseConnector().isLoggedIn()) {
-                          return const DeleteAccountPage();
-                        } else {
-                          return const SignInPage();
-                        }
-                      }),
+                    path: 'delete_account',
+                    name: 'Suppression du compte',
+                    builder: (context, state) {
+                      // Directly check login status and return the appropriate page
+                      if (PocketBaseConnector().isLoggedIn()) {
+                        return const DeleteAccountPage();
+                      } else {
+                        return const SignInPage();
+                      }
+                    },
+                  ),
                   GoRoute(
-                      path: 'admin',
-                      name: 'Admin',
-                      builder: (context, state) {
-                        return AdminHomePage(key: state.pageKey);
-                      },
-                      routes: [
-                        GoRoute(
-                          path: 'admin_login',
-                          name: 'Admin Login',
-                          builder: (context, state) {
-                            return AdminLoginPage(key: state.pageKey);
-                          },
-                        ),
-                        GoRoute(
-                          path: 'create',
-                          name: 'Admin Create',
-                          builder: (context, state) {
-                            return AdminCreatePage(key: state.pageKey);
-                          },
-                        ),
-                        GoRoute(
-                          path: 'static_page',
-                          name: 'Admin Static Page',
-                          builder: (context, state) {
-                            return StatisticsPage(key: state.pageKey);
-                          },
-                        ),
-                      ]),
-                ]),
-          ]),
+                    path: 'admin',
+                    name: 'Admin',
+                    builder: (context, state) {
+                      return AdminHomePage(key: state.pageKey);
+                    },
+                    routes: [
+                      GoRoute(
+                        path: 'admin_login',
+                        name: 'Admin Login',
+                        builder: (context, state) {
+                          return AdminLoginPage(key: state.pageKey);
+                        },
+                      ),
+                      GoRoute(
+                        path: 'create',
+                        name: 'Admin Create',
+                        builder: (context, state) {
+                          return AdminCreatePage(key: state.pageKey);
+                        },
+                      ),
+                      GoRoute(
+                        path: 'static_page',
+                        name: 'Admin Static Page',
+                        builder: (context, state) {
+                          return StatisticsPage(key: state.pageKey);
+                        },
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
           StatefulShellBranch(
             navigatorKey: _rootNavigatorLibrary,
             routes: [
               GoRoute(
-                  path: '/library',
-                  name: 'Mangathèque',
-                  builder: (context, state) {
-                    return LibraryPage(key: state.pageKey);
-                  },
-                  routes: [
-                    GoRoute(
-                        path: 'editor/:id',
-                        name: 'Editor Library',
-                        builder: (context, state) {
-                          return EditorPage(
-                            editorId: state.pathParameters['id']!,
-                            initRoute: '/library',
-                            key: state.pageKey,
-                          );
-                        }),
-                    GoRoute(
-                        path: 'author/:id',
-                        name: 'Author Library',
-                        builder: (context, state) {
-                          return AuthorPage(
-                            authorName: state.pathParameters['id']!,
-                            initRoute: '/library',
-                            key: state.pageKey,
-                          );
-                        }),
-                    GoRoute(
-                        path: 'serie/:id',
-                        name: 'Page de la Série',
-                        builder: (context, state) {
-                          return SeriePage(
-                            serieId: state.pathParameters['id']!,
-                            initRoute: '/library',
-                            key: state.pageKey,
-                          );
-                        }),
-                    GoRoute(
-                        path: 'sub_serie/:id',
-                        name: 'Sub-Series Library',
-                        builder: (context, state) {
-                          return SubSeriePage(
-                            serieId: state.pathParameters['id']!,
-                            initRoute: '/library',
-                            key: state.pageKey,
-                          );
-                        }),
-                    GoRoute(
-                        path: 'volume/:id',
-                        name: 'Volume Library',
-                        builder: (context, state) {
-                          return VolumePage(
-                            volumeId: state.pathParameters['id']!,
-                            initRoute: '/library',
-                            key: state.pageKey,
-                          );
-                        }),
-                    GoRoute(
-                        path: 'scan',
-                        name: 'Scan',
-                        builder: (context, state) {
-                          return ScanEanPage(key: state.pageKey);
-                        })
-                  ])
-            ],
-          ),
-          StatefulShellBranch(routes: [
-            GoRoute(
-                path: '/search',
-                name: 'Search',
+                path: '/library',
+                name: 'Mangathèque',
                 builder: (context, state) {
-                  return SearchPage(
-                    key: state.pageKey,
-                  );
+                  return LibraryPage(key: state.pageKey);
                 },
                 routes: [
                   GoRoute(
-                      path: 'editor/:id',
-                      name: 'Editor Search',
-                      builder: (context, state) {
-                        return EditorPage(
-                          editorId: state.pathParameters['id']!,
-                          initRoute: '/search',
-                          key: state.pageKey,
-                        );
-                      }),
+                    path: 'editor/:id',
+                    name: 'Editor Library',
+                    builder: (context, state) {
+                      return EditorPage(
+                        editorId: state.pathParameters['id']!,
+                        initRoute: '/library',
+                        key: state.pageKey,
+                      );
+                    },
+                  ),
                   GoRoute(
-                      path: 'author/:id',
-                      name: 'Author Search',
-                      builder: (context, state) {
-                        return AuthorPage(
-                          authorName: state.pathParameters['id']!,
-                          initRoute: '/search',
-                          key: state.pageKey,
-                        );
-                      }),
+                    path: 'author/:id',
+                    name: 'Author Library',
+                    builder: (context, state) {
+                      return AuthorPage(
+                        authorName: state.pathParameters['id']!,
+                        initRoute: '/library',
+                        key: state.pageKey,
+                      );
+                    },
+                  ),
                   GoRoute(
-                      path: 'serie/:id',
-                      name: 'Series Search',
-                      builder: (context, state) {
-                        return SeriePage(
-                          serieId: state.pathParameters['id']!,
-                          initRoute: '/search',
-                          key: state.pageKey,
-                        );
-                      }),
+                    path: 'serie/:id',
+                    name: 'Page de la Série',
+                    builder: (context, state) {
+                      return SeriePage(
+                        serieId: state.pathParameters['id']!,
+                        initRoute: '/library',
+                        key: state.pageKey,
+                      );
+                    },
+                  ),
                   GoRoute(
-                      path: 'sub_serie/:id',
-                      name: 'Sub-Series Search',
-                      builder: (context, state) {
-                        return SubSeriePage(
-                          serieId: state.pathParameters['id']!,
-                          initRoute: '/search',
-                          key: state.pageKey,
-                        );
-                      }),
+                    path: 'sub_serie/:id',
+                    name: 'Sub-Series Library',
+                    builder: (context, state) {
+                      return SubSeriePage(
+                        serieId: state.pathParameters['id']!,
+                        initRoute: '/library',
+                        key: state.pageKey,
+                      );
+                    },
+                  ),
                   GoRoute(
-                      path: 'volume/:id',
-                      name: 'Volume Search',
-                      builder: (context, state) {
-                        return VolumePage(
-                          volumeId: state.pathParameters['id']!,
-                          initRoute: '/search',
-                          key: state.pageKey,
-                        );
-                      })
-                ])
-          ]),
+                    path: 'volume/:id',
+                    name: 'Volume Library',
+                    builder: (context, state) {
+                      return VolumePage(
+                        volumeId: state.pathParameters['id']!,
+                        initRoute: '/library',
+                        key: state.pageKey,
+                      );
+                    },
+                  ),
+                  GoRoute(
+                    path: 'scan',
+                    name: 'Scan',
+                    builder: (context, state) {
+                      return ScanEanPage(key: state.pageKey);
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/search',
+                name: 'Search',
+                builder: (context, state) {
+                  return SearchPage(key: state.pageKey);
+                },
+                routes: [
+                  GoRoute(
+                    path: 'editor/:id',
+                    name: 'Editor Search',
+                    builder: (context, state) {
+                      return EditorPage(
+                        editorId: state.pathParameters['id']!,
+                        initRoute: '/search',
+                        key: state.pageKey,
+                      );
+                    },
+                  ),
+                  GoRoute(
+                    path: 'author/:id',
+                    name: 'Author Search',
+                    builder: (context, state) {
+                      return AuthorPage(
+                        authorName: state.pathParameters['id']!,
+                        initRoute: '/search',
+                        key: state.pageKey,
+                      );
+                    },
+                  ),
+                  GoRoute(
+                    path: 'serie/:id',
+                    name: 'Series Search',
+                    builder: (context, state) {
+                      return SeriePage(
+                        serieId: state.pathParameters['id']!,
+                        initRoute: '/search',
+                        key: state.pageKey,
+                      );
+                    },
+                  ),
+                  GoRoute(
+                    path: 'sub_serie/:id',
+                    name: 'Sub-Series Search',
+                    builder: (context, state) {
+                      return SubSeriePage(
+                        serieId: state.pathParameters['id']!,
+                        initRoute: '/search',
+                        key: state.pageKey,
+                      );
+                    },
+                  ),
+                  GoRoute(
+                    path: 'volume/:id',
+                    name: 'Volume Search',
+                    builder: (context, state) {
+                      return VolumePage(
+                        volumeId: state.pathParameters['id']!,
+                        initRoute: '/search',
+                        key: state.pageKey,
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
           StatefulShellBranch(
             navigatorKey: _rootNavigatorProfile,
             routes: [
@@ -326,41 +364,47 @@ class AppNavigation {
                 },
                 routes: [
                   GoRoute(
-                      path: 'modify_password',
-                      name: 'ModifyPassword',
-                      builder: (context, state) {
-                        return ModifyPasswordPage(key: state.pageKey);
-                      }),
+                    path: 'modify_password',
+                    name: 'ModifyPassword',
+                    builder: (context, state) {
+                      return ModifyPasswordPage(key: state.pageKey);
+                    },
+                  ),
                   GoRoute(
-                      path: 'signin',
-                      name: 'SignIn',
-                      builder: (context, state) {
-                        return SignInPage(key: state.pageKey);
-                      }),
+                    path: 'signin',
+                    name: 'SignIn',
+                    builder: (context, state) {
+                      return SignInPage(key: state.pageKey);
+                    },
+                  ),
                   GoRoute(
-                      path: 'signup',
-                      name: 'SignUp',
-                      builder: (context, state) {
-                        return SignUpPage(key: state.pageKey);
-                      }),
+                    path: 'signup',
+                    name: 'SignUp',
+                    builder: (context, state) {
+                      return SignUpPage(key: state.pageKey);
+                    },
+                  ),
                   GoRoute(
-                      path: 'forgot_password',
-                      name: 'ForgotPassword',
-                      builder: (context, state) {
-                        return ForgotPasswordPage(key: state.pageKey);
-                      }),
+                    path: 'forgot_password',
+                    name: 'ForgotPassword',
+                    builder: (context, state) {
+                      return ForgotPasswordPage(key: state.pageKey);
+                    },
+                  ),
                   GoRoute(
-                      path: 'mentions_legales',
-                      name: 'Mentions Légales Profile',
-                      builder: (context, state) {
-                        return MentionsLegalesPage(key: state.pageKey);
-                      }),
+                    path: 'mentions_legales',
+                    name: 'Mentions Légales Profile',
+                    builder: (context, state) {
+                      return MentionsLegalesPage(key: state.pageKey);
+                    },
+                  ),
                   GoRoute(
-                      path: 'legal_notice',
-                      name: 'Legal Notice Profile',
-                      builder: (context, state) {
-                        return MentionsLegalesPage(key: state.pageKey);
-                      }),
+                    path: 'legal_notice',
+                    name: 'Legal Notice Profile',
+                    builder: (context, state) {
+                      return MentionsLegalesPage(key: state.pageKey);
+                    },
+                  ),
                 ],
               ),
             ],
@@ -370,9 +414,7 @@ class AppNavigation {
     ],
 
     // 👇 This handles unknown routes
-    errorBuilder: (context, state) => ErrorPage(
-      error: state.error,
-      key: state.pageKey,
-    ),
+    errorBuilder: (context, state) =>
+        ErrorPage(error: state.error, key: state.pageKey),
   );
 }

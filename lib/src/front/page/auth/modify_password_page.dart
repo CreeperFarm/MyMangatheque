@@ -8,6 +8,7 @@ import 'package:mymangatheque/src/front/components/my_scroll_column.dart';
 import 'package:mymangatheque/src/front/components/my_textfield.dart';
 import 'package:mymangatheque/src/function/auto_push_or_go.dart';
 import 'package:mymangatheque/src/function/show_message_function.dart';
+import 'package:mymangatheque/src/const/routes.dart';
 
 // ignore_for_file: use_build_context_synchronously
 
@@ -36,7 +37,7 @@ class _ModifyPasswordPageState extends State<ModifyPasswordPage> {
     super.dispose();
   }
 
-  signIn() async {
+  Future<void> signIn() async {
     /*try {
       await FirebaseAuth.instance.setLanguageCode("fr");
       await FirebaseAuth.instance.signInWithEmailAndPassword(email: user.email.toString(), password: oldPasswordController.text);
@@ -74,7 +75,12 @@ class _ModifyPasswordPageState extends State<ModifyPasswordPage> {
       }
     }*/
     try {
-      await connector.modifyPassword(connector.getConnectedUser()!.email, oldPasswordController.text, newPasswordController.text, context);
+      await connector.modifyPassword(
+        connector.getConnectedUser()!.email,
+        oldPasswordController.text,
+        newPasswordController.text,
+        context,
+      );
       Navigator.pop(context);
     } catch (e) {
       Navigator.pop(context);
@@ -88,21 +94,14 @@ class _ModifyPasswordPageState extends State<ModifyPasswordPage> {
     // Get localization - return early if not available
     var localizations = AppLocalizations.of(context);
     if (localizations == null) {
-      return const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     if (connector.getConnectedUser() == null) {
-      pushOrGo(context, "/profile/signin");
+      pushOrGo(context, Routes.profile.signin);
     }
     return Scaffold(
-      appBar: AppBar(
-        title: Text(localizations.modifyPassword),
-        elevation: 0,
-      ),
+      appBar: AppBar(title: Text(localizations.modifyPassword), elevation: 0),
       body: MyScrollColumn(
         scrollPadding: const EdgeInsets.symmetric(horizontal: 10),
         children: [
@@ -188,7 +187,8 @@ class _ModifyPasswordPageState extends State<ModifyPasswordPage> {
                   onTap: () {
                     // Verify if all field is complete
                     if (_formKey.currentState!.validate()) {
-                      if (newPasswordController.text != newPasswordVerifierController.text) {
+                      if (newPasswordController.text !=
+                          newPasswordVerifierController.text) {
                         errorText = localizations.passwordsDoNotMatch;
                       } else {
                         passwordModify();
