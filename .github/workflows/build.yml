@@ -41,6 +41,11 @@ jobs:
 
             - name: Build
               run: flutter build appbundle --obfuscate --split-debug-info out/android --release
+
+            - name: Add SonarQube config to ignore C/C++/ObjC
+              run: |
+                  echo "sonar.cpp.file.suffixes=-" >> sonar-project.properties
+                  echo "sonar.objc.file.suffixes=-" >> sonar-project.properties
             - name: SonarQube Scan
               uses: SonarSource/sonarqube-scan-action@v6
               env:
