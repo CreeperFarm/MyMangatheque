@@ -62,6 +62,7 @@ class _CollectionTabState extends ConsumerState<CollectionTab> {
         if (value == false) {
           debugPrint("Error while loading data");
         } else {
+          if (!mounted) return;
           setState(() {});
         }
       });
@@ -103,7 +104,7 @@ class _CollectionTabState extends ConsumerState<CollectionTab> {
                                     ' - Edition Standard',
                                     '',
                                   ),
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
                                   ),

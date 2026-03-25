@@ -40,7 +40,7 @@ class _AdminCreateGenrePageState extends State<AdminCreateGenrePage> {
           padding: const EdgeInsets.symmetric(vertical: 10),
           child: Text(
             localizations.createGenre,
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
         ),
         Form(
@@ -73,7 +73,9 @@ class _AdminCreateGenrePageState extends State<AdminCreateGenrePage> {
                       }
                     });
                     if (!genreAlreadyExists) {
+                      if (!mounted) return;
                       connector.createGenre(genreController.text);
+                      if (!mounted) return;
                       showMessage(localizations.genreAddSuccess, context);
                     } else {
                       showMessage(localizations.genreDuplicate, context);

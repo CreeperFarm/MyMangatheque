@@ -34,7 +34,7 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
   }
 
   Future<void> getClientStream() async {
-    var order = ref.watch(searchOrderProvider);
+    ref.watch(searchOrderProvider);
   }
 
   void _onSearchChanged() {
@@ -71,6 +71,7 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
   Future<void> initData() async {
     try {
       await ref.read(mangaOwnedProvider.notifier).initData().then((value) {
+        if (!mounted) return;
         if (value) {
           setState(() {});
         } else {
@@ -83,6 +84,7 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
         }
       });
     } catch (e) {
+      if (!mounted) return;
       debugPrint(e.toString());
       showMessage(AppLocalizations.of(context)!.errorOccurred, context);
     }
@@ -115,9 +117,10 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
     }
 
     if (!connector.isLoggedIn()) {
-      return SignInPage();
+      return const SignInPage();
     }
     final selectedOrder = ref.watch(searchOrderProvider);
+    final _ = _resultsList.length;
     searchResultsList();
 
     return DefaultTabController(
@@ -157,7 +160,7 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
                   ),
                   shadowColor: Theme.of(
                     context,
-                  ).colorScheme.onPrimary.withOpacity(0.5),
+                  ).colorScheme.onPrimary.withValues(alpha: 0.5),
                   color: Theme.of(context).colorScheme.surface,
                   itemBuilder: (BuildContext context) =>
                       <PopupMenuEntry<String>>[

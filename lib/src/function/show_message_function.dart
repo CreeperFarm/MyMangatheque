@@ -7,7 +7,7 @@ void showMessage(String message, context) {
     dismissDirection: DismissDirection.down,
     behavior: SnackBarBehavior.floating,
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
-    duration: Duration(seconds: 3),
+    duration: const Duration(seconds: 3),
     elevation: 10,
     content: Text(
       message,

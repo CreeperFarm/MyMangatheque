@@ -27,7 +27,7 @@ class MySeriesTile extends StatelessWidget {
       contentPadding: const EdgeInsets.symmetric(horizontal: 5, vertical: 0),
       title: Text(
         seriesData['title'],
-        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
       ),
       trailing: OwnIcon(
         iconColor: Theme.of(context).colorScheme.primary,

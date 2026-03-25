@@ -47,6 +47,7 @@ class _ReadPileTabState extends ConsumerState<ReadPileTab> {
       }
     }
 
+    if (!mounted) return;
     setState(() {});
   }
 
@@ -123,19 +124,25 @@ class _ReadPileTabState extends ConsumerState<ReadPileTab> {
     }
 
     return Padding(
-      padding: EdgeInsets.all(10),
+      padding: const EdgeInsets.all(10),
       child: MyScrollColumn(
         columnCrossAxisAlignment: CrossAxisAlignment.center,
         children: [
           (volumeOwned == 0)
               ? Text(
                   localizations.zeroVolumesOwned,
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
                 )
               : (volumeOwned == volumeReaded)
               ? Text(
                   localizations.allVolumesReaded,
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
                 )
               : Column(
                   children: [
@@ -144,7 +151,7 @@ class _ReadPileTabState extends ConsumerState<ReadPileTab> {
                         volumeReaded,
                         volumeOwned,
                       ),
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
                       ),
@@ -180,7 +187,7 @@ class _ReadPileTabState extends ConsumerState<ReadPileTab> {
                           ' - Edition Standard',
                           '',
                         ),
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),

@@ -106,7 +106,7 @@ class _AuthorPageState extends State<AuthorPage> {
                                   ),
                                   child: Container(
                                     alignment: Alignment.center,
-                                    color: Colors.grey.withOpacity(0.4),
+                                    color: Colors.grey.withValues(alpha: 0.4),
                                   ),
                                 ),
                               ],
@@ -168,7 +168,7 @@ class _AuthorPageState extends State<AuthorPage> {
                 ),
                 MyLine(width: MediaQuery.of(context).size.width, vertical: 10),
                 (series == null)
-                    ? SizedBox()
+                    ? const SizedBox()
                     : Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 10.0),
                         child: Column(

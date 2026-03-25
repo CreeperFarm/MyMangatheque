@@ -63,13 +63,13 @@ class PocketBaseConnector {
       } else {}
     } on SocketException {
       AlertDialog.adaptive(
-        title: Text("No Connection"),
-        content: Text("No Connection"),
+        title: const Text("No Connection"),
+        content: const Text("No Connection"),
       );
     } catch (e) {
       AlertDialog.adaptive(
-        title: Text("An error occurred"),
-        content: Text("An error occurred"),
+        title: const Text("An error occurred"),
+        content: const Text("An error occurred"),
       );
       debugPrint(e.toString());
     }

@@ -24,7 +24,7 @@ class _SignInPageState extends State<SignInPage> {
   final passwordController = TextEditingController();
   final connector = PocketBaseConnector();
 
-  Future<User?> signIn(context) async {
+  Future<User?> signIn(BuildContext context) async {
     try {
       final userData = await connector.loginWithEmail(
         emailController.text,
@@ -35,9 +35,11 @@ class _SignInPageState extends State<SignInPage> {
 
       debugPrint('connector id ${connector.getConnectedUser()!.id}');
 
-      context.go(Routes.profile.base);
+      if (!mounted) return null;
+      pushOrGo(context, Routes.profile.base);
       return userData;
     } catch (e) {
+      if (!mounted) return null;
       //var error = json.decode(e.toString().replaceAll('ClientException: ', ''));
       //print(error);
       //print(error['response']['message']);
@@ -146,19 +148,21 @@ class _SignInPageState extends State<SignInPage> {
                 // Display sign in button
                 MyButton(
                   text: localizations.logIn,
-                  onTap: () => connector
-                      .loginWithEmail(
+                  onTap: () async {
+                    try {
+                      await connector.loginWithEmail(
                         emailController.text,
                         passwordController.text,
                         context,
-                      )
-                      .then((value) {
-                        setState(() {});
-                        pushOrGo(context, Routes.profile.base);
-                      })
-                      .catchError((e) {
-                        showMessage(e.toString(), context);
-                      }),
+                      );
+                      if (!mounted) return;
+                      setState(() {});
+                      pushOrGo(context, Routes.profile.base);
+                    } catch (e) {
+                      if (!mounted) return;
+                      showMessage(e.toString(), context);
+                    }
+                  },
                 ),
                 const SizedBox(height: 35),
 
@@ -230,7 +234,7 @@ class _SignInPageState extends State<SignInPage> {
                             pushOrGo(context, Routes.profile.signup),
                         child: Text(
                           localizations.createAccount,
-                          style: TextStyle(
+                          style: const TextStyle(
                             color: Colors.blue,
                             fontWeight: FontWeight.bold,
                           ),

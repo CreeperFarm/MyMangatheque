@@ -36,10 +36,12 @@ class _SubSeriePageState extends State<SubSeriePage> {
         connector.getConnectedUser()!.id,
         widget.serieId,
       );
+      if (!mounted) return;
       setState(() {
         isSubSeriesFollowed = owned;
       });
     } else {
+      if (!mounted) return;
       setState(() {
         isSubSeriesFollowed = false;
       });
@@ -83,7 +85,7 @@ class _SubSeriePageState extends State<SubSeriePage> {
         if (snapshot.hasError) {
           return Scaffold(
             appBar: AppBar(backgroundColor: Colors.transparent),
-            body: Center(child: const Text("Une erreur est survenue")),
+            body: const Center(child: Text("Une erreur est survenue")),
           );
         }
         if (snapshot.hasData && snapshot.data != null) {
@@ -138,7 +140,7 @@ class _SubSeriePageState extends State<SubSeriePage> {
                         ),
                       ),
                       (data['support'] == null || data['support'] == "manga")
-                          ? SizedBox()
+                          ? const SizedBox()
                           : Padding(
                               padding: const EdgeInsets.symmetric(vertical: 5),
                               child: Text(
@@ -207,8 +209,8 @@ class _SubSeriePageState extends State<SubSeriePage> {
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     (!isSubSeriesFollowed)
-                                        ? Icon(Icons.bookmark_border)
-                                        : Icon(Icons.bookmark),
+                                        ? const Icon(Icons.bookmark_border)
+                                        : const Icon(Icons.bookmark),
                                     Text(
                                       (!isSubSeriesFollowed)
                                           ? localizations.follow
@@ -277,7 +279,7 @@ class _SubSeriePageState extends State<SubSeriePage> {
                         horizontal: 0.0,
                       ),
                       (authors.isEmpty)
-                          ? SizedBox()
+                          ? const SizedBox()
                           : (authors.length == 1)
                           ? Padding(
                               padding: const EdgeInsets.symmetric(vertical: 5),
@@ -313,7 +315,7 @@ class _SubSeriePageState extends State<SubSeriePage> {
                                     vertical: 5,
                                     horizontal: 0,
                                   )
-                                : SizedBox(),
+                                : const SizedBox(),
                           ],
                         ),
                       MyLine(
@@ -322,7 +324,7 @@ class _SubSeriePageState extends State<SubSeriePage> {
                         horizontal: 0,
                       ),
                       (volumes.isEmpty)
-                          ? SizedBox()
+                          ? const SizedBox()
                           : (volumes.length == 1)
                           ? Padding(
                               padding: const EdgeInsets.symmetric(vertical: 5),
@@ -385,11 +387,11 @@ class _SubSeriePageState extends State<SubSeriePage> {
                                     vertical: 5,
                                     horizontal: 0,
                                   )
-                                : SizedBox(),
+                                : const SizedBox(),
                           ],
                         ),
                       (editor.isEmpty)
-                          ? SizedBox()
+                          ? const SizedBox()
                           : Padding(
                               padding: const EdgeInsets.symmetric(vertical: 5),
                               child: Column(

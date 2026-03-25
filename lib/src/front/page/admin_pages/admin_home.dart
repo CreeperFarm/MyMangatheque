@@ -33,7 +33,7 @@ class AdminHomePage extends ConsumerWidget {
                   Text(localizations.adminHomePageDescription),
                   ElevatedButton(
                     onPressed: () => pushOrGo(context, '/admin/create'),
-                    child: Text("Go to Admin Create Page"),
+                    child: const Text("Go to Admin Create Page"),
                   ),
                   ElevatedButton(
                     child: Text(localizations.scanEAN),
@@ -47,7 +47,7 @@ class AdminHomePage extends ConsumerWidget {
                     },
                   ),
                   ElevatedButton(
-                    child: Text("Stats"),
+                    child: const Text("Stats"),
                     onPressed: () => pushOrGo(context, '/admin/static_page'),
                   ),
                 ],
@@ -57,7 +57,7 @@ class AdminHomePage extends ConsumerWidget {
         ),
       );
     } else {
-      return AdminLoginPage();
+      return const AdminLoginPage();
     }
   }
 }

@@ -75,7 +75,8 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
     imagePathVolumeController.text = image!.path;
     imageNameVolumeController.text = image.name;
 
-    Future.delayed(Duration(milliseconds: 200), () {
+    Future.delayed(const Duration(milliseconds: 200), () {
+      if (!mounted) return;
       setState(() {});
     });
   }
@@ -126,7 +127,7 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
           padding: const EdgeInsets.symmetric(vertical: 10),
           child: Text(
             localizations.createVolume,
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
         ),
         Form(
@@ -160,7 +161,7 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
                         imageNameVolumeController.text = "";
                         setState(() {});
                       },
-                      icon: Icon(CupertinoIcons.delete_left_fill),
+                      icon: const Icon(CupertinoIcons.delete_left_fill),
                     ),
                   ),
                 ],
@@ -201,13 +202,14 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
                           ),
                         ),
                       );
+                      if (!mounted) return;
                       setState(() {
                         if (res is String) {
                           eanVolumeController.text = res;
                         }
                       });
                     },
-                    icon: Icon(Icons.camera_alt),
+                    icon: const Icon(Icons.camera_alt),
                   ),
                 ],
               ),
@@ -249,7 +251,7 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
                     padding: const EdgeInsets.symmetric(horizontal: 10.0),
                     child: Text(
                       localizations.adultContent,
-                      style: TextStyle(fontSize: 16),
+                      style: const TextStyle(fontSize: 16),
                     ),
                   ),
                 ],
@@ -569,8 +571,10 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
                         imageNameVolumeController.text,
                         bytes,
                       );
+                      if (!mounted) return;
                       showMessage(localizations.volumeAddSuccess, context);
                     } catch (e) {
+                      if (!mounted) return;
                       showMessage(localizations.volumeAddError, context);
                     }
                   }

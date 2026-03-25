@@ -72,7 +72,7 @@ class MyTomeNumberShow extends StatelessWidget {
                             iconColor: Theme.of(context).colorScheme.primary,
                             iconSrc: Assets.icons.barcode,
                           ),
-                          SizedBox(width: 5),
+                          const SizedBox(width: 5),
                           Text(
                             localizations.scanner,
                             style: TextStyle(

@@ -15,8 +15,7 @@ class MangaOwnedNotifier extends Notifier<Set<SubSerieForCollection>> {
   // Init the data
   Future<bool> initData() async {
     final storage = getIt<LocalStorage>();
-    Set<SubSerieForCollection>? temp = await storage
-        .getOwnedSubSerie(); // Get the data from the local storage
+    await storage.getOwnedSubSerie(); // Get the data from the local storage
 
     try {
       final result = await PocketBaseConnector()

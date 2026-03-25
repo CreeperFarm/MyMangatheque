@@ -31,6 +31,8 @@ class VolumePage extends StatefulWidget {
 }
 
 class _VolumePageState extends State<VolumePage> {
+  static const String signInRoute = '/profile/signin';
+
   bool isVolumeOwned = false;
   bool isSubSeriesFollowed = false;
   bool isVolumeReaded = false;
@@ -50,6 +52,7 @@ class _VolumePageState extends State<VolumePage> {
         connector.getConnectedUser()!.id,
         widget.volumeId,
       );
+      if (!mounted) return;
       setState(() {
         isVolumeOwned = owned;
       });
@@ -58,11 +61,13 @@ class _VolumePageState extends State<VolumePage> {
           connector.getConnectedUser()!.id,
           widget.volumeId,
         );
+        if (!mounted) return;
         setState(() {
           isVolumeReaded = readed;
         });
       }
     } else {
+      if (!mounted) return;
       setState(() {
         isVolumeOwned = false;
       });
@@ -81,10 +86,12 @@ class _VolumePageState extends State<VolumePage> {
         connector.getConnectedUser()!.id,
         data['expand']['sub_series']['id'].toString(),
       );
+      if (!mounted) return;
       setState(() {
         isSubSeriesFollowed = owned;
       });
     } else {
+      if (!mounted) return;
       setState(() {
         isSubSeriesFollowed = false;
       });
@@ -96,6 +103,81 @@ class _VolumePageState extends State<VolumePage> {
     super.initState();
     _checkVolumeOwnership();
     _checkSubSeriesFollowing();
+  }
+
+  Future<void> _handleOwnedPressed(String volumeId, String subSeriesId) async {
+    if (!connector.isLoggedIn()) {
+      pushOrGo(context, signInRoute);
+      return;
+    }
+
+    if (!isVolumeOwned) {
+      connector.addVolumeToOwned(
+        connector.getConnectedUser()!.id,
+        volumeId,
+        false,
+      );
+      if (!isSubSeriesFollowed) {
+        connector.addSubSeriesToFollowed(
+          connector.getConnectedUser()!.id,
+          subSeriesId,
+        );
+      }
+      setState(() {
+        isVolumeOwned = true;
+        if (!isSubSeriesFollowed) {
+          isSubSeriesFollowed = true;
+        }
+      });
+      return;
+    }
+
+    connector.removeVolumeFromOwned(connector.getConnectedUser()!.id, volumeId);
+    setState(() {
+      isVolumeOwned = false;
+    });
+  }
+
+  Future<void> _handleFollowPressed(String subSeriesId) async {
+    if (!connector.isLoggedIn()) {
+      pushOrGo(context, signInRoute);
+      return;
+    }
+
+    if (!isSubSeriesFollowed) {
+      connector.addSubSeriesToFollowed(
+        connector.getConnectedUser()!.id,
+        subSeriesId,
+      );
+      setState(() {
+        isSubSeriesFollowed = true;
+      });
+      return;
+    }
+
+    connector.removeSubSeriesToFollowed(
+      connector.getConnectedUser()!.id,
+      subSeriesId,
+    );
+    setState(() {
+      isSubSeriesFollowed = false;
+    });
+  }
+
+  Future<void> _handleReadPressed(String volumeId) async {
+    if (!connector.isLoggedIn()) {
+      pushOrGo(context, signInRoute);
+      return;
+    }
+
+    connector.changeReadState(
+      connector.getConnectedUser()!.id,
+      volumeId,
+      !isVolumeReaded,
+    );
+    setState(() {
+      isVolumeReaded = !isVolumeReaded;
+    });
   }
 
   @override
@@ -175,7 +257,7 @@ class _VolumePageState extends State<VolumePage> {
                         ),
                       ),
                       (data['support'] == null || data['support'] == "manga")
-                          ? SizedBox()
+                          ? const SizedBox()
                           : Padding(
                               padding: const EdgeInsets.symmetric(vertical: 5),
                               child: Text(
@@ -198,7 +280,7 @@ class _VolumePageState extends State<VolumePage> {
                               borderRadius: BorderRadius.circular(100),
                               child: Container(
                                 decoration: BoxDecoration(
-                                  color: Color(0xFF1780A3),
+                                  color: const Color(0xFF1780A3),
                                 ),
                                 child: Padding(
                                   padding: const EdgeInsets.all(5.0),
@@ -211,7 +293,7 @@ class _VolumePageState extends State<VolumePage> {
                                               ).colorScheme.surface,
                                             )
                                           : WidgetStateProperty.all<Color>(
-                                              Color(0xFF1780A3),
+                                              const Color(0xFF1780A3),
                                             ),
                                       iconColor: (!isVolumeOwned)
                                           ? WidgetStateProperty.all<Color>(
@@ -227,53 +309,17 @@ class _VolumePageState extends State<VolumePage> {
                                       elevation:
                                           WidgetStateProperty.all<double>(0),
                                     ),
-                                    onPressed: () async {
-                                      if (connector.isLoggedIn()) {
-                                        if (!isVolumeOwned) {
-                                          if (!isSubSeriesFollowed) {
-                                            connector.addVolumeToOwned(
-                                              connector.getConnectedUser()!.id,
-                                              data['id'].toString(),
-                                              false,
-                                            );
-                                            connector.addSubSeriesToFollowed(
-                                              connector.getConnectedUser()!.id,
-                                              subSeries['id'].toString(),
-                                            );
-                                            setState(() {
-                                              isVolumeOwned = true;
-                                              isSubSeriesFollowed = true;
-                                            });
-                                          } else {
-                                            connector.addVolumeToOwned(
-                                              connector.getConnectedUser()!.id,
-                                              data['id'].toString(),
-                                              false,
-                                            );
-                                            setState(() {
-                                              isVolumeOwned = true;
-                                            });
-                                          }
-                                        } else {
-                                          connector.removeVolumeFromOwned(
-                                            connector.getConnectedUser()!.id,
-                                            data['id'].toString(),
-                                          );
-                                          setState(() {
-                                            isVolumeOwned = false;
-                                          });
-                                        }
-                                      } else {
-                                        pushOrGo(context, '/profile/signin');
-                                      }
-                                    },
+                                    onPressed: () => _handleOwnedPressed(
+                                      data['id'].toString(),
+                                      subSeries['id'].toString(),
+                                    ),
                                     child: Row(
                                       mainAxisAlignment:
                                           MainAxisAlignment.spaceBetween,
                                       children: [
                                         (!isVolumeOwned)
-                                            ? Icon(Icons.add)
-                                            : Icon(Icons.check),
+                                            ? const Icon(Icons.add)
+                                            : const Icon(Icons.check),
                                         Text(
                                           (!isVolumeOwned)
                                               ? localizations.add
@@ -330,36 +376,16 @@ class _VolumePageState extends State<VolumePage> {
                                       elevation:
                                           WidgetStateProperty.all<double>(0),
                                     ),
-                                    onPressed: () async {
-                                      if (connector.isLoggedIn()) {
-                                        if (!isSubSeriesFollowed) {
-                                          connector.addSubSeriesToFollowed(
-                                            connector.getConnectedUser()!.id,
-                                            subSeries['id'].toString(),
-                                          );
-                                          setState(() {
-                                            isSubSeriesFollowed = true;
-                                          });
-                                        } else {
-                                          connector.removeSubSeriesToFollowed(
-                                            connector.getConnectedUser()!.id,
-                                            subSeries['id'].toString(),
-                                          );
-                                          setState(() {
-                                            isSubSeriesFollowed = false;
-                                          });
-                                        }
-                                      } else {
-                                        pushOrGo(context, '/profile/signin');
-                                      }
-                                    },
+                                    onPressed: () => _handleFollowPressed(
+                                      subSeries['id'].toString(),
+                                    ),
                                     child: Row(
                                       mainAxisAlignment:
                                           MainAxisAlignment.spaceBetween,
                                       children: [
                                         (!isSubSeriesFollowed)
-                                            ? Icon(Icons.bookmark_border)
-                                            : Icon(Icons.bookmark),
+                                            ? const Icon(Icons.bookmark_border)
+                                            : const Icon(Icons.bookmark),
                                         Text(
                                           (!isSubSeriesFollowed)
                                               ? localizations.follow
@@ -425,23 +451,9 @@ class _VolumePageState extends State<VolumePage> {
                                                 0,
                                               ),
                                         ),
-                                        onPressed: () async {
-                                          if (connector.isLoggedIn()) {
-                                            connector.changeReadState(
-                                              connector.getConnectedUser()!.id,
-                                              data['id'].toString(),
-                                              !isVolumeReaded,
-                                            );
-                                            setState(() {
-                                              isVolumeReaded = !isVolumeReaded;
-                                            });
-                                          } else {
-                                            pushOrGo(
-                                              context,
-                                              '/profile/signin',
-                                            );
-                                          }
-                                        },
+                                        onPressed: () => _handleReadPressed(
+                                          data['id'].toString(),
+                                        ),
                                         label: Text(
                                           (!isVolumeReaded)
                                               ? localizations.read
@@ -458,8 +470,10 @@ class _VolumePageState extends State<VolumePage> {
                                           ),
                                         ),
                                         icon: (!isVolumeReaded)
-                                            ? Icon(Icons.bookmark_add_rounded)
-                                            : Icon(
+                                            ? const Icon(
+                                                Icons.bookmark_add_rounded,
+                                              )
+                                            : const Icon(
                                                 Icons.bookmark_remove_rounded,
                                               ),
                                       ),
@@ -468,14 +482,14 @@ class _VolumePageState extends State<VolumePage> {
                                 ),
                               ),
                             )
-                          : SizedBox(),
+                          : const SizedBox(),
                       MyLine(
                         width: MediaQuery.of(context).size.width,
                         vertical: 10,
                         horizontal: 0,
                       ),
                       (authors.isEmpty)
-                          ? SizedBox()
+                          ? const SizedBox()
                           : (authors.length == 1)
                           ? Padding(
                               padding: const EdgeInsets.symmetric(vertical: 5),
@@ -511,11 +525,11 @@ class _VolumePageState extends State<VolumePage> {
                                     vertical: 5,
                                     horizontal: 0,
                                   )
-                                : SizedBox(),
+                                : const SizedBox(),
                           ],
                         ),
                       (data['resume'].isEmpty || data['resume'] == "")
-                          ? SizedBox()
+                          ? const SizedBox()
                           : Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -644,7 +658,7 @@ class _VolumePageState extends State<VolumePage> {
                                     ),
                                     /*
                               (data['book_link'] == null || data['book_link'] == "")
-                                  ? SizedBox()
+                                  ? const SizedBox()
                                   : DropdownButton(
 
                                       items: [
@@ -665,10 +679,10 @@ class _VolumePageState extends State<VolumePage> {
                                   ],
                                 ),
                                 (data['book_link'].isEmpty)
-                                    ? SizedBox()
+                                    ? const SizedBox()
                                     : Column(
                                         children: [
-                                          SizedBox(height: 10),
+                                          const SizedBox(height: 10),
                                           for (
                                             var i = 0;
                                             i < data['book_link'].length;
@@ -676,7 +690,7 @@ class _VolumePageState extends State<VolumePage> {
                                           )
                                             (data['book_link'][i]['seller'] !=
                                                     "bdfugue")
-                                                ? SizedBox()
+                                                ? const SizedBox()
                                                 : (data['price'] == "0" ||
                                                       data['price'] == "-1")
                                                 ? Text(
@@ -760,7 +774,9 @@ class _VolumePageState extends State<VolumePage> {
                                                                   : Colors.red,
                                                             ),
                                                           ),
-                                                          SizedBox(height: 10),
+                                                          const SizedBox(
+                                                            height: 10,
+                                                          ),
                                                           Text(
                                                             localizations.soldAndShippedBy(
                                                               data["book_link"][i]["seller"]
@@ -811,7 +827,9 @@ class _VolumePageState extends State<VolumePage> {
                                                                     .shoppingCart,
                                                               ),
                                                             ),
-                                                            SizedBox(width: 10),
+                                                            const SizedBox(
+                                                              width: 10,
+                                                            ),
                                                             Text(
                                                               localizations.buyOn(
                                                                 data["book_link"][i]["seller"]
@@ -858,7 +876,7 @@ class _VolumePageState extends State<VolumePage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             (data['release'] == null)
-                                ? SizedBox()
+                                ? const SizedBox()
                                 : Padding(
                                     padding: const EdgeInsets.symmetric(
                                       vertical: 5,
@@ -871,7 +889,7 @@ class _VolumePageState extends State<VolumePage> {
                                     ),
                                   ),
                             (data['ean'] == null)
-                                ? SizedBox()
+                                ? const SizedBox()
                                 : Padding(
                                     padding: const EdgeInsets.symmetric(
                                       vertical: 5,
@@ -884,7 +902,7 @@ class _VolumePageState extends State<VolumePage> {
                                     ),
                                   ),
                             (data['info'] == null)
-                                ? SizedBox()
+                                ? const SizedBox()
                                 : Padding(
                                     padding: const EdgeInsets.symmetric(
                                       vertical: 5,
@@ -897,7 +915,7 @@ class _VolumePageState extends State<VolumePage> {
                                     ),
                                   ),
                             (contain.isEmpty || contain.toString() == "")
-                                ? SizedBox()
+                                ? const SizedBox()
                                 : Column(
                                     children: [
                                       MyLine(

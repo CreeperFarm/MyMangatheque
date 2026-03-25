@@ -111,6 +111,7 @@ class _CompleteLibTabState extends ConsumerState<CompleteLibTab> {
       }
     }
 
+    if (!mounted) return;
     setState(() {});
   }
 
@@ -200,7 +201,7 @@ class _CompleteLibTabState extends ConsumerState<CompleteLibTab> {
     }
 
     return Padding(
-      padding: EdgeInsets.all(10),
+      padding: const EdgeInsets.all(10),
       child: MyScrollColumn(
         children: [
           MyTomeNumberShow(
@@ -211,9 +212,12 @@ class _CompleteLibTabState extends ConsumerState<CompleteLibTab> {
           (volumeNotOwned == 0)
               ? Text(
                   localizations.allVolumesOwned,
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
                 )
-              : SizedBox(),
+              : const SizedBox(),
           for (var i = 0; i < notOwnedSubSeriesList.length; i++)
             Column(
               children: [
@@ -244,7 +248,7 @@ class _CompleteLibTabState extends ConsumerState<CompleteLibTab> {
                                     ' - Edition Standard',
                                     '',
                                   ),
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
                                   ),

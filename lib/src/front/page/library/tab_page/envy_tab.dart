@@ -109,6 +109,7 @@ class _EnvyTabState extends ConsumerState<EnvyTab> {
       authorsNameLinkSubSeriesId.add({'id': subSerie.id, 'author': author});
     }
 
+    if (!mounted) return;
     setState(() {});
   }
 
@@ -185,7 +186,7 @@ class _EnvyTabState extends ConsumerState<EnvyTab> {
     }
 
     return Padding(
-      padding: EdgeInsets.all(10),
+      padding: const EdgeInsets.all(10),
       child: Column(
         children: [
           MyTomeNumberShow(
@@ -197,10 +198,13 @@ class _EnvyTabState extends ConsumerState<EnvyTab> {
               ? Center(
                   child: Text(
                     localizations.noFollowedSubSerie,
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 )
-              : SizedBox(),
+              : const SizedBox(),
           Column(
             children: [
               for (var subSerie in followedSubSeriesList)
@@ -236,7 +240,7 @@ class _EnvyTabState extends ConsumerState<EnvyTab> {
                                       ' - Edition Standard',
                                       '',
                                     ),
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                       fontSize: 18,
                                       fontWeight: FontWeight.bold,
                                     ),

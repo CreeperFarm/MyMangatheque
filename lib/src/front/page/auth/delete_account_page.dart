@@ -30,7 +30,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
     }
 
     final AlertDialog dialog = AlertDialog(
-      constraints: BoxConstraints(maxHeight: 250),
+      constraints: const BoxConstraints(maxHeight: 250),
       backgroundColor: Theme.of(context).colorScheme.onPrimary,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
       elevation: 10,
@@ -66,7 +66,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                         ),
                       ),
                     ),
-                    SizedBox(width: 20),
+                    const SizedBox(width: 20),
                     Expanded(
                       child: ElevatedButton(
                         onPressed: () async {
@@ -87,6 +87,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
 
                           try {
                             await connector.deleteUser(user.id);
+                            if (!mounted) return;
                             // After successful deletion, log out locally and notify the user
                             connector.logOut();
                             showMessage(
@@ -100,6 +101,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                               pushOrGo(context, Routes.profile.base);
                             }
                           } catch (e) {
+                            if (!mounted) return;
                             // If deletion failed, still log out and inform the user
                             connector.logOut();
                             showMessage(
@@ -122,7 +124,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                         child: Text(
                           localizations.deleteAccount,
                           textAlign: TextAlign.center,
-                          style: TextStyle(color: Colors.white),
+                          style: const TextStyle(color: Colors.white),
                         ),
                       ),
                     ),
@@ -167,7 +169,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                 ),
                 child: Text(
                   localizations.deleteAccount,
-                  style: TextStyle(color: Colors.white),
+                  style: const TextStyle(color: Colors.white),
                 ),
               ),
             ],

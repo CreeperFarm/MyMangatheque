@@ -195,7 +195,9 @@ class _SearchPageState extends ConsumerState<SearchPage> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
               ),
-              shadowColor: Theme.of(context).colorScheme.primary.withOpacity(0.5),
+              shadowColor: Theme.of(
+                context,
+              ).colorScheme.primary.withValues(alpha: 0.5),
               color: Theme.of(context).colorScheme.onPrimary,
               itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
                 PopupMenuItem<String>(

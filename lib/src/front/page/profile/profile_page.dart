@@ -57,18 +57,17 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       bytes = await image.readAsBytes();
     }
 
-    await connector
-        .updateAvatar(
-          'users',
-          connector.getConnectedUser()!.id,
-          image!.name,
-          bytes,
-          context,
-        )
-        .then((value) async {
-          await connector.updateUserData(connector.getConnectedUser()!.email);
-          setState(() {});
-        });
+    if (!mounted) return;
+    await connector.updateAvatar(
+      'users',
+      connector.getConnectedUser()!.id,
+      image!.name,
+      bytes,
+      context,
+    );
+    await connector.updateUserData(connector.getConnectedUser()!.email);
+    if (!mounted) return;
+    setState(() {});
   }
 
   // Get the number of owned manga
@@ -77,11 +76,12 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       int countMangaOwned = await connector.getNumberOwnedManga(
         connector.getConnectedUser()!.id,
       );
+      if (!mounted) return;
       setState(() {
         numberMangaOwned = countMangaOwned;
       });
     } catch (e) {
-      print(e);
+      debugPrint(e.toString());
     }
   }
 
@@ -91,11 +91,12 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       int countSerieFav = await connector.getNumberFavSerie(
         connector.getConnectedUser()!.id,
       );
+      if (!mounted) return;
       setState(() {
         numberSerieFav = countSerieFav;
       });
     } catch (e) {
-      print(e);
+      debugPrint(e.toString());
     }
   }
 
@@ -203,14 +204,14 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             ),
             MyLine(width: MediaQuery.of(context).size.width, vertical: 10),
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 10.0),
+              padding: const EdgeInsets.symmetric(horizontal: 10.0),
               child: SingleChildScrollView(
                 child: Text(localizations.volumeOwnedNumber(numberMangaOwned)),
               ),
             ),
             MyLine(width: MediaQuery.of(context).size.width, vertical: 10),
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 10.0),
+              padding: const EdgeInsets.symmetric(horizontal: 10.0),
               child: SingleChildScrollView(
                 child: Text(localizations.favoriteSeriesNumber(numberSerieFav)),
               ),
@@ -370,7 +371,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             ),
             MyLine(width: MediaQuery.of(context).size.width, vertical: 10.0),
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20.0),
+              padding: const EdgeInsets.symmetric(horizontal: 20.0),
               child: GestureDetector(
                 child: Text(localizations.legalNotice),
                 onTap: () => pushOrGo(context, Routes.profile.legalNotice),
@@ -381,7 +382,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 pushOrGo(context, '/admin');
               },
               child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20.0),
+                padding: const EdgeInsets.symmetric(horizontal: 20.0),
                 child: FutureBuilder(
                   future: connector.appVersion,
                   builder: (context, snapshot) {

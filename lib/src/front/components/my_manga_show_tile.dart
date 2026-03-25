@@ -33,10 +33,12 @@ class _MyMangaShowTileState extends State<MyMangaShowTile> {
         PocketBaseConnector().getConnectedUser()!.id,
         widget.mangaData['id'],
       );
+      if (!mounted) return;
       setState(() {
         isOwned = isOwnedData;
       });
     } else {
+      if (!mounted) return;
       setState(() {
         isOwned = false;
       });
@@ -177,14 +179,14 @@ class _MyMangaShowTileState extends State<MyMangaShowTile> {
                                               ConnectionState.done &&
                                           snapshot.hasData) {
                                         if (snapshot.data == false) {
-                                          return Container();
+                                          return const SizedBox.shrink();
                                         } else {
                                           return Positioned(
                                             top: 10,
                                             right: 10,
                                             child: Container(
                                               decoration: BoxDecoration(
-                                                color: Color(0xFF1780A3),
+                                                color: const Color(0xFF1780A3),
                                                 borderRadius: BorderRadius.only(
                                                   bottomLeft: Radius.circular(
                                                     10.0,
@@ -205,14 +207,14 @@ class _MyMangaShowTileState extends State<MyMangaShowTile> {
                                                     ),
                                                 child: Row(
                                                   children: [
-                                                    Icon(
+                                                    const Icon(
                                                       Icons.check,
                                                       color: Colors.white,
                                                       size: 20,
                                                     ),
                                                     Text(
                                                       localizations.owned,
-                                                      style: TextStyle(
+                                                      style: const TextStyle(
                                                         color: Colors.white,
                                                         fontSize: 15,
                                                       ),
@@ -224,7 +226,7 @@ class _MyMangaShowTileState extends State<MyMangaShowTile> {
                                           );
                                         }
                                       } else {
-                                        return Container();
+                                        return const SizedBox.shrink();
                                       }
                                     },
                                   )
@@ -240,7 +242,7 @@ class _MyMangaShowTileState extends State<MyMangaShowTile> {
                           ' - Tome ${widget.mangaData['tome_number']}',
                           "",
                         ),
-                        style: TextStyle(fontSize: 17),
+                        style: const TextStyle(fontSize: 17),
                         softWrap: false,
                         overflow: TextOverflow.ellipsis,
                         textAlign: TextAlign.left,
@@ -256,7 +258,7 @@ class _MyMangaShowTileState extends State<MyMangaShowTile> {
                         localizations.volumeNum(
                           widget.mangaData['tome_number'],
                         ),
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w300,
                         ),

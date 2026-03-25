@@ -37,6 +37,27 @@ class MyTextField extends StatelessWidget {
     super.key,
   });
 
+  String? _validate(String? value, AppLocalizations localizations) {
+    if (skipEmptyVerification == true) {
+      return null;
+    }
+    if (value == null || value.isEmpty) {
+      return errorMessage;
+    }
+    if (minLength != null && value.length < minLength!) {
+      return minLengthErrorMessage ??
+          localizations.minLengthNotReached(minLength!);
+    }
+    if (maxLength != null && value.length > maxLength!) {
+      return maxLengthErrorMessage ??
+          localizations.maxLengthExceeded(maxLength!);
+    }
+    if ((obscureText ?? false) && value.length < 6) {
+      return localizations.passwordTooShort;
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     // Get localization - return early if not available
@@ -57,23 +78,7 @@ class MyTextField extends StatelessWidget {
         focusNode: focusNode,
         validator: (customValidator != null)
             ? (value) => customValidator!(value)
-            : (value) {
-                if (skipEmptyVerification != null && skipEmptyVerification!) {
-                  return null;
-                } else if (value == null || value.isEmpty) {
-                  return errorMessage;
-                } else if (minLength != null && value.length < minLength!) {
-                  return minLengthErrorMessage ??
-                      localizations.minLengthNotReached(minLength!);
-                } else if (maxLength != null && value.length > maxLength!) {
-                  return maxLengthErrorMessage ??
-                      localizations.maxLengthExceeded(maxLength!);
-                } else if (value.length < 6 && obscureText!) {
-                  return localizations.passwordTooShort;
-                } else {
-                  return null;
-                }
-              },
+            : (value) => _validate(value, localizations),
         onChanged: (customOnChanged != null)
             ? (value) => customOnChanged!(value)
             : null,

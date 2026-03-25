@@ -41,16 +41,16 @@ class AdminCreatePage extends StatelessWidget {
             children: [
               //AdminCreateSeriePage(),
               //AdminCreateSubSeriePage(),
-              AdminCreateVolumePage(),
-              AdminCreateAuthorPage(),
+              const AdminCreateVolumePage(),
+              const AdminCreateAuthorPage(),
               //AdminCreateEditorPage(),
-              AdminCreateGenrePage(),
+              const AdminCreateGenrePage(),
             ],
           ),
         ),
       );
     } else {
-      return AdminLoginPage();
+      return const AdminLoginPage();
     }
   }
 }

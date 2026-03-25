@@ -13,8 +13,6 @@ class DiscoverPage extends ConsumerStatefulWidget {
 }
 
 class _DiscoverPageState extends ConsumerState<DiscoverPage> {
-  final List _allResults = [];
-
   String textLength(text, length) {
     if (text.length > length) {
       return text.substring(0, length) + "...";
@@ -75,7 +73,7 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage> {
               ),
               shadowColor: Theme.of(
                 context,
-              ).colorScheme.primary.withOpacity(0.5),
+              ).colorScheme.primary.withValues(alpha: 0.5),
               color: Theme.of(context).colorScheme.onPrimary,
               itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
                 PopupMenuItem<String>(
@@ -127,7 +125,10 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(localizations.discover, style: TextStyle(fontSize: 25)),
+              Text(
+                localizations.discover,
+                style: const TextStyle(fontSize: 25),
+              ),
             ],
           ),
         ),

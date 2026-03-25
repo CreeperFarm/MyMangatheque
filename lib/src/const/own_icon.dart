@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class OwnIcon extends StatelessWidget {
-  Color iconColor;
+  final Color iconColor;
   final String iconSrc;
   final double? height;
 
-  OwnIcon({
+  const OwnIcon({
     required this.iconColor,
     required this.iconSrc,
     this.height,

@@ -140,9 +140,9 @@ class _StatisticsPageState extends State<StatisticsPage> {
       height: 200,
       child: LineChart(
         LineChartData(
-          gridData: FlGridData(show: true, drawVerticalLine: false),
+          gridData: const FlGridData(show: true, drawVerticalLine: false),
           titlesData: FlTitlesData(
-            topTitles: AxisTitles(),
+            topTitles: const AxisTitles(),
             bottomTitles: AxisTitles(
               sideTitles: SideTitles(
                 showTitles: true,
@@ -165,7 +165,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
                 },
               ),
             ),
-            leftTitles: AxisTitles(
+            leftTitles: const AxisTitles(
               sideTitles: SideTitles(showTitles: true, reservedSize: 40),
             ),
           ),
@@ -192,6 +192,8 @@ class _StatisticsPageState extends State<StatisticsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final realtimeStatus = _fallbackTimer != null ? ' (polling every 15s)' : '';
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Statistics'),
@@ -257,7 +259,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
                     const SizedBox(height: 40),
                     Center(
                       child: Text(
-                        'Updates in real-time${_fallbackTimer != null ? ' (polling every 15s)' : ''}',
+                        'Updates in real-time$realtimeStatus',
                         style: const TextStyle(fontStyle: FontStyle.italic),
                       ),
                     ),

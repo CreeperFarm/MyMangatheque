@@ -11,10 +11,10 @@ class MyDrawer extends StatefulWidget {
   final List navIcons;
   final List navTitle;
   final List navRoute;
-  String profileText;
-  String logInText;
+  final String profileText;
+  final String logInText;
 
-  MyDrawer({
+  const MyDrawer({
     required this.navIcons,
     required this.navTitle,
     required this.navRoute,

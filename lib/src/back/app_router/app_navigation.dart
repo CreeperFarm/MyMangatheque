@@ -30,6 +30,14 @@ import 'package:mymangatheque/src/front/page/search/search_page.dart';
 class AppNavigation {
   AppNavigation._();
 
+  static const String editorRoute = 'editor/:id';
+  static const String authorRoute = 'author/:id';
+  static const String serieRoute = 'serie/:id';
+  static const String subSerieRoute = 'sub_serie/:id';
+  static const String volumeRoute = 'volume/:id';
+  static const String libraryPath = '/library';
+  static const String searchPath = '/search';
+
   static String initR = '/';
 
   // Private Navigator Key
@@ -69,7 +77,7 @@ class AppNavigation {
                 },
                 routes: [
                   GoRoute(
-                    path: 'editor/:id',
+                    path: editorRoute,
                     name: 'Editor Home',
                     builder: (context, state) {
                       return EditorPage(
@@ -80,7 +88,7 @@ class AppNavigation {
                     },
                   ),
                   GoRoute(
-                    path: 'author/:id',
+                    path: authorRoute,
                     name: 'Author Home',
                     builder: (context, state) {
                       return AuthorPage(
@@ -91,7 +99,7 @@ class AppNavigation {
                     },
                   ),
                   GoRoute(
-                    path: 'serie/:id',
+                    path: serieRoute,
                     name: 'Series Home',
                     builder: (context, state) {
                       return SeriePage(
@@ -102,7 +110,7 @@ class AppNavigation {
                     },
                   ),
                   GoRoute(
-                    path: 'sub_serie/:id',
+                    path: subSerieRoute,
                     name: 'Sub-Series Home',
                     builder: (context, state) {
                       return SubSeriePage(
@@ -113,7 +121,7 @@ class AppNavigation {
                     },
                   ),
                   GoRoute(
-                    path: 'volume/:id',
+                    path: volumeRoute,
                     name: 'Volume Home',
                     builder: (context, state) {
                       return VolumePage(
@@ -209,63 +217,63 @@ class AppNavigation {
             navigatorKey: _rootNavigatorLibrary,
             routes: [
               GoRoute(
-                path: '/library',
+                path: libraryPath,
                 name: 'Mangathèque',
                 builder: (context, state) {
                   return LibraryPage(key: state.pageKey);
                 },
                 routes: [
                   GoRoute(
-                    path: 'editor/:id',
+                    path: editorRoute,
                     name: 'Editor Library',
                     builder: (context, state) {
                       return EditorPage(
                         editorId: state.pathParameters['id']!,
-                        initRoute: '/library',
+                        initRoute: libraryPath,
                         key: state.pageKey,
                       );
                     },
                   ),
                   GoRoute(
-                    path: 'author/:id',
+                    path: authorRoute,
                     name: 'Author Library',
                     builder: (context, state) {
                       return AuthorPage(
                         authorName: state.pathParameters['id']!,
-                        initRoute: '/library',
+                        initRoute: libraryPath,
                         key: state.pageKey,
                       );
                     },
                   ),
                   GoRoute(
-                    path: 'serie/:id',
+                    path: serieRoute,
                     name: 'Page de la Série',
                     builder: (context, state) {
                       return SeriePage(
                         serieId: state.pathParameters['id']!,
-                        initRoute: '/library',
+                        initRoute: libraryPath,
                         key: state.pageKey,
                       );
                     },
                   ),
                   GoRoute(
-                    path: 'sub_serie/:id',
+                    path: subSerieRoute,
                     name: 'Sub-Series Library',
                     builder: (context, state) {
                       return SubSeriePage(
                         serieId: state.pathParameters['id']!,
-                        initRoute: '/library',
+                        initRoute: libraryPath,
                         key: state.pageKey,
                       );
                     },
                   ),
                   GoRoute(
-                    path: 'volume/:id',
+                    path: volumeRoute,
                     name: 'Volume Library',
                     builder: (context, state) {
                       return VolumePage(
                         volumeId: state.pathParameters['id']!,
-                        initRoute: '/library',
+                        initRoute: libraryPath,
                         key: state.pageKey,
                       );
                     },
@@ -284,63 +292,63 @@ class AppNavigation {
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: '/search',
+                path: searchPath,
                 name: 'Search',
                 builder: (context, state) {
                   return SearchPage(key: state.pageKey);
                 },
                 routes: [
                   GoRoute(
-                    path: 'editor/:id',
+                    path: editorRoute,
                     name: 'Editor Search',
                     builder: (context, state) {
                       return EditorPage(
                         editorId: state.pathParameters['id']!,
-                        initRoute: '/search',
+                        initRoute: searchPath,
                         key: state.pageKey,
                       );
                     },
                   ),
                   GoRoute(
-                    path: 'author/:id',
+                    path: authorRoute,
                     name: 'Author Search',
                     builder: (context, state) {
                       return AuthorPage(
                         authorName: state.pathParameters['id']!,
-                        initRoute: '/search',
+                        initRoute: searchPath,
                         key: state.pageKey,
                       );
                     },
                   ),
                   GoRoute(
-                    path: 'serie/:id',
+                    path: serieRoute,
                     name: 'Series Search',
                     builder: (context, state) {
                       return SeriePage(
                         serieId: state.pathParameters['id']!,
-                        initRoute: '/search',
+                        initRoute: searchPath,
                         key: state.pageKey,
                       );
                     },
                   ),
                   GoRoute(
-                    path: 'sub_serie/:id',
+                    path: subSerieRoute,
                     name: 'Sub-Series Search',
                     builder: (context, state) {
                       return SubSeriePage(
                         serieId: state.pathParameters['id']!,
-                        initRoute: '/search',
+                        initRoute: searchPath,
                         key: state.pageKey,
                       );
                     },
                   ),
                   GoRoute(
-                    path: 'volume/:id',
+                    path: volumeRoute,
                     name: 'Volume Search',
                     builder: (context, state) {
                       return VolumePage(
                         volumeId: state.pathParameters['id']!,
-                        initRoute: '/search',
+                        initRoute: searchPath,
                         key: state.pageKey,
                       );
                     },

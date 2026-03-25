@@ -79,7 +79,7 @@ class MyVolumeTile extends StatelessWidget {
                                 volumeData['sub_serie_id'].toString(),
                               ) &&
                               isVolumeOwned != true)
-                          ? SizedBox()
+                          ? const SizedBox()
                           : Padding(
                               padding: const EdgeInsets.only(top: 1.0),
                               child: MyCollectionBadge(

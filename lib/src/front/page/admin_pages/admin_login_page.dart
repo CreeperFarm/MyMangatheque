@@ -76,7 +76,7 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
               ),
             ],
           ),
-          SizedBox(height: 15),
+          const SizedBox(height: 15),
           // Display sign in button
           MyButton(
             text: localizations.logIn,
@@ -90,13 +90,16 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
                     )
                     .then((value) async {
                       if (value) {
+                        if (!mounted) return;
                         setState(() {});
-                        await Future.delayed(Duration(milliseconds: 250));
+                        await Future.delayed(const Duration(milliseconds: 250));
+                        if (!mounted) return;
                         GoRouter.of(context).push('/admin');
                         showMessage(localizations.adminLoginSuccess, context);
                       }
                     });
               } catch (e) {
+                if (!mounted) return;
                 var error = e.toString();
                 showMessage(error, context);
               }

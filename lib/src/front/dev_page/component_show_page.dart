@@ -85,7 +85,7 @@ class ComponentShowPage extends StatelessWidget {
             'MyTomeNumberShow(tomeTotal: string of the number of tome, editionTotal: string of the number of edition)',
           ),
           Padding(
-            padding: EdgeInsets.all(10),
+            padding: const EdgeInsets.all(10),
             child: MyTomeNumberShow(
               tomeTotal: '22',
               editionTotal: '18',

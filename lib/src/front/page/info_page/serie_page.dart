@@ -130,7 +130,7 @@ class _SeriePageState extends State<SeriePage> {
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 5),
                         child: (subSeries.isEmpty)
-                            ? SizedBox()
+                            ? const SizedBox()
                             : (subSeries.length == 1)
                             ? Text(
                                 "${localizations.editor} :",
@@ -169,7 +169,7 @@ class _SeriePageState extends State<SeriePage> {
                         horizontal: 0.0,
                       ),
                       (authors.isEmpty)
-                          ? SizedBox()
+                          ? const SizedBox()
                           : (authors.length == 1)
                           ? Padding(
                               padding: const EdgeInsets.symmetric(vertical: 5),
@@ -205,7 +205,7 @@ class _SeriePageState extends State<SeriePage> {
                                     vertical: 5,
                                     horizontal: 0,
                                   )
-                                : SizedBox(),
+                                : const SizedBox(),
                           ],
                         ),
                     ],

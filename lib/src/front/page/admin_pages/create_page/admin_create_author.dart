@@ -38,7 +38,8 @@ class _AdminCreateAuthorPageState extends State<AdminCreateAuthorPage> {
     pickedImageAuthor = image;
     imagePathAuthorController.text = image!.path;
     imageNameAuthorController.text = image.name;
-    Future.delayed(Duration(milliseconds: 200), () {
+    Future.delayed(const Duration(milliseconds: 200), () {
+      if (!mounted) return;
       setState(() {});
     });
   }
@@ -68,7 +69,7 @@ class _AdminCreateAuthorPageState extends State<AdminCreateAuthorPage> {
           padding: const EdgeInsets.symmetric(vertical: 10),
           child: Text(
             localizations.createAuthor,
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
         ),
         Form(
@@ -102,7 +103,7 @@ class _AdminCreateAuthorPageState extends State<AdminCreateAuthorPage> {
                         imageNameAuthorController.text = "";
                         setState(() {});
                       },
-                      icon: Icon(CupertinoIcons.delete_left_fill),
+                      icon: const Icon(CupertinoIcons.delete_left_fill),
                     ),
                   ),
                 ],
@@ -159,6 +160,7 @@ class _AdminCreateAuthorPageState extends State<AdminCreateAuthorPage> {
                 imageNameAuthorController.text,
                 bytes,
               );
+              if (!mounted) return;
               showMessage(localizations.authorAddSuccess, context);
             } else {
               showMessage(localizations.authorDuplicate, context);

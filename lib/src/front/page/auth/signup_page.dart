@@ -58,6 +58,7 @@ class _SignUpPageState extends State<SignUpPage> {
     connector.sendVerification(emailController.text);
     connector.findUser(emailController.text);
     await connector.updateUserData(emailController.text);
+    if (!mounted) return;
     pushOrGo(context, '/profile');
   }
 
@@ -430,7 +431,7 @@ class _SignUpPageState extends State<SignUpPage> {
                         onPressed: () => pushOrGo(context, '/profile/signin'),
                         child: Text(
                           localizations.signIn,
-                          style: TextStyle(
+                          style: const TextStyle(
                             color: Colors.blue,
                             fontWeight: FontWeight.bold,
                           ),
