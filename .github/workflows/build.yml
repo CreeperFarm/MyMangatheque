@@ -16,7 +16,8 @@ jobs:
             - uses: subosito/flutter-action@v2
               with:
                   channel: stable
-            - name: Build
+            - name: SonarQube Scan
+              if: ${{ secrets.SONAR_TOKEN != '' }}
               run: flutter build apk
             - name: SonarQube Scan
               uses: SonarSource/sonarqube-scan-action@v6
