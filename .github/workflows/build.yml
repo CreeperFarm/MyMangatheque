@@ -16,7 +16,7 @@ jobs:
 
             # The analysis requires to retrieve dependencies and build successfully
             - name: Install Flutter
-              uses: subosito/flutter-action@v2
+              uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
               with:
                   channel: "stable"
 
@@ -47,6 +47,6 @@ jobs:
                   echo "sonar.cpp.file.suffixes=-" >> sonar-project.properties
                   echo "sonar.objc.file.suffixes=-" >> sonar-project.properties
             - name: SonarQube Scan
-              uses: SonarSource/sonarqube-scan-action@v6
+              uses: SonarSource/sonarqube-scan-action@fd88b7d7ccbaefd23d8f36f73b59db7a3d246602
               env:
                   SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
