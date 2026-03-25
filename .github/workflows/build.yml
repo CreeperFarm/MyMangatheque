@@ -18,8 +18,9 @@ jobs:
                   channel: stable
             - name: SonarQube Scan
               if: ${{ secrets.SONAR_TOKEN != '' }}
-              run: flutter build apk
-            - name: SonarQube Scan
-              uses: SonarSource/sonarqube-scan-action@v6
+              uses: SonarSource/sonarcloud-github-action@v2
+              env:
+                  SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+                  SONAR_HOST_URL: https://sonarcloud.io
               env:
                   SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
