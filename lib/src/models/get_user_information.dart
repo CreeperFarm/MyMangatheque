@@ -9,7 +9,12 @@ class GetUserProfilePicture extends StatelessWidget {
   final double? height;
   final double? width;
 
-  const GetUserProfilePicture({required this.file, this.height, this.width, super.key});
+  const GetUserProfilePicture({
+    required this.file,
+    this.height,
+    this.width,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -26,9 +31,7 @@ class GetUserProfilePicture extends StatelessWidget {
             return _buildNetworkImage(snapshot.data as String);
           }
         }
-        return const Center(
-          child: CircularProgressIndicator(),
-        );
+        return const Center(child: CircularProgressIndicator());
       },
     );
   }

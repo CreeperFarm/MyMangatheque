@@ -12,7 +12,7 @@ class Assets {
 
   // Expose `Assets.images.<name>`
   static const images = _Images(
-    const _Theme(
+    _Theme(
       'assets/images/theme/auto-icon.png',
       'assets/images/theme/dark-icon.png',
       'assets/images/theme/light-icon.png',
@@ -55,9 +55,7 @@ class Assets {
   );
 
   // Expose `Assets.videos.<name>`
-  static const videos = _Videos(
-    'assets/videos/bad-apple.mp4',
-  );
+  static const videos = _Videos('assets/videos/bad-apple.mp4');
 }
 
 // Private class that holds the actual asset paths as final fields and supports const construction.
@@ -102,11 +100,7 @@ class _Theme {
   final String darkIcon;
   final String lightIcon;
 
-  const _Theme(
-    this.autoIcon,
-    this.darkIcon,
-    this.lightIcon,
-  );
+  const _Theme(this.autoIcon, this.darkIcon, this.lightIcon);
 }
 
 class _Icons {
@@ -168,7 +162,5 @@ class _Icons {
 class _Videos {
   final String badApple;
 
-  const _Videos(
-    this.badApple,
-  );
+  const _Videos(this.badApple);
 }

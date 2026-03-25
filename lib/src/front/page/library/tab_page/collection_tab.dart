@@ -54,11 +54,7 @@ class _CollectionTabState extends ConsumerState<CollectionTab> {
     // Get localization - return early if not available
     var localizations = AppLocalizations.of(context);
     if (localizations == null) {
-      return const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     if (ref.watch(mangaOwnedProvider).isEmpty) {
@@ -66,6 +62,7 @@ class _CollectionTabState extends ConsumerState<CollectionTab> {
         if (value == false) {
           debugPrint("Error while loading data");
         } else {
+          if (!mounted) return;
           setState(() {});
         }
       });
@@ -103,8 +100,14 @@ class _CollectionTabState extends ConsumerState<CollectionTab> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  subSerie.title.replaceAll(' - Edition Standard', ''),
-                                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                                  subSerie.title.replaceAll(
+                                    ' - Edition Standard',
+                                    '',
+                                  ),
+                                  style: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                   softWrap: true,
                                   overflow: TextOverflow.ellipsis,
                                 ),
@@ -117,13 +120,21 @@ class _CollectionTabState extends ConsumerState<CollectionTab> {
                                 Padding(
                                   padding: const EdgeInsets.only(top: 5),
                                   child: SizedBox(
-                                    width: MediaQuery.of(context).size.width - 65,
+                                    width:
+                                        MediaQuery.of(context).size.width - 65,
                                     child: Stack(
                                       children: [
-                                        for (var i = 0; i < min(9, subSerie.volumes.length); i++)
+                                        for (
+                                          var i = 0;
+                                          i < min(9, subSerie.volumes.length);
+                                          i++
+                                        )
                                           (i == 0)
                                               ? ClipRRect(
-                                                  borderRadius: BorderRadius.circular(10.0),
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                        10.0,
+                                                      ),
                                                   child: Image.network(
                                                     subSerie.volumes[i].image,
                                                     width: 65,
@@ -135,17 +146,31 @@ class _CollectionTabState extends ConsumerState<CollectionTab> {
                                                     decoration: BoxDecoration(
                                                       boxShadow: [
                                                         BoxShadow(
-                                                          color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.9),
+                                                          color:
+                                                              Theme.of(context)
+                                                                  .colorScheme
+                                                                  .onPrimary
+                                                                  .withValues(
+                                                                    alpha: 0.9,
+                                                                  ),
                                                           spreadRadius: 1,
                                                           blurRadius: 2,
-                                                          offset: const Offset(0, 1),
+                                                          offset: const Offset(
+                                                            0,
+                                                            1,
+                                                          ),
                                                         ),
                                                       ],
                                                     ),
                                                     child: ClipRRect(
-                                                      borderRadius: BorderRadius.circular(10.0),
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                            10.0,
+                                                          ),
                                                       child: Image.network(
-                                                        subSerie.volumes[i].image,
+                                                        subSerie
+                                                            .volumes[i]
+                                                            .image,
                                                         width: 65,
                                                       ),
                                                     ),
@@ -154,7 +179,7 @@ class _CollectionTabState extends ConsumerState<CollectionTab> {
                                       ],
                                     ),
                                   ),
-                                )
+                                ),
                               ],
                             ),
                           ),
@@ -174,7 +199,7 @@ class _CollectionTabState extends ConsumerState<CollectionTab> {
                 ),
               ],
             );
-          })
+          }),
         ],
       ),
     );

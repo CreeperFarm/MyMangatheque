@@ -29,11 +29,16 @@ class _MyMangaShowTileState extends State<MyMangaShowTile> {
 
   Future<void> _checkIfOwned() async {
     if (PocketBaseConnector().isLoggedIn()) {
-      bool isOwnedData = await PocketBaseConnector().isVolumeOwned(PocketBaseConnector().getConnectedUser()!.id, widget.mangaData['id']);
+      bool isOwnedData = await PocketBaseConnector().isVolumeOwned(
+        PocketBaseConnector().getConnectedUser()!.id,
+        widget.mangaData['id'],
+      );
+      if (!mounted) return;
       setState(() {
         isOwned = isOwnedData;
       });
     } else {
+      if (!mounted) return;
       setState(() {
         isOwned = false;
       });
@@ -51,18 +56,11 @@ class _MyMangaShowTileState extends State<MyMangaShowTile> {
     // Get localization - return early if not available
     var localizations = AppLocalizations.of(context);
     if (localizations == null) {
-      return const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     return Padding(
-      padding: const EdgeInsets.only(
-        right: 10.0,
-        bottom: 10.0,
-      ),
+      padding: const EdgeInsets.only(right: 10.0, bottom: 10.0),
       child: GestureDetector(
         onTap: () {
           pushOrGo(
@@ -83,7 +81,9 @@ class _MyMangaShowTileState extends State<MyMangaShowTile> {
               minHeight: widget.height,
             ),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.5),
+              color: Theme.of(
+                context,
+              ).colorScheme.onPrimary.withValues(alpha: 0.5),
               borderRadius: BorderRadius.circular(10.0),
             ),
             child: ClipRRect(
@@ -120,10 +120,15 @@ class _MyMangaShowTileState extends State<MyMangaShowTile> {
                                           fit: BoxFit.fill,
                                         ),
                                         BackdropFilter(
-                                          filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                                          filter: ImageFilter.blur(
+                                            sigmaX: 5,
+                                            sigmaY: 5,
+                                          ),
                                           child: Container(
                                             alignment: Alignment.center,
-                                            color: Colors.grey.withValues(alpha: .4),
+                                            color: Colors.grey.withValues(
+                                              alpha: .4,
+                                            ),
                                           ),
                                         ),
                                       ],
@@ -139,10 +144,14 @@ class _MyMangaShowTileState extends State<MyMangaShowTile> {
                               ),
                               child: Container(
                                 decoration: BoxDecoration(
-                                  color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.5),
+                                  color: Theme.of(context).colorScheme.onPrimary
+                                      .withValues(alpha: 0.5),
                                   borderRadius: BorderRadius.circular(10.0),
                                   border: Border.all(
-                                    color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.5),
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onPrimary
+                                        .withValues(alpha: 0.5),
                                   ), // Added border color
                                 ),
                                 height: widget.height * 0.74 - 10,
@@ -159,39 +168,53 @@ class _MyMangaShowTileState extends State<MyMangaShowTile> {
                             // Show a badge if the volume is owned
                             (isLoggedIn)
                                 ? FutureBuilder(
-                                    future: PocketBaseConnector().isVolumeOwned(PocketBaseConnector().getConnectedUser()!.id, widget.mangaData['id']),
+                                    future: PocketBaseConnector().isVolumeOwned(
+                                      PocketBaseConnector()
+                                          .getConnectedUser()!
+                                          .id,
+                                      widget.mangaData['id'],
+                                    ),
                                     builder: (BuildContext context, snapshot) {
-                                      if (snapshot.connectionState == ConnectionState.done && snapshot.hasData) {
+                                      if (snapshot.connectionState ==
+                                              ConnectionState.done &&
+                                          snapshot.hasData) {
                                         if (snapshot.data == false) {
-                                          return Container();
+                                          return const SizedBox.shrink();
                                         } else {
                                           return Positioned(
                                             top: 10,
                                             right: 10,
                                             child: Container(
                                               decoration: BoxDecoration(
-                                                color: Color(0xFF1780A3),
+                                                color: const Color(0xFF1780A3),
                                                 borderRadius: BorderRadius.only(
-                                                  bottomLeft: Radius.circular(10.0),
-                                                  topLeft: Radius.circular(10.0),
-                                                  bottomRight: Radius.circular(10.0),
+                                                  bottomLeft: Radius.circular(
+                                                    10.0,
+                                                  ),
+                                                  topLeft: Radius.circular(
+                                                    10.0,
+                                                  ),
+                                                  bottomRight: Radius.circular(
+                                                    10.0,
+                                                  ),
                                                 ),
                                               ),
                                               child: Padding(
-                                                padding: const EdgeInsets.symmetric(
-                                                  horizontal: 5.0,
-                                                  vertical: 2.0,
-                                                ),
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                      horizontal: 5.0,
+                                                      vertical: 2.0,
+                                                    ),
                                                 child: Row(
                                                   children: [
-                                                    Icon(
+                                                    const Icon(
                                                       Icons.check,
                                                       color: Colors.white,
                                                       size: 20,
                                                     ),
                                                     Text(
                                                       localizations.owned,
-                                                      style: TextStyle(
+                                                      style: const TextStyle(
                                                         color: Colors.white,
                                                         fontSize: 15,
                                                       ),
@@ -203,7 +226,7 @@ class _MyMangaShowTileState extends State<MyMangaShowTile> {
                                           );
                                         }
                                       } else {
-                                        return Container();
+                                        return const SizedBox.shrink();
                                       }
                                     },
                                   )
@@ -213,14 +236,13 @@ class _MyMangaShowTileState extends State<MyMangaShowTile> {
                       ),
                     ),
                     Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10.0,
-                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 10.0),
                       child: Text(
-                        widget.mangaData['title'].toString().replaceAll(' - Tome ${widget.mangaData['tome_number']}', ""),
-                        style: TextStyle(
-                          fontSize: 17,
+                        widget.mangaData['title'].toString().replaceAll(
+                          ' - Tome ${widget.mangaData['tome_number']}',
+                          "",
                         ),
+                        style: const TextStyle(fontSize: 17),
                         softWrap: false,
                         overflow: TextOverflow.ellipsis,
                         textAlign: TextAlign.left,
@@ -233,8 +255,10 @@ class _MyMangaShowTileState extends State<MyMangaShowTile> {
                         bottom: 10.0,
                       ),
                       child: Text(
-                        localizations.volumeNum(widget.mangaData['tome_number']),
-                        style: TextStyle(
+                        localizations.volumeNum(
+                          widget.mangaData['tome_number'],
+                        ),
+                        style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w300,
                         ),

@@ -5,5 +5,6 @@ final HttpClientFactory httpClientFactory = HttpClientFactoryWeb();
 
 class HttpClientFactoryWeb implements HttpClientFactory {
   @override
-  getHttpClient() => () => FetchClient(mode: RequestMode.cors);
+  getHttpClient() =>
+      () => FetchClient(mode: RequestMode.cors);
 }

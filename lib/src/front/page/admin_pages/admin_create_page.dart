@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:mymangatheque/l10n/app_localizations.dart' show AppLocalizations;
+import 'package:mymangatheque/l10n/app_localizations.dart'
+    show AppLocalizations;
 import 'package:mymangatheque/src/back/services/pocketbaseadmin.dart';
 import 'package:mymangatheque/src/front/page/admin_pages/admin_login_page.dart';
 import 'package:mymangatheque/src/front/page/admin_pages/create_page/admin_create_author.dart';
@@ -14,11 +15,7 @@ class AdminCreatePage extends StatelessWidget {
     // Get localization - return early if not available
     var localizations = AppLocalizations.of(context);
     if (localizations == null) {
-      return const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     PocketBaseAdminConnector connector = PocketBaseAdminConnector();
@@ -44,16 +41,16 @@ class AdminCreatePage extends StatelessWidget {
             children: [
               //AdminCreateSeriePage(),
               //AdminCreateSubSeriePage(),
-              AdminCreateVolumePage(),
-              AdminCreateAuthorPage(),
+              const AdminCreateVolumePage(),
+              const AdminCreateAuthorPage(),
               //AdminCreateEditorPage(),
-              AdminCreateGenrePage(),
+              const AdminCreateGenrePage(),
             ],
           ),
         ),
       );
     } else {
-      return AdminLoginPage();
+      return const AdminLoginPage();
     }
   }
 }

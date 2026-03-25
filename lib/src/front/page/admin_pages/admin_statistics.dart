@@ -7,7 +7,7 @@ import 'package:mymangatheque/src/back/services/pocketbase.dart';
 import 'package:pocketbase/pocketbase.dart';
 
 class StatisticsPage extends StatefulWidget {
-  const StatisticsPage({Key? key}) : super(key: key);
+  const StatisticsPage({super.key});
 
   @override
   State<StatisticsPage> createState() => _StatisticsPageState();
@@ -46,7 +46,8 @@ class _StatisticsPageState extends State<StatisticsPage> {
 
       // Last 7 days chart (0..6)
       final List<FlSpot> chartSpots = <FlSpot>[];
-      final lastMonthRes = await PocketBaseConnector().getNewRegisterLastMonth();
+      final lastMonthRes = await PocketBaseConnector()
+          .getNewRegisterLastMonth();
       final lastMonthData = json.decode(lastMonthRes)["data"];
       final Map<String, int> dateCountMap = {};
       for (var item in lastMonthData) {
@@ -55,7 +56,8 @@ class _StatisticsPageState extends State<StatisticsPage> {
       }
       for (int i = 6; i >= 0; i--) {
         final date = now.subtract(Duration(days: i));
-        final dateStr = "${date.year.toString().padLeft(4, '0')}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
+        final dateStr =
+            "${date.year.toString().padLeft(4, '0')}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
         final count = dateCountMap[dateStr] ?? 0;
         chartSpots.add(FlSpot((6 - i).toDouble(), count.toDouble()));
       }
@@ -81,7 +83,9 @@ class _StatisticsPageState extends State<StatisticsPage> {
     try {
       // Many PocketBase SDKs expose `.collection('name').subscribe(...)`.
       // We keep the handler very simple: on any user or manga event, refresh.
-      _usersSubscription = connector.collection('users').subscribe('*', (event) {
+      _usersSubscription = connector.collection('users').subscribe('*', (
+        event,
+      ) {
         // event can be create/update/delete; just refresh
         _fetchStatistics();
       });
@@ -129,45 +133,39 @@ class _StatisticsPageState extends State<StatisticsPage> {
 
   Widget _buildUserGrowthChart() {
     if (userGrowthData.isEmpty) {
-      return const SizedBox(
-        height: 160,
-        child: Center(child: Text('No data')),
-      );
+      return const SizedBox(height: 160, child: Center(child: Text('No data')));
     }
 
     return SizedBox(
       height: 200,
       child: LineChart(
         LineChartData(
-          gridData: FlGridData(
-            show: true,
-            drawVerticalLine: false,
-          ),
+          gridData: const FlGridData(show: true, drawVerticalLine: false),
           titlesData: FlTitlesData(
-            topTitles: AxisTitles(),
+            topTitles: const AxisTitles(),
             bottomTitles: AxisTitles(
               sideTitles: SideTitles(
                 showTitles: true,
                 reservedSize: 36,
                 getTitlesWidget: (value, meta) {
                   final intIdx = value.toInt().clamp(0, 6);
-                  final date = DateTime.now().subtract(Duration(days: 6 - intIdx));
+                  final date = DateTime.now().subtract(
+                    Duration(days: 6 - intIdx),
+                  );
                   return SideTitleWidget(
                     meta: meta,
                     child: Transform(
                       transform: Matrix4.translationValues(0, 15, 0.0),
                       child: RotationTransition(
                         turns: AlwaysStoppedAnimation(45 / 360),
-                        child: Text(
-                          "${date.day}/${date.month}",
-                        ),
+                        child: Text("${date.day}/${date.month}"),
                       ),
                     ),
                   );
                 },
               ),
             ),
-            leftTitles: AxisTitles(
+            leftTitles: const AxisTitles(
               sideTitles: SideTitles(showTitles: true, reservedSize: 40),
             ),
           ),
@@ -194,6 +192,8 @@ class _StatisticsPageState extends State<StatisticsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final realtimeStatus = _fallbackTimer != null ? ' (polling every 15s)' : '';
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Statistics'),
@@ -215,15 +215,29 @@ class _StatisticsPageState extends State<StatisticsPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Users registered today', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                    Text(
+                      'Users registered today',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                     const SizedBox(height: 8),
                     Card(
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 20,
+                        ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text('$usersToday', style: const TextStyle(fontSize: 36, fontWeight: FontWeight.bold)),
+                            Text(
+                              '$usersToday',
+                              style: const TextStyle(
+                                fontSize: 36,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                             ElevatedButton.icon(
                               onPressed: _fetchStatistics,
                               icon: const Icon(Icons.refresh),
@@ -234,13 +248,18 @@ class _StatisticsPageState extends State<StatisticsPage> {
                       ),
                     ),
                     const SizedBox(height: 20),
-                    Text('New users (last 7 days)', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                    Text(
+                      'New users (last 7 days)',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                     const SizedBox(height: 8),
                     _buildUserGrowthChart(),
                     const SizedBox(height: 40),
                     Center(
                       child: Text(
-                        'Updates in real-time${_fallbackTimer != null ? ' (polling every 15s)' : ''}',
+                        'Updates in real-time$realtimeStatus',
                         style: const TextStyle(fontStyle: FontStyle.italic),
                       ),
                     ),

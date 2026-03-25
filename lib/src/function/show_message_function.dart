@@ -6,16 +6,12 @@ void showMessage(String message, context) {
     clipBehavior: Clip.none,
     dismissDirection: DismissDirection.down,
     behavior: SnackBarBehavior.floating,
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(50),
-    ),
-    duration: Duration(seconds: 3),
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
+    duration: const Duration(seconds: 3),
     elevation: 10,
     content: Text(
       message,
-      style: TextStyle(
-        color: Theme.of(context).colorScheme.primary,
-      ),
+      style: TextStyle(color: Theme.of(context).colorScheme.primary),
     ),
     action: SnackBarAction(
       textColor: Theme.of(context).colorScheme.primary,

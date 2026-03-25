@@ -16,7 +16,11 @@ class SubSeriePage extends StatefulWidget {
   final String serieId;
   final String initRoute;
 
-  const SubSeriePage({required this.serieId, required this.initRoute, super.key});
+  const SubSeriePage({
+    required this.serieId,
+    required this.initRoute,
+    super.key,
+  });
 
   @override
   State<SubSeriePage> createState() => _SubSeriePageState();
@@ -28,11 +32,16 @@ class _SubSeriePageState extends State<SubSeriePage> {
 
   void _checkSubSeriesFollowing() async {
     if (connector.isLoggedIn()) {
-      bool owned = await connector.isSubSeriesFollowed(connector.getConnectedUser()!.id, widget.serieId);
+      bool owned = await connector.isSubSeriesFollowed(
+        connector.getConnectedUser()!.id,
+        widget.serieId,
+      );
+      if (!mounted) return;
       setState(() {
         isSubSeriesFollowed = owned;
       });
     } else {
+      if (!mounted) return;
       setState(() {
         isSubSeriesFollowed = false;
       });
@@ -50,11 +59,7 @@ class _SubSeriePageState extends State<SubSeriePage> {
     // Get localization - return early if not available
     var localizations = AppLocalizations.of(context);
     if (localizations == null) {
-      return const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     return FutureBuilder(
@@ -66,33 +71,21 @@ class _SubSeriePageState extends State<SubSeriePage> {
       builder: (BuildContext context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Scaffold(
-            appBar: AppBar(
-              backgroundColor: Colors.transparent,
-            ),
-            body: const Center(
-              child: CircularProgressIndicator(),
-            ),
+            appBar: AppBar(backgroundColor: Colors.transparent),
+            body: const Center(child: CircularProgressIndicator()),
           );
         }
 
         if (snapshot.connectionState == ConnectionState.none) {
           return Scaffold(
-            appBar: AppBar(
-              backgroundColor: Colors.transparent,
-            ),
-            body: Center(
-              child: Text(localizations.noConnection),
-            ),
+            appBar: AppBar(backgroundColor: Colors.transparent),
+            body: Center(child: Text(localizations.noConnection)),
           );
         }
         if (snapshot.hasError) {
           return Scaffold(
-            appBar: AppBar(
-              backgroundColor: Colors.transparent,
-            ),
-            body: Center(
-              child: const Text("Une erreur est survenue"),
-            ),
+            appBar: AppBar(backgroundColor: Colors.transparent),
+            body: const Center(child: Text("Une erreur est survenue")),
           );
         }
         if (snapshot.hasData && snapshot.data != null) {
@@ -130,7 +123,8 @@ class _SubSeriePageState extends State<SubSeriePage> {
               columnMainAxisAlignment: MainAxisAlignment.start,
               children: [
                 MyPictureDisplay(
-                  pictureUrl: "https://api.mymangatheque.com/api/files/ofwxwbyrhy5dcor/${data['id'].toString()}/${data['image'].toString()}",
+                  pictureUrl:
+                      "https://api.mymangatheque.com/api/files/ofwxwbyrhy5dcor/${data['id'].toString()}/${data['image'].toString()}",
                 ),
                 Padding(
                   padding: const EdgeInsets.all(10),
@@ -146,11 +140,13 @@ class _SubSeriePageState extends State<SubSeriePage> {
                         ),
                       ),
                       (data['support'] == null || data['support'] == "manga")
-                          ? SizedBox()
+                          ? const SizedBox()
                           : Padding(
                               padding: const EdgeInsets.symmetric(vertical: 5),
                               child: Text(
-                                localizations.supportIs(data['support'].toString()),
+                                localizations.supportIs(
+                                  data['support'].toString(),
+                                ),
                                 style: const TextStyle(
                                   fontSize: 30,
                                   fontWeight: FontWeight.w200,
@@ -163,20 +159,29 @@ class _SubSeriePageState extends State<SubSeriePage> {
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(100),
                           child: Container(
-                            decoration: BoxDecoration(
-                              color: Colors.green,
-                            ),
+                            decoration: BoxDecoration(color: Colors.green),
                             child: Padding(
                               padding: const EdgeInsets.all(5.0),
                               child: ElevatedButton(
                                 style: ButtonStyle(
-                                    backgroundColor: (!isSubSeriesFollowed)
-                                        ? WidgetStateProperty.all<Color>(Theme.of(context).colorScheme.surface)
-                                        : WidgetStateProperty.all<Color>(Colors.green),
-                                    iconColor: (!isSubSeriesFollowed)
-                                        ? WidgetStateProperty.all<Color>(Theme.of(context).colorScheme.primary)
-                                        : WidgetStateProperty.all<Color>(Theme.of(context).colorScheme.onPrimary),
-                                    elevation: WidgetStateProperty.all<double>(0)),
+                                  backgroundColor: (!isSubSeriesFollowed)
+                                      ? WidgetStateProperty.all<Color>(
+                                          Theme.of(context).colorScheme.surface,
+                                        )
+                                      : WidgetStateProperty.all<Color>(
+                                          Colors.green,
+                                        ),
+                                  iconColor: (!isSubSeriesFollowed)
+                                      ? WidgetStateProperty.all<Color>(
+                                          Theme.of(context).colorScheme.primary,
+                                        )
+                                      : WidgetStateProperty.all<Color>(
+                                          Theme.of(
+                                            context,
+                                          ).colorScheme.onPrimary,
+                                        ),
+                                  elevation: WidgetStateProperty.all<double>(0),
+                                ),
                                 onPressed: () async {
                                   if (connector.isLoggedIn()) {
                                     if (!isSubSeriesFollowed) {
@@ -197,22 +202,28 @@ class _SubSeriePageState extends State<SubSeriePage> {
                                       });
                                     }
                                   } else {
-                                    pushOrGo(
-                                      context,
-                                      '/profile/signin',
-                                    );
+                                    pushOrGo(context, '/profile/signin');
                                   }
                                 },
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    (!isSubSeriesFollowed) ? Icon(Icons.bookmark_border) : Icon(Icons.bookmark),
+                                    (!isSubSeriesFollowed)
+                                        ? const Icon(Icons.bookmark_border)
+                                        : const Icon(Icons.bookmark),
                                     Text(
-                                      (!isSubSeriesFollowed) ? localizations.follow : localizations.followed,
+                                      (!isSubSeriesFollowed)
+                                          ? localizations.follow
+                                          : localizations.followed,
                                       style: TextStyle(
                                         fontSize: 15,
-                                        color:
-                                            (!isSubSeriesFollowed) ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onPrimary,
+                                        color: (!isSubSeriesFollowed)
+                                            ? Theme.of(
+                                                context,
+                                              ).colorScheme.primary
+                                            : Theme.of(
+                                                context,
+                                              ).colorScheme.onPrimary,
                                       ),
                                     ),
                                   ],
@@ -242,10 +253,19 @@ class _SubSeriePageState extends State<SubSeriePage> {
                             SingleChildScrollView(
                               scrollDirection: Axis.horizontal,
                               child: Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 5),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 5,
+                                ),
                                 child: Row(
                                   children: [
-                                    for (var i = 0; i < series["expand"]["genres"].length; i += 1) MyGenresShow(data: series["expand"]["genres"][i]),
+                                    for (
+                                      var i = 0;
+                                      i < series["expand"]["genres"].length;
+                                      i += 1
+                                    )
+                                      MyGenresShow(
+                                        data: series["expand"]["genres"][i],
+                                      ),
                                   ],
                                 ),
                               ),
@@ -259,28 +279,28 @@ class _SubSeriePageState extends State<SubSeriePage> {
                         horizontal: 0.0,
                       ),
                       (authors.isEmpty)
-                          ? SizedBox()
+                          ? const SizedBox()
                           : (authors.length == 1)
-                              ? Padding(
-                                  padding: const EdgeInsets.symmetric(vertical: 5),
-                                  child: Text(
-                                    '${localizations.author} :',
-                                    style: const TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                )
-                              : Padding(
-                                  padding: const EdgeInsets.symmetric(vertical: 5),
-                                  child: Text(
-                                    '${localizations.authors} :',
-                                    style: const TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
+                          ? Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 5),
+                              child: Text(
+                                '${localizations.author} :',
+                                style: const TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
                                 ),
+                              ),
+                            )
+                          : Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 5),
+                              child: Text(
+                                '${localizations.authors} :',
+                                style: const TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
                       for (var i = 0; i < authors.length; i += 1)
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -295,7 +315,7 @@ class _SubSeriePageState extends State<SubSeriePage> {
                                     vertical: 5,
                                     horizontal: 0,
                                   )
-                                : SizedBox(),
+                                : const SizedBox(),
                           ],
                         ),
                       MyLine(
@@ -304,36 +324,41 @@ class _SubSeriePageState extends State<SubSeriePage> {
                         horizontal: 0,
                       ),
                       (volumes.isEmpty)
-                          ? SizedBox()
+                          ? const SizedBox()
                           : (volumes.length == 1)
-                              ? Padding(
-                                  padding: const EdgeInsets.symmetric(vertical: 5),
-                                  child: Text(
-                                    '${localizations.volume} :',
-                                    style: const TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                )
-                              : Padding(
-                                  padding: const EdgeInsets.symmetric(vertical: 5),
-                                  child: Text(
-                                    '${localizations.volumes} :',
-                                    style: const TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
+                          ? Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 5),
+                              child: Text(
+                                '${localizations.volume} :',
+                                style: const TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
                                 ),
+                              ),
+                            )
+                          : Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 5),
+                              child: Text(
+                                '${localizations.volumes} :',
+                                style: const TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
                       for (var i = 0; i < volumes.length; i += 1)
                         Column(
                           children: [
                             (connector.isLoggedIn())
                                 ? FutureBuilder(
-                                    future: connector.isVolumeOwned(connector.getConnectedUser()!.id, volumes[i]['id']),
+                                    future: connector.isVolumeOwned(
+                                      connector.getConnectedUser()!.id,
+                                      volumes[i]['id'],
+                                    ),
                                     builder: (BuildContext context, snapshot) {
-                                      if (snapshot.connectionState == ConnectionState.done && snapshot.hasData) {
+                                      if (snapshot.connectionState ==
+                                              ConnectionState.done &&
+                                          snapshot.hasData) {
                                         return MyVolumeTile(
                                           volumeData: volumes[i],
                                           subSerieData: series,
@@ -348,7 +373,8 @@ class _SubSeriePageState extends State<SubSeriePage> {
                                           initRoute: widget.initRoute,
                                         );
                                       }
-                                    })
+                                    },
+                                  )
                                 : MyVolumeTile(
                                     volumeData: volumes[i],
                                     subSerieData: series,
@@ -361,11 +387,11 @@ class _SubSeriePageState extends State<SubSeriePage> {
                                     vertical: 5,
                                     horizontal: 0,
                                   )
-                                : SizedBox(),
+                                : const SizedBox(),
                           ],
                         ),
                       (editor.isEmpty)
-                          ? SizedBox()
+                          ? const SizedBox()
                           : Padding(
                               padding: const EdgeInsets.symmetric(vertical: 5),
                               child: Column(
@@ -393,18 +419,14 @@ class _SubSeriePageState extends State<SubSeriePage> {
                             ),
                     ],
                   ),
-                )
+                ),
               ],
             ),
           );
         } else {
           return Scaffold(
-            appBar: AppBar(
-              backgroundColor: Colors.transparent,
-            ),
-            body: Center(
-              child: Text(localizations.subSeriesDoesNotExist),
-            ),
+            appBar: AppBar(backgroundColor: Colors.transparent),
+            body: Center(child: Text(localizations.subSeriesDoesNotExist)),
           );
         }
       },

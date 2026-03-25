@@ -1,8 +1,14 @@
 import 'package:mymangatheque/src/models/manga/volume.dart';
 
 class SubSerieForCollection {
-  SubSerieForCollection(
-      {required this.id, required this.title, required this.numberOfVolumes, required this.numberOwnedVolumes, required this.volumes, this.cover});
+  SubSerieForCollection({
+    required this.id,
+    required this.title,
+    required this.numberOfVolumes,
+    required this.numberOwnedVolumes,
+    required this.volumes,
+    this.cover,
+  });
 
   final String id;
   final String title;
@@ -17,15 +23,17 @@ class SubSerieForCollection {
       title: json['title'],
       numberOfVolumes: json['numberOfVolumes'],
       numberOwnedVolumes: json['numberOwnedVolumes'],
-      volumes: json['volumes'] != null ? List<Volume>.from(json['volumes'].map((x) => Volume.fromJson(x))) : <Volume>[],
+      volumes: json['volumes'] != null
+          ? List<Volume>.from(json['volumes'].map((x) => Volume.fromJson(x)))
+          : <Volume>[],
     );
   }
 
-  removeVolume(Volume volume) {
+  void removeVolume(Volume volume) {
     volumes.removeWhere((v) => v.id == volume.id);
   }
 
-  containsVolume(Volume volume) {
+  bool containsVolume(Volume volume) {
     return volumes.any((v) => v.id == volume.id);
   }
 

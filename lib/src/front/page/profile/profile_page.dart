@@ -1,7 +1,6 @@
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:mymangatheque/l10n/app_localizations.dart';
@@ -18,6 +17,7 @@ import 'package:mymangatheque/src/function/auto_push_or_go.dart';
 import 'package:mymangatheque/src/function/show_message_function.dart';
 import 'package:mymangatheque/src/models/get_user_information.dart';
 import 'package:mymangatheque/src/models/local_storage/local_storage.dart';
+import 'package:mymangatheque/src/const/routes.dart';
 
 class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});
@@ -40,7 +40,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   void signUserOut({required String text}) async {
     connector.logOut();
     showMessage(text, context);
-    pushOrGo(context, '/profile/signin');
+    pushOrGo(context, Routes.profile.signin);
   }
 
   // Select an image to change profile picture image
@@ -52,45 +52,59 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       imageQuality: 75,
     );
 
-    await connector
-        .updateAvatar(
+    List<int>? bytes;
+    if (image != null) {
+      bytes = await image.readAsBytes();
+    }
+
+    if (!mounted) return;
+    await connector.updateAvatar(
       'users',
       connector.getConnectedUser()!.id,
       image!.name,
-      image.path,
+      bytes,
       context,
-    )
-        .then((value) async {
-      await connector.updateUserData(connector.getConnectedUser()!.email);
-      setState(() {});
-    });
+    );
+    await connector.updateUserData(connector.getConnectedUser()!.email);
+    if (!mounted) return;
+    setState(() {});
   }
 
   // Get the number of owned manga
   Future<void> getNumberOfMangaOwned() async {
     try {
-      int countMangaOwned = await connector.getNumberOwnedManga(connector.getConnectedUser()!.id);
+      int countMangaOwned = await connector.getNumberOwnedManga(
+        connector.getConnectedUser()!.id,
+      );
+      if (!mounted) return;
       setState(() {
         numberMangaOwned = countMangaOwned;
       });
     } catch (e) {
-      print(e);
+      debugPrint(e.toString());
     }
   }
 
   // Get the number of favorite series
   Future<void> getNumberOfSeriesFav() async {
     try {
-      int countSerieFav = await connector.getNumberFavSerie(connector.getConnectedUser()!.id);
+      int countSerieFav = await connector.getNumberFavSerie(
+        connector.getConnectedUser()!.id,
+      );
+      if (!mounted) return;
       setState(() {
         numberSerieFav = countSerieFav;
       });
     } catch (e) {
-      print(e);
+      debugPrint(e.toString());
     }
   }
 
-  DateTime selectedBDayDate = DateTime(DateTime.now().year - 7, DateTime.now().month, DateTime.now().day);
+  DateTime selectedBDayDate = DateTime(
+    DateTime.now().year - 7,
+    DateTime.now().month,
+    DateTime.now().day,
+  );
 
   @override
   void initState() {
@@ -105,33 +119,29 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     User? user = connector.getConnectedUser();
 
     if (user == null) {
-      pushOrGo(context, '/profile/signin');
+      pushOrGo(context, Routes.profile.signin);
       return const SizedBox.shrink(); // Return empty widget while navigating
     }
 
     // Get localization - return early if not available
     var localizations = AppLocalizations.of(context);
     if (localizations == null) {
-      return const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     if (theme !=
         (AdaptiveTheme.of(context).mode.isSystem
             ? 'system'
             : AdaptiveTheme.of(context).mode.isDark
-                ? 'dark'
-                : 'light')) {
+            ? 'dark'
+            : 'light')) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         setState(() {
           theme = AdaptiveTheme.of(context).mode.isSystem
               ? 'system'
               : AdaptiveTheme.of(context).mode.isDark
-                  ? 'dark'
-                  : 'light';
+              ? 'dark'
+              : 'light';
         });
       });
     }
@@ -139,10 +149,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     final language = ref.watch(languageProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        title: Text(localizations.profileSettings),
-      ),
+      appBar: AppBar(elevation: 0, title: Text(localizations.profileSettings)),
       body: Center(
         child: MyScrollColumn(
           scrollPadding: const EdgeInsets.symmetric(horizontal: 10),
@@ -151,9 +158,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               onTap: () {
                 pickUploadImage();
               },
-              child: GetUserProfilePicture(
-                file: user.avatar!,
-              ),
+              child: GetUserProfilePicture(file: user.avatar!),
             ),
             const Padding(padding: EdgeInsets.only(bottom: 25)),
             MyLine(width: MediaQuery.of(context).size.width, vertical: 10),
@@ -168,9 +173,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10.0),
               child: SingleChildScrollView(
-                child: Text(
-                  localizations.usernameIs(user.username),
-                ),
+                child: Text(localizations.usernameIs(user.username)),
               ),
             ),
             MyLine(width: MediaQuery.of(context).size.width, vertical: 10),
@@ -179,9 +182,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               child: SingleChildScrollView(
                 child: Text(
                   localizations.accountCreatedOn(
-                    DateFormat.yMMMMd(Localizations.localeOf(context).languageCode).format(
-                      connector.getConnectedUser()!.created,
-                    ),
+                    DateFormat.yMMMMd(
+                      Localizations.localeOf(context).languageCode,
+                    ).format(connector.getConnectedUser()!.created),
                   ),
                 ),
               ),
@@ -192,139 +195,104 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               child: SingleChildScrollView(
                 child: Text(
                   localizations.birthdayDateIs(
-                    DateFormat.yMMMMd(Localizations.localeOf(context).languageCode).format(
-                      connector.getConnectedUser()!.birthday,
-                    ),
+                    DateFormat.yMMMMd(
+                      Localizations.localeOf(context).languageCode,
+                    ).format(connector.getConnectedUser()!.birthday),
                   ),
                 ),
               ),
             ),
             MyLine(width: MediaQuery.of(context).size.width, vertical: 10),
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 10.0),
+              padding: const EdgeInsets.symmetric(horizontal: 10.0),
               child: SingleChildScrollView(
                 child: Text(localizations.volumeOwnedNumber(numberMangaOwned)),
               ),
             ),
             MyLine(width: MediaQuery.of(context).size.width, vertical: 10),
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 10.0),
+              padding: const EdgeInsets.symmetric(horizontal: 10.0),
               child: SingleChildScrollView(
-                child: Text(
-                  localizations.favoriteSeriesNumber(numberSerieFav),
-                ),
+                child: Text(localizations.favoriteSeriesNumber(numberSerieFav)),
               ),
-            ),
-            MyLine(width: MediaQuery.of(context).size.width, vertical: 10), // Drop Down Menu du DarkMode
-            Container(
-              padding: const EdgeInsets.all(10),
-              margin: const EdgeInsets.symmetric(horizontal: 5),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: DropdownButtonFormField(
-                  items: [
-                    DropdownMenuItem(
-                      value: 'light',
-                      child: Row(
-                        children: [
-                          Image.asset(
-                            Assets.images.theme.lightIcon,
-                            width: 20,
-                          ),
-                          const Padding(
-                            padding: EdgeInsets.only(right: 10),
-                          ),
-                          Text(
-                            localizations.lightMode,
-                          ),
-                        ],
-                      ),
-                    ),
-                    DropdownMenuItem(
-                      value: 'dark',
-                      child: Row(
-                        children: [
-                          Image.asset(
-                            Assets.images.theme.darkIcon,
-                            width: 20,
-                          ),
-                          const Padding(
-                            padding: EdgeInsets.only(right: 10),
-                          ),
-                          Text(
-                            localizations.darkMode,
-                          ),
-                        ],
-                      ),
-                    ),
-                    DropdownMenuItem(
-                      value: 'system',
-                      child: Row(
-                        children: [
-                          Image.asset(
-                            Assets.images.theme.autoIcon,
-                            width: 20,
-                          ),
-                          const Padding(
-                            padding: EdgeInsets.only(right: 10),
-                          ),
-                          Text(
-                            localizations.systemMode,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                  ),
-                  initialValue: theme,
-                  onChanged: (value) {
-                    if (value == 'light') {
-                      AdaptiveTheme.of(context).setLight();
-                      setState(() {
-                        savedThemeMode = AdaptiveThemeMode.light;
-                      });
-                    } else if (value == 'dark') {
-                      AdaptiveTheme.of(context).setDark();
-                      setState(() {
-                        savedThemeMode = AdaptiveThemeMode.dark;
-                      });
-                    } else {
-                      AdaptiveTheme.of(context).setSystem();
-                      setState(() {
-                        savedThemeMode = AdaptiveThemeMode.system;
-                      });
-                    }
-                  }),
             ),
             MyLine(
               width: MediaQuery.of(context).size.width,
               vertical: 10,
-            ),
+            ), // Drop Down Menu du DarkMode
             Container(
               padding: const EdgeInsets.all(10),
               margin: const EdgeInsets.symmetric(horizontal: 5),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
+              decoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
+              child: DropdownButtonFormField(
+                items: [
+                  DropdownMenuItem(
+                    value: 'light',
+                    child: Row(
+                      children: [
+                        Image.asset(Assets.images.theme.lightIcon, width: 20),
+                        const Padding(padding: EdgeInsets.only(right: 10)),
+                        Text(localizations.lightMode),
+                      ],
+                    ),
+                  ),
+                  DropdownMenuItem(
+                    value: 'dark',
+                    child: Row(
+                      children: [
+                        Image.asset(Assets.images.theme.darkIcon, width: 20),
+                        const Padding(padding: EdgeInsets.only(right: 10)),
+                        Text(localizations.darkMode),
+                      ],
+                    ),
+                  ),
+                  DropdownMenuItem(
+                    value: 'system',
+                    child: Row(
+                      children: [
+                        Image.asset(Assets.images.theme.autoIcon, width: 20),
+                        const Padding(padding: EdgeInsets.only(right: 10)),
+                        Text(localizations.systemMode),
+                      ],
+                    ),
+                  ),
+                ],
+                decoration: const InputDecoration(border: OutlineInputBorder()),
+                initialValue: theme,
+                onChanged: (value) {
+                  if (value == 'light') {
+                    AdaptiveTheme.of(context).setLight();
+                    setState(() {
+                      savedThemeMode = AdaptiveThemeMode.light;
+                    });
+                  } else if (value == 'dark') {
+                    AdaptiveTheme.of(context).setDark();
+                    setState(() {
+                      savedThemeMode = AdaptiveThemeMode.dark;
+                    });
+                  } else {
+                    AdaptiveTheme.of(context).setSystem();
+                    setState(() {
+                      savedThemeMode = AdaptiveThemeMode.system;
+                    });
+                  }
+                },
               ),
+            ),
+            MyLine(width: MediaQuery.of(context).size.width, vertical: 10),
+            Container(
+              padding: const EdgeInsets.all(10),
+              margin: const EdgeInsets.symmetric(horizontal: 5),
+              decoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
               child: DropdownButtonFormField<Language>(
                 items: [
                   DropdownMenuItem(
                     value: Language.english,
                     child: Row(
                       children: [
-                        Image.asset(
-                          Assets.images.us,
-                          width: 20,
-                        ),
-                        const Padding(
-                          padding: EdgeInsets.only(right: 10),
-                        ),
-                        Text(
-                          localizations.english,
-                        ),
+                        Image.asset(Assets.images.us, width: 20),
+                        const Padding(padding: EdgeInsets.only(right: 10)),
+                        Text(localizations.english),
                       ],
                     ),
                   ),
@@ -332,23 +300,14 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                     value: Language.french,
                     child: Row(
                       children: [
-                        Image.asset(
-                          Assets.images.fr,
-                          width: 20,
-                        ),
-                        const Padding(
-                          padding: EdgeInsets.only(right: 10),
-                        ),
-                        Text(
-                          localizations.french,
-                        ),
+                        Image.asset(Assets.images.fr, width: 20),
+                        const Padding(padding: EdgeInsets.only(right: 10)),
+                        Text(localizations.french),
                       ],
                     ),
                   ),
                 ],
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                ),
+                decoration: const InputDecoration(border: OutlineInputBorder()),
                 initialValue: language,
                 onChanged: (Language? value) {
                   if (value == null) return;
@@ -357,10 +316,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 },
               ),
             ),
-            MyLine(
-              width: MediaQuery.of(context).size.width,
-              vertical: 10,
-            ),
+            MyLine(width: MediaQuery.of(context).size.width, vertical: 10),
             SingleChildScrollView(
               child: GestureDetector(
                 onTap: () {
@@ -372,65 +328,53 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 child: Row(
                   children: [
                     const Padding(padding: EdgeInsets.only(right: 16)),
-                    OwnIcon(iconColor: Theme.of(context).colorScheme.primary, iconSrc: Assets.icons.trash),
+                    OwnIcon(
+                      iconColor: Theme.of(context).colorScheme.primary,
+                      iconSrc: Assets.icons.trash,
+                    ),
                     const Padding(padding: EdgeInsets.only(right: 9)),
                     Text(localizations.clearCache),
                   ],
                 ),
               ),
             ),
-            MyLine(
-              width: MediaQuery.of(context).size.width,
-              vertical: 10,
-            ),
+            MyLine(width: MediaQuery.of(context).size.width, vertical: 10),
             SingleChildScrollView(
               child: GestureDetector(
-                onTap: () => pushOrGo(context, '/profile/modify_password'),
+                onTap: () => pushOrGo(context, Routes.profile.modifyPassword),
                 child: Row(
                   children: [
-                    const Padding(
-                      padding: EdgeInsets.only(right: 16),
-                    ),
+                    const Padding(padding: EdgeInsets.only(right: 16)),
                     OwnIcon(
                       iconColor: Theme.of(context).colorScheme.primary,
                       iconSrc: Assets.icons.lock,
                     ),
-                    const Padding(
-                      padding: EdgeInsets.only(right: 9),
-                    ),
+                    const Padding(padding: EdgeInsets.only(right: 9)),
                     Text(localizations.modifyPassword),
                   ],
                 ),
               ),
             ),
-            MyLine(
-              width: MediaQuery.of(context).size.width,
-              vertical: 10.0,
-            ),
+            MyLine(width: MediaQuery.of(context).size.width, vertical: 10.0),
             MyIconTextButton(
               function: () => signUserOut(text: localizations.logOutSuccess),
               color: Colors.red,
               iconSrc: Assets.icons.logOut,
               text: localizations.logOut,
             ),
-            MyTextDivider(
-              text: localizations.dangerZone,
-            ),
+            MyTextDivider(text: localizations.dangerZone),
             MyIconTextButton(
-              function: () => pushOrGo(context, "/delete_account"),
+              function: () => pushOrGo(context, Routes.deleteAccount),
               color: Colors.red,
               iconSrc: Assets.icons.delete,
               text: localizations.deleteAccount,
             ),
-            MyLine(
-              width: MediaQuery.of(context).size.width,
-              vertical: 10.0,
-            ),
+            MyLine(width: MediaQuery.of(context).size.width, vertical: 10.0),
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20.0),
+              padding: const EdgeInsets.symmetric(horizontal: 20.0),
               child: GestureDetector(
                 child: Text(localizations.legalNotice),
-                onTap: () => pushOrGo(context, "/profile/legal_notice"),
+                onTap: () => pushOrGo(context, Routes.profile.legalNotice),
               ),
             ),
             GestureDetector(
@@ -438,7 +382,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 pushOrGo(context, '/admin');
               },
               child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20.0),
+                padding: const EdgeInsets.symmetric(horizontal: 20.0),
                 child: FutureBuilder(
                   future: connector.appVersion,
                   builder: (context, snapshot) {
@@ -447,8 +391,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                       return FutureBuilder(
                         future: connector.buildVersion,
                         builder: (context, snapshot) {
-                          if (snapshot.connectionState == ConnectionState.done) {
-                            final String buildVersion = snapshot.data.toString();
+                          if (snapshot.connectionState ==
+                              ConnectionState.done) {
+                            final String buildVersion = snapshot.data
+                                .toString();
                             return Column(
                               children: [
                                 Text(

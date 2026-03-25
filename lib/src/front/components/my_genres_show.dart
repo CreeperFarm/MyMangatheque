@@ -17,9 +17,7 @@ class MyGenresShow extends StatelessWidget {
             padding: const EdgeInsets.all(5),
             child: Text(
               data['name'].toString(),
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.secondary,
-              ),
+              style: TextStyle(color: Theme.of(context).colorScheme.secondary),
             ),
           ),
         ),

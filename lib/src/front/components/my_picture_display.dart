@@ -9,11 +9,15 @@ class MyPictureDisplay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final height = ((MediaQuery.of(context).size.width * 16.5) / 24 > 500)
-        ? 500.0
-        : ((MediaQuery.of(context).size.width * 16.5) / 24 < 275)
-            ? 275.0
-            : (MediaQuery.of(context).size.width * 16.5) / 24;
+    final computedHeight = (MediaQuery.of(context).size.width * 16.5) / 24;
+    final double height;
+    if (computedHeight > 500) {
+      height = 500.0;
+    } else if (computedHeight < 275) {
+      height = 275.0;
+    } else {
+      height = computedHeight;
+    }
     return SizedBox(
       height: height,
       child: Stack(
@@ -52,10 +56,7 @@ class MyPictureDisplay extends StatelessWidget {
             width: ((height * 16.5) / 24),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(10.0),
-              child: Image.network(
-                pictureUrl,
-                fit: BoxFit.fill,
-              ),
+              child: Image.network(pictureUrl, fit: BoxFit.fill),
             ),
           ),
         ],

@@ -23,27 +23,45 @@ class AdminCreateVolumePage extends StatefulWidget {
 class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
   // A (*) Mean that the field is required
 
-  final TextEditingController titleVolumeController = TextEditingController(); // Field (*) : title
-  final TextEditingController numberVolumeController = TextEditingController(); // Field : tome_number
-  final TextEditingController eanVolumeController = TextEditingController(); // Field (*) : ean
-  final TextEditingController priceVolumeController = TextEditingController(); // Field (*) : price
+  final TextEditingController titleVolumeController =
+      TextEditingController(); // Field (*) : title
+  final TextEditingController numberVolumeController =
+      TextEditingController(); // Field : tome_number
+  final TextEditingController eanVolumeController =
+      TextEditingController(); // Field (*) : ean
+  final TextEditingController priceVolumeController =
+      TextEditingController(); // Field (*) : price
   bool over18 = false; // Field (*) : over18
-  final TextEditingController languageVolumeController = TextEditingController(); // Field (*) : language
-  final TextEditingController supportVolumeController = TextEditingController(); // Field (*) : support
-  final TextEditingController genreJapVolumeController = TextEditingController(); // Field : genre_jap
-  final TextEditingController summaryVolumeController = TextEditingController(); // Field (*) : resume
-  final TextEditingController imagePathVolumeController = TextEditingController(); // Field : image
-  final TextEditingController imageNameVolumeController = TextEditingController(); // Field : image
-  final TextEditingController bookLinkVolumeController = TextEditingController(); // Field (*) : book_link
-  final TextEditingController infoVolumeController = TextEditingController(); // Field : info
+  final TextEditingController languageVolumeController =
+      TextEditingController(); // Field (*) : language
+  final TextEditingController supportVolumeController =
+      TextEditingController(); // Field (*) : support
+  final TextEditingController genreJapVolumeController =
+      TextEditingController(); // Field : genre_jap
+  final TextEditingController summaryVolumeController =
+      TextEditingController(); // Field (*) : resume
+  final TextEditingController imagePathVolumeController =
+      TextEditingController(); // Field : image
+  final TextEditingController imageNameVolumeController =
+      TextEditingController(); // Field : image
+  final TextEditingController bookLinkVolumeController =
+      TextEditingController(); // Field (*) : book_link
+  final TextEditingController infoVolumeController =
+      TextEditingController(); // Field : info
   DateTime release = DateTime.now(); // Field : release
 
   // Correspond to id of the items connected
-  final TextEditingController serieVolumeController = TextEditingController(); // Field (*) : series
-  final TextEditingController subSerieVolumeController = TextEditingController(); // Field (*) : sub_series
-  final TextEditingController authorsVolumeController = TextEditingController(); // Field (*) : authors
-  final TextEditingController editorVolumeController = TextEditingController(); // Field (*) : editor
-  final TextEditingController containsVolumeController = TextEditingController(); // Field : contain
+  final TextEditingController serieVolumeController =
+      TextEditingController(); // Field (*) : series
+  final TextEditingController subSerieVolumeController =
+      TextEditingController(); // Field (*) : sub_series
+  final TextEditingController authorsVolumeController =
+      TextEditingController(); // Field (*) : authors
+  final TextEditingController editorVolumeController =
+      TextEditingController(); // Field (*) : editor
+  final TextEditingController containsVolumeController =
+      TextEditingController(); // Field : contain
+  XFile? pickedImageVolume;
 
   void uploadImage() async {
     final image = await ImagePicker().pickImage(
@@ -53,10 +71,12 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
       imageQuality: 75,
     );
 
+    pickedImageVolume = image;
     imagePathVolumeController.text = image!.path;
     imageNameVolumeController.text = image.name;
 
-    Future.delayed(Duration(milliseconds: 200), () {
+    Future.delayed(const Duration(milliseconds: 200), () {
+      if (!mounted) return;
       setState(() {});
     });
   }
@@ -96,11 +116,7 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
     // Get localization - return early if not available
     var localizations = AppLocalizations.of(context);
     if (localizations == null) {
-      return const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     final PocketBaseAdminConnector adminConnector = PocketBaseAdminConnector();
@@ -111,10 +127,7 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
           padding: const EdgeInsets.symmetric(vertical: 10),
           child: Text(
             localizations.createVolume,
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
         ),
         Form(
@@ -130,7 +143,9 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(20.0),
                         child: Image.asset(
-                          imagePathVolumeController.text != "" ? imagePathVolumeController.text : Assets.images.unknown,
+                          imagePathVolumeController.text != ""
+                              ? imagePathVolumeController.text
+                              : Assets.images.unknown,
                           width: MediaQuery.of(context).size.width * 0.4,
                           fit: BoxFit.cover,
                         ),
@@ -146,7 +161,7 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
                         imageNameVolumeController.text = "";
                         setState(() {});
                       },
-                      icon: Icon(CupertinoIcons.delete_left_fill),
+                      icon: const Icon(CupertinoIcons.delete_left_fill),
                     ),
                   ),
                 ],
@@ -187,14 +202,15 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
                           ),
                         ),
                       );
+                      if (!mounted) return;
                       setState(() {
                         if (res is String) {
                           eanVolumeController.text = res;
                         }
                       });
                     },
-                    icon: Icon(Icons.camera_alt),
-                  )
+                    icon: const Icon(Icons.camera_alt),
+                  ),
                 ],
               ),
               MyTextField(
@@ -235,9 +251,7 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
                     padding: const EdgeInsets.symmetric(horizontal: 10.0),
                     child: Text(
                       localizations.adultContent,
-                      style: TextStyle(
-                        fontSize: 16,
-                      ),
+                      style: const TextStyle(fontSize: 16),
                     ),
                   ),
                 ],
@@ -356,22 +370,10 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
                 padding: const EdgeInsets.symmetric(vertical: 5.0),
                 child: DropdownButtonFormField(
                   items: [
-                    DropdownMenuItem(
-                      value: "Shōjo",
-                      child: Text("Shōjo"),
-                    ),
-                    DropdownMenuItem(
-                      value: "Shōnen",
-                      child: Text("Shōnen"),
-                    ),
-                    DropdownMenuItem(
-                      value: "Seinen",
-                      child: Text("Seinen"),
-                    ),
-                    DropdownMenuItem(
-                      value: "Josei",
-                      child: Text("Josei"),
-                    ),
+                    DropdownMenuItem(value: "Shōjo", child: Text("Shōjo")),
+                    DropdownMenuItem(value: "Shōnen", child: Text("Shōnen")),
+                    DropdownMenuItem(value: "Seinen", child: Text("Seinen")),
+                    DropdownMenuItem(value: "Josei", child: Text("Josei")),
                   ],
                   onChanged: (value) {
                     setState(() {
@@ -380,9 +382,10 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
                   },
                   decoration: InputDecoration(
                     border: OutlineInputBorder(
-                        borderSide: BorderSide(
-                      color: Theme.of(context).colorScheme.primary,
-                    )),
+                      borderSide: BorderSide(
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
                     filled: true,
                     labelStyle: TextStyle(
                       color: Theme.of(context).colorScheme.onPrimary,
@@ -445,7 +448,11 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
                     return localizations.provideVolumeSeriesId;
                   } else {
                     // Check if the id is a serie
-                    if (await adminConnector.checkIfExist('series', 'id', value)) {
+                    if (await adminConnector.checkIfExist(
+                      'series',
+                      'id',
+                      value,
+                    )) {
                       return localizations.provideValidVolumeSeriesId;
                     } else {
                       return null;
@@ -464,7 +471,11 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
                     return localizations.provideVolumeSubSeriesId;
                   } else {
                     // Check if the id is a serie
-                    if (await adminConnector.checkIfExist('sub_series', 'id', value)) {
+                    if (await adminConnector.checkIfExist(
+                      'sub_series',
+                      'id',
+                      value,
+                    )) {
                       return localizations.provideValidVolumeSubSeriesId;
                     } else {
                       return null;
@@ -483,7 +494,11 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
                     return localizations.provideVolumeEditorId;
                   } else {
                     // Check if the id is a serie
-                    if (await adminConnector.checkIfExist('editors', 'id', value)) {
+                    if (await adminConnector.checkIfExist(
+                      'editors',
+                      'id',
+                      value,
+                    )) {
                       return localizations.provideValidVolumeEditorId;
                     } else {
                       return null;
@@ -505,7 +520,8 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
                 verticalPadding: 5,
                 horizontalPadding: 0,
                 customValidator: (value) {
-                  if (supportVolumeController.text == "boxSet" && (value == null || value.isEmpty)) {
+                  if (supportVolumeController.text == "boxSet" &&
+                      (value == null || value.isEmpty)) {
                     return localizations.provideContentOfBoxSet;
                   } else {
                     return null;
@@ -516,41 +532,57 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
                 text: localizations.volumeAdd,
                 verticalPadding: 10,
                 horizontalPadding: 0,
-                onTap: () {
+                onTap: () async {
                   if (Form.of(context).validate()) {
                     try {
-                      adminConnector.createVolume(
+                      List<int>? bytes;
+                      if (pickedImageVolume != null) {
+                        bytes = await pickedImageVolume!.readAsBytes();
+                      }
+                      await adminConnector.createVolume(
                         {
                           "title": titleVolumeController.text,
                           "tome_number": int.parse(numberVolumeController.text),
                           "price": priceVolumeController.text,
                           "over18": over18,
                           "resume": summaryVolumeController.text,
-                          "book_link": jsonEncode(bookLinkVolumeController.text),
+                          "book_link": jsonEncode(
+                            bookLinkVolumeController.text,
+                          ),
                           "release": release.toIso8601String(),
                           "ean": int.parse(eanVolumeController.text),
-                          "language": (languageVolumeController.text != "") ? languageVolumeController.text : null,
+                          "language": (languageVolumeController.text != "")
+                              ? languageVolumeController.text
+                              : null,
                           "sub_series": subSerieVolumeController.text,
                           "series": serieVolumeController.text,
                           "authors": authorsVolumeController.text,
-                          "contain": (containsVolumeController.text != "") ? containsVolumeController.text : null,
-                          "info": (infoVolumeController.text != "") ? jsonEncode(infoVolumeController.text) : null,
+                          "contain": (containsVolumeController.text != "")
+                              ? containsVolumeController.text
+                              : null,
+                          "info": (infoVolumeController.text != "")
+                              ? jsonEncode(infoVolumeController.text)
+                              : null,
                           "support": supportVolumeController.text,
-                          "genre_jap": (genreJapVolumeController.text != "") ? genreJapVolumeController.text : null,
+                          "genre_jap": (genreJapVolumeController.text != "")
+                              ? genreJapVolumeController.text
+                              : null,
                         },
                         imageNameVolumeController.text,
-                        imagePathVolumeController.text,
+                        bytes,
                       );
+                      if (!mounted) return;
                       showMessage(localizations.volumeAddSuccess, context);
                     } catch (e) {
+                      if (!mounted) return;
                       showMessage(localizations.volumeAddError, context);
                     }
                   }
                 },
-              )
+              ),
             ],
           ),
-        )
+        ),
       ],
     );
   }

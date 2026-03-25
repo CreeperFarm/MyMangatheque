@@ -13,12 +13,11 @@ import 'package:mymangatheque/main.dart';
 
 void main() {
   testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-
-    WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+    WidgetsFlutterBinding.ensureInitialized();
 
     final savedThemeMode = await AdaptiveTheme.getThemeMode();
     // Build our app and trigger a frame.
-    await tester.pumpWidget(MyApp(savedThemeMode: savedThemeMode,));
+    await tester.pumpWidget(MyApp(savedThemeMode: savedThemeMode));
 
     // Verify that our counter starts at 0.
     expect(find.text('0'), findsOneWidget);

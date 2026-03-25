@@ -8,7 +8,13 @@ class MyDrawerTile extends StatelessWidget {
   final String goTo;
   final bool pop;
 
-  MyDrawerTile({required this.title, required this.iconSrc, required this.goTo, required this.pop, super.key});
+  const MyDrawerTile({
+    required this.title,
+    required this.iconSrc,
+    required this.goTo,
+    required this.pop,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -18,7 +18,6 @@ class RedirectToProfile extends StatelessWidget {
           if (PocketBaseConnector().isLoggedIn()) {
             return const ProfilePage();
           }
-
           //user is NOT logged in
           else {
             return const SignInPage();
@@ -43,7 +42,6 @@ class RedirectToDelete extends StatelessWidget {
           if (PocketBaseConnector().isLoggedIn()) {
             return const DeleteAccountPage();
           }
-
           //user is NOT logged in
           else {
             return const SignInPage();

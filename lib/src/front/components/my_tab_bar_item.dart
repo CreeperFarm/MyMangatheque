@@ -2,9 +2,14 @@ import 'package:flutter/material.dart';
 
 class MyTabBarItem extends StatelessWidget {
   final String tabText;
-  Color colorIn;
-  Color colorOut;
-  MyTabBarItem({required this.tabText, required this.colorIn, required this.colorOut, super.key});
+  final Color colorIn;
+  final Color colorOut;
+  const MyTabBarItem({
+    required this.tabText,
+    required this.colorIn,
+    required this.colorOut,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -25,9 +30,7 @@ class MyTabBarItem extends StatelessWidget {
               offset: const Offset(0, 3.5),
               child: Text(
                 tabText,
-                style: TextStyle(
-                  color: colorOut,
-                ),
+                style: TextStyle(color: colorOut),
                 textAlign: TextAlign.center,
               ),
             ),

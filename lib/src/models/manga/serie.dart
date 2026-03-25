@@ -20,24 +20,24 @@ class Serie {
   DateTime lastTimeChecked; // * Get the last time the serie was checked
 
   factory Serie.fromJson(Map<String, dynamic> json) => Serie(
-        id: json['id'],
-        title: json['title'],
-        image: json['image'],
-        subSeries: List<String>.from(json['subSeries'].map((x) => x)),
-        authors: List<String>.from(json['authors'].map((x) => x)),
-        editors: List<String>.from(json['editors'].map((x) => x)),
-        genres: List<String>.from(json['genres'].map((x) => x)),
-        lastTimeChecked: DateTime.parse(json['lastTimeChecked']),
-      );
+    id: json['id'],
+    title: json['title'],
+    image: json['image'],
+    subSeries: List<String>.from(json['subSeries'].map((x) => x)),
+    authors: List<String>.from(json['authors'].map((x) => x)),
+    editors: List<String>.from(json['editors'].map((x) => x)),
+    genres: List<String>.from(json['genres'].map((x) => x)),
+    lastTimeChecked: DateTime.parse(json['lastTimeChecked']),
+  );
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'title': title,
-        'image': image,
-        'subSeries': List<dynamic>.from(subSeries.map((x) => x)),
-        'authors': List<dynamic>.from(authors.map((x) => x)),
-        'editors': List<dynamic>.from(editors.map((x) => x)),
-        'genres': List<dynamic>.from(genres.map((x) => x)),
-        'lastTimeChecked': lastTimeChecked.toIso8601String(),
-      };
+    'id': id,
+    'title': title,
+    'image': image,
+    'subSeries': List<dynamic>.from(subSeries.map((x) => x)),
+    'authors': List<dynamic>.from(authors.map((x) => x)),
+    'editors': List<dynamic>.from(editors.map((x) => x)),
+    'genres': List<dynamic>.from(genres.map((x) => x)),
+    'lastTimeChecked': lastTimeChecked.toIso8601String(),
+  };
 }

@@ -7,23 +7,27 @@ class MySeriesTile extends StatelessWidget {
   final Map<String, dynamic> seriesData;
   final String initRoute;
 
-  const MySeriesTile({required this.seriesData, required this.initRoute, super.key});
+  const MySeriesTile({
+    required this.seriesData,
+    required this.initRoute,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
     final List<dynamic> editors = seriesData['expand']['editors'];
     String editorNames = "• ";
     for (var i = 0; i < editors.length; i += 1) {
-      editorNames = editorNames + editors[i]['name'] + ((i != editors.length - 1) ? ", " : "");
+      editorNames =
+          editorNames +
+          editors[i]['name'] +
+          ((i != editors.length - 1) ? ", " : "");
     }
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 5, vertical: 0),
       title: Text(
         seriesData['title'],
-        style: TextStyle(
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
-        ),
+        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
       ),
       trailing: OwnIcon(
         iconColor: Theme.of(context).colorScheme.primary,
@@ -32,14 +36,7 @@ class MySeriesTile extends StatelessWidget {
       subtitle: Padding(
         padding: const EdgeInsets.symmetric(vertical: 5.0),
         child: Row(
-          children: [
-            Text(
-              editorNames,
-              style: const TextStyle(
-                fontSize: 15,
-              ),
-            ),
-          ],
+          children: [Text(editorNames, style: const TextStyle(fontSize: 15))],
         ),
       ),
       leading: ClipRRect(
@@ -49,7 +46,10 @@ class MySeriesTile extends StatelessWidget {
         ),
       ),
       onTap: () {
-        pushOrGo(context, '${(initRoute == "/") ? "" : initRoute}/serie/${seriesData['id']}');
+        pushOrGo(
+          context,
+          '${(initRoute == "/") ? "" : initRoute}/serie/${seriesData['id']}',
+        );
       },
     );
   }

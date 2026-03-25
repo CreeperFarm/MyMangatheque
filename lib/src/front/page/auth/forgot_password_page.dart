@@ -45,18 +45,11 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     // Get localization - return early if not available
     var localizations = AppLocalizations.of(context);
     if (localizations == null) {
-      return const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(localizations.passwordForgot),
-        elevation: 0,
-      ),
+      appBar: AppBar(title: Text(localizations.passwordForgot), elevation: 0),
       body: Center(
         child: Container(
           margin: const EdgeInsets.symmetric(horizontal: 10),
@@ -66,7 +59,10 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                 SvgPicture.asset(
                   Assets.icons.lockForgot,
                   height: 150,
-                  colorFilter: ColorFilter.mode(Theme.of(context).colorScheme.primary, BlendMode.srcIn),
+                  colorFilter: ColorFilter.mode(
+                    Theme.of(context).colorScheme.primary,
+                    BlendMode.srcIn,
+                  ),
                 ),
                 Text(
                   localizations.enterEmailForSendingEmailReset,
@@ -89,10 +85,17 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                   onTap: () {
                     if (emailController.text.isEmpty) {
                       showMessage(localizations.provideAccountEmail, context);
-                    } else if (!emailController.text.contains('@') || !emailController.text.contains('.')) {
-                      showMessage(localizations.provideValidAccountEmail, context);
+                    } else if (!emailController.text.contains('@') ||
+                        !emailController.text.contains('.')) {
+                      showMessage(
+                        localizations.provideValidAccountEmail,
+                        context,
+                      );
                     } else {
-                      PocketBaseConnector().resetPassword(emailController.text, context);
+                      PocketBaseConnector().resetPassword(
+                        emailController.text,
+                        context,
+                      );
                     }
                   },
                 ),

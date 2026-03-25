@@ -95,6 +95,11 @@ This project is under the license specified in the [LICENSE](LICENSE) file.
 
 The third-party licenses are available in the [THIRD_PARTY_LICENSE.md](THIRD_PARTY_LICENSE.md) file.
 
+## Migration notes
+
+- Uploads: the app no longer sends file system paths to the backend. Upload methods now accept raw bytes (from `XFile.readAsBytes()`), which removes the need for `READ_EXTERNAL_STORAGE` on Android. See `lib/src/back/services/pocketbaseadmin.dart` for the helper `buildMultipartFiles` used by uploads and tests.
+- Android: `android:allowBackup` is set to `false` and cleartext traffic is disabled by default; deep links use HTTPS only. Review `android/app/src/main/AndroidManifest.xml` and `android/app/src/main/res/xml/network_security_config.xml` if you need domain exceptions.
+
 ---
 
 ## Français

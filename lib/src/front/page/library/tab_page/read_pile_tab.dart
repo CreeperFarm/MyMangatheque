@@ -12,6 +12,7 @@ import 'package:mymangatheque/src/front/components/my_loader_display.dart';
 import 'package:mymangatheque/src/front/components/my_scroll_column.dart';
 import 'package:mymangatheque/src/function/auto_push_or_go.dart';
 import 'package:mymangatheque/src/models/manga/volume.dart';
+import 'package:mymangatheque/src/const/routes.dart';
 
 class ReadPileTab extends ConsumerStatefulWidget {
   const ReadPileTab({super.key});
@@ -46,6 +47,7 @@ class _ReadPileTabState extends ConsumerState<ReadPileTab> {
       }
     }
 
+    if (!mounted) return;
     setState(() {});
   }
 
@@ -73,11 +75,14 @@ class _ReadPileTabState extends ConsumerState<ReadPileTab> {
   void _setupRealtimeOrFallback() {
     _cancelRealtime();
     try {
-      _ownedSubscription = connector.connector().collection('owned').subscribe('*', (event) async {
-        debugPrint("Got an event");
-        await ref.read(mangaOwnedProvider.notifier).initData();
-        _fetchData();
-      });
+      _ownedSubscription = connector.connector().collection('owned').subscribe(
+        '*',
+        (event) async {
+          debugPrint("Got an event");
+          await ref.read(mangaOwnedProvider.notifier).initData();
+          _fetchData();
+        },
+      );
 
       debugPrint('Realtime subscriptions established.');
     } catch (e) {
@@ -110,58 +115,50 @@ class _ReadPileTabState extends ConsumerState<ReadPileTab> {
   Widget build(BuildContext context) {
     var localizations = AppLocalizations.of(context);
     if (localizations == null) {
-      return const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     readedSubSeries = ref.read(mangaOwnedProvider);
     if (readedSubSeries == null) {
-      return const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     return Padding(
-      padding: EdgeInsets.all(10),
+      padding: const EdgeInsets.all(10),
       child: MyScrollColumn(
         columnCrossAxisAlignment: CrossAxisAlignment.center,
         children: [
           (volumeOwned == 0)
               ? Text(
                   localizations.zeroVolumesOwned,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                   ),
                 )
               : (volumeOwned == volumeReaded)
-                  ? Text(
-                      localizations.allVolumesReaded,
-                      style: TextStyle(
+              ? Text(
+                  localizations.allVolumesReaded,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                )
+              : Column(
+                  children: [
+                    Text(
+                      localizations.volumeReadedOverX(
+                        volumeReaded,
+                        volumeOwned,
+                      ),
+                      style: const TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
                       ),
-                    )
-                  : Column(
-                      children: [
-                        Text(
-                          localizations.volumeReadedOverX(
-                            volumeReaded,
-                            volumeOwned,
-                          ),
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        MyLoaderDisplay(percentage: (volumeReaded / volumeOwned)),
-                      ],
                     ),
+                    MyLoaderDisplay(percentage: (volumeReaded / volumeOwned)),
+                  ],
+                ),
           MyLine(
             width: MediaQuery.of(context).size.width,
             vertical: 10,
@@ -170,7 +167,10 @@ class _ReadPileTabState extends ConsumerState<ReadPileTab> {
           for (var i = 0; i < readedSubSeries.length; i++)
             InkWell(
               onTap: () {
-                pushOrGo(context, '/library/sub_serie/${readSubSeriesList[i].id}');
+                pushOrGo(
+                  context,
+                  Routes.librarySubSerie(readSubSeriesList[i].id),
+                );
               },
               child: Container(
                 constraints: BoxConstraints(
@@ -183,8 +183,11 @@ class _ReadPileTabState extends ConsumerState<ReadPileTab> {
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 10.0),
                       child: Text(
-                        readSubSeriesList[i].title.replaceAll(' - Edition Standard', ''),
-                        style: TextStyle(
+                        readSubSeriesList[i].title.replaceAll(
+                          ' - Edition Standard',
+                          '',
+                        ),
+                        style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),
@@ -192,9 +195,12 @@ class _ReadPileTabState extends ConsumerState<ReadPileTab> {
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    (numberVolumeReaded(readSubSeriesList[i].volumes) == readSubSeriesList[i].numberOwnedVolumes)
+                    (numberVolumeReaded(readSubSeriesList[i].volumes) ==
+                            readSubSeriesList[i].numberOwnedVolumes)
                         ? Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10.0,
+                            ),
                             child: Text(
                               localizations.allVolumesReadedSubSeries,
                             ),
@@ -207,33 +213,65 @@ class _ReadPileTabState extends ConsumerState<ReadPileTab> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Padding(
-                                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 10,
+                                      ),
                                       child: Text(
                                         localizations.volumeReadedOverSeriesX(
-                                          numberVolumeReaded(readSubSeriesList[i].volumes),
-                                          readSubSeriesList[i].numberOwnedVolumes,
+                                          numberVolumeReaded(
+                                            readSubSeriesList[i].volumes,
+                                          ),
+                                          readSubSeriesList[i]
+                                              .numberOwnedVolumes,
                                         ),
                                       ),
                                     ),
                                     Padding(
-                                      padding: const EdgeInsets.only(top: 10, left: 10, right: 10),
+                                      padding: const EdgeInsets.only(
+                                        top: 10,
+                                        left: 10,
+                                        right: 10,
+                                      ),
                                       child: SizedBox(
-                                        width: MediaQuery.of(context).size.width,
-                                        height: (readSubSeriesList[i].numberOwnedVolumes - numberVolumeReaded(readSubSeriesList[i].volumes) != 0)
+                                        width: MediaQuery.of(
+                                          context,
+                                        ).size.width,
+                                        height:
+                                            (readSubSeriesList[i]
+                                                        .numberOwnedVolumes -
+                                                    numberVolumeReaded(
+                                                      readSubSeriesList[i]
+                                                          .volumes,
+                                                    ) !=
+                                                0)
                                             ? 100
                                             : 0,
                                         child: Stack(
                                           children: [
-                                            for (var j = 0;
-                                                j <
-                                                    min(9,
-                                                        readSubSeriesList[i].numberOwnedVolumes - numberVolumeReaded(readSubSeriesList[i].volumes));
-                                                j++)
+                                            for (
+                                              var j = 0;
+                                              j <
+                                                  min(
+                                                    9,
+                                                    readSubSeriesList[i]
+                                                            .numberOwnedVolumes -
+                                                        numberVolumeReaded(
+                                                          readSubSeriesList[i]
+                                                              .volumes,
+                                                        ),
+                                                  );
+                                              j++
+                                            )
                                               (j == 0)
                                                   ? ClipRRect(
-                                                      borderRadius: BorderRadius.circular(10.0),
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                            10.0,
+                                                          ),
                                                       child: Image.network(
-                                                        notReadedSubSeriesList[i].volumes[j].image,
+                                                        notReadedSubSeriesList[i]
+                                                            .volumes[j]
+                                                            .image,
                                                         width: 65,
                                                       ),
                                                     )
@@ -243,17 +281,35 @@ class _ReadPileTabState extends ConsumerState<ReadPileTab> {
                                                         decoration: BoxDecoration(
                                                           boxShadow: [
                                                             BoxShadow(
-                                                              color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.9),
+                                                              color:
+                                                                  Theme.of(
+                                                                        context,
+                                                                      )
+                                                                      .colorScheme
+                                                                      .onPrimary
+                                                                      .withValues(
+                                                                        alpha:
+                                                                            0.9,
+                                                                      ),
                                                               spreadRadius: 1,
                                                               blurRadius: 2,
-                                                              offset: const Offset(0, 1),
+                                                              offset:
+                                                                  const Offset(
+                                                                    0,
+                                                                    1,
+                                                                  ),
                                                             ),
                                                           ],
                                                         ),
                                                         child: ClipRRect(
-                                                          borderRadius: BorderRadius.circular(10.0),
+                                                          borderRadius:
+                                                              BorderRadius.circular(
+                                                                10.0,
+                                                              ),
                                                           child: Image.network(
-                                                            notReadedSubSeriesList[i].volumes[j].image,
+                                                            notReadedSubSeriesList[i]
+                                                                .volumes[j]
+                                                                .image,
                                                             width: 65,
                                                           ),
                                                         ),
@@ -267,7 +323,9 @@ class _ReadPileTabState extends ConsumerState<ReadPileTab> {
                                 ),
                               ),
                               OwnIcon(
-                                iconColor: Theme.of(context).colorScheme.primary,
+                                iconColor: Theme.of(
+                                  context,
+                                ).colorScheme.primary,
                                 iconSrc: Assets.icons.arrowRight,
                               ),
                             ],

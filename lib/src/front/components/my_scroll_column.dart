@@ -22,16 +22,28 @@ class MyScrollColumn extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) => SingleChildScrollView(
-        scrollDirection: scrollDirection != null ? scrollDirection! : Axis.vertical,
+        scrollDirection: scrollDirection != null
+            ? scrollDirection!
+            : Axis.vertical,
         padding: scrollPadding,
         child: Column(
-          mainAxisSize: columnMainAxisSize != null ? columnMainAxisSize! : MainAxisSize.max,
-          mainAxisAlignment: columnMainAxisAlignment != null ? columnMainAxisAlignment! : MainAxisAlignment.start,
-          crossAxisAlignment: columnCrossAxisAlignment != null ? columnCrossAxisAlignment! : CrossAxisAlignment.start,
+          mainAxisSize: columnMainAxisSize != null
+              ? columnMainAxisSize!
+              : MainAxisSize.max,
+          mainAxisAlignment: columnMainAxisAlignment != null
+              ? columnMainAxisAlignment!
+              : MainAxisAlignment.start,
+          crossAxisAlignment: columnCrossAxisAlignment != null
+              ? columnCrossAxisAlignment!
+              : CrossAxisAlignment.start,
           children: [
-            (constraints.maxWidth > 600 ? const SizedBox(height: 15) : const SizedBox(height: 0)),
+            (constraints.maxWidth > 600
+                ? const SizedBox(height: 15)
+                : const SizedBox(height: 0)),
             for (var child in children) child,
-            (constraints.maxWidth < 600 ? const SizedBox(height: 92) : const SizedBox(height: 15)),
+            (constraints.maxWidth < 600
+                ? const SizedBox(height: 92)
+                : const SizedBox(height: 15)),
           ],
         ),
       ),

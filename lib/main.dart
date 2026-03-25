@@ -1,5 +1,4 @@
 import 'package:adaptive_theme/adaptive_theme.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -25,7 +24,9 @@ Future<void> main() async {
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
 
   final container = ProviderContainer();
-  final language = await container.read(languageRepositoryProvider).getLanguage();
+  final language = await container
+      .read(languageRepositoryProvider)
+      .getLanguage();
 
   runApp(
     ProviderScope(

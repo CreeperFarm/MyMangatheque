@@ -13,8 +13,6 @@ class DiscoverPage extends ConsumerStatefulWidget {
 }
 
 class _DiscoverPageState extends ConsumerState<DiscoverPage> {
-  List _allResults = [];
-
   String textLength(text, length) {
     if (text.length > length) {
       return text.substring(0, length) + "...";
@@ -27,7 +25,7 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage> {
     ref.read(searchFilterProvider.notifier).changeSearchFilter(filter);
   }
 
-  getClientStream() async {
+  Future<void> getClientStream() async {
     /*var data = await FirebaseFirestore.instance
         .collection('manga')
         .orderBy(ref.watch(searchFilterProvider))
@@ -48,11 +46,7 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage> {
     // Get localization - return early if not available
     var localizations = AppLocalizations.of(context);
     if (localizations == null) {
-      return const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     final selectedFilter = ref.watch(searchFilterProvider);
@@ -64,7 +58,10 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage> {
           children: [
             Text(localizations.discover),
             PopupMenuButton<String>(
-              icon: OwnIcon(iconColor: Theme.of(context).colorScheme.primary, iconSrc: Assets.icons.filterRight),
+              icon: OwnIcon(
+                iconColor: Theme.of(context).colorScheme.primary,
+                iconSrc: Assets.icons.filterRight,
+              ),
               onSelected: (String result) {
                 setState(() {
                   changeFilter(result);
@@ -74,7 +71,9 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
               ),
-              shadowColor: Theme.of(context).colorScheme.primary.withOpacity(0.5),
+              shadowColor: Theme.of(
+                context,
+              ).colorScheme.primary.withValues(alpha: 0.5),
               color: Theme.of(context).colorScheme.onPrimary,
               itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
                 PopupMenuItem<String>(
@@ -85,29 +84,33 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage> {
                       if (selectedFilter == 'manga')
                         const Icon(Icons.check)
                       else
-                        const Padding(
-                            padding: EdgeInsets.only(
-                          right: 0,
-                        )),
+                        const Padding(padding: EdgeInsets.only(right: 0)),
                       Text(localizations.manga),
                     ],
                   ),
                 ),
                 PopupMenuItem<String>(
-                    value: 'editor',
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        if (selectedFilter == 'editor') const Icon(Icons.check) else const Padding(padding: EdgeInsets.only(right: 0)),
-                        Text(localizations.editor),
-                      ],
-                    )),
+                  value: 'editor',
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      if (selectedFilter == 'editor')
+                        const Icon(Icons.check)
+                      else
+                        const Padding(padding: EdgeInsets.only(right: 0)),
+                      Text(localizations.editor),
+                    ],
+                  ),
+                ),
                 PopupMenuItem<String>(
                   value: 'author',
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      if (selectedFilter == 'author') const Icon(Icons.check) else const Padding(padding: EdgeInsets.only(right: 0)),
+                      if (selectedFilter == 'author')
+                        const Icon(Icons.check)
+                      else
+                        const Padding(padding: EdgeInsets.only(right: 0)),
                       Text(localizations.author),
                     ],
                   ),
@@ -124,9 +127,7 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage> {
             children: [
               Text(
                 localizations.discover,
-                style: TextStyle(
-                  fontSize: 25,
-                ),
+                style: const TextStyle(fontSize: 25),
               ),
             ],
           ),

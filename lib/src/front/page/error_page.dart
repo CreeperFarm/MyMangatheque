@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mymangatheque/l10n/app_localizations.dart';
-import 'package:mymangatheque/src/back/language/language.dart';
 import 'package:mymangatheque/src/function/auto_push_or_go.dart';
 
 class ErrorPage extends ConsumerWidget {
@@ -16,18 +15,12 @@ class ErrorPage extends ConsumerWidget {
     // Get localization - return early if not available
     var localizations = AppLocalizations.of(context);
     if (localizations == null) {
-      return const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     if (error == null || error?.message == null) {
       return Scaffold(
-        appBar: AppBar(
-          title: Text(localizations.unknownError),
-        ),
+        appBar: AppBar(title: Text(localizations.unknownError)),
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -53,9 +46,7 @@ class ErrorPage extends ConsumerWidget {
     }
     if (error!.message.contains('no routes for')) {
       return Scaffold(
-        appBar: AppBar(
-          title: Text(localizations.pageNotFound),
-        ),
+        appBar: AppBar(title: Text(localizations.pageNotFound)),
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -85,9 +76,7 @@ class ErrorPage extends ConsumerWidget {
       );
     }
     return Scaffold(
-      appBar: AppBar(
-        title: Text(localizations.errorOccurred),
-      ),
+      appBar: AppBar(title: Text(localizations.errorOccurred)),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

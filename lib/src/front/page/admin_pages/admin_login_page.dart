@@ -34,19 +34,12 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
     // Get localization - return early if not available
     var localizations = AppLocalizations.of(context);
     if (localizations == null) {
-      return const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          localizations.adminLoginPage,
-          style: GoogleFonts.poppins(),
-        ),
+        title: Text(localizations.adminLoginPage, style: GoogleFonts.poppins()),
       ),
       body: MyScrollColumn(
         scrollPadding: const EdgeInsets.symmetric(horizontal: 8),
@@ -83,23 +76,30 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
               ),
             ],
           ),
-          SizedBox(
-            height: 15,
-          ),
+          const SizedBox(height: 15),
           // Display sign in button
           MyButton(
             text: localizations.logIn,
             onTap: () async {
               try {
-                await connector.loginAsAdmin(emailController.text, passwordController.text, context).then((value) async {
-                  if (value) {
-                    setState(() {});
-                    await Future.delayed(Duration(milliseconds: 250));
-                    GoRouter.of(context).push('/admin');
-                    showMessage(localizations.adminLoginSuccess, context);
-                  }
-                });
+                await connector
+                    .loginAsAdmin(
+                      emailController.text,
+                      passwordController.text,
+                      context,
+                    )
+                    .then((value) async {
+                      if (value) {
+                        if (!mounted) return;
+                        setState(() {});
+                        await Future.delayed(const Duration(milliseconds: 250));
+                        if (!mounted) return;
+                        GoRouter.of(context).push('/admin');
+                        showMessage(localizations.adminLoginSuccess, context);
+                      }
+                    });
               } catch (e) {
+                if (!mounted) return;
                 var error = e.toString();
                 showMessage(error, context);
               }
