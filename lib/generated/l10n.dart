@@ -1876,7 +1876,7 @@ class AppLocalizations {
         'available': 'Available',
         'unavailable': 'Unavailable',
         'onPreorder': 'On Preorder',
-        'other': availability,
+        'other': '$availability',
       },
       name: 'availability',
       desc: 'A message that indicates the availability of a volume',
