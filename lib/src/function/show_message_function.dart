@@ -1,6 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:mymangatheque/l10n/app_localizations.dart';
 
-void showMessage(String message, context) {
+void showMessage(String message, BuildContext context) {
+  final messenger = ScaffoldMessenger.maybeOf(context);
+  if (messenger == null) {
+    return;
+  }
+  final localizations = AppLocalizations.of(context);
+
   final SnackBar snackBar = SnackBar(
     backgroundColor: Theme.of(context).colorScheme.onPrimary,
     clipBehavior: Clip.none,
@@ -15,13 +22,13 @@ void showMessage(String message, context) {
     ),
     action: SnackBarAction(
       textColor: Theme.of(context).colorScheme.primary,
-      label: 'Ok',
+      label: localizations?.ok ?? 'OK',
       onPressed: () {
-        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        messenger.hideCurrentSnackBar();
       },
     ),
   );
-  ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  messenger.showSnackBar(snackBar);
   /*showDialog(
       context: context,
       builder: (context) {

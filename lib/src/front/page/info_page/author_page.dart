@@ -1,10 +1,10 @@
-import 'dart:convert';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:mymangatheque/l10n/app_localizations.dart';
-import 'package:mymangatheque/src/back/services/pocketbase.dart';
+import 'package:mymangatheque/src/back/services/appwrite.dart';
 import 'package:mymangatheque/src/front/components/my_line.dart';
+import 'package:mymangatheque/src/front/components/safe_network_image.dart';
 import 'package:mymangatheque/src/front/components/my_scroll_column.dart';
 import 'package:mymangatheque/src/front/components/my_series_tile.dart';
 
@@ -31,8 +31,8 @@ class _AuthorPageState extends State<AuthorPage> {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
-    final PocketBaseConnector connector = PocketBaseConnector();
-    return FutureBuilder(
+    final AppwriteConnector connector = AppwriteConnector();
+    return FutureBuilder<List<RecordModel>>(
       future: connector.getOneExpand(
         'authors',
         widget.authorName,
@@ -61,18 +61,23 @@ class _AuthorPageState extends State<AuthorPage> {
         }
         if (snapshot.hasData && snapshot.data != null) {
           // ? Declaring variables
-          Map<String, dynamic> data = json.decode(snapshot.data.toString())[0];
+          final data = snapshot.data!.isNotEmpty ? Map<String, dynamic>.from(snapshot.data!.first.data) : <String, dynamic>{};
+          final expand = data['expand'] is Map<String, dynamic> ? data['expand'] as Map<String, dynamic> : <String, dynamic>{};
           final height = (MediaQuery.of(context).size.width > 500)
               ? 500.0
               : (MediaQuery.of(context).size.width < 275)
               ? 275.0
               : MediaQuery.of(context).size.width;
-          final pictureUrl =
-              'https://api.mymangatheque.com/api/files/hper195bzhpmjp9/${data['id']}/${data['image']}';
-          final series = data['expand']['series'];
+          final pictureUrl = data['image']?.toString() ?? data['coverUrl']?.toString();
+          final series = List<Map<String, dynamic>>.from(
+            (expand['series'] as List<dynamic>? ?? const <dynamic>[]).whereType<Map<String, dynamic>>(),
+          );
+          final jobsRaw = data['job']?.toString() ?? '';
+          final jobs = jobsRaw.isEmpty ? const <String>[] : jobsRaw.split(', ');
+          final authorName = data['name']?.toString() ?? '';
           // ? Return Scaffold
           return Scaffold(
-            appBar: AppBar(title: Text(data['name'])),
+            appBar: AppBar(title: Text(authorName)),
             body: MyScrollColumn(
               children: [
                 Padding(
@@ -93,9 +98,9 @@ class _AuthorPageState extends State<AuthorPage> {
                                     0,
                                     -MediaQuery.of(context).size.width / 2,
                                   ),
-                                  child: Image.network(
+                                  child: SafeNetworkImage(
+                                    imageUrl: pictureUrl,
                                     scale: 1 / height,
-                                    pictureUrl,
                                     fit: BoxFit.fill,
                                   ),
                                 ),
@@ -119,7 +124,10 @@ class _AuthorPageState extends State<AuthorPage> {
                           height: height * .5,
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(10.0),
-                            child: Image.network(pictureUrl, fit: BoxFit.fill),
+                            child: SafeNetworkImage(
+                              imageUrl: pictureUrl,
+                              fit: BoxFit.fill,
+                            ),
                           ),
                         ),
                       ],
@@ -132,7 +140,7 @@ class _AuthorPageState extends State<AuthorPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        data['name'],
+                        authorName,
                         textAlign: TextAlign.left,
                         style: const TextStyle(
                           fontSize: 25,
@@ -142,18 +150,9 @@ class _AuthorPageState extends State<AuthorPage> {
                       SingleChildScrollView(
                         child: Row(
                           children: [
-                            for (
-                              var i = 0;
-                              i < data['job'].split(', ').length;
-                              i++
-                            )
+                            for (var i = 0; i < jobs.length; i++)
                               Text(
-                                localizations.jobsName(
-                                      data['job'].split(', ')[i],
-                                    ) +
-                                    (i != data['job'].split(', ').length - 1
-                                        ? ", "
-                                        : ""),
+                                localizations.jobsName(jobs[i]) + (i != jobs.length - 1 ? ", " : ""),
                                 textAlign: TextAlign.left,
                                 style: const TextStyle(
                                   fontSize: 15,
@@ -167,7 +166,7 @@ class _AuthorPageState extends State<AuthorPage> {
                   ),
                 ),
                 MyLine(width: MediaQuery.of(context).size.width, vertical: 10),
-                (series == null)
+                (series.isEmpty)
                     ? const SizedBox()
                     : Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 10.0),

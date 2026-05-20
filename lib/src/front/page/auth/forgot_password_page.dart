@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mymangatheque/l10n/app_localizations.dart';
-import 'package:mymangatheque/src/back/services/pocketbase.dart';
+import 'package:mymangatheque/src/back/services/appwrite.dart';
 import 'package:mymangatheque/src/const/assets.dart';
 import 'package:mymangatheque/src/front/components/my_button.dart';
 import 'package:mymangatheque/src/front/components/my_textfield.dart';
@@ -31,7 +31,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
 
   Future passwordReset(email) async {
     try {
-      await PocketBaseConnector().resetPassword(email, context);
+      await AppwriteConnector().resetPassword(email, context);
       Navigator.pop(context);
     } catch (e) {
       Navigator.pop(context);
@@ -92,7 +92,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                         context,
                       );
                     } else {
-                      PocketBaseConnector().resetPassword(
+                      AppwriteConnector().resetPassword(
                         emailController.text,
                         context,
                       );

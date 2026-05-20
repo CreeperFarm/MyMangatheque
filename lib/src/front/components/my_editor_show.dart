@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mymangatheque/src/const/assets.dart';
 import 'package:mymangatheque/src/const/own_icon.dart';
 import 'package:mymangatheque/src/function/auto_push_or_go.dart';
+import 'package:mymangatheque/src/front/components/safe_network_image.dart';
 
 class MyEditorShow extends StatelessWidget {
   final Map<String, dynamic> editor;
@@ -36,8 +37,8 @@ class MyEditorShow extends StatelessWidget {
                       maxHeight: 50,
                       maxWidth: MediaQuery.of(context).size.width / 4,
                     ),
-                    child: Image.network(
-                      "https://api.mymangatheque.com/api/files/whwwobw02cwbhtj/${editor['id'].toString()}/${editor['logo'].toString()}",
+                    child: SafeNetworkImage(
+                      imageUrl: (editor['coverUrl'] ?? '').toString(),
                       fit: BoxFit.fill,
                     ),
                   ),

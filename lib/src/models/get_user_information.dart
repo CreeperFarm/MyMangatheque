@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:mymangatheque/src/back/services/pocketbase.dart';
+import 'package:mymangatheque/src/back/services/appwrite.dart';
 import 'package:mymangatheque/src/const/assets.dart';
-import 'package:path/path.dart';
+import 'package:mymangatheque/src/models/file.dart';
 
 class GetUserProfilePicture extends StatelessWidget {
-  final PocketBaseFile file;
+  final AppwriteFile file;
   final double? height;
   final double? width;
 
@@ -18,18 +18,17 @@ class GetUserProfilePicture extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    PocketBaseConnector connector = PocketBaseConnector();
-    User? user = connector.getConnectedUser();
+    final connector = AppwriteConnector();
+    final user = connector.getConnectedUser();
 
-    return FutureBuilder(
+    return FutureBuilder<String?>(
       future: _fetchUserProfilePicture(user),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
-          if (snapshot.hasError || snapshot.data == null) {
+          if (snapshot.hasError || snapshot.data == null || snapshot.data!.isEmpty) {
             return _buildLocalImage();
-          } else {
-            return _buildNetworkImage(snapshot.data as String);
           }
+          return _buildNetworkImage(snapshot.data!);
         }
         return const Center(child: CircularProgressIndicator());
       },
@@ -37,20 +36,21 @@ class GetUserProfilePicture extends StatelessWidget {
   }
 
   Future<String?> _fetchUserProfilePicture(User? user) async {
-    if (user?.avatar == null || user?.avatar?.path == null) {
+    final avatarUrl = user?.avatar?.url;
+    if (avatarUrl == null || avatarUrl.isEmpty) {
       return null;
     }
+
     try {
-      final url = join(PocketBaseConnector().serverUrl, user!.avatar!.path);
-      final response = await http.get(Uri.parse(url));
+      final response = await http.get(Uri.parse(avatarUrl));
       if (response.statusCode == 200) {
-        return url;
-      } else {
-        return null;
+        return avatarUrl;
       }
-    } catch (e) {
+    } catch (_) {
       return null;
     }
+
+    return null;
   }
 
   Widget _buildLocalImage() {

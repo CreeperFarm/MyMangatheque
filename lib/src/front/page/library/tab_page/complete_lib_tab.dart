@@ -1,17 +1,17 @@
-import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mymangatheque/l10n/app_localizations.dart';
 import 'package:mymangatheque/src/back/provider/manga_owned_provider.dart';
-import 'package:mymangatheque/src/back/services/pocketbase.dart';
+import 'package:mymangatheque/src/back/services/appwrite.dart';
 import 'package:mymangatheque/src/const/assets.dart';
 import 'package:mymangatheque/src/const/own_icon.dart';
 import 'package:mymangatheque/src/front/components/my_line.dart';
 import 'package:mymangatheque/src/front/components/my_scroll_column.dart';
 import 'package:mymangatheque/src/front/components/my_tome_number_show.dart';
 import 'package:mymangatheque/src/function/auto_push_or_go.dart';
+import 'package:mymangatheque/src/function/safe_expand_reader.dart';
 import 'package:mymangatheque/src/models/manga/sub_serie_for_collection.dart';
 import 'package:mymangatheque/src/models/manga/volume.dart';
 
@@ -23,13 +23,12 @@ class CompleteLibTab extends ConsumerStatefulWidget {
 }
 
 class _CompleteLibTabState extends ConsumerState<CompleteLibTab> {
-  PocketBaseConnector connector = PocketBaseConnector();
+  AppwriteConnector connector = AppwriteConnector();
   int volumeNotOwned = 0;
   int volumeOwned = 0;
   List<SubSerieForCollection> ownedSubSeriesList = [];
   List<SubSerieForCollection> notOwnedSubSeriesList = [];
-  dynamic
-  _ownedSubscription; // Subscription to listen to changes in owned manga
+  dynamic _ownedSubscription; // Subscription to listen to changes in owned manga
 
   dynamic ownedSubSeries;
 
@@ -38,35 +37,31 @@ class _CompleteLibTabState extends ConsumerState<CompleteLibTab> {
     notOwnedSubSeriesList = [];
 
     for (var subSerie in ownedSubSeries) {
-      final resList = await connector.getOneExpand(
-        "sub_series",
-        subSerie.id,
-        "volumes",
-      );
-      final res = json.decode(resList.toString());
+      final resList = await connector.getOneExpand("sub_series", subSerie.id, "volumes");
+      if (resList.isEmpty) continue;
+      final res = Map<String, dynamic>.from(resList.first.data);
+      final expand = SafeExpandReader.asMap(res['expand']);
       List<Volume> volumes = [];
 
-      for (var volumeData in res[0]['expand']['volumes']) {
+      for (final volumeData in (expand['volumes'] as List<dynamic>? ?? const <dynamic>[]).whereType<Map<String, dynamic>>()) {
+        final release = DateTime.tryParse(volumeData['release']?.toString() ?? '') ?? DateTime.now();
         volumes.add(
           Volume(
             id: volumeData['id'],
             title: volumeData['title'],
             tomeNumber: volumeData['tome_number'],
             price: volumeData['price'],
-            image:
-                'https://api.mymangatheque.com/api/files/tnof8u6oqfepdq6/${volumeData['id']}/${volumeData['image']}',
+            image: volumeData['coverUrl'] ?? volumeData['image'] ?? '',
             over18: volumeData['over18'],
             resume: volumeData['resume'],
             bookLink: volumeData['book_link'],
-            release: DateTime.parse(volumeData['release']),
+            release: release,
             ean: volumeData['ean'],
             language: volumeData['language'],
             subSeries: volumeData['sub_series'],
             readed: false,
             // Not owned volumes are not readed
-            authors: volumeData['authors'] != null
-                ? List<String>.from(volumeData['authors'])
-                : [],
+            authors: volumeData['authors'] != null ? List<String>.from(volumeData['authors']) : [],
             series: volumeData['series'],
             contains: volumeData['contains'],
             info: volumeData['info'],
@@ -103,9 +98,7 @@ class _CompleteLibTabState extends ConsumerState<CompleteLibTab> {
             notOwnedSubSeriesList.removeAt(j);
           } else {
             // Order volumes by tome number
-            notOwnedSubSeriesList[j].volumes.sort(
-              (a, b) => (a.tomeNumber ?? 0).compareTo(b.tomeNumber ?? 0),
-            );
+            notOwnedSubSeriesList[j].volumes.sort((a, b) => (a.tomeNumber ?? 0).compareTo(b.tomeNumber ?? 0));
           }
         }
       }
@@ -151,14 +144,11 @@ class _CompleteLibTabState extends ConsumerState<CompleteLibTab> {
   void _setupRealtimeOrFallback() {
     _cancelRealtime();
     try {
-      _ownedSubscription = connector.connector().collection('owned').subscribe(
-        '*',
-        (event) async {
-          debugPrint("Got an event");
-          await ref.read(mangaOwnedProvider.notifier).initData();
-          _fetchData();
-        },
-      );
+      _ownedSubscription = connector.connector().collection('owned').subscribe('*', (event) async {
+        debugPrint("Got an event");
+        await ref.read(mangaOwnedProvider.notifier).initData();
+        _fetchData();
+      });
 
       debugPrint('Realtime subscriptions established.');
     } catch (e) {
@@ -210,28 +200,17 @@ class _CompleteLibTabState extends ConsumerState<CompleteLibTab> {
             localizations: localizations,
           ),
           (volumeNotOwned == 0)
-              ? Text(
-                  localizations.allVolumesOwned,
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                )
+              ? Text(localizations.allVolumesOwned, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold))
               : const SizedBox(),
           for (var i = 0; i < notOwnedSubSeriesList.length; i++)
             Column(
               children: [
                 InkWell(
                   onTap: () {
-                    pushOrGo(
-                      context,
-                      '/library/sub_serie/${notOwnedSubSeriesList[i].id}',
-                    );
+                    pushOrGo(context, '/library/sub_serie/${notOwnedSubSeriesList[i].id}');
                   },
                   child: Container(
-                    constraints: BoxConstraints(
-                      maxWidth: MediaQuery.of(context).size.width,
-                    ),
+                    constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width),
                     child: Row(
                       children: [
                         Expanded(
@@ -240,26 +219,16 @@ class _CompleteLibTabState extends ConsumerState<CompleteLibTab> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 10.0,
-                                ),
+                                padding: const EdgeInsets.symmetric(horizontal: 10.0),
                                 child: Text(
-                                  notOwnedSubSeriesList[i].title.replaceAll(
-                                    ' - Edition Standard',
-                                    '',
-                                  ),
-                                  style: const TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                                  notOwnedSubSeriesList[i].title.replaceAll(' - Edition Standard', ''),
+                                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                                   softWrap: true,
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ),
                               Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 10,
-                                ),
+                                padding: const EdgeInsets.symmetric(horizontal: 10),
                                 child: Text(
                                   localizations.volumeOwnedOverX(
                                     notOwnedSubSeriesList[i].numberOwnedVolumes,
@@ -268,42 +237,17 @@ class _CompleteLibTabState extends ConsumerState<CompleteLibTab> {
                                 ),
                               ),
                               Padding(
-                                padding: const EdgeInsets.only(
-                                  top: 10,
-                                  left: 10,
-                                  right: 10,
-                                ),
+                                padding: const EdgeInsets.only(top: 10, left: 10, right: 10),
                                 child: SizedBox(
                                   width: MediaQuery.of(context).size.width,
-                                  height:
-                                      (notOwnedSubSeriesList[i]
-                                              .numberOwnedVolumes !=
-                                          0)
-                                      ? 100
-                                      : 0,
+                                  height: (notOwnedSubSeriesList[i].numberOwnedVolumes != 0) ? 100 : 0,
                                   child: Stack(
                                     children: [
-                                      for (
-                                        var j = 0;
-                                        j <
-                                            min(
-                                              9,
-                                              notOwnedSubSeriesList[i]
-                                                  .volumes
-                                                  .length,
-                                            );
-                                        j++
-                                      )
+                                      for (var j = 0; j < min(9, notOwnedSubSeriesList[i].volumes.length); j++)
                                         (j == 0)
                                             ? ClipRRect(
-                                                borderRadius:
-                                                    BorderRadius.circular(10.0),
-                                                child: Image.network(
-                                                  notOwnedSubSeriesList[i]
-                                                      .volumes[j]
-                                                      .image,
-                                                  width: 65,
-                                                ),
+                                                borderRadius: BorderRadius.circular(10.0),
+                                                child: Image.network(notOwnedSubSeriesList[i].volumes[j].image, width: 65),
                                               )
                                             : Positioned(
                                                 left: j * 45.0,
@@ -311,32 +255,16 @@ class _CompleteLibTabState extends ConsumerState<CompleteLibTab> {
                                                   decoration: BoxDecoration(
                                                     boxShadow: [
                                                       BoxShadow(
-                                                        color: Theme.of(context)
-                                                            .colorScheme
-                                                            .onPrimary
-                                                            .withValues(
-                                                              alpha: 0.9,
-                                                            ),
+                                                        color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.9),
                                                         spreadRadius: 1,
                                                         blurRadius: 2,
-                                                        offset: const Offset(
-                                                          0,
-                                                          1,
-                                                        ),
+                                                        offset: const Offset(0, 1),
                                                       ),
                                                     ],
                                                   ),
                                                   child: ClipRRect(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                          10.0,
-                                                        ),
-                                                    child: Image.network(
-                                                      notOwnedSubSeriesList[i]
-                                                          .volumes[j]
-                                                          .image,
-                                                      width: 65,
-                                                    ),
+                                                    borderRadius: BorderRadius.circular(10.0),
+                                                    child: Image.network(notOwnedSubSeriesList[i].volumes[j].image, width: 65),
                                                   ),
                                                 ),
                                               ),
@@ -347,19 +275,12 @@ class _CompleteLibTabState extends ConsumerState<CompleteLibTab> {
                             ],
                           ),
                         ),
-                        OwnIcon(
-                          iconColor: Theme.of(context).colorScheme.primary,
-                          iconSrc: Assets.icons.arrowRight,
-                        ),
+                        OwnIcon(iconColor: Theme.of(context).colorScheme.primary, iconSrc: Assets.icons.arrowRight),
                       ],
                     ),
                   ),
                 ),
-                MyLine(
-                  width: MediaQuery.of(context).size.width,
-                  vertical: 10,
-                  horizontal: 0,
-                ),
+                MyLine(width: MediaQuery.of(context).size.width, vertical: 10, horizontal: 0),
               ],
             ),
         ],

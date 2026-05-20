@@ -1,12 +1,5 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:mymangatheque/l10n/app_localizations.dart';
-import 'package:mymangatheque/src/back/services/pocketbaseadmin.dart';
-import 'package:mymangatheque/src/front/components/my_button.dart';
-import 'package:mymangatheque/src/front/components/my_scroll_column.dart';
-import 'package:mymangatheque/src/front/components/my_textfield.dart';
-import 'package:mymangatheque/src/function/show_message_function.dart';
+import 'package:mymangatheque/src/back/services/admin_service.dart';
 
 class AdminCreateGenrePage extends StatefulWidget {
   const AdminCreateGenrePage({super.key});
@@ -16,77 +9,72 @@ class AdminCreateGenrePage extends StatefulWidget {
 }
 
 class _AdminCreateGenrePageState extends State<AdminCreateGenrePage> {
-  final TextEditingController genreController = TextEditingController();
+  final AdminConnector _admin = AdminConnector();
+  final TextEditingController _nameController = TextEditingController();
+  bool _loading = false;
+  String _message = '';
 
   @override
   void dispose() {
-    genreController.dispose();
+    _nameController.dispose();
     super.dispose();
+  }
+
+  Future<void> _submit() async {
+    if (_nameController.text.trim().isEmpty) {
+      setState(() {
+        _message = 'Le nom est obligatoire.';
+      });
+      return;
+    }
+
+    setState(() {
+      _loading = true;
+      _message = '';
+    });
+
+    try {
+      await _admin.createGenre(name: _nameController.text.trim());
+      if (!mounted) return;
+      setState(() {
+        _loading = false;
+        _message = 'Genre créé avec succès.';
+      });
+      _nameController.clear();
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _loading = false;
+        _message = e.toString();
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    // Get localization - return early if not available
-    var localizations = AppLocalizations.of(context);
-    if (localizations == null) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
-    }
-
-    PocketBaseAdminConnector connector = PocketBaseAdminConnector();
-    return MyScrollColumn(
-      scrollPadding: const EdgeInsets.symmetric(horizontal: 10),
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          child: Text(
-            localizations.createGenre,
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: ListView(
+        children: [
+          TextField(
+            controller: _nameController,
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+              labelText: 'Nom *',
+            ),
           ),
-        ),
-        Form(
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                child: MyTextField(
-                  controller: genreController,
-                  labelText: localizations.genreName,
-                  errorMessage: localizations.provideGenreName,
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                child: MyButton(
-                  text: localizations.genreAdd,
-                  onTap: () async {
-                    final data = jsonDecode(
-                      (await connector.getCollectionFullList(
-                        'genres',
-                      )).toString(),
-                    );
-                    var genreAlreadyExists = false;
-                    data.forEach((element) {
-                      if (element['name'] == genreController.text) {
-                        setState(() {
-                          genreAlreadyExists = true;
-                        });
-                      }
-                    });
-                    if (!genreAlreadyExists) {
-                      if (!mounted) return;
-                      connector.createGenre(genreController.text);
-                      if (!mounted) return;
-                      showMessage(localizations.genreAddSuccess, context);
-                    } else {
-                      showMessage(localizations.genreDuplicate, context);
-                    }
-                  },
-                ),
-              ),
-            ],
+          const SizedBox(height: 12),
+          ElevatedButton(
+            onPressed: _loading ? null : _submit,
+            child: const Text('Créer genre'),
           ),
-        ),
-      ],
+          const SizedBox(height: 8),
+          if (_loading)
+            const Center(child: CircularProgressIndicator())
+          else if (_message.isNotEmpty)
+            Text(_message),
+        ],
+      ),
     );
   }
 }

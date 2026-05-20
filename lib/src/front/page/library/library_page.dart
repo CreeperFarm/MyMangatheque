@@ -5,7 +5,7 @@ import 'package:mymangatheque/l10n/app_localizations.dart';
 import 'package:mymangatheque/src/back/provider/manga_owned_provider.dart';
 import 'package:mymangatheque/src/back/provider/search_filter_provider.dart';
 import 'package:mymangatheque/src/back/provider/search_order_provider.dart';
-import 'package:mymangatheque/src/back/services/pocketbase.dart';
+import 'package:mymangatheque/src/back/services/appwrite.dart';
 import 'package:mymangatheque/src/const/assets.dart';
 import 'package:mymangatheque/src/const/own_icon.dart';
 import 'package:mymangatheque/src/front/components/my_tab_bar_item.dart';
@@ -24,9 +24,7 @@ class LibraryPage extends ConsumerStatefulWidget {
 }
 
 class _LibraryPageState extends ConsumerState<LibraryPage> {
-  final connector = PocketBaseConnector();
-  final List _allResults = [];
-  List _resultsList = [];
+  final connector = AppwriteConnector();
   final TextEditingController _searchController = TextEditingController();
 
   void changeOrder(String filter) {
@@ -34,7 +32,7 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
   }
 
   Future<void> getClientStream() async {
-    ref.watch(searchOrderProvider);
+    ref.read(searchOrderProvider);
   }
 
   void _onSearchChanged() {
@@ -42,30 +40,8 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
   }
 
   void searchResultsList() {
-    var showResults = [];
-    var order = ref.watch(searchOrderProvider);
-
-    if (_searchController.text != "") {
-      for (var clientSnapshot in _allResults) {
-        var name = clientSnapshot[order].toString().toLowerCase();
-
-        if (name.contains(_searchController.text.toLowerCase())) {
-          showResults.add(clientSnapshot);
-        }
-      }
-    } else {
-      showResults = List.from(_allResults);
-    }
-
-    setState(() {
-      _resultsList = showResults;
-    });
-  }
-
-  @override
-  void didChangeDependencies() {
-    getClientStream();
-    super.didChangeDependencies();
+    // The order provider is consumed in build; this read just keeps listener logic safe.
+    ref.read(searchOrderProvider);
   }
 
   Future<void> initData() async {
@@ -75,12 +51,7 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
         if (value) {
           setState(() {});
         } else {
-          showMessage(
-            AppLocalizations.of(
-              context,
-            )!.errorInitializing(AppLocalizations.of(context)!.dataUndercase),
-            context,
-          );
+          showMessage(AppLocalizations.of(context)!.errorInitializing(AppLocalizations.of(context)!.dataUndercase), context);
         }
       });
     } catch (e) {
@@ -104,7 +75,6 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
     ref.read(searchOrderProvider);
     ref.read(mangaOwnedProvider);
 
-    getClientStream();
     _searchController.addListener(_onSearchChanged);
   }
 
@@ -120,8 +90,6 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
       return const SignInPage();
     }
     final selectedOrder = ref.watch(searchOrderProvider);
-    final _ = _resultsList.length;
-    searchResultsList();
 
     return DefaultTabController(
       initialIndex: 1,
@@ -134,79 +102,51 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
                 child: CupertinoSearchTextField(
                   controller: _searchController,
                   placeholder: localizations.search,
-                  placeholderStyle: TextStyle(
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
+                  placeholderStyle: TextStyle(color: Theme.of(context).colorScheme.primary),
+                  style: TextStyle(color: Theme.of(context).colorScheme.primary),
                 ),
               ),
               SizedBox(
                 width: 50,
                 child: PopupMenuButton(
-                  icon: OwnIcon(
-                    iconColor: Theme.of(context).colorScheme.primary,
-                    iconSrc: Assets.icons.filterRight,
-                  ),
+                  icon: OwnIcon(iconColor: Theme.of(context).colorScheme.primary, iconSrc: Assets.icons.filterRight),
                   onSelected: (String result) {
                     setState(() {
                       changeOrder(result);
                     });
                   },
                   offset: const Offset(0, 50),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  shadowColor: Theme.of(
-                    context,
-                  ).colorScheme.onPrimary.withValues(alpha: 0.5),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  shadowColor: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.5),
                   color: Theme.of(context).colorScheme.surface,
-                  itemBuilder: (BuildContext context) =>
-                      <PopupMenuEntry<String>>[
-                        PopupMenuItem<String>(
-                          value: 'manga',
-                          child: SizedBox(
-                            width: 175,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                if (selectedOrder == 'manga')
-                                  const Icon(Icons.check)
-                                else
-                                  const Padding(
-                                    padding: EdgeInsets.only(right: 0),
-                                  ),
-                                Text(
-                                  localizations.alphabeticalOrder,
-                                  textAlign: TextAlign.right,
-                                ),
-                              ],
-                            ),
-                          ),
+                  itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                    PopupMenuItem<String>(
+                      value: 'manga',
+                      child: SizedBox(
+                        width: 175,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            if (selectedOrder == 'manga') const Icon(Icons.check) else const Padding(padding: EdgeInsets.only(right: 0)),
+                            Text(localizations.alphabeticalOrder, textAlign: TextAlign.right),
+                          ],
                         ),
-                        PopupMenuItem<String>(
-                          value: 'releaseDate',
-                          child: SizedBox(
-                            width: 175,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                if (selectedOrder == 'releaseDate')
-                                  const Icon(Icons.check)
-                                else
-                                  const Padding(
-                                    padding: EdgeInsets.only(right: 0),
-                                  ),
-                                Text(
-                                  localizations.lastRelease,
-                                  textAlign: TextAlign.right,
-                                ),
-                              ],
-                            ),
-                          ),
+                      ),
+                    ),
+                    PopupMenuItem<String>(
+                      value: 'releaseDate',
+                      child: SizedBox(
+                        width: 175,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            if (selectedOrder == 'releaseDate') const Icon(Icons.check) else const Padding(padding: EdgeInsets.only(right: 0)),
+                            Text(localizations.lastRelease, textAlign: TextAlign.right),
+                          ],
                         ),
-                      ],
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
@@ -217,15 +157,9 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
               child: TabBar(
                 mouseCursor: SystemMouseCursors.click,
                 indicatorSize: TabBarIndicatorSize.label,
-                indicatorPadding: const EdgeInsets.symmetric(
-                  vertical: 5,
-                  horizontal: 0,
-                ),
+                indicatorPadding: const EdgeInsets.symmetric(vertical: 5, horizontal: 0),
                 indicatorWeight: 1,
-                indicator: BoxDecoration(
-                  borderRadius: BorderRadius.circular(360),
-                  color: Theme.of(context).colorScheme.primary,
-                ),
+                indicator: BoxDecoration(borderRadius: BorderRadius.circular(360), color: Theme.of(context).colorScheme.primary),
                 isScrollable: true,
                 splashBorderRadius: BorderRadius.circular(360),
                 tabAlignment: TabAlignment.center,
@@ -263,15 +197,7 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
             ),
           ),
         ),
-        body: TabBarView(
-          physics: const NeverScrollableScrollPhysics(),
-          children: [
-            ReadPileTab(),
-            CollectionTab(),
-            CompleteLibTab(),
-            EnvyTab(),
-          ],
-        ),
+        body: TabBarView(physics: const NeverScrollableScrollPhysics(), children: [ReadPileTab(), CollectionTab(), CompleteLibTab(), EnvyTab()]),
       ),
     );
   }

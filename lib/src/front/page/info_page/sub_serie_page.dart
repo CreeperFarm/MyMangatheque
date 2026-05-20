@@ -1,8 +1,6 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:mymangatheque/l10n/app_localizations.dart';
-import 'package:mymangatheque/src/back/services/pocketbase.dart';
+import 'package:mymangatheque/src/back/services/appwrite.dart';
 import 'package:mymangatheque/src/front/components/my_author_tile.dart';
 import 'package:mymangatheque/src/front/components/my_editor_show.dart';
 import 'package:mymangatheque/src/front/components/my_genres_show.dart';
@@ -11,6 +9,7 @@ import 'package:mymangatheque/src/front/components/my_picture_display.dart';
 import 'package:mymangatheque/src/front/components/my_scroll_column.dart';
 import 'package:mymangatheque/src/front/components/my_volume_tile.dart';
 import 'package:mymangatheque/src/function/auto_push_or_go.dart';
+import 'package:mymangatheque/src/function/safe_expand_reader.dart';
 
 class SubSeriePage extends StatefulWidget {
   final String serieId;
@@ -28,14 +27,15 @@ class SubSeriePage extends StatefulWidget {
 
 class _SubSeriePageState extends State<SubSeriePage> {
   bool isSubSeriesFollowed = false;
-  final PocketBaseConnector connector = PocketBaseConnector();
+  Set<String> _ownedVolumeIds = <String>{};
+  final AppwriteConnector connector = AppwriteConnector();
+
+  String? _connectedUserId() => connector.getConnectedUser()?.id;
 
   void _checkSubSeriesFollowing() async {
-    if (connector.isLoggedIn()) {
-      bool owned = await connector.isSubSeriesFollowed(
-        connector.getConnectedUser()!.id,
-        widget.serieId,
-      );
+    final userId = _connectedUserId();
+    if (userId != null) {
+      bool owned = await connector.isSubSeriesFollowed(userId, widget.serieId);
       if (!mounted) return;
       setState(() {
         isSubSeriesFollowed = owned;
@@ -52,6 +52,32 @@ class _SubSeriePageState extends State<SubSeriePage> {
   void initState() {
     super.initState();
     _checkSubSeriesFollowing();
+    _loadOwnedVolumeIds();
+  }
+
+  Future<void> _loadOwnedVolumeIds() async {
+    final userId = _connectedUserId();
+    if (userId == null) {
+      if (!mounted) return;
+      setState(() {
+        _ownedVolumeIds = <String>{};
+      });
+      return;
+    }
+
+    try {
+      final owned = await connector.getCollectionFullList('owned');
+      final ids = owned.map((entry) => entry.data['volume']?.toString() ?? '').where((id) => id.isNotEmpty).toSet();
+      if (!mounted) return;
+      setState(() {
+        _ownedVolumeIds = ids;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _ownedVolumeIds = <String>{};
+      });
+    }
   }
 
   @override
@@ -61,12 +87,13 @@ class _SubSeriePageState extends State<SubSeriePage> {
     if (localizations == null) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
+    final connectedUserId = _connectedUserId();
 
-    return FutureBuilder(
-      future: PocketBaseConnector().getOneExpand(
+    return FutureBuilder<List<RecordModel>>(
+      future: AppwriteConnector().getOneExpand(
         'sub_series',
         widget.serieId,
-        'authors,volumes,serie.genres,editor',
+        'authors,volumes,series.genres,editors',
       ),
       builder: (BuildContext context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -85,26 +112,70 @@ class _SubSeriePageState extends State<SubSeriePage> {
         if (snapshot.hasError) {
           return Scaffold(
             appBar: AppBar(backgroundColor: Colors.transparent),
-            body: const Center(child: Text("Une erreur est survenue")),
+            body: Center(child: Text(localizations.errorOccurred)),
           );
         }
         if (snapshot.hasData && snapshot.data != null) {
           // ? Define variables
-          Map<String, dynamic> data = json.decode(snapshot.data.toString())[0];
-          final List<dynamic> authors = data['expand']['authors'];
-          final List<dynamic> volumes = data['expand']['volumes'];
-          final Map<String, dynamic> series = data['expand']['serie'];
-          final Map<String, dynamic> editor = data['expand']['editor'];
+          final data = snapshot.data!.isNotEmpty ? Map<String, dynamic>.from(snapshot.data!.first.data) : <String, dynamic>{};
+          final expand = SafeExpandReader.asMap(data['expand']);
+          // Normalize expanded values to typed lists so we can safely sort and access elements.
+          final rawVolumes = expand['volumes'];
+          final List<Map<String, dynamic>> volumes = (rawVolumes is List)
+              ? rawVolumes.map<Map<String, dynamic>>((e) => (e is Map) ? Map<String, dynamic>.from(e) : <String, dynamic>{}).toList()
+              : <Map<String, dynamic>>[];
+
+          final rawAuthors = expand['authors'];
+          final List<Map<String, dynamic>> authors = (rawAuthors is List)
+              ? rawAuthors.map<Map<String, dynamic>>((e) => (e is Map) ? Map<String, dynamic>.from(e) : <String, dynamic>{}).toList()
+              : <Map<String, dynamic>>[];
+
+          // Normalize genres to a non-null list so calls like `genres.length` are safe.
+          final rawGenres = expand['series'][0]['expand'][0]['genres'];
+          final List<dynamic> genres = (rawGenres is List) ? List<dynamic>.from(rawGenres) : <dynamic>[];
+          final title = data['title']?.toString() ?? data['titleFr']?.toString() ?? '';
+          final titleEn = data['titleEn']?.toString() ?? '';
+          final titleJp = data['titleJp']?.toString() ?? '';
+          final cover = data['image']?.toString() ?? data['coverUrl']?.toString();
+
+          // Sort sub-series by title (falling back to French title field) in a stable and null-safe way.
+          volumes.sort((a, b) {
+            final aTitle = (a['title']?.toString() ?? a['titleFr']?.toString() ?? '').toLowerCase();
+            final bTitle = (b['title']?.toString() ?? b['titleFr']?.toString() ?? '').toLowerCase();
+            return aTitle.compareTo(bTitle);
+          });
+
+          // Sort authors by name in a null-safe way.
+          authors.sort((a, b) {
+            final aName = (a['name']?.toString() ?? '').toLowerCase();
+            final bName = (b['name']?.toString() ?? '').toLowerCase();
+            return aName.compareTo(bName);
+          });
+
+          // Helper to safely extract a Map from a dynamic expanded field.
+          // The API may return either a Map or a List (of Maps). If it's a List,
+          // take the first element when possible. Otherwise return an empty map.
+          Map<String, dynamic> extractMap(dynamic value) {
+            if (value == null) return <String, dynamic>{};
+            if (value is Map<String, dynamic>) return value;
+            if (value is Map) return Map<String, dynamic>.from(value);
+            if (value is List && value.isNotEmpty) {
+              final first = value.first;
+              if (first is Map<String, dynamic>) return first;
+              if (first is Map) return Map<String, dynamic>.from(first);
+            }
+            return <String, dynamic>{};
+          }
+
+          final series = extractMap(expand['series'] ?? expand['serie']);
+          final editor = extractMap(expand['editor'] ?? expand['editors']);
+          final seriesExpand = (series['expand'] is Map) ? Map<String, dynamic>.from(series['expand']) : <String, dynamic>{};
 
           // ? Sort volumes
           volumes.sort((a, b) {
-            if (a['tome_number'] < b['tome_number']) {
-              return -1;
-            } else if (a['tome_number'] > b['tome_number']) {
-              return 1;
-            } else {
-              return 0;
-            }
+            final tomeA = num.tryParse(a['tomeNumber']?.toString() ?? '') ?? 1e9;
+            final tomeB = num.tryParse(b['tomeNumber']?.toString() ?? '') ?? 1e9;
+            return tomeA.compareTo(tomeB);
           });
 
           // ? Display on screen
@@ -112,7 +183,7 @@ class _SubSeriePageState extends State<SubSeriePage> {
             appBar: AppBar(
               backgroundColor: Colors.transparent,
               title: Text(
-                data['title'].toString(),
+                title,
                 style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w300,
@@ -122,17 +193,14 @@ class _SubSeriePageState extends State<SubSeriePage> {
             body: MyScrollColumn(
               columnMainAxisAlignment: MainAxisAlignment.start,
               children: [
-                MyPictureDisplay(
-                  pictureUrl:
-                      "https://api.mymangatheque.com/api/files/ofwxwbyrhy5dcor/${data['id'].toString()}/${data['image'].toString()}",
-                ),
+                MyPictureDisplay(pictureUrl: cover ?? ''),
                 Padding(
                   padding: const EdgeInsets.all(10),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        data['title'].toString(),
+                        title,
                         textAlign: TextAlign.left,
                         style: const TextStyle(
                           fontSize: 25,
@@ -183,10 +251,11 @@ class _SubSeriePageState extends State<SubSeriePage> {
                                   elevation: WidgetStateProperty.all<double>(0),
                                 ),
                                 onPressed: () async {
-                                  if (connector.isLoggedIn()) {
+                                  final userId = _connectedUserId();
+                                  if (userId != null) {
                                     if (!isSubSeriesFollowed) {
                                       connector.addSubSeriesToFollowed(
-                                        connector.getConnectedUser()!.id,
+                                        userId,
                                         widget.serieId.toString(),
                                       );
                                       setState(() {
@@ -194,7 +263,7 @@ class _SubSeriePageState extends State<SubSeriePage> {
                                       });
                                     } else {
                                       connector.removeSubSeriesToFollowed(
-                                        connector.getConnectedUser()!.id,
+                                        userId,
                                         widget.serieId.toString(),
                                       );
                                       setState(() {
@@ -208,13 +277,9 @@ class _SubSeriePageState extends State<SubSeriePage> {
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    (!isSubSeriesFollowed)
-                                        ? const Icon(Icons.bookmark_border)
-                                        : const Icon(Icons.bookmark),
+                                    (!isSubSeriesFollowed) ? const Icon(Icons.bookmark_border) : const Icon(Icons.bookmark),
                                     Text(
-                                      (!isSubSeriesFollowed)
-                                          ? localizations.follow
-                                          : localizations.followed,
+                                      (!isSubSeriesFollowed) ? localizations.follow : localizations.followed,
                                       style: TextStyle(
                                         fontSize: 15,
                                         color: (!isSubSeriesFollowed)
@@ -258,14 +323,7 @@ class _SubSeriePageState extends State<SubSeriePage> {
                                 ),
                                 child: Row(
                                   children: [
-                                    for (
-                                      var i = 0;
-                                      i < series["expand"]["genres"].length;
-                                      i += 1
-                                    )
-                                      MyGenresShow(
-                                        data: series["expand"]["genres"][i],
-                                      ),
+                                    for (var i = 0; i < genres.length; i += 1) MyGenresShow(data: genres[i]),
                                   ],
                                 ),
                               ),
@@ -318,78 +376,6 @@ class _SubSeriePageState extends State<SubSeriePage> {
                                 : const SizedBox(),
                           ],
                         ),
-                      MyLine(
-                        width: MediaQuery.of(context).size.width,
-                        vertical: 10,
-                        horizontal: 0,
-                      ),
-                      (volumes.isEmpty)
-                          ? const SizedBox()
-                          : (volumes.length == 1)
-                          ? Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 5),
-                              child: Text(
-                                '${localizations.volume} :',
-                                style: const TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            )
-                          : Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 5),
-                              child: Text(
-                                '${localizations.volumes} :',
-                                style: const TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                      for (var i = 0; i < volumes.length; i += 1)
-                        Column(
-                          children: [
-                            (connector.isLoggedIn())
-                                ? FutureBuilder(
-                                    future: connector.isVolumeOwned(
-                                      connector.getConnectedUser()!.id,
-                                      volumes[i]['id'],
-                                    ),
-                                    builder: (BuildContext context, snapshot) {
-                                      if (snapshot.connectionState ==
-                                              ConnectionState.done &&
-                                          snapshot.hasData) {
-                                        return MyVolumeTile(
-                                          volumeData: volumes[i],
-                                          subSerieData: series,
-                                          isVolumeOwned: snapshot.data,
-                                          initRoute: widget.initRoute,
-                                        );
-                                      } else {
-                                        return MyVolumeTile(
-                                          volumeData: volumes[i],
-                                          subSerieData: series,
-                                          isVolumeOwned: false,
-                                          initRoute: widget.initRoute,
-                                        );
-                                      }
-                                    },
-                                  )
-                                : MyVolumeTile(
-                                    volumeData: volumes[i],
-                                    subSerieData: series,
-                                    isVolumeOwned: false,
-                                    initRoute: widget.initRoute,
-                                  ),
-                            (i != volumes.length - 1 && volumes.length > 1)
-                                ? MyLine(
-                                    width: MediaQuery.of(context).size.width,
-                                    vertical: 5,
-                                    horizontal: 0,
-                                  )
-                                : const SizedBox(),
-                          ],
-                        ),
                       (editor.isEmpty)
                           ? const SizedBox()
                           : Padding(
@@ -417,6 +403,56 @@ class _SubSeriePageState extends State<SubSeriePage> {
                                 ],
                               ),
                             ),
+                      MyLine(
+                        width: MediaQuery.of(context).size.width,
+                        vertical: 10.0,
+                        horizontal: 0.0,
+                      ),
+                      (volumes.isEmpty)
+                          ? const SizedBox()
+                          : (volumes.length == 1)
+                          ? Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 5),
+                              child: Text(
+                                '${localizations.volume} :',
+                                style: const TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            )
+                          : Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 5),
+                              child: Text(
+                                '${localizations.volumes} :',
+                                style: const TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                      for (var i = 0; i < volumes.length; i += 1)
+                        Column(
+                          children: [
+                            MyVolumeTile(
+                              volumeData: volumes[i],
+                              subSerieData: data,
+                              isVolumeOwned:
+                                  connectedUserId != null &&
+                                  _ownedVolumeIds.contains(
+                                    volumes[i]['id']?.toString() ?? '',
+                                  ),
+                              initRoute: widget.initRoute,
+                            ),
+                            (i != volumes.length - 1 && volumes.length > 1)
+                                ? MyLine(
+                                    width: MediaQuery.of(context).size.width,
+                                    vertical: 5,
+                                    horizontal: 0,
+                                  )
+                                : const SizedBox(),
+                          ],
+                        ),
                     ],
                   ),
                 ),

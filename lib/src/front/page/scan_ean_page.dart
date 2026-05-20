@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mymangatheque/l10n/app_localizations.dart';
 import 'package:mymangatheque/src/back/provider/last_ean.dart';
-import 'package:mymangatheque/src/back/services/pocketbase.dart';
+import 'package:mymangatheque/src/back/services/appwrite.dart';
 import 'package:mymangatheque/src/function/auto_push_or_go.dart';
 import 'package:simple_barcode_scanner/simple_barcode_scanner.dart';
 
@@ -42,7 +42,7 @@ class _ScanEanPageState extends ConsumerState<ScanEanPage> {
         child: Text("Malheureusement, le scan EAN n'est pas disponible pour le moment."),
       ),
     );*/
-    if (!PocketBaseConnector().isLoggedIn()) {
+    if (!AppwriteConnector().isLoggedIn()) {
       pushOrGo(context, '/profile/signin');
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     } else {

@@ -13,6 +13,7 @@ All notable changes to this project are documented in reverse chronological orde
 
 ## Summary
 
+- [Unreleased](#unreleased)
 - [0.0.1+10](#0020---friday-january-30-2026)
 - [0.0.1+9](#0019---wednesday-january-28-2026)
 - [0.0.1+8](#0018---sunday-november-9-2025)
@@ -27,6 +28,22 @@ All notable changes to this project are documented in reverse chronological orde
 ---
 
 ## Changes
+
+## [Unreleased]
+
+### Added
+
+- Added `appwrite` dependency for authentication/session/storage integration.
+- Added `flutter_web_auth_2` dependency for mobile OAuth callback flow.
+- Added `flutter_secure_storage` dependency for secure API/admin key persistence.
+
+### Changed
+
+- Replaced direct PocketBase runtime usage with Appwrite + API service architecture.
+
+### Removed
+
+- Removed `pocketbase` dependency from runtime stack.
 
 ## [0.0.1+10] - Friday, January 30, 2026
 
@@ -124,6 +141,7 @@ Toutes les modifications notables de ce projet sont documentées par ordre chron
 
 ## Sommaire
 
+- [Non publié](#non-publié)
 - [0.0.1+10](#0020---vendredi-30-janvier-2026)
 - [0.0.1+9](#0019---mercredi-28-janvier-2026)
 - [0.0.1+8](#0018---dimanche-9-novembre-2025)
@@ -139,6 +157,21 @@ Toutes les modifications notables de ce projet sont documentées par ordre chron
 
 ## Changements
 
+## [Non publié]
+
+### Ajouts
+
+- Ajout de la dépendance `appwrite` pour l'intégration authentification/session/stockage.
+- Ajout de la dépendance `flutter_web_auth_2` pour le flux OAuth mobile avec callback.
+- Ajout de la dépendance `flutter_secure_storage` pour le stockage sécurisé des clés API/admin.
+
+### Modifications
+
+- Remplacement de l'usage runtime direct de PocketBase par une architecture Appwrite + API.
+
+### Suppressions
+
+- Suppression de la dépendance `pocketbase` de la stack runtime.
 
 ## [0.0.1+10] - Vendredi, 30 janvier 2026
 

@@ -7,7 +7,7 @@ import 'package:glass_kit/glass_kit.dart';
 import 'package:go_router/go_router.dart';
 import 'package:keyboard_detection/keyboard_detection.dart';
 import 'package:mymangatheque/l10n/app_localizations.dart';
-import 'package:mymangatheque/src/back/services/pocketbase.dart';
+import 'package:mymangatheque/src/back/services/appwrite.dart';
 import 'package:mymangatheque/src/const/assets.dart';
 import 'package:mymangatheque/src/const/own_icon.dart';
 import 'package:mymangatheque/src/front/components/my_drawer.dart';
@@ -232,11 +232,11 @@ class _MainWrapperState extends ConsumerState<MainWrapper> {
 
   Widget _buildDesktopProfileArea() {
     return StreamBuilder(
-      stream: PocketBaseConnector().listenToUserChanges(),
+      stream: AppwriteConnector().listenToUserChanges(),
       builder: (context, snapshot) {
-        final isLoggedIn = PocketBaseConnector().isLoggedIn();
+        final isLoggedIn = AppwriteConnector().isLoggedIn();
         if (isLoggedIn) {
-          final user = PocketBaseConnector().getConnectedUser();
+          final user = AppwriteConnector().getConnectedUser();
           return Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [

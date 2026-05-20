@@ -6,7 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:mymangatheque/l10n/app_localizations.dart';
 import 'package:mymangatheque/src/back/language/language.dart';
 import 'package:mymangatheque/src/back/language/language_repository.dart';
-import 'package:mymangatheque/src/back/services/pocketbase.dart';
+import 'package:mymangatheque/src/back/services/appwrite.dart';
 import 'package:mymangatheque/src/const/assets.dart';
 import 'package:mymangatheque/src/const/own_icon.dart';
 import 'package:mymangatheque/src/front/components/my_icon_text_button.dart';
@@ -29,12 +29,14 @@ class ProfilePage extends ConsumerStatefulWidget {
 class _ProfilePageState extends ConsumerState<ProfilePage> {
   dynamic savedThemeMode;
   dynamic theme;
+  bool _redirectScheduled = false;
+  bool _adultContentEnabled = false;
 
   //String localLanguage = PlatformDispatcher.instance.locale.languageCode;
   int numberMangaOwned = 0;
   int numberSerieFav = 0;
 
-  final connector = PocketBaseConnector();
+  final connector = AppwriteConnector();
 
   // Sign Out a Connected User
   void signUserOut({required String text}) async {
@@ -52,20 +54,23 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       imageQuality: 75,
     );
 
-    List<int>? bytes;
-    if (image != null) {
-      bytes = await image.readAsBytes();
-    }
+    if (image == null) return;
+
+    final connectedUser = connector.getConnectedUser();
+    if (connectedUser == null) return;
+
+    final bytes = await image.readAsBytes();
 
     if (!mounted) return;
-    await connector.updateAvatar(
+    final updated = await connector.updateAvatar(
       'users',
-      connector.getConnectedUser()!.id,
-      image!.name,
+      connectedUser.id,
+      image.name,
       bytes,
       context,
     );
-    await connector.updateUserData(connector.getConnectedUser()!.email);
+    if (!updated) return;
+    await connector.updateUserData(connectedUser.email);
     if (!mounted) return;
     setState(() {});
   }
@@ -73,8 +78,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   // Get the number of owned manga
   Future<void> getNumberOfMangaOwned() async {
     try {
+      final connectedUser = connector.getConnectedUser();
+      if (connectedUser == null) return;
       int countMangaOwned = await connector.getNumberOwnedManga(
-        connector.getConnectedUser()!.id,
+        connectedUser.id,
       );
       if (!mounted) return;
       setState(() {
@@ -88,9 +95,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   // Get the number of favorite series
   Future<void> getNumberOfSeriesFav() async {
     try {
-      int countSerieFav = await connector.getNumberFavSerie(
-        connector.getConnectedUser()!.id,
-      );
+      final connectedUser = connector.getConnectedUser();
+      if (connectedUser == null) return;
+      int countSerieFav = await connector.getNumberFavSerie(connectedUser.id);
       if (!mounted) return;
       setState(() {
         numberSerieFav = countSerieFav;
@@ -106,22 +113,52 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     DateTime.now().day,
   );
 
+  Future<void> _loadAdultContentPreference() async {
+    final enabled = await LocalStorage().getAdultContentEnabled();
+    if (!mounted) return;
+    setState(() {
+      _adultContentEnabled = enabled;
+    });
+  }
+
+  Future<void> _setAdultContentPreference(bool enabled) async {
+    await LocalStorage().setAdultContentEnabled(enabled);
+    if (!mounted) return;
+    setState(() {
+      _adultContentEnabled = enabled;
+    });
+    showMessage(
+      enabled
+          ? AppLocalizations.of(context)!.adultContentEnabled
+          : AppLocalizations.of(context)!.adultContentDisabled,
+      context,
+    );
+  }
+
   @override
   void initState() {
     super.initState();
     getNumberOfMangaOwned();
     getNumberOfSeriesFav();
+    _loadAdultContentPreference();
   }
 
   @override
   Widget build(BuildContext context) {
-    PocketBaseConnector connector = PocketBaseConnector();
+    AppwriteConnector connector = AppwriteConnector();
     User? user = connector.getConnectedUser();
 
     if (user == null) {
-      pushOrGo(context, Routes.profile.signin);
-      return const SizedBox.shrink(); // Return empty widget while navigating
+      if (!_redirectScheduled) {
+        _redirectScheduled = true;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          pushOrGo(context, Routes.profile.signin);
+        });
+      }
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
+    _redirectScheduled = false;
 
     // Get localization - return early if not available
     var localizations = AppLocalizations.of(context);
@@ -158,7 +195,12 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               onTap: () {
                 pickUploadImage();
               },
-              child: GetUserProfilePicture(file: user.avatar!),
+              child: user.avatar != null
+                  ? GetUserProfilePicture(file: user.avatar!)
+                  : CircleAvatar(
+                      radius: 87.5,
+                      backgroundImage: AssetImage(Assets.images.unknown),
+                    ),
             ),
             const Padding(padding: EdgeInsets.only(bottom: 25)),
             MyLine(width: MediaQuery.of(context).size.width, vertical: 10),
@@ -184,7 +226,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   localizations.accountCreatedOn(
                     DateFormat.yMMMMd(
                       Localizations.localeOf(context).languageCode,
-                    ).format(connector.getConnectedUser()!.created),
+                    ).format(user.created),
                   ),
                 ),
               ),
@@ -197,7 +239,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   localizations.birthdayDateIs(
                     DateFormat.yMMMMd(
                       Localizations.localeOf(context).languageCode,
-                    ).format(connector.getConnectedUser()!.birthday),
+                    ).format(user.birthday),
                   ),
                 ),
               ),
@@ -314,6 +356,18 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   ref.read(languageRepositoryProvider).setLanguage(value);
                   setState(() {});
                 },
+              ),
+            ),
+            MyLine(width: MediaQuery.of(context).size.width, vertical: 10),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              margin: const EdgeInsets.symmetric(horizontal: 5),
+              decoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
+              child: SwitchListTile(
+                title: Text(localizations.adultContent),
+                subtitle: Text(localizations.adultContentPreferenceDescription),
+                value: _adultContentEnabled,
+                onChanged: _setAdultContentPreference,
               ),
             ),
             MyLine(width: MediaQuery.of(context).size.width, vertical: 10),

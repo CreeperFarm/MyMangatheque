@@ -191,6 +191,8 @@ END OF TERMS AND CONDITIONS
 - image_picker
 - go_router
 - http
+- appwrite
+- flutter_secure_storage
 - package_info_plus
 - flutter_localizations (and the Flutter SDK itself)
 #### License Text:
@@ -255,8 +257,8 @@ localstorage
 get_it
 keyboard_detection
 fetch_client
-pocketbase
 flutter_custom_tabs
+flutter_web_auth_2
 #### License Text:
 ```
 MIT License
@@ -264,7 +266,7 @@ MIT License
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
 in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/Ssell
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 copies of the Software, and to permit persons to whom the Software is
 furnished to do so, subject to the following conditions:
 
@@ -279,5 +281,4 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
-
 

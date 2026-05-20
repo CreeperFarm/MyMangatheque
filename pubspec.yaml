@@ -79,7 +79,9 @@ dependencies:
 
   # For the API
   http: ^1.2.2
-  pocketbase: ^0.23.0+1
+  appwrite: ^22.0.0
+  flutter_web_auth_2: ^5.0.2
+  flutter_secure_storage: ^8.1.0
 
   # For some functionalities
   keyboard_detection: ^0.8.1

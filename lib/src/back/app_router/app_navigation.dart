@@ -2,12 +2,13 @@ import 'package:flutter/cupertino.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mymangatheque/src/back/app_router/main_wrapper.dart';
 // REMOVE THIS IMPORT: import 'package:mymangatheque/src/back/app_router/redirect_to_page.dart';
-import 'package:mymangatheque/src/back/services/pocketbase.dart'; // Import PocketBaseConnector
+import 'package:mymangatheque/src/back/services/appwrite.dart'; // Import AppwriteConnector
 import 'package:mymangatheque/src/front/dev_page/component_show_page.dart';
 import 'package:mymangatheque/src/front/page/admin_pages/admin_create_page.dart';
 import 'package:mymangatheque/src/front/page/admin_pages/admin_home.dart';
 import 'package:mymangatheque/src/front/page/admin_pages/admin_login_page.dart';
 import 'package:mymangatheque/src/front/page/admin_pages/admin_statistics.dart';
+import 'package:mymangatheque/src/front/page/auth/auth_callback_page.dart';
 import 'package:mymangatheque/src/front/page/auth/delete_account_page.dart'; // Import DeleteAccountPage
 import 'package:mymangatheque/src/front/page/auth/forgot_password_page.dart';
 import 'package:mymangatheque/src/front/page/auth/modify_password_page.dart';
@@ -57,6 +58,19 @@ class AppNavigation {
     navigatorKey: _rootNavigatorKey,
     initialLocation: initR,
     routes: <RouteBase>[
+      GoRoute(
+        path: '/auth/callback',
+        name: 'Auth Callback',
+        builder: (context, state) {
+          final query = state.uri.queryParameters;
+          return AuthCallbackPage(
+            key: state.pageKey,
+            userId: query['userId'],
+            secret: query['secret'],
+            hasError: query['error'] == 'true',
+          );
+        },
+      ),
       // MainWrapper Route
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
@@ -172,7 +186,7 @@ class AppNavigation {
                     name: 'Suppression du compte',
                     builder: (context, state) {
                       // Directly check login status and return the appropriate page
-                      if (PocketBaseConnector().isLoggedIn()) {
+                      if (AppwriteConnector().isLoggedIn()) {
                         return const DeleteAccountPage();
                       } else {
                         return const SignInPage();
@@ -364,7 +378,7 @@ class AppNavigation {
                 path: '/profile',
                 name: 'Profile',
                 builder: (context, state) {
-                  if (PocketBaseConnector().isLoggedIn()) {
+                  if (AppwriteConnector().isLoggedIn()) {
                     return const ProfilePage();
                   } else {
                     return const SignInPage();

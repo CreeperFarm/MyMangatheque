@@ -1260,6 +1260,11 @@ class AppLocalizations {
     );
   }
 
+  /// `Sub-Serie`
+  String get subSerie {
+    return Intl.message('Sub-Serie', name: 'subSerie', desc: '', args: []);
+  }
+
   /// `Sub-Series`
   String get subSeries {
     return Intl.message('Sub-Series', name: 'subSeries', desc: '', args: []);
@@ -2418,6 +2423,216 @@ class AppLocalizations {
     );
   }
 
+  /// `Try again`
+  String get tryAgain {
+    return Intl.message('Try again', name: 'tryAgain', desc: '', args: []);
+  }
+
+  /// `No results`
+  String get noResults {
+    return Intl.message('No results', name: 'noResults', desc: '', args: []);
+  }
+
+  /// `Not available`
+  String get notAvailable {
+    return Intl.message(
+      'Not available',
+      name: 'notAvailable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Reviews`
+  String get reviews {
+    return Intl.message('Reviews', name: 'reviews', desc: '', args: []);
+  }
+
+  /// `No reviews for this volume yet.`
+  String get noReviewsForThisVolumeYet {
+    return Intl.message(
+      'No reviews for this volume yet.',
+      name: 'noReviewsForThisVolumeYet',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Pending moderation`
+  String get pendingModeration {
+    return Intl.message(
+      'Pending moderation',
+      name: 'pendingModeration',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Review questionnaire`
+  String get reviewQuestionnaireTitle {
+    return Intl.message(
+      'Review questionnaire',
+      name: 'reviewQuestionnaireTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Now that this volume is marked as read, you can rate it and leave a comment.`
+  String get reviewQuestionnaireDescription {
+    return Intl.message(
+      'Now that this volume is marked as read, you can rate it and leave a comment.',
+      name: 'reviewQuestionnaireDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Open questionnaire`
+  String get openQuestionnaire {
+    return Intl.message(
+      'Open questionnaire',
+      name: 'openQuestionnaire',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Stars: {count}/5`
+  String reviewStars(num count) {
+    return Intl.message(
+      'Stars: $count/5',
+      name: 'reviewStars',
+      desc: 'Label showing review stars count over five',
+      args: [count],
+    );
+  }
+
+  /// `Favorite character(s)`
+  String get favoriteCharacters {
+    return Intl.message(
+      'Favorite character(s)',
+      name: 'favoriteCharacters',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Tanjiro, Nezuko, ...`
+  String get favoriteCharactersHint {
+    return Intl.message(
+      'Tanjiro, Nezuko, ...',
+      name: 'favoriteCharactersHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Favorite character(s): {characters}`
+  String favoriteCharactersLabel(String characters) {
+    return Intl.message(
+      'Favorite character(s): $characters',
+      name: 'favoriteCharactersLabel',
+      desc: 'Label for favorite characters in a review',
+      args: [characters],
+    );
+  }
+
+  /// `Comment`
+  String get comment {
+    return Intl.message('Comment', name: 'comment', desc: '', args: []);
+  }
+
+  /// `What did you think about this volume?`
+  String get reviewCommentHint {
+    return Intl.message(
+      'What did you think about this volume?',
+      name: 'reviewCommentHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Review submitted successfully.`
+  String get reviewSubmittedSuccess {
+    return Intl.message(
+      'Review submitted successfully.',
+      name: 'reviewSubmittedSuccess',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Unable to submit review: {error}`
+  String reviewSubmitFailed(String error) {
+    return Intl.message(
+      'Unable to submit review: $error',
+      name: 'reviewSubmitFailed',
+      desc: 'Review submit failure message',
+      args: [error],
+    );
+  }
+
+  /// `Allow displaying covers and details marked 18+.`
+  String get adultContentPreferenceDescription {
+    return Intl.message(
+      'Allow displaying covers and details marked 18+.',
+      name: 'adultContentPreferenceDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Adult content display enabled.`
+  String get adultContentEnabled {
+    return Intl.message(
+      'Adult content display enabled.',
+      name: 'adultContentEnabled',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Adult content display disabled.`
+  String get adultContentDisabled {
+    return Intl.message(
+      'Adult content display disabled.',
+      name: 'adultContentDisabled',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This volume is marked as 18+. Enable adult content in profile settings to display the cover.`
+  String get adultContentBlockedDescription {
+    return Intl.message(
+      'This volume is marked as 18+. Enable adult content in profile settings to display the cover.',
+      name: 'adultContentBlockedDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Open content settings`
+  String get openContentSettings {
+    return Intl.message(
+      'Open content settings',
+      name: 'openContentSettings',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Availability unknown`
+  String get availabilityUnknown {
+    return Intl.message(
+      'Availability unknown',
+      name: 'availabilityUnknown',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Are you sure you want to delete your account? This action cannot be undone. All your data will be permanently deleted.`
   String get areYouSureDeleteAccount {
     return Intl.message(
@@ -2458,6 +2673,36 @@ class AppLocalizations {
     return Intl.message(
       'An error occurred, your account has not been deleted, you have been log out of your account.',
       name: 'errorDeleteAccount',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `English Title`
+  String get englishTitle {
+    return Intl.message(
+      'English Title',
+      name: 'englishTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Japanese Title`
+  String get japaneseTitle {
+    return Intl.message(
+      'Japanese Title',
+      name: 'japaneseTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `English and Japanese Title`
+  String get englishAndJapaneseTitle {
+    return Intl.message(
+      'English and Japanese Title',
+      name: 'englishAndJapaneseTitle',
       desc: '',
       args: [],
     );

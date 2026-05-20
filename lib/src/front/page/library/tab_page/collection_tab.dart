@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mymangatheque/l10n/app_localizations.dart';
 import 'package:mymangatheque/src/back/provider/manga_owned_provider.dart';
-import 'package:mymangatheque/src/back/services/pocketbase.dart';
+import 'package:mymangatheque/src/back/services/appwrite.dart';
 import 'package:mymangatheque/src/const/assets.dart';
 import 'package:mymangatheque/src/const/own_icon.dart';
 import 'package:mymangatheque/src/front/components/my_line.dart';
@@ -20,7 +20,7 @@ class CollectionTab extends ConsumerStatefulWidget {
 }
 
 class _CollectionTabState extends ConsumerState<CollectionTab> {
-  PocketBaseConnector connector = PocketBaseConnector();
+  AppwriteConnector connector = AppwriteConnector();
 
   String textLength(text, length) {
     if (text.length > length) {
@@ -73,11 +73,8 @@ class _CollectionTabState extends ConsumerState<CollectionTab> {
       padding: const EdgeInsets.all(10),
       child: MyScrollColumn(
         children: [
-          MyTomeNumberShow(
-            tomeTotal: getNumberVolume().toString(),
-            editionTotal: subSeries.length.toString(),
-            localizations: localizations,
-          ),
+          MyTomeNumberShow(tomeTotal: getNumberVolume().toString(), editionTotal: subSeries.length.toString(), localizations: localizations),
+
           ...subSeries.map((subSerie) {
             return Column(
               children: [
@@ -86,9 +83,7 @@ class _CollectionTabState extends ConsumerState<CollectionTab> {
                     pushOrGo(context, '/library/sub_serie/${subSerie.id}');
                   },
                   child: Container(
-                    constraints: BoxConstraints(
-                      maxWidth: MediaQuery.of(context).size.width,
-                    ),
+                    constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -100,14 +95,8 @@ class _CollectionTabState extends ConsumerState<CollectionTab> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  subSerie.title.replaceAll(
-                                    ' - Edition Standard',
-                                    '',
-                                  ),
-                                  style: const TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                                  subSerie.title.replaceAll(' - Edition Standard', ''),
+                                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                                   softWrap: true,
                                   overflow: TextOverflow.ellipsis,
                                 ),
@@ -120,25 +109,14 @@ class _CollectionTabState extends ConsumerState<CollectionTab> {
                                 Padding(
                                   padding: const EdgeInsets.only(top: 5),
                                   child: SizedBox(
-                                    width:
-                                        MediaQuery.of(context).size.width - 65,
+                                    width: MediaQuery.of(context).size.width - 65,
                                     child: Stack(
                                       children: [
-                                        for (
-                                          var i = 0;
-                                          i < min(9, subSerie.volumes.length);
-                                          i++
-                                        )
+                                        for (var i = 0; i < min(9, subSerie.volumes.length); i++)
                                           (i == 0)
                                               ? ClipRRect(
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                        10.0,
-                                                      ),
-                                                  child: Image.network(
-                                                    subSerie.volumes[i].image,
-                                                    width: 65,
-                                                  ),
+                                                  borderRadius: BorderRadius.circular(10.0),
+                                                  child: Image.network(subSerie.volumes[i].image, width: 65),
                                                 )
                                               : Positioned(
                                                   left: i * 45.0,
@@ -146,33 +124,16 @@ class _CollectionTabState extends ConsumerState<CollectionTab> {
                                                     decoration: BoxDecoration(
                                                       boxShadow: [
                                                         BoxShadow(
-                                                          color:
-                                                              Theme.of(context)
-                                                                  .colorScheme
-                                                                  .onPrimary
-                                                                  .withValues(
-                                                                    alpha: 0.9,
-                                                                  ),
+                                                          color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.9),
                                                           spreadRadius: 1,
                                                           blurRadius: 2,
-                                                          offset: const Offset(
-                                                            0,
-                                                            1,
-                                                          ),
+                                                          offset: const Offset(0, 1),
                                                         ),
                                                       ],
                                                     ),
                                                     child: ClipRRect(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                            10.0,
-                                                          ),
-                                                      child: Image.network(
-                                                        subSerie
-                                                            .volumes[i]
-                                                            .image,
-                                                        width: 65,
-                                                      ),
+                                                      borderRadius: BorderRadius.circular(10.0),
+                                                      child: Image.network(subSerie.volumes[i].image, width: 65),
                                                     ),
                                                   ),
                                                 ),
@@ -184,19 +145,12 @@ class _CollectionTabState extends ConsumerState<CollectionTab> {
                             ),
                           ),
                         ),
-                        OwnIcon(
-                          iconColor: Theme.of(context).colorScheme.primary,
-                          iconSrc: Assets.icons.arrowRight,
-                        ),
+                        OwnIcon(iconColor: Theme.of(context).colorScheme.primary, iconSrc: Assets.icons.arrowRight),
                       ],
                     ),
                   ),
                 ),
-                MyLine(
-                  width: MediaQuery.of(context).size.width,
-                  vertical: 10,
-                  horizontal: 0,
-                ),
+                MyLine(width: MediaQuery.of(context).size.width, vertical: 10, horizontal: 0),
               ],
             );
           }),

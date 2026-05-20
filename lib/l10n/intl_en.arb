@@ -257,6 +257,7 @@
   "volumeAdd": "Add Volume",
   "volumeAddSuccess": "Volume successfully added.",
   "volumeAddError": "An error occurred, the volume has not been added.",
+  "subSerie": "Sub-Serie",
   "subSeries": "Sub-Series",
   "editor": "Editor",
   "genre": "Genre",
@@ -508,10 +509,60 @@
       }
     }
   },
+  "tryAgain": "Try again",
+  "noResults": "No results",
+  "notAvailable": "Not available",
+  "reviews": "Reviews",
+  "noReviewsForThisVolumeYet": "No reviews for this volume yet.",
+  "pendingModeration": "Pending moderation",
+  "reviewQuestionnaireTitle": "Review questionnaire",
+  "reviewQuestionnaireDescription": "Now that this volume is marked as read, you can rate it and leave a comment.",
+  "openQuestionnaire": "Open questionnaire",
+  "reviewStars": "Stars: {count}/5",
+  "@reviewStars": {
+    "description": "Label showing review stars count over five",
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "favoriteCharacters": "Favorite character(s)",
+  "favoriteCharactersHint": "Tanjiro, Nezuko, ...",
+  "favoriteCharactersLabel": "Favorite character(s): {characters}",
+  "@favoriteCharactersLabel": {
+    "description": "Label for favorite characters in a review",
+    "placeholders": {
+      "characters": {
+        "type": "String"
+      }
+    }
+  },
+  "comment": "Comment",
+  "reviewCommentHint": "What did you think about this volume?",
+  "reviewSubmittedSuccess": "Review submitted successfully.",
+  "reviewSubmitFailed": "Unable to submit review: {error}",
+  "@reviewSubmitFailed": {
+    "description": "Review submit failure message",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "adultContentPreferenceDescription": "Allow displaying covers and details marked 18+.",
+  "adultContentEnabled": "Adult content display enabled.",
+  "adultContentDisabled": "Adult content display disabled.",
+  "adultContentBlockedDescription": "This volume is marked as 18+. Enable adult content in profile settings to display the cover.",
+  "openContentSettings": "Open content settings",
+  "availabilityUnknown": "Availability unknown",
   "areYouSureDeleteAccount": "Are you sure you want to delete your account? This action cannot be undone. All your data will be permanently deleted.",
   "cancel": "Cancel",
   "confirm": "Confirm",
   "ok": "OK",
   "accountHaveBeenDeleted": "Your account has been successfully deleted.",
-  "errorDeleteAccount": "An error occurred, your account has not been deleted, you have been log out of your account."
+  "errorDeleteAccount": "An error occurred, your account has not been deleted, you have been log out of your account.",
+  "englishTitle": "English Title",
+  "japaneseTitle": "Japanese Title",
+  "englishAndJapaneseTitle": "English and Japanese Title"
 }

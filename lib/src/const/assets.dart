@@ -12,11 +12,7 @@ class Assets {
 
   // Expose `Assets.images.<name>`
   static const images = _Images(
-    _Theme(
-      'assets/images/theme/auto-icon.png',
-      'assets/images/theme/dark-icon.png',
-      'assets/images/theme/light-icon.png',
-    ),
+    _Theme('assets/images/theme/auto-icon.png', 'assets/images/theme/dark-icon.png', 'assets/images/theme/light-icon.png'),
     'assets/images/splash_bg.png',
     'assets/images/google.png',
     'assets/images/apple.png',
@@ -37,6 +33,7 @@ class Assets {
     'assets/icons/calendar-active.svg',
     'assets/icons/collection.svg',
     'assets/icons/collection-active.svg',
+    'assets/icons/cross.svg',
     'assets/icons/delete.svg',
     'assets/icons/filter-right.svg',
     'assets/icons/home.svg',
@@ -84,15 +81,7 @@ class _Images {
   final String fr;
   final String us;
 
-  const _Images(
-    this.theme,
-    this.splashBg,
-    this.google,
-    this.apple,
-    this.unknown,
-    this.fr,
-    this.us,
-  );
+  const _Images(this.theme, this.splashBg, this.google, this.apple, this.unknown, this.fr, this.us);
 }
 
 class _Theme {
@@ -114,6 +103,7 @@ class _Icons {
   final String calendarActive;
   final String collection;
   final String collectionActive;
+  final String cross;
   final String delete;
   final String filterRight;
   final String home;
@@ -141,6 +131,7 @@ class _Icons {
     this.calendarActive,
     this.collection,
     this.collectionActive,
+    this.cross,
     this.delete,
     this.filterRight,
     this.home,

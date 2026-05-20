@@ -89,6 +89,13 @@ The app compile and then launch if no error occured.
     - Switch between Light, Dark, or System theme.
     - Change the application language (English/French supported).
 
+### Core Backend/Auth Dependencies
+
+- `appwrite`: session/account/storage/realtime integration.
+- `flutter_web_auth_2`: mobile OAuth callback flow.
+- `flutter_secure_storage`: secure persistence for mobile API/admin keys.
+- `http`: API transport layer.
+
 ### License
 
 This project is under the license specified in the [LICENSE](LICENSE) file.
@@ -97,7 +104,8 @@ The third-party licenses are available in the [THIRD_PARTY_LICENSE.md](THIRD_PAR
 
 ## Migration notes
 
-- Uploads: the app no longer sends file system paths to the backend. Upload methods now accept raw bytes (from `XFile.readAsBytes()`), which removes the need for `READ_EXTERNAL_STORAGE` on Android. See `lib/src/back/services/pocketbaseadmin.dart` for the helper `buildMultipartFiles` used by uploads and tests.
+- Backend: runtime data/auth stack migrated from direct PocketBase usage to Appwrite + REST API services (`appwrite.dart`, `appwrite_client.dart`, `mobile_api_client.dart`).
+- Uploads: the app no longer sends file system paths to the backend. Upload methods now accept raw bytes (from `XFile.readAsBytes()`), which removes the need for `READ_EXTERNAL_STORAGE` on Android.
 - Android: `android:allowBackup` is set to `false` and cleartext traffic is disabled by default; deep links use HTTPS only. Review `android/app/src/main/AndroidManifest.xml` and `android/app/src/main/res/xml/network_security_config.xml` if you need domain exceptions.
 
 ---
@@ -170,6 +178,13 @@ L'application compile puis se lance si aucune erreur ne s'est produite.
     - Gérez votre profil utilisateur.
     - Basculez entre les thèmes Clair, Sombre ou Système.
     - Changez la langue de l'application (Anglais/Français supportés).
+
+### Dépendances Backend/Auth Principales
+
+- `appwrite` : intégration session/compte/stockage/realtime.
+- `flutter_web_auth_2` : flux OAuth mobile avec callback.
+- `flutter_secure_storage` : stockage sécurisé des clés API/admin mobile.
+- `http` : couche de transport API.
 
 ### License
 

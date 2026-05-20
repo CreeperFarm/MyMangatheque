@@ -1,56 +1,72 @@
 import 'package:flutter/material.dart';
-import 'package:mymangatheque/l10n/app_localizations.dart'
-    show AppLocalizations;
-import 'package:mymangatheque/src/back/services/pocketbaseadmin.dart';
-import 'package:mymangatheque/src/front/page/admin_pages/admin_login_page.dart';
+import 'package:mymangatheque/src/back/services/admin_service.dart';
 import 'package:mymangatheque/src/front/page/admin_pages/create_page/admin_create_author.dart';
 import 'package:mymangatheque/src/front/page/admin_pages/create_page/admin_create_genre.dart';
 import 'package:mymangatheque/src/front/page/admin_pages/create_page/admin_create_volume_page.dart';
+import 'package:mymangatheque/src/function/auto_push_or_go.dart';
 
-class AdminCreatePage extends StatelessWidget {
+class AdminCreatePage extends StatefulWidget {
   const AdminCreatePage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    // Get localization - return early if not available
-    var localizations = AppLocalizations.of(context);
-    if (localizations == null) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
-    }
+  State<AdminCreatePage> createState() => _AdminCreatePageState();
+}
 
-    PocketBaseAdminConnector connector = PocketBaseAdminConnector();
-    if (connector.isLoggedIn()) {
-      return DefaultTabController(
-        length: 6,
-        initialIndex: 2,
-        child: Scaffold(
-          appBar: AppBar(
-            bottom: TabBar(
-              isScrollable: true,
-              tabs: [
-                Tab(text: localizations.series),
-                Tab(text: localizations.subSeries),
-                Tab(text: localizations.volume),
-                Tab(text: localizations.author),
-                Tab(text: localizations.editor),
-                Tab(text: localizations.genre),
-              ],
-            ),
-          ),
-          body: TabBarView(
-            children: [
-              //AdminCreateSeriePage(),
-              //AdminCreateSubSeriePage(),
-              const AdminCreateVolumePage(),
-              const AdminCreateAuthorPage(),
-              //AdminCreateEditorPage(),
-              const AdminCreateGenrePage(),
-            ],
+class _AdminCreatePageState extends State<AdminCreatePage>
+    with TickerProviderStateMixin {
+  final AdminConnector _admin = AdminConnector();
+  late final TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 3, vsync: this);
+    _admin.init().then((_) {
+      if (!mounted) return;
+      setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_admin.isLoggedIn()) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Admin Create')),
+        body: Center(
+          child: ElevatedButton(
+            onPressed: () => pushOrGo(context, '/admin/admin_login'),
+            child: const Text('Se connecter en admin'),
           ),
         ),
       );
-    } else {
-      return const AdminLoginPage();
     }
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Admin Create'),
+        bottom: TabBar(
+          controller: _tabController,
+          tabs: const [
+            Tab(text: 'Auteur'),
+            Tab(text: 'Genre'),
+            Tab(text: 'Volume'),
+          ],
+        ),
+      ),
+      body: TabBarView(
+        controller: _tabController,
+        children: const [
+          AdminCreateAuthorPage(),
+          AdminCreateGenrePage(),
+          AdminCreateVolumePage(),
+        ],
+      ),
+    );
   }
 }

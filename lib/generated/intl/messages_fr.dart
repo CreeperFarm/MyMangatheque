@@ -39,54 +39,60 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m7(message) => "Une erreur s\'est produite : ${message}";
 
-  static String m8(count) =>
+  static String m8(characters) => "Personnage(s) favori(s) : ${characters}";
+
+  static String m9(count) =>
       "${Intl.plural(count, zero: 'Vous avez 0 série', one: 'Vous avez une série', other: 'Vous avez ${count} séries')} en favoris";
 
-  static String m9(job) =>
+  static String m10(job) =>
       "${Intl.select(job, {'writerMen': 'Écrivain', 'writerWomen': 'Écrivaine', 'artistMen': 'Dessinateur', 'artistWomen': 'Dessinatrice', 'editorMen': 'Éditeur', 'editorWomen': 'Éditrice', 'illustratorMen': 'Illustrateur', 'illustratorWomen': 'Illustratrice', 'scriptwriterMen': 'Scénariste', 'scriptwriterWomen': 'Scénariste', 'authorMen': 'Auteur', 'authorWomen': 'Auteure', 'mangakaMen': 'Mangaka', 'mangakaWomen': 'Mangaka', 'charaDesignMen': 'Chara Design', 'charaDesignWomen': 'Chara Design', 'other': 'Other'})}";
 
-  static String m10(maxLength) =>
+  static String m11(maxLength) =>
       "Le nombre maximum de caractères autorisés est ${maxLength}.";
 
-  static String m11(minLength) =>
+  static String m12(minLength) =>
       "Le nombre minimum de caractères requis est ${minLength}.";
 
-  static String m12(gender) =>
+  static String m13(gender) =>
       "${Intl.gender(gender, female: 'elle', male: 'il', other: 'iel')}";
 
-  static String m13(count) =>
+  static String m14(count) => "Étoiles : ${count}/5";
+
+  static String m15(error) => "Impossible d\'envoyer l\'avis : ${error}";
+
+  static String m16(count) =>
       "${Intl.plural(count, zero: 'Série', one: 'Série', other: 'Séries')}";
 
-  static String m14(days) => "Expédition sous ${days} jours";
-
-  static String m15(count) =>
-      "Expédition sous {count, select, 0{0 semaine} 1{1 semaine} other{${count} semaines}}";
-
-  static String m16(seller) => "Vendu et expédié par ${seller}";
-
-  static String m17(author) =>
-      "${Intl.select(author, {'error': '', 'other': 'De ${author}'})}";
+  static String m17(days) => "Expédition sous ${days} jours";
 
   static String m18(count) =>
+      "Expédition sous {count, select, 0{0 semaine} 1{1 semaine} other{${count} semaines}}";
+
+  static String m19(seller) => "Vendu et expédié par ${seller}";
+
+  static String m20(author) =>
+      "${Intl.select(author, {'error': '', 'other': 'De ${author}'})}";
+
+  static String m21(count) =>
       "Total de ${Intl.plural(count, zero: '0 tome', one: '1 tome', other: '${count} tomes')}";
 
-  static String m19(support) =>
+  static String m22(support) =>
       "${Intl.select(support, {'manga': 'Manga', 'novel': 'Roman', 'artbook': 'Artbook', 'lightNovel': 'Light Novel', 'boxSet': 'Coffret', 'other': 'Other'})}";
 
-  static String m20(username) => "Votre pseudo est ${username}";
+  static String m23(username) => "Votre pseudo est ${username}";
 
-  static String m21(count) => "Tome ${count}";
+  static String m24(count) => "Tome ${count}";
 
-  static String m22(count) =>
+  static String m25(count) =>
       "${Intl.plural(count, zero: 'Vous possédez 0 volume', one: 'Vous possédez un volume', other: 'Vous possédez ${count} volumes')}";
 
-  static String m23(owned, total) =>
+  static String m26(owned, total) =>
       "${Intl.plural(owned, zero: '0 tome possédé', one: '1 tome possédé', other: '${owned} tomes possédés')} sur ${Intl.plural(total, zero: '0 tome', one: '1 tome', other: '${total} tomes')}";
 
-  static String m24(readed, total) =>
+  static String m27(readed, total) =>
       "${Intl.plural(readed, zero: '0 tome lu', one: '1 tome lu', other: '${readed} tomes lus')} sur ${Intl.plural(total, zero: '0 tome', one: '1 tome', other: '${total} tomes')}.";
 
-  static String m25(readed, total) =>
+  static String m28(readed, total) =>
       "${Intl.plural(readed, zero: '0 tome lu', one: '1 tome lu', other: '${readed} tomes lus')} sur ${Intl.plural(total, zero: '0 tome possédé', one: '1 tome possédé', other: '${total} tomes possédés')}.";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -110,6 +116,18 @@ class MessageLookup extends MessageLookupByLibrary {
       "Vous êtes connecté en tant qu\'administrateur avec succès.",
     ),
     "adultContent": MessageLookupByLibrary.simpleMessage("Contenu adulte"),
+    "adultContentBlockedDescription": MessageLookupByLibrary.simpleMessage(
+      "Ce tome est marqué 18+. Activez le contenu adulte dans les réglages du profil pour afficher la couverture.",
+    ),
+    "adultContentDisabled": MessageLookupByLibrary.simpleMessage(
+      "Affichage du contenu adulte désactivé.",
+    ),
+    "adultContentEnabled": MessageLookupByLibrary.simpleMessage(
+      "Affichage du contenu adulte activé.",
+    ),
+    "adultContentPreferenceDescription": MessageLookupByLibrary.simpleMessage(
+      "Autoriser l\'affichage des couvertures et contenus marqués 18+.",
+    ),
     "adultContentWarning": MessageLookupByLibrary.simpleMessage(
       "Avertissement de contenu adulte",
     ),
@@ -167,6 +185,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "authors": MessageLookupByLibrary.simpleMessage("Auteurs"),
     "availability": m2,
+    "availabilityUnknown": MessageLookupByLibrary.simpleMessage(
+      "Disponibilité inconnue",
+    ),
     "birthdayDateIs": m3,
     "boxSet": MessageLookupByLibrary.simpleMessage("Coffret"),
     "buildAppVersionImpossibleToRetreive": MessageLookupByLibrary.simpleMessage(
@@ -185,6 +206,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Cache vidé avec succès.",
     ),
     "collection": MessageLookupByLibrary.simpleMessage("Collection"),
+    "comment": MessageLookupByLibrary.simpleMessage("Commentaire"),
     "completeLibrary": MessageLookupByLibrary.simpleMessage("Compléter"),
     "confirm": MessageLookupByLibrary.simpleMessage("Confirmer"),
     "confirmNewPassword": MessageLookupByLibrary.simpleMessage(
@@ -246,6 +268,10 @@ class MessageLookup extends MessageLookupByLibrary {
       "Un email de réinitialisation de mot de passe a été envoyé à votre adresse email.",
     ),
     "english": MessageLookupByLibrary.simpleMessage("Anglais"),
+    "englishAndJapaneseTitle": MessageLookupByLibrary.simpleMessage(
+      "Titre anglais et japonais",
+    ),
+    "englishTitle": MessageLookupByLibrary.simpleMessage("Titre anglais"),
     "enterEmailForSendingEmailReset": MessageLookupByLibrary.simpleMessage(
       "Entrez votre email pour recevoir un lien pour réinitialiser votre mot de passe.",
     ),
@@ -263,7 +289,14 @@ class MessageLookup extends MessageLookupByLibrary {
       "Le site web MyMangatheque peut contenir des liens vers des sites externes. Nous déclinons toute responsabilité quant au contenu et aux pratiques de confidentialité de ces sites. Ces liens sont proposés aux utilisateurs du Site ou des sites web de ses filiales et entités affiliées en tant que service. La décision d\'activer les liens appartient exclusivement aux utilisateurs.",
     ),
     "favorite": MessageLookupByLibrary.simpleMessage("Favori"),
-    "favoriteSeriesNumber": m8,
+    "favoriteCharacters": MessageLookupByLibrary.simpleMessage(
+      "Personnage(s) favori(s)",
+    ),
+    "favoriteCharactersHint": MessageLookupByLibrary.simpleMessage(
+      "Tanjiro, Nezuko, ...",
+    ),
+    "favoriteCharactersLabel": m8,
+    "favoriteSeriesNumber": m9,
     "february": MessageLookupByLibrary.simpleMessage("Février"),
     "female": MessageLookupByLibrary.simpleMessage("Femme"),
     "follow": MessageLookupByLibrary.simpleMessage("Suivre"),
@@ -294,7 +327,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "italian": MessageLookupByLibrary.simpleMessage("Italien"),
     "january": MessageLookupByLibrary.simpleMessage("Janvier"),
     "japanese": MessageLookupByLibrary.simpleMessage("Japonais"),
-    "jobsName": m9,
+    "japaneseTitle": MessageLookupByLibrary.simpleMessage("Titre japonais"),
+    "jobsName": m10,
     "july": MessageLookupByLibrary.simpleMessage("Juillet"),
     "june": MessageLookupByLibrary.simpleMessage("Juin"),
     "lastRelease": MessageLookupByLibrary.simpleMessage("Dernière sortie"),
@@ -331,9 +365,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "male": MessageLookupByLibrary.simpleMessage("Homme"),
     "manga": MessageLookupByLibrary.simpleMessage("Manga"),
     "march": MessageLookupByLibrary.simpleMessage("Mars"),
-    "maxLengthExceeded": m10,
+    "maxLengthExceeded": m11,
     "may": MessageLookupByLibrary.simpleMessage("Mai"),
-    "minLengthNotReached": m11,
+    "minLengthNotReached": m12,
     "modifyPassword": MessageLookupByLibrary.simpleMessage(
       "Modifier le mot de passe",
     ),
@@ -350,15 +384,26 @@ class MessageLookup extends MessageLookupByLibrary {
     "noFollowedSubSerie": MessageLookupByLibrary.simpleMessage(
       "Vous ne suivez aucune sous-série, vous pouvez en suivre via la page de recherche.",
     ),
+    "noResults": MessageLookupByLibrary.simpleMessage("Aucun résultat"),
+    "noReviewsForThisVolumeYet": MessageLookupByLibrary.simpleMessage(
+      "Aucun avis pour ce tome pour le moment.",
+    ),
     "noVolumeOwned": MessageLookupByLibrary.simpleMessage(
       "Vous ne possédez aucun tome dans votre collection, vous pouvez en ajouter via la page de recherche ou en scannant les codes barres des tomes que vous possédez.",
     ),
+    "notAvailable": MessageLookupByLibrary.simpleMessage("Non disponible"),
     "novel": MessageLookupByLibrary.simpleMessage("Roman"),
     "november": MessageLookupByLibrary.simpleMessage("Novembre"),
     "numberOfPages": MessageLookupByLibrary.simpleMessage("Nombre de pages"),
     "october": MessageLookupByLibrary.simpleMessage("Octobre"),
     "ok": MessageLookupByLibrary.simpleMessage("OK"),
     "oldPassword": MessageLookupByLibrary.simpleMessage("Ancien mot de passe"),
+    "openContentSettings": MessageLookupByLibrary.simpleMessage(
+      "Ouvrir les réglages du contenu",
+    ),
+    "openQuestionnaire": MessageLookupByLibrary.simpleMessage(
+      "Ouvrir le questionnaire",
+    ),
     "openScan": MessageLookupByLibrary.simpleMessage("Ouvrir le scan"),
     "orContinueWith": MessageLookupByLibrary.simpleMessage("Ou continuez avec"),
     "other": MessageLookupByLibrary.simpleMessage("Autre"),
@@ -378,6 +423,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "passwordsDoNotMatch": MessageLookupByLibrary.simpleMessage(
       "Les mots de passe ne correspondent pas.",
+    ),
+    "pendingModeration": MessageLookupByLibrary.simpleMessage(
+      "En attente de modération",
     ),
     "personalData": MessageLookupByLibrary.simpleMessage(
       "Données personnelles",
@@ -413,7 +461,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "profileSettings": MessageLookupByLibrary.simpleMessage(
       "Page de profil et réglages",
     ),
-    "pronoun": m12,
+    "pronoun": m13,
     "protectionOfPersonalData": MessageLookupByLibrary.simpleMessage(
       "Protection des données personnelles",
     ),
@@ -515,6 +563,21 @@ class MessageLookup extends MessageLookupByLibrary {
     "readPile": MessageLookupByLibrary.simpleMessage("Pile à lire"),
     "readed": MessageLookupByLibrary.simpleMessage("Lu"),
     "remove": MessageLookupByLibrary.simpleMessage("Retirer"),
+    "reviewCommentHint": MessageLookupByLibrary.simpleMessage(
+      "Qu\'avez-vous pensé de ce tome ?",
+    ),
+    "reviewQuestionnaireDescription": MessageLookupByLibrary.simpleMessage(
+      "Maintenant que ce tome est marqué comme lu, vous pouvez le noter et laisser un commentaire.",
+    ),
+    "reviewQuestionnaireTitle": MessageLookupByLibrary.simpleMessage(
+      "Questionnaire d\'avis",
+    ),
+    "reviewStars": m14,
+    "reviewSubmitFailed": m15,
+    "reviewSubmittedSuccess": MessageLookupByLibrary.simpleMessage(
+      "Avis envoyé avec succès.",
+    ),
+    "reviews": MessageLookupByLibrary.simpleMessage("Avis"),
     "scanEAN": MessageLookupByLibrary.simpleMessage("Scan EAN"),
     "scanner": MessageLookupByLibrary.simpleMessage("Scanner"),
     "scannerDescription": MessageLookupByLibrary.simpleMessage(
@@ -526,34 +589,36 @@ class MessageLookup extends MessageLookupByLibrary {
     "selectDate": MessageLookupByLibrary.simpleMessage("Sélectionner la date"),
     "september": MessageLookupByLibrary.simpleMessage("Septembre"),
     "series": MessageLookupByLibrary.simpleMessage("Série"),
-    "seriesCount": m13,
+    "seriesCount": m16,
     "seriesDoesNotExist": MessageLookupByLibrary.simpleMessage(
       "La série n\'existe pas.",
     ),
     "seriesIdOfAuthor": MessageLookupByLibrary.simpleMessage(
       "ID de la série de l\'auteur",
     ),
-    "shippingUnderDays": m14,
-    "shippingUnderWeeks": m15,
+    "shippingUnderDays": m17,
+    "shippingUnderWeeks": m18,
     "signIn": MessageLookupByLibrary.simpleMessage("Se connecter"),
     "signInPage": MessageLookupByLibrary.simpleMessage("Page de connexion"),
     "signUp": MessageLookupByLibrary.simpleMessage("Créer un compte"),
     "signUpPage": MessageLookupByLibrary.simpleMessage("Page d\'inscription"),
-    "soldAndShippedBy": m16,
+    "soldAndShippedBy": m19,
     "spanish": MessageLookupByLibrary.simpleMessage("Espagnol"),
-    "subSerieFromAuthor": m17,
-    "subSerieVolumeNumber": m18,
+    "subSerie": MessageLookupByLibrary.simpleMessage("Sous-série"),
+    "subSerieFromAuthor": m20,
+    "subSerieVolumeNumber": m21,
     "subSeries": MessageLookupByLibrary.simpleMessage("Sous-séries"),
     "subSeriesDoesNotExist": MessageLookupByLibrary.simpleMessage(
       "La sous-série n\'existe pas.",
     ),
     "summary": MessageLookupByLibrary.simpleMessage("Résumé"),
-    "supportIs": m19,
+    "supportIs": m22,
     "systemMode": MessageLookupByLibrary.simpleMessage("Thème du système"),
     "thirdPartyContent": MessageLookupByLibrary.simpleMessage("Contenu tiers"),
     "thirdPartyContentLane1": MessageLookupByLibrary.simpleMessage(
       "Les contenus tiers utilisés sur le site MyMangatheque appartiennent à leurs auteurs respectifs.",
     ),
+    "tryAgain": MessageLookupByLibrary.simpleMessage("Réessayer"),
     "unknownError": MessageLookupByLibrary.simpleMessage(
       "Une erreur inconnue s\'est produite.",
     ),
@@ -574,7 +639,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Vous êtes connecté avec succès.",
     ),
     "username": MessageLookupByLibrary.simpleMessage("Pseudo"),
-    "usernameIs": m20,
+    "usernameIs": m23,
     "usernameMinLength": MessageLookupByLibrary.simpleMessage(
       "Le pseudo doit comporter au moins 3 caractères.",
     ),
@@ -607,13 +672,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "volumeNotAvailableForSale": MessageLookupByLibrary.simpleMessage(
       "Malheureusement, ce volume n\'est pas disponible à la vente.",
     ),
-    "volumeNum": m21,
+    "volumeNum": m24,
     "volumeNumber": MessageLookupByLibrary.simpleMessage("Numéro du volume"),
-    "volumeOwnedNumber": m22,
-    "volumeOwnedOverX": m23,
+    "volumeOwnedNumber": m25,
+    "volumeOwnedOverX": m26,
     "volumePrice": MessageLookupByLibrary.simpleMessage("Prix du volume"),
-    "volumeReadedOverSeriesX": m24,
-    "volumeReadedOverX": m25,
+    "volumeReadedOverSeriesX": m27,
+    "volumeReadedOverX": m28,
     "volumeSeriesId": MessageLookupByLibrary.simpleMessage(
       "ID de la série du volume",
     ),

@@ -968,6 +968,12 @@ abstract class AppLocalizations {
   /// **'An error occurred, the volume has not been added.'**
   String get volumeAddError;
 
+  /// No description provided for @subSerie.
+  ///
+  /// In en, this message translates to:
+  /// **'Sub-Serie'**
+  String get subSerie;
+
   /// No description provided for @subSeries.
   ///
   /// In en, this message translates to:
@@ -1742,6 +1748,144 @@ abstract class AppLocalizations {
   /// **'{author, select, error{} other{By {author}}}'**
   String subSerieFromAuthor(String author);
 
+  /// No description provided for @tryAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get tryAgain;
+
+  /// No description provided for @noResults.
+  ///
+  /// In en, this message translates to:
+  /// **'No results'**
+  String get noResults;
+
+  /// No description provided for @notAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Not available'**
+  String get notAvailable;
+
+  /// No description provided for @reviews.
+  ///
+  /// In en, this message translates to:
+  /// **'Reviews'**
+  String get reviews;
+
+  /// No description provided for @noReviewsForThisVolumeYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No reviews for this volume yet.'**
+  String get noReviewsForThisVolumeYet;
+
+  /// No description provided for @pendingModeration.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending moderation'**
+  String get pendingModeration;
+
+  /// No description provided for @reviewQuestionnaireTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Review questionnaire'**
+  String get reviewQuestionnaireTitle;
+
+  /// No description provided for @reviewQuestionnaireDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Now that this volume is marked as read, you can rate it and leave a comment.'**
+  String get reviewQuestionnaireDescription;
+
+  /// No description provided for @openQuestionnaire.
+  ///
+  /// In en, this message translates to:
+  /// **'Open questionnaire'**
+  String get openQuestionnaire;
+
+  /// Label showing review stars count over five
+  ///
+  /// In en, this message translates to:
+  /// **'Stars: {count}/5'**
+  String reviewStars(num count);
+
+  /// No description provided for @favoriteCharacters.
+  ///
+  /// In en, this message translates to:
+  /// **'Favorite character(s)'**
+  String get favoriteCharacters;
+
+  /// No description provided for @favoriteCharactersHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tanjiro, Nezuko, ...'**
+  String get favoriteCharactersHint;
+
+  /// Label for favorite characters in a review
+  ///
+  /// In en, this message translates to:
+  /// **'Favorite character(s): {characters}'**
+  String favoriteCharactersLabel(String characters);
+
+  /// No description provided for @comment.
+  ///
+  /// In en, this message translates to:
+  /// **'Comment'**
+  String get comment;
+
+  /// No description provided for @reviewCommentHint.
+  ///
+  /// In en, this message translates to:
+  /// **'What did you think about this volume?'**
+  String get reviewCommentHint;
+
+  /// No description provided for @reviewSubmittedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Review submitted successfully.'**
+  String get reviewSubmittedSuccess;
+
+  /// Review submit failure message
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to submit review: {error}'**
+  String reviewSubmitFailed(String error);
+
+  /// No description provided for @adultContentPreferenceDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow displaying covers and details marked 18+.'**
+  String get adultContentPreferenceDescription;
+
+  /// No description provided for @adultContentEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Adult content display enabled.'**
+  String get adultContentEnabled;
+
+  /// No description provided for @adultContentDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Adult content display disabled.'**
+  String get adultContentDisabled;
+
+  /// No description provided for @adultContentBlockedDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'This volume is marked as 18+. Enable adult content in profile settings to display the cover.'**
+  String get adultContentBlockedDescription;
+
+  /// No description provided for @openContentSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Open content settings'**
+  String get openContentSettings;
+
+  /// No description provided for @availabilityUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Availability unknown'**
+  String get availabilityUnknown;
+
   /// No description provided for @areYouSureDeleteAccount.
   ///
   /// In en, this message translates to:
@@ -1777,6 +1921,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'An error occurred, your account has not been deleted, you have been log out of your account.'**
   String get errorDeleteAccount;
+
+  /// No description provided for @englishTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'English Title'**
+  String get englishTitle;
+
+  /// No description provided for @japaneseTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Japanese Title'**
+  String get japaneseTitle;
+
+  /// No description provided for @englishAndJapaneseTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'English and Japanese Title'**
+  String get englishAndJapaneseTitle;
 }
 
 class _AppLocalizationsDelegate

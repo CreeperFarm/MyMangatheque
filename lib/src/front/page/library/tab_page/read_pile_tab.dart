@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mymangatheque/l10n/app_localizations.dart';
 import 'package:mymangatheque/src/back/provider/manga_owned_provider.dart';
-import 'package:mymangatheque/src/back/services/pocketbase.dart';
+import 'package:mymangatheque/src/back/services/appwrite.dart';
 import 'package:mymangatheque/src/const/assets.dart';
 import 'package:mymangatheque/src/const/own_icon.dart';
 import 'package:mymangatheque/src/front/components/my_line.dart';
@@ -26,7 +26,7 @@ class _ReadPileTabState extends ConsumerState<ReadPileTab> {
   int volumeOwned = 0;
   List<dynamic> readSubSeriesList = [];
   List<dynamic> notReadedSubSeriesList = [];
-  final connector = PocketBaseConnector();
+  final connector = AppwriteConnector();
   dynamic _ownedSubscription;
 
   dynamic readedSubSeries;

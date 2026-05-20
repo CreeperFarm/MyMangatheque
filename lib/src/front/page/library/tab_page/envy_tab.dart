@@ -1,10 +1,8 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mymangatheque/l10n/app_localizations.dart';
 import 'package:mymangatheque/src/back/provider/manga_owned_provider.dart';
-import 'package:mymangatheque/src/back/services/pocketbase.dart';
+import 'package:mymangatheque/src/back/services/appwrite.dart';
 import 'package:mymangatheque/src/const/assets.dart';
 import 'package:mymangatheque/src/const/own_icon.dart';
 import 'package:mymangatheque/src/front/components/my_line.dart';
@@ -21,16 +19,14 @@ class EnvyTab extends ConsumerStatefulWidget {
 }
 
 class _EnvyTabState extends ConsumerState<EnvyTab> {
-  PocketBaseConnector connector = PocketBaseConnector();
+  AppwriteConnector connector = AppwriteConnector();
   int followedVolumeNumber = 0;
   int followedSubSeriesNumber = 0;
   List<SubSerieForCollection> ownedSubSeriesList = [];
   List<SubSerieForCollection> followedSubSeriesList = [];
   List authorsNameLinkSubSeriesId = [];
-  dynamic
-  _ownedSubscription; // Subscription to listen to changes in owned manga
-  dynamic
-  _followedSubscription; // Subscription to listen to changes in followed manga
+  dynamic _ownedSubscription; // Subscription to listen to changes in owned manga
+  dynamic _followedSubscription; // Subscription to listen to changes in followed manga
   dynamic ownedSubSeries;
 
   int getNumberVolumesOwnedOfSubSeries(String id) {
@@ -47,13 +43,19 @@ class _EnvyTabState extends ConsumerState<EnvyTab> {
   Future<String> getAuthorNameOfSubSeries(String id) async {
     String authorName = "";
     final res = await connector.getOneExpand("sub_series", id, "authors");
-    final data = json.decode(res.toString());
-    final length = data[0]['expand']['authors'].length;
+    if (res.isEmpty) return "error";
+    final data = Map<String, dynamic>.from(res.first.data);
+    final expand = data['expand'] is Map<String, dynamic> ? data['expand'] as Map<String, dynamic> : <String, dynamic>{};
+    final authors = (expand['authors'] as List<dynamic>?) ?? const <dynamic>[];
+    final authorMaps = authors.whereType<Map<String, dynamic>>().toList();
+    final length = authorMaps.length;
     for (var i = 0; i < length; i++) {
+      final name = authorMaps[i]['name']?.toString() ?? '';
+      if (name.isEmpty) continue;
       if (i != length - 1) {
-        authorName += data[0]['expand']['authors'][i]['name'] + ", ";
+        authorName += '$name, ';
       } else {
-        authorName += data[0]['expand']['authors'][i]['name'];
+        authorName += name;
       }
     }
     if (authorName == "") {
@@ -82,21 +84,22 @@ class _EnvyTabState extends ConsumerState<EnvyTab> {
     // Get the favorite sub series from local storage
     final res = await connector.getCollectionFullDataWithFilterExpand(
       "followed",
-      "user='${PocketBaseConnector().getConnectedUser()!.id}'",
+      '',
       'sub_serie',
     );
-    final data = json.decode(res.toString());
-    for (var followed in data) {
+    for (final followedRecord in res) {
+      final followed = Map<String, dynamic>.from(followedRecord.data);
+      final expand = followed['expand'] is Map<String, dynamic> ? followed['expand'] as Map<String, dynamic> : <String, dynamic>{};
+      final subSerie = (expand['sub_serie'] as Map<String, dynamic>?) ?? <String, dynamic>{};
       if (getNumberVolumesOwnedOfSubSeries(followed["sub_serie"]) == 0) {
         followedSubSeriesList.add(
           SubSerieForCollection(
             id: followed['sub_serie'],
-            title: followed['expand']['sub_serie']['title'],
-            numberOfVolumes: followed['expand']['sub_serie']['volumes'].length,
+            title: subSerie['title'],
+            numberOfVolumes: (subSerie['volumes'] as List<dynamic>?)?.length ?? 0,
             volumes: [],
             numberOwnedVolumes: 0,
-            cover:
-                'https://api.mymangatheque.com/api/files/ofwxwbyrhy5dcor/${followed['sub_serie']}/${followed['expand']['sub_serie']['image']}',
+            cover: subSerie['coverUrl'] ?? subSerie['image'] ?? '',
           ),
         );
         followedSubSeriesNumber += 1;
@@ -133,22 +136,16 @@ class _EnvyTabState extends ConsumerState<EnvyTab> {
   void _setupRealtimeOrFallback() {
     _cancelRealtime();
     try {
-      _ownedSubscription = connector.connector().collection('owned').subscribe(
-        '*',
-        (event) async {
-          debugPrint("Got an event");
-          await ref.read(mangaOwnedProvider.notifier).initData();
-          _fetchData();
-        },
-      );
-      _followedSubscription = connector
-          .connector()
-          .collection('followed')
-          .subscribe('*', (event) async {
-            debugPrint("Got an event");
-            await ref.read(mangaOwnedProvider.notifier).initData();
-            _fetchData();
-          });
+      _ownedSubscription = connector.connector().collection('owned').subscribe('*', (event) async {
+        debugPrint("Got an event");
+        await ref.read(mangaOwnedProvider.notifier).initData();
+        _fetchData();
+      });
+      _followedSubscription = connector.connector().collection('followed').subscribe('*', (event) async {
+        debugPrint("Got an event");
+        await ref.read(mangaOwnedProvider.notifier).initData();
+        _fetchData();
+      });
 
       debugPrint('Realtime subscriptions established.');
     } catch (e) {
@@ -189,20 +186,10 @@ class _EnvyTabState extends ConsumerState<EnvyTab> {
       padding: const EdgeInsets.all(10),
       child: Column(
         children: [
-          MyTomeNumberShow(
-            tomeTotal: "$followedVolumeNumber",
-            editionTotal: "$followedSubSeriesNumber",
-            localizations: localizations,
-          ),
+          MyTomeNumberShow(tomeTotal: "$followedVolumeNumber", editionTotal: "$followedSubSeriesNumber", localizations: localizations),
           (followedVolumeNumber == 0)
               ? Center(
-                  child: Text(
-                    localizations.noFollowedSubSerie,
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                  child: Text(localizations.noFollowedSubSerie, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                 )
               : const SizedBox(),
           Column(
@@ -211,10 +198,7 @@ class _EnvyTabState extends ConsumerState<EnvyTab> {
                 Column(
                   children: [
                     InkWell(
-                      onTap: () => pushOrGo(
-                        context,
-                        Routes.librarySubSerie(subSerie.id),
-                      ),
+                      onTap: () => pushOrGo(context, Routes.librarySubSerie(subSerie.id)),
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 10.0),
                         child: Row(
@@ -223,11 +207,7 @@ class _EnvyTabState extends ConsumerState<EnvyTab> {
                           children: [
                             ClipRRect(
                               borderRadius: BorderRadius.circular(10.0),
-                              child: Image.network(
-                                subSerie.cover ??
-                                    'https://placehold.co/514x728?text=No%20Image',
-                                width: 65,
-                              ),
+                              child: Image.network(subSerie.cover ?? 'https://placehold.co/514x728?text=No%20Image', width: 65),
                             ),
                             const SizedBox(width: 10),
                             Expanded(
@@ -236,43 +216,22 @@ class _EnvyTabState extends ConsumerState<EnvyTab> {
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 children: [
                                   Text(
-                                    subSerie.title.replaceAll(
-                                      ' - Edition Standard',
-                                      '',
-                                    ),
-                                    style: const TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                                    subSerie.title.replaceAll(' - Edition Standard', ''),
+                                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                                     softWrap: true,
                                     overflow: TextOverflow.ellipsis,
                                   ),
-                                  Text(
-                                    localizations.subSerieVolumeNumber(
-                                      subSerie.numberOfVolumes,
-                                    ),
-                                  ),
-                                  Text(
-                                    localizations.subSerieFromAuthor(
-                                      displayAuthorWithSubSeriesId(subSerie.id),
-                                    ),
-                                  ),
+                                  Text(localizations.subSerieVolumeNumber(subSerie.numberOfVolumes)),
+                                  Text(localizations.subSerieFromAuthor(displayAuthorWithSubSeriesId(subSerie.id))),
                                 ],
                               ),
                             ),
-                            OwnIcon(
-                              iconColor: Theme.of(context).colorScheme.primary,
-                              iconSrc: Assets.icons.arrowRight,
-                            ),
+                            OwnIcon(iconColor: Theme.of(context).colorScheme.primary, iconSrc: Assets.icons.arrowRight),
                           ],
                         ),
                       ),
                     ),
-                    MyLine(
-                      width: MediaQuery.of(context).size.width,
-                      vertical: 10,
-                      horizontal: 0,
-                    ),
+                    MyLine(width: MediaQuery.of(context).size.width, vertical: 10, horizontal: 0),
                   ],
                 ),
             ],

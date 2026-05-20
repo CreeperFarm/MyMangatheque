@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mymangatheque/src/back/services/pocketbase.dart';
+import 'package:mymangatheque/src/back/services/appwrite.dart';
 
 class PlanningPage extends StatefulWidget {
   const PlanningPage({super.key});
@@ -10,7 +10,7 @@ class PlanningPage extends StatefulWidget {
 
 class _PlanningPageState extends State<PlanningPage> {
   List<dynamic>? latestManga;
-  final PocketBaseConnector connector = PocketBaseConnector();
+  final AppwriteConnector connector = AppwriteConnector();
 
   Future<void> getLatestManga() async {
     await connector
@@ -19,8 +19,7 @@ class _PlanningPageState extends State<PlanningPage> {
           'release?<="${DateTime.now().add(const Duration(days: 14)).toUtc()}"&&release?>="${DateTime.now().subtract(const Duration(days: 14)).toIso8601String()}"',
         )
         .then((value) {
-          if (value.isNotEmpty &&
-              !value[0].toString().contains("statusCode: 404")) {
+          if (value.isNotEmpty && !value[0].toString().contains("statusCode: 404")) {
             setState(() {
               latestManga = value;
             });
@@ -29,15 +28,15 @@ class _PlanningPageState extends State<PlanningPage> {
     debugPrint(latestManga.toString());
   }
 
-  Future<String> getAllAuthorsName(List authorsId) async {
-    var authors = [];
+  Future<String> getAllAuthorsName(List<dynamic> authorsId) async {
+    final authors = <String>[];
     for (var authorId in authorsId) {
       authors.add(await connector.getAuthorName(authorId));
     }
     return authors.join(" & ");
   }
 
-  String textLength(text, length) {
+  String textLength(dynamic text, int length) {
     if (text.length > length) {
       return text.substring(0, length) + "...";
     } else {

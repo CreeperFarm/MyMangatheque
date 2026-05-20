@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:mymangatheque/src/back/services/pocketbase.dart';
+import 'package:mymangatheque/src/back/services/appwrite.dart';
 import 'package:mymangatheque/src/const/assets.dart';
 import 'package:mymangatheque/src/front/components/my_drawer_tile.dart';
 import 'package:mymangatheque/src/function/auto_push_or_go.dart';
@@ -101,11 +101,11 @@ class _MyDrawerState extends State<MyDrawer> {
                   vertical: 25,
                 ),
                 child: StreamBuilder(
-                  stream: PocketBaseConnector().listenToUserChanges(),
+                  stream: AppwriteConnector().listenToUserChanges(),
                   builder: (context, snapshot) {
-                    final isLoggedIn = PocketBaseConnector().isLoggedIn();
+                    final isLoggedIn = AppwriteConnector().isLoggedIn();
                     if (isLoggedIn) {
-                      final user = PocketBaseConnector().getConnectedUser();
+                      final user = AppwriteConnector().getConnectedUser();
                       return Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [

@@ -1,63 +1,70 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:mymangatheque/l10n/app_localizations.dart';
-import 'package:mymangatheque/src/back/provider/last_ean.dart';
-import 'package:mymangatheque/src/back/services/pocketbaseadmin.dart';
-import 'package:mymangatheque/src/front/components/my_scroll_column.dart';
-import 'package:mymangatheque/src/front/page/admin_pages/admin_login_page.dart';
+import 'package:mymangatheque/src/back/services/admin_service.dart';
 import 'package:mymangatheque/src/function/auto_push_or_go.dart';
 
-class AdminHomePage extends ConsumerWidget {
+class AdminHomePage extends StatefulWidget {
   const AdminHomePage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    // Get localization - return early if not available
-    var localizations = AppLocalizations.of(context);
-    if (localizations == null) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
-    }
+  State<AdminHomePage> createState() => _AdminHomePageState();
+}
 
-    var lastEAN = ref.watch(lastEANProvider);
+class _AdminHomePageState extends State<AdminHomePage> {
+  final AdminConnector _admin = AdminConnector();
 
-    if (PocketBaseAdminConnector().isLoggedIn()) {
-      return Scaffold(
-        appBar: AppBar(title: Text(localizations.adminHomePage)),
-        body: MyScrollColumn(
+  @override
+  void initState() {
+    super.initState();
+    _admin.init().then((_) {
+      if (!mounted) return;
+      setState(() {});
+    });
+  }
+
+  Future<void> _logout() async {
+    await _admin.logout();
+    if (!mounted) return;
+    setState(() {});
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isLoggedIn = _admin.isLoggedIn();
+    return Scaffold(
+      appBar: AppBar(title: const Text('Admin')),
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: ListView(
           children: [
-            Center(
-              child: Column(
-                children: [
-                  Text(localizations.adminHomePage),
-                  Text(localizations.adminHomePageDescription),
-                  ElevatedButton(
-                    onPressed: () => pushOrGo(context, '/admin/create'),
-                    child: const Text("Go to Admin Create Page"),
-                  ),
-                  ElevatedButton(
-                    child: Text(localizations.scanEAN),
-                    onPressed: () => pushOrGo(context, '/library/scan'),
-                  ),
-                  ElevatedButton(
-                    child: Text('Copy last EAN: $lastEAN'),
-                    onPressed: () async {
-                      await Clipboard.setData(ClipboardData(text: lastEAN));
-                      // copied successfully
-                    },
-                  ),
-                  ElevatedButton(
-                    child: const Text("Stats"),
-                    onPressed: () => pushOrGo(context, '/admin/static_page'),
-                  ),
-                ],
-              ),
+            Text(
+              isLoggedIn
+                  ? 'Connecté avec ${_admin.maskedKey}'
+                  : 'Tu dois te connecter avec une clé API admin.',
             ),
+            const SizedBox(height: 16),
+            if (!isLoggedIn)
+              ElevatedButton(
+                onPressed: () => pushOrGo(context, '/admin/admin_login'),
+                child: const Text('Se connecter'),
+              ),
+            if (isLoggedIn)
+              ElevatedButton(
+                onPressed: () => pushOrGo(context, '/admin/create'),
+                child: const Text('Création de données'),
+              ),
+            if (isLoggedIn)
+              ElevatedButton(
+                onPressed: () => pushOrGo(context, '/admin/static_page'),
+                child: const Text('Statistiques'),
+              ),
+            if (isLoggedIn)
+              ElevatedButton(
+                onPressed: _logout,
+                child: const Text('Déconnexion admin'),
+              ),
           ],
         ),
-      );
-    } else {
-      return const AdminLoginPage();
-    }
+      ),
+    );
   }
 }

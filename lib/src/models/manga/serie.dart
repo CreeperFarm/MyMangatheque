@@ -19,10 +19,14 @@ class Serie {
   List<String> genres; // * Get the list of genres of the serie
   DateTime lastTimeChecked; // * Get the last time the serie was checked
 
+  static String _resolveImage(Map<String, dynamic> json) {
+    return (json['image'] ?? json['coverUrl'] ?? '').toString();
+  }
+
   factory Serie.fromJson(Map<String, dynamic> json) => Serie(
     id: json['id'],
     title: json['title'],
-    image: json['image'],
+    image: _resolveImage(json),
     subSeries: List<String>.from(json['subSeries'].map((x) => x)),
     authors: List<String>.from(json['authors'].map((x) => x)),
     editors: List<String>.from(json['editors'].map((x) => x)),
@@ -34,6 +38,7 @@ class Serie {
     'id': id,
     'title': title,
     'image': image,
+    'coverUrl': image,
     'subSeries': List<dynamic>.from(subSeries.map((x) => x)),
     'authors': List<dynamic>.from(authors.map((x) => x)),
     'editors': List<dynamic>.from(editors.map((x) => x)),

@@ -1,13 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:mymangatheque/l10n/app_localizations.dart';
-import 'package:mymangatheque/src/back/services/pocketbaseadmin.dart';
-import 'package:mymangatheque/src/const/assets.dart';
-import 'package:mymangatheque/src/front/components/my_button.dart';
-import 'package:mymangatheque/src/front/components/my_scroll_column.dart';
-import 'package:mymangatheque/src/front/components/my_textfield.dart';
-import 'package:mymangatheque/src/function/show_message_function.dart';
+import 'package:mymangatheque/src/back/services/admin_service.dart';
+import 'package:mymangatheque/src/function/auto_push_or_go.dart';
 
 class AdminLoginPage extends StatefulWidget {
   const AdminLoginPage({super.key});
@@ -17,95 +10,125 @@ class AdminLoginPage extends StatefulWidget {
 }
 
 class _AdminLoginPageState extends State<AdminLoginPage> {
-  final emailController = TextEditingController();
-  final passwordController = TextEditingController();
-  final connector = PocketBaseAdminConnector();
+  final AdminConnector _admin = AdminConnector();
+  final TextEditingController _apiKeyController = TextEditingController();
+  bool _loading = false;
+  String _message = '';
 
-  // Dispose Variable
+  @override
+  void initState() {
+    super.initState();
+    _admin.init().then((_) {
+      if (!mounted) return;
+      setState(() {});
+    });
+  }
+
   @override
   void dispose() {
-    emailController.dispose();
-    passwordController.dispose();
+    _apiKeyController.dispose();
     super.dispose();
+  }
+
+  Future<void> _loginWithManualKey() async {
+    if (_apiKeyController.text.trim().isEmpty) {
+      setState(() {
+        _message = 'Saisis une clé API admin.';
+      });
+      return;
+    }
+
+    setState(() {
+      _loading = true;
+      _message = '';
+    });
+
+    final ok = await _admin.loginAsAdmin(_apiKeyController.text.trim());
+    if (!mounted) return;
+
+    setState(() {
+      _loading = false;
+      _message = ok
+          ? 'Connexion admin réussie.'
+          : 'Clé API invalide ou non admin.';
+    });
+
+    if (ok) {
+      pushOrGo(context, '/admin');
+    }
+  }
+
+  Future<void> _loginWithSessionKey() async {
+    setState(() {
+      _loading = true;
+      _message = '';
+    });
+
+    try {
+      final ok = await _admin.loginWithCurrentSessionKey();
+      if (!mounted) return;
+      setState(() {
+        _loading = false;
+        _message = ok
+            ? 'Connexion admin via session réussie.'
+            : 'La session courante n’a pas les droits admin.';
+      });
+
+      if (ok) {
+        pushOrGo(context, '/admin');
+      }
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _loading = false;
+        _message = 'Impossible d’utiliser la session courante: $e';
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    // Get localization - return early if not available
-    var localizations = AppLocalizations.of(context);
-    if (localizations == null) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
-    }
-
     return Scaffold(
-      appBar: AppBar(
-        title: Text(localizations.adminLoginPage, style: GoogleFonts.poppins()),
-      ),
-      body: MyScrollColumn(
-        scrollPadding: const EdgeInsets.symmetric(horizontal: 8),
-        children: [
-          Column(
-            children: [
-              // Display logo
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 20),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(30.0),
-                  child: Image.asset(
-                    Assets.logo.blueToneAndWhiteSquare,
-                    width: 200,
-                  ),
-                ),
+      appBar: AppBar(title: const Text('Admin Login')),
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: ListView(
+          children: [
+            const Text(
+              'Connexion admin',
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'État: ${_admin.isLoggedIn() ? "connecté (${_admin.maskedKey})" : "non connecté"}',
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: _apiKeyController,
+              autocorrect: false,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: 'Clé API admin',
+                hintText: 'mmt_xxx...',
               ),
-              // Email field
-              MyTextField(
-                controller: emailController,
-                labelText: localizations.yourEmail,
-                obscureText: false,
-                errorMessage: localizations.provideYourEmail,
-              ),
-
-              const SizedBox(height: 15),
-
-              // Password field
-              MyTextField(
-                controller: passwordController,
-                labelText: localizations.yourPassword,
-                obscureText: true,
-                errorMessage: localizations.provideYourPassword,
-              ),
-            ],
-          ),
-          const SizedBox(height: 15),
-          // Display sign in button
-          MyButton(
-            text: localizations.logIn,
-            onTap: () async {
-              try {
-                await connector
-                    .loginAsAdmin(
-                      emailController.text,
-                      passwordController.text,
-                      context,
-                    )
-                    .then((value) async {
-                      if (value) {
-                        if (!mounted) return;
-                        setState(() {});
-                        await Future.delayed(const Duration(milliseconds: 250));
-                        if (!mounted) return;
-                        GoRouter.of(context).push('/admin');
-                        showMessage(localizations.adminLoginSuccess, context);
-                      }
-                    });
-              } catch (e) {
-                if (!mounted) return;
-                var error = e.toString();
-                showMessage(error, context);
-              }
-            },
-          ),
-        ],
+            ),
+            const SizedBox(height: 12),
+            ElevatedButton(
+              onPressed: _loading ? null : _loginWithManualKey,
+              child: const Text('Connexion avec clé API'),
+            ),
+            const SizedBox(height: 8),
+            ElevatedButton(
+              onPressed: _loading ? null : _loginWithSessionKey,
+              child: const Text('Utiliser la session courante'),
+            ),
+            const SizedBox(height: 8),
+            if (_loading)
+              const Center(child: CircularProgressIndicator())
+            else if (_message.isNotEmpty)
+              Text(_message),
+          ],
+        ),
       ),
     );
   }

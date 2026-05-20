@@ -257,6 +257,7 @@
   "volumeAdd": "Ajouter un volume",
   "volumeAddSuccess": "Volume ajouté avec succès.",
   "volumeAddError": "Une erreur est survenue, le volume n'a pas été ajouté.",
+  "subSerie": "Sous-série",
   "subSeries": "Sous-séries",
   "editor": "Éditeur",
   "genre": "Genre",
@@ -509,10 +510,60 @@
       }
     }
   },
+  "tryAgain": "Réessayer",
+  "noResults": "Aucun résultat",
+  "notAvailable": "Non disponible",
+  "reviews": "Avis",
+  "noReviewsForThisVolumeYet": "Aucun avis pour ce tome pour le moment.",
+  "pendingModeration": "En attente de modération",
+  "reviewQuestionnaireTitle": "Questionnaire d'avis",
+  "reviewQuestionnaireDescription": "Maintenant que ce tome est marqué comme lu, vous pouvez le noter et laisser un commentaire.",
+  "openQuestionnaire": "Ouvrir le questionnaire",
+  "reviewStars": "Étoiles : {count}/5",
+  "@reviewStars": {
+    "description": "Libellé affichant la note sur cinq étoiles",
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "favoriteCharacters": "Personnage(s) favori(s)",
+  "favoriteCharactersHint": "Tanjiro, Nezuko, ...",
+  "favoriteCharactersLabel": "Personnage(s) favori(s) : {characters}",
+  "@favoriteCharactersLabel": {
+    "description": "Libellé des personnages favoris dans un avis",
+    "placeholders": {
+      "characters": {
+        "type": "String"
+      }
+    }
+  },
+  "comment": "Commentaire",
+  "reviewCommentHint": "Qu'avez-vous pensé de ce tome ?",
+  "reviewSubmittedSuccess": "Avis envoyé avec succès.",
+  "reviewSubmitFailed": "Impossible d'envoyer l'avis : {error}",
+  "@reviewSubmitFailed": {
+    "description": "Message d'échec d'envoi d'avis",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "adultContentPreferenceDescription": "Autoriser l'affichage des couvertures et contenus marqués 18+.",
+  "adultContentEnabled": "Affichage du contenu adulte activé.",
+  "adultContentDisabled": "Affichage du contenu adulte désactivé.",
+  "adultContentBlockedDescription": "Ce tome est marqué 18+. Activez le contenu adulte dans les réglages du profil pour afficher la couverture.",
+  "openContentSettings": "Ouvrir les réglages du contenu",
+  "availabilityUnknown": "Disponibilité inconnue",
   "areYouSureDeleteAccount": "Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible et entraînera la suppression de toutes vos données, y compris votre collection, vos séries suivies et vos informations de profil.",
   "cancel": "Annuler",
   "confirm": "Confirmer",
   "ok": "OK",
   "accountHaveBeenDeleted": "Votre compte a été supprimé avec succès.",
-  "errorDeleteAccount": "Une erreur est survenue lors de la suppression de votre compte. Veuillez réessayer plus tard."
+  "errorDeleteAccount": "Une erreur est survenue lors de la suppression de votre compte. Veuillez réessayer plus tard.",
+  "englishTitle": "Titre anglais",
+  "japaneseTitle": "Titre japonais",
+  "englishAndJapaneseTitle": "Titre anglais et japonais"
 }
