@@ -8,8 +8,7 @@ import 'package:mymangatheque/environment.dart';
 class AppwriteClientService {
   AppwriteClientService._internal();
 
-  static final AppwriteClientService _singleton =
-      AppwriteClientService._internal();
+  static final AppwriteClientService _singleton = AppwriteClientService._internal();
 
   factory AppwriteClientService() => _singleton;
 
@@ -30,8 +29,7 @@ class AppwriteClientService {
       ..setProject(Environment.appwriteProjectId);
 
     // Keep self-signed only in local debug environments.
-    if (!kReleaseMode &&
-        Environment.appwritePublicEndpoint.contains('localhost')) {
+    if (!kReleaseMode && Environment.appwritePublicEndpoint.contains('localhost')) {
       _client.setSelfSigned(status: true);
     }
 
@@ -42,8 +40,11 @@ class AppwriteClientService {
   }
 
   Account get account => _account;
+
   Storage get storage => _storage;
+
   Realtime get realtime => _realtime;
+
   Client get client => _client;
 
   Future<models.User?> tryGetCurrentUser() async {
@@ -159,18 +160,10 @@ class AppwriteClientService {
     final callbackParams = _queryAndFragmentParams(callbackUri);
 
     final callbackHost = callbackUri.host.toLowerCase();
-    final hasOAuthError =
-        callbackHost == 'oauth2failure' ||
-        callbackParams.containsKey('error') ||
-        callbackParams.containsKey('error_description');
+    final hasOAuthError = callbackHost == 'oauth2failure' || callbackParams.containsKey('error') || callbackParams.containsKey('error_description');
     if (hasOAuthError) {
-      final errorDetails =
-          callbackParams['error_description'] ??
-          callbackParams['error'] ??
-          callbackUri.toString();
-      final sessionAlreadyExists =
-          errorDetails.contains('user_session_already_exists') ||
-          errorDetails.contains('session is active');
+      final errorDetails = callbackParams['error_description'] ?? callbackParams['error'] ?? callbackUri.toString();
+      final sessionAlreadyExists = errorDetails.contains('user_session_already_exists') || errorDetails.contains('session is active');
       if (sessionAlreadyExists) {
         final currentUser = await tryGetCurrentUser();
         if (currentUser != null) {
@@ -204,8 +197,7 @@ class AppwriteClientService {
     try {
       await _account.createSession(userId: userId, secret: secret);
     } on AppwriteException catch (e) {
-      final sessionAlreadyExists =
-          e.type == 'user_session_already_exists' || e.code == 409;
+      final sessionAlreadyExists = e.type == 'user_session_already_exists' || e.code == 409;
       if (sessionAlreadyExists) {
         final currentUser = await tryGetCurrentUser();
         if (currentUser != null) {

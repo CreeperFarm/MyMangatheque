@@ -76,10 +76,8 @@ class AppwriteConnector {
   final NotificationService _notifications = NotificationService();
 
   final BehaviorSubject<User?> _connectedUser = BehaviorSubject<User?>();
-  final Map<String, _RecordListCacheEntry> _fullListCache =
-      <String, _RecordListCacheEntry>{};
-  final Map<String, Future<List<RecordModel>>> _fullListInFlight =
-      <String, Future<List<RecordModel>>>{};
+  final Map<String, _RecordListCacheEntry> _fullListCache = <String, _RecordListCacheEntry>{};
+  final Map<String, Future<List<RecordModel>>> _fullListInFlight = <String, Future<List<RecordModel>>>{};
   Set<String>? _ownedVolumeIdsIndex;
   Map<String, bool>? _ownedReadStateIndex;
   Set<String>? _followedSubSeriesIdsIndex;
@@ -190,9 +188,7 @@ class AppwriteConnector {
       final now = DateTime.now().toUtc();
       return User(
         id: accountUser.$id,
-        username: accountUser.name.isNotEmpty
-            ? accountUser.name
-            : accountUser.email.split('@').first,
+        username: accountUser.name.isNotEmpty ? accountUser.name : accountUser.email.split('@').first,
         email: accountUser.email,
         gender: 'other',
         avatar: null,
@@ -467,8 +463,7 @@ class AppwriteConnector {
       return false;
     }
 
-    final hasAuthenticatedSession = await _appwrite
-        .hasAuthenticatedUserSession();
+    final hasAuthenticatedSession = await _appwrite.hasAuthenticatedUserSession();
     if (!hasAuthenticatedSession) {
       debugPrint('Avatar upload skipped: no authenticated Appwrite session.');
       if (context.mounted) {
@@ -852,10 +847,7 @@ class AppwriteConnector {
 
     final data = decoded['data'];
     final dataMap = data is Map<String, dynamic> ? data : <String, dynamic>{};
-    final rows =
-        dataMap[listKey] ??
-        decoded[listKey] ??
-        (dataMap.length == 1 ? dataMap.values.first : null);
+    final rows = dataMap[listKey] ?? decoded[listKey] ?? (dataMap.length == 1 ? dataMap.values.first : null);
     final rawList = rows is List<dynamic> ? rows : const <dynamic>[];
 
     final records = rawList
@@ -871,15 +863,10 @@ class AppwriteConnector {
         .toList();
 
     final paginationRaw = decoded['pagination'];
-    final pagination = paginationRaw is Map<String, dynamic>
-        ? paginationRaw
-        : <String, dynamic>{};
+    final pagination = paginationRaw is Map<String, dynamic> ? paginationRaw : <String, dynamic>{};
 
     final totalItemsFromPagination = _toIntOrDefault(
-      pagination['totalItems'] ??
-          pagination['total'] ??
-          pagination['count'] ??
-          pagination['totalCount'],
+      pagination['totalItems'] ?? pagination['total'] ?? pagination['count'] ?? pagination['totalCount'],
       0,
     );
     final currentPage = _toIntOrDefault(
@@ -946,8 +933,7 @@ class AppwriteConnector {
             ),
           )
           .toList();
-      final shouldCacheEmpty =
-          normalized == 'owned' || normalized == 'followed';
+      final shouldCacheEmpty = normalized == 'owned' || normalized == 'followed';
       if (records.isNotEmpty || shouldCacheEmpty) {
         _fullListCache[normalized] = _RecordListCacheEntry(
           _cloneRecords(records),
@@ -1186,9 +1172,7 @@ class AppwriteConnector {
 
   Future<List<String>> getSubSerieVolumesImages(String id) async {
     final subSeries = await getOneExpand('sub_series', id, 'volumes');
-    final volumes =
-        (subSeries.first.data['expand']?['volumes'] as List?) ??
-        const <dynamic>[];
+    final volumes = (subSeries.first.data['expand']?['volumes'] as List?) ?? const <dynamic>[];
 
     final sorted =
         List<Map<String, dynamic>>.from(
@@ -1199,16 +1183,11 @@ class AppwriteConnector {
           return aTome.compareTo(bTome);
         });
 
-    return sorted
-        .map((volume) => volume['image']?.toString() ?? '')
-        .where((url) => url.isNotEmpty)
-        .toList();
+    return sorted.map((volume) => volume['image']?.toString() ?? '').where((url) => url.isNotEmpty).toList();
   }
 
   Future<void> _ensureOwnedIndexes() async {
-    if (_ownedVolumeIdsIndex != null &&
-        _ownedReadStateIndex != null &&
-        _isCacheEntryFresh(_fullListCache['owned'])) {
+    if (_ownedVolumeIdsIndex != null && _ownedReadStateIndex != null && _isCacheEntryFresh(_fullListCache['owned'])) {
       return;
     }
 
@@ -1217,7 +1196,7 @@ class AppwriteConnector {
     final readState = <String, bool>{};
 
     for (final entry in entries) {
-      final volumeId = entry.data['volume']?.toString() ?? '';
+      final volumeId = entry.data['volume']?.toString() ?? entry.data['volumeId']?.toString() ?? entry.data['volumes']?.toString() ?? '';
       if (volumeId.isEmpty) continue;
       ids.add(volumeId);
       readState[volumeId] = entry.data['readed'] == true;
@@ -1228,13 +1207,19 @@ class AppwriteConnector {
   }
 
   Future<void> _ensureFollowedIndex() async {
-    if (_followedSubSeriesIdsIndex != null &&
-        _isCacheEntryFresh(_fullListCache['followed'])) {
+    if (_followedSubSeriesIdsIndex != null && _isCacheEntryFresh(_fullListCache['followed'])) {
       return;
     }
     final entries = await getCollectionFullList('followed');
     _followedSubSeriesIdsIndex = entries
-        .map((entry) => entry.data['sub_serie']?.toString() ?? '')
+        .map(
+          (entry) =>
+              entry.data['sub_serie']?.toString() ??
+              entry.data['sub_series']?.toString() ??
+              entry.data['subSeries']?.toString() ??
+              entry.data['subSeriesId']?.toString() ??
+              '',
+        )
         .where((id) => id.isNotEmpty)
         .toSet();
   }
@@ -1331,16 +1316,11 @@ class AppwriteConnector {
       );
 
       final includePendingUser = includePendingForUserId ?? '';
-      final reviews = response.rows
-          .map<Map<String, dynamic>>((doc) => _normalizeReviewDocument(doc))
-          .where((review) {
-            final checked = review['commentChecked'] == true;
-            final isPendingForUser =
-                includePendingUser.isNotEmpty &&
-                review['userId']?.toString() == includePendingUser;
-            return checked || isPendingForUser;
-          })
-          .toList();
+      final reviews = response.rows.map<Map<String, dynamic>>((doc) => _normalizeReviewDocument(doc)).where((review) {
+        final checked = review['commentChecked'] == true;
+        final isPendingForUser = includePendingUser.isNotEmpty && review['userId']?.toString() == includePendingUser;
+        return checked || isPendingForUser;
+      }).toList();
 
       return reviews;
     } catch (e) {
@@ -1363,11 +1343,7 @@ class AppwriteConnector {
 
     final normalizedStars = stars.clamp(1, 5);
     final cleanedComment = comment.trim();
-    final cleanedFavCharacters = favCharacters
-        .map((item) => item.trim())
-        .where((item) => item.isNotEmpty)
-        .toSet()
-        .toList();
+    final cleanedFavCharacters = favCharacters.map((item) => item.trim()).where((item) => item.isNotEmpty).toSet().toList();
 
     final payload = <String, dynamic>{
       'users': userId,
@@ -1435,11 +1411,9 @@ class AppwriteConnector {
     return (await PackageInfo.fromPlatform()).version;
   }
 
-  Future<String> get appVersion async =>
-      (await PackageInfo.fromPlatform()).version;
+  Future<String> get appVersion async => (await PackageInfo.fromPlatform()).version;
 
-  Future<String> get buildVersion async =>
-      (await PackageInfo.fromPlatform()).buildNumber;
+  Future<String> get buildVersion async => (await PackageInfo.fromPlatform()).buildNumber;
 
   String get serverUrl => 'https://api.mymangatheque.com';
 
@@ -1650,9 +1624,7 @@ class AppwriteConnector {
           fullList: true,
           expand: expand,
         )).firstWhere(
-          (entry) =>
-              entry['volume']?.toString() == id ||
-              entry['id']?.toString() == id,
+          (entry) => entry['volume']?.toString() == id || entry['id']?.toString() == id,
           orElse: () => <String, dynamic>{'id': id},
         ),
       'followed' =>
@@ -1661,9 +1633,7 @@ class AppwriteConnector {
           fullList: true,
           expand: expand,
         )).firstWhere(
-          (entry) =>
-              entry['sub_serie']?.toString() == id ||
-              entry['id']?.toString() == id,
+          (entry) => entry['sub_serie']?.toString() == id || entry['id']?.toString() == id,
           orElse: () => <String, dynamic>{'id': id},
         ),
       _ => throw UnsupportedError('Unsupported collection: $collectionId'),
@@ -1685,9 +1655,7 @@ class AppwriteConnector {
   }) async {
     final response = await _api.get(
       path,
-      query: expand == null || expand.trim().isEmpty
-          ? null
-          : <String, dynamic>{'expand': expand},
+      query: expand == null || expand.trim().isEmpty ? null : <String, dynamic>{'expand': expand},
       requiresApiKey: requiresApiKey,
     );
 
@@ -1723,8 +1691,7 @@ class AppwriteConnector {
   dynamic _normalizeTopLevelExpand(dynamic rawExpand) {
     if (rawExpand == null) return null;
     if (rawExpand is Map<String, dynamic>) return _cloneExpandValue(rawExpand);
-    if (rawExpand is Map)
-      return _cloneExpandValue(Map<String, dynamic>.from(rawExpand));
+    if (rawExpand is Map) return _cloneExpandValue(Map<String, dynamic>.from(rawExpand));
 
     if (rawExpand is List) {
       final merged = <String, dynamic>{};
@@ -1856,10 +1823,8 @@ class AppwriteConnector {
               path: path,
               listKey: listKey,
               baseQuery: <String, dynamic>{
-                if (expand != null && expand.trim().isNotEmpty)
-                  'expand': expand,
-                if (filterQuery != null && filterQuery.trim().isNotEmpty)
-                  'filter': filterQuery,
+                if (expand != null && expand.trim().isNotEmpty) 'expand': expand,
+                if (filterQuery != null && filterQuery.trim().isNotEmpty) 'filter': filterQuery,
               },
               requiresApiKey: requiresApiKey,
             )
@@ -1869,10 +1834,8 @@ class AppwriteConnector {
                 query: <String, dynamic>{
                   'page': 1,
                   'limit': 20,
-                  if (expand != null && expand.trim().isNotEmpty)
-                    'expand': expand,
-                  if (filterQuery != null && filterQuery.trim().isNotEmpty)
-                    'filter': filterQuery,
+                  if (expand != null && expand.trim().isNotEmpty) 'expand': expand,
+                  if (filterQuery != null && filterQuery.trim().isNotEmpty) 'filter': filterQuery,
                 },
                 requiresApiKey: requiresApiKey,
               );
@@ -1906,10 +1869,7 @@ class AppwriteConnector {
       rethrow;
     }
 
-    return rows
-        .whereType<Map<String, dynamic>>()
-        .map((raw) => normalize(raw))
-        .toList();
+    return rows.whereType<Map<String, dynamic>>().map((raw) => normalize(raw)).toList();
   }
 
   Future<List<Map<String, dynamic>>> _fetchUserCollection(
@@ -1922,9 +1882,7 @@ class AppwriteConnector {
     try {
       response = await _api.get(
         path,
-        query: expand == null || expand.trim().isEmpty
-            ? null
-            : <String, dynamic>{'expand': expand},
+        query: expand == null || expand.trim().isEmpty ? null : <String, dynamic>{'expand': expand},
         requiresApiKey: true,
         requiresBearer: true,
       );
@@ -1938,17 +1896,54 @@ class AppwriteConnector {
     }
 
     final decoded = _api.decodeBody(response);
-    if (decoded is! Map<String, dynamic>) return <Map<String, dynamic>>[];
+    final list = _extractUserCollectionList(decoded, listKey);
+    if (list.isEmpty) return <Map<String, dynamic>>[];
+
+    return list.whereType<Map<String, dynamic>>().map((raw) => normalize(raw)).toList();
+  }
+
+  List<dynamic> _extractUserCollectionList(dynamic decoded, String listKey) {
+    if (decoded is List<dynamic>) return decoded;
+    if (decoded is! Map<String, dynamic>) return const <dynamic>[];
+
+    final direct = decoded[listKey];
+    if (direct is List<dynamic>) return direct;
+
+    final alternateKeys = <String>[
+      if (listKey == 'ownedVolumes') ...<String>['owned', 'ownedVolumes'],
+      if (listKey == 'followedSubSeries') ...<String>['followed', 'followedSubSeries'],
+      'items',
+      'results',
+      'data',
+    ];
+    for (final key in alternateKeys) {
+      final candidate = decoded[key];
+      if (candidate is List<dynamic>) return candidate;
+      if (candidate is Map<String, dynamic>) {
+        final nested = candidate[listKey];
+        if (nested is List<dynamic>) return nested;
+        for (final nestedValue in candidate.values) {
+          if (nestedValue is List<dynamic>) return nestedValue;
+        }
+      }
+    }
+
     final data = decoded['data'];
-    if (data is! Map<String, dynamic>) return <Map<String, dynamic>>[];
+    if (data is List<dynamic>) return data;
+    if (data is Map<String, dynamic>) {
+      final nested = data[listKey];
+      if (nested is List<dynamic>) return nested;
 
-    final list = data[listKey];
-    if (list is! List<dynamic>) return <Map<String, dynamic>>[];
+      for (final value in data.values) {
+        if (value is List<dynamic>) return value;
+      }
+    }
 
-    return list
-        .whereType<Map<String, dynamic>>()
-        .map((raw) => normalize(raw))
-        .toList();
+    for (final value in decoded.values) {
+      if (value is List<dynamic>) return value;
+    }
+
+    return const <dynamic>[];
   }
 
   Future<Map<String, dynamic>> _appendExpand(
@@ -1962,11 +1957,7 @@ class AppwriteConnector {
         .map((path) => path.trim())
         .where((path) => path.isNotEmpty)
         .map(
-          (path) => path
-              .split('.')
-              .map((part) => part.trim())
-              .where((part) => part.isNotEmpty)
-              .toList(),
+          (path) => path.split('.').map((part) => part.trim()).where((part) => part.isNotEmpty).toList(),
         )
         .where((parts) => parts.isNotEmpty);
 
@@ -2034,15 +2025,12 @@ class AppwriteConnector {
 
   List<Map<String, dynamic>> _expandedRecordMaps(dynamic value) {
     if (value is Map<String, dynamic>) return <Map<String, dynamic>>[value];
-    if (value is Map)
-      return <Map<String, dynamic>>[Map<String, dynamic>.from(value)];
+    if (value is Map) return <Map<String, dynamic>>[Map<String, dynamic>.from(value)];
     if (value is List) {
       return value
           .whereType<Map>()
           .map(
-            (item) => item is Map<String, dynamic>
-                ? item
-                : Map<String, dynamic>.from(item),
+            (item) => item is Map<String, dynamic> ? item : Map<String, dynamic>.from(item),
           )
           .toList();
     }
@@ -2050,9 +2038,7 @@ class AppwriteConnector {
   }
 
   dynamic _normalizeExpandedValue(_RelationSpec spec, dynamic value) {
-    final records = _expandedRecordMaps(value)
-        .map((item) => _normalizeRecordForCollection(spec.collectionId, item))
-        .toList();
+    final records = _expandedRecordMaps(value).map((item) => _normalizeRecordForCollection(spec.collectionId, item)).toList();
     if (spec.many) return records;
     return records.isNotEmpty ? records.first : <String, dynamic>{};
   }
@@ -2401,8 +2387,7 @@ class AppwriteConnector {
       if (expand.isNotEmpty) 'expand': expand,
       'info': parsedInfo,
       'book_link': parsedLinks,
-      'support':
-          raw['support']?.toString() ?? raw['type']?.toString() ?? 'manga',
+      'support': raw['support']?.toString() ?? raw['type']?.toString() ?? 'manga',
       'genre_jap': raw['genderJp'] ?? raw['genre_jap'],
       'created': raw[r'$createdAt'] ?? raw['created'],
       'updated': raw[r'$updatedAt'] ?? raw['updated'],
@@ -2412,9 +2397,7 @@ class AppwriteConnector {
   Map<String, dynamic> _normalizeAuthor(Map<String, dynamic> raw) {
     final id = _extractId(raw);
     final jobs = raw['jobs'];
-    final jobValue = jobs is List
-        ? jobs.map((e) => e.toString()).join(', ')
-        : raw['job']?.toString() ?? '';
+    final jobValue = jobs is List ? jobs.map((e) => e.toString()).join(', ') : raw['job']?.toString() ?? '';
     final subSeries = _relationIds(raw['subSeries'] ?? raw['sub_series']);
     final expand = _cloneExpandMap(raw['expand']);
 
@@ -2472,10 +2455,7 @@ class AppwriteConnector {
 
   Map<String, dynamic> _normalizeOwnedEntry(Map<String, dynamic> raw) {
     final id = _extractId(raw);
-    final volumeId =
-        raw['volumeId']?.toString() ??
-        _relationId(raw['volume'] ?? raw['volumes']) ??
-        '';
+    final volumeId = raw['volumeId']?.toString() ?? _relationId(raw['volume'] ?? raw['volumes']) ?? '';
     final expand = _cloneExpandMap(raw['expand']);
 
     final data = <String, dynamic>{
@@ -2489,11 +2469,7 @@ class AppwriteConnector {
       'updated': raw[r'$updatedAt'] ?? raw['updated'],
     };
 
-    final expandedVolume =
-        raw['volume'] ??
-        raw['volumes'] ??
-        expand['volume'] ??
-        expand['volumes'];
+    final expandedVolume = raw['volume'] ?? raw['volumes'] ?? expand['volume'] ?? expand['volumes'];
     if (expandedVolume is Map<String, dynamic>) {
       expand['volume'] = _normalizeVolume(expandedVolume);
     }
@@ -2522,11 +2498,7 @@ class AppwriteConnector {
       'updated': raw[r'$updatedAt'] ?? raw['updated'],
     };
 
-    final expandedSubSeries =
-        raw['subSeries'] ??
-        expand['subSeries'] ??
-        expand['sub_series'] ??
-        expand['sub_serie'];
+    final expandedSubSeries = raw['subSeries'] ?? expand['subSeries'] ?? expand['sub_series'] ?? expand['sub_serie'];
     if (expandedSubSeries is Map<String, dynamic>) {
       final sub = _normalizeSubSeries(expandedSubSeries);
       expand['sub_serie'] = sub;
@@ -2566,9 +2538,7 @@ class AppwriteConnector {
     if (value == null) return null;
     if (value is String) {
       final normalized = value.trim();
-      if (normalized.isEmpty ||
-          normalized == 'null' ||
-          normalized == 'undefined') {
+      if (normalized.isEmpty || normalized == 'null' || normalized == 'undefined') {
         return null;
       }
       return normalized;
@@ -2606,10 +2576,7 @@ class AppwriteConnector {
   List<String> _toStringList(dynamic value) {
     if (value == null) return <String>[];
     if (value is List) {
-      return value
-          .map((e) => e.toString())
-          .where((e) => e.trim().isNotEmpty)
-          .toList();
+      return value.map((e) => e.toString()).where((e) => e.trim().isNotEmpty).toList();
     }
     if (value is String) {
       final trimmed = value.trim();
@@ -2617,10 +2584,7 @@ class AppwriteConnector {
       try {
         final decoded = jsonDecode(trimmed);
         if (decoded is List) {
-          return decoded
-              .map((e) => e.toString())
-              .where((e) => e.trim().isNotEmpty)
-              .toList();
+          return decoded.map((e) => e.toString()).where((e) => e.trim().isNotEmpty).toList();
         }
       } catch (_) {
         // Keep plain string fallback.

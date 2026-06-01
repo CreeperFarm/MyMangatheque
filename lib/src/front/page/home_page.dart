@@ -93,18 +93,20 @@ class MyHomePageState extends ConsumerState<MyHomePage> {
       setState(() {
         if (reset) {
           _loadedRecords.clear();
+          _visibleVolumes.clear();
         }
 
         final existingIds = _loadedRecords.map((e) => e.id).toSet();
         for (final record in page.items) {
           if (existingIds.add(record.id)) {
             _loadedRecords.add(record);
+            // append visible volume entry for newly added records only
+            _visibleVolumes.add(Map<String, dynamic>.from(record.data));
           }
         }
 
         _currentPage = page.page;
         _totalPages = page.totalPages;
-        _visibleVolumes = _loadedRecords.map((record) => Map<String, dynamic>.from(record.data)).toList();
       });
     } catch (e) {
       if (!mounted) return;
