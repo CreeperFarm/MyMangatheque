@@ -327,6 +327,16 @@
       }
     }
   },
+  "subSeriesCount": "{count, plural, =0 {Sous-série} =1{Sous-série} other {Sous-séries}}",
+  "@subSeriesCount": {
+    "description": "Un message qui affiche le nombre de sous-séries",
+    "placeholders": {
+      "count": {
+        "type": "num",
+        "format": "compact"
+      }
+    }
+  },
   "authorDoesNotExist": "L'auteur n'existe pas.",
   "seriesDoesNotExist": "La série n'existe pas.",
   "subSeriesDoesNotExist": "La sous-série n'existe pas.",

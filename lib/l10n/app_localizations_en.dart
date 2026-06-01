@@ -743,8 +743,25 @@ class AppLocalizationsEn extends AppLocalizations {
       count,
       locale: localeName,
       other: 'Series',
-      one: 'Series',
-      zero: 'Series',
+      one: 'Serie',
+      zero: 'Serie',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String subSeriesCount(num count) {
+    final intl.NumberFormat countNumberFormat = intl.NumberFormat.compact(
+      locale: localeName,
+    );
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Sub-series',
+      one: 'Sub-serie',
+      zero: 'Sub-serie',
     );
     return '$_temp0';
   }

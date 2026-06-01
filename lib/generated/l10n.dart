@@ -1719,15 +1719,28 @@ class AppLocalizations {
     );
   }
 
-  /// `{count, plural, =0 {Series} =1{Series} other {Series}}`
+  /// `{count, plural, =0 {Serie} =1{Serie} other {Series}}`
   String seriesCount(num count) {
     return Intl.plural(
       count,
-      zero: 'Series',
-      one: 'Series',
+      zero: 'Serie',
+      one: 'Serie',
       other: 'Series',
       name: 'seriesCount',
       desc: 'A message that indicates the number of series',
+      args: [count],
+    );
+  }
+
+  /// `{count, plural, =0 {Sub-serie} =1{Sub-serie} other {Sub-series}}`
+  String subSeriesCount(num count) {
+    return Intl.plural(
+      count,
+      zero: 'Sub-serie',
+      one: 'Sub-serie',
+      other: 'Sub-series',
+      name: 'subSeriesCount',
+      desc: 'A message that indicates the number of sub-series',
       args: [count],
     );
   }

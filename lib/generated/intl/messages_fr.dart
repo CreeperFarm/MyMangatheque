@@ -76,23 +76,26 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m21(count) =>
       "Total de ${Intl.plural(count, zero: '0 tome', one: '1 tome', other: '${count} tomes')}";
 
-  static String m22(support) =>
+  static String m22(count) =>
+      "${Intl.plural(count, zero: 'Sous-série', one: 'Sous-série', other: 'Sous-séries')}";
+
+  static String m23(support) =>
       "${Intl.select(support, {'manga': 'Manga', 'novel': 'Roman', 'artbook': 'Artbook', 'lightNovel': 'Light Novel', 'boxSet': 'Coffret', 'other': 'Other'})}";
 
-  static String m23(username) => "Votre pseudo est ${username}";
+  static String m24(username) => "Votre pseudo est ${username}";
 
-  static String m24(count) => "Tome ${count}";
+  static String m25(count) => "Tome ${count}";
 
-  static String m25(count) =>
+  static String m26(count) =>
       "${Intl.plural(count, zero: 'Vous possédez 0 volume', one: 'Vous possédez un volume', other: 'Vous possédez ${count} volumes')}";
 
-  static String m26(owned, total) =>
+  static String m27(owned, total) =>
       "${Intl.plural(owned, zero: '0 tome possédé', one: '1 tome possédé', other: '${owned} tomes possédés')} sur ${Intl.plural(total, zero: '0 tome', one: '1 tome', other: '${total} tomes')}";
 
-  static String m27(readed, total) =>
+  static String m28(readed, total) =>
       "${Intl.plural(readed, zero: '0 tome lu', one: '1 tome lu', other: '${readed} tomes lus')} sur ${Intl.plural(total, zero: '0 tome', one: '1 tome', other: '${total} tomes')}.";
 
-  static String m28(readed, total) =>
+  static String m29(readed, total) =>
       "${Intl.plural(readed, zero: '0 tome lu', one: '1 tome lu', other: '${readed} tomes lus')} sur ${Intl.plural(total, zero: '0 tome possédé', one: '1 tome possédé', other: '${total} tomes possédés')}.";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -608,11 +611,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "subSerieFromAuthor": m20,
     "subSerieVolumeNumber": m21,
     "subSeries": MessageLookupByLibrary.simpleMessage("Sous-séries"),
+    "subSeriesCount": m22,
     "subSeriesDoesNotExist": MessageLookupByLibrary.simpleMessage(
       "La sous-série n\'existe pas.",
     ),
     "summary": MessageLookupByLibrary.simpleMessage("Résumé"),
-    "supportIs": m22,
+    "supportIs": m23,
     "systemMode": MessageLookupByLibrary.simpleMessage("Thème du système"),
     "thirdPartyContent": MessageLookupByLibrary.simpleMessage("Contenu tiers"),
     "thirdPartyContentLane1": MessageLookupByLibrary.simpleMessage(
@@ -639,7 +643,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Vous êtes connecté avec succès.",
     ),
     "username": MessageLookupByLibrary.simpleMessage("Pseudo"),
-    "usernameIs": m23,
+    "usernameIs": m24,
     "usernameMinLength": MessageLookupByLibrary.simpleMessage(
       "Le pseudo doit comporter au moins 3 caractères.",
     ),
@@ -672,13 +676,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "volumeNotAvailableForSale": MessageLookupByLibrary.simpleMessage(
       "Malheureusement, ce volume n\'est pas disponible à la vente.",
     ),
-    "volumeNum": m24,
+    "volumeNum": m25,
     "volumeNumber": MessageLookupByLibrary.simpleMessage("Numéro du volume"),
-    "volumeOwnedNumber": m25,
-    "volumeOwnedOverX": m26,
+    "volumeOwnedNumber": m26,
+    "volumeOwnedOverX": m27,
     "volumePrice": MessageLookupByLibrary.simpleMessage("Prix du volume"),
-    "volumeReadedOverSeriesX": m27,
-    "volumeReadedOverX": m28,
+    "volumeReadedOverSeriesX": m28,
+    "volumeReadedOverX": m29,
     "volumeSeriesId": MessageLookupByLibrary.simpleMessage(
       "ID de la série du volume",
     ),

@@ -3,7 +3,7 @@ import 'package:mymangatheque/l10n/app_localizations.dart';
 import 'package:mymangatheque/src/back/services/appwrite.dart';
 import 'package:mymangatheque/src/front/components/my_line.dart';
 import 'package:mymangatheque/src/front/components/my_scroll_column.dart';
-import 'package:mymangatheque/src/front/components/my_series_tile.dart';
+import 'package:mymangatheque/src/front/components/my_sub_series_tile.dart';
 import 'package:mymangatheque/src/front/components/safe_network_image.dart';
 
 class EditorPage extends StatefulWidget {
@@ -35,7 +35,7 @@ class _EditorPageState extends State<EditorPage> {
       future: connector.getOneExpand(
         'editors',
         widget.editorId,
-        'series.editors',
+        'subSeries.editors',
       ),
       builder: (BuildContext context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -53,8 +53,8 @@ class _EditorPageState extends State<EditorPage> {
           // ? Define variables
           final data = snapshot.data!.isNotEmpty ? Map<String, dynamic>.from(snapshot.data!.first.data) : <String, dynamic>{};
           final expand = data['expand'] is Map<String, dynamic> ? data['expand'] as Map<String, dynamic> : <String, dynamic>{};
-          final series = List<Map<String, dynamic>>.from(
-            (expand['series'] as List<dynamic>? ?? const <dynamic>[]).whereType<Map<String, dynamic>>(),
+          final subSeries = List<Map<String, dynamic>>.from(
+            (expand['subSeries'] as List<dynamic>? ?? const <dynamic>[]).whereType<Map<String, dynamic>>(),
           );
           final editorName = data['name']?.toString() ?? '';
           final logoUrl = data['logo']?.toString() ?? data['image']?.toString() ?? data['coverUrl']?.toString();
@@ -105,7 +105,7 @@ class _EditorPageState extends State<EditorPage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              localizations.seriesCount(series.length),
+                              localizations.subSeriesCount(subSeries.length),
                               style: const TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.w300,
@@ -114,14 +114,14 @@ class _EditorPageState extends State<EditorPage> {
                             ListView(
                               shrinkWrap: true,
                               children: [
-                                for (var i = 0; i < series.length; i += 1)
+                                for (var i = 0; i < subSeries.length; i += 1)
                                   Column(
                                     children: [
-                                      MySeriesTile(
-                                        seriesData: series[i],
+                                      MySubSeriesTile(
+                                        data: subSeries[i],
                                         initRoute: widget.initRoute,
                                       ),
-                                      if (i != series.length - 1)
+                                      if (i != subSeries.length - 1)
                                         MyLine(
                                           width: MediaQuery.of(
                                             context,

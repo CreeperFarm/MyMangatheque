@@ -1277,8 +1277,14 @@ abstract class AppLocalizations {
   /// A message that indicates the number of series
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =0 {Series} =1{Series} other {Series}}'**
+  /// **'{count, plural, =0 {Serie} =1{Serie} other {Series}}'**
   String seriesCount(num count);
+
+  /// A message that indicates the number of sub-series
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0 {Sub-serie} =1{Sub-serie} other {Sub-series}}'**
+  String subSeriesCount(num count);
 
   /// No description provided for @authorDoesNotExist.
   ///

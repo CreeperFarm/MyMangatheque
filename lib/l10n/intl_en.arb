@@ -316,9 +316,19 @@
       }
     }
   },
-  "seriesCount": "{count, plural, =0 {Series} =1{Series} other {Series}}",
+  "seriesCount": "{count, plural, =0 {Serie} =1{Serie} other {Series}}",
   "@seriesCount": {
     "description": "A message that indicates the number of series",
+    "placeholders": {
+      "count": {
+        "type": "num",
+        "format": "compact"
+      }
+    }
+  },
+  "subSeriesCount": "{count, plural, =0 {Sub-serie} =1{Sub-serie} other {Sub-series}}",
+  "@subSeriesCount": {
+    "description": "A message that indicates the number of sub-series",
     "placeholders": {
       "count": {
         "type": "num",

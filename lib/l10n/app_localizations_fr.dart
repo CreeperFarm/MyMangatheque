@@ -757,6 +757,23 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String subSeriesCount(num count) {
+    final intl.NumberFormat countNumberFormat = intl.NumberFormat.compact(
+      locale: localeName,
+    );
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Sous-séries',
+      one: 'Sous-série',
+      zero: 'Sous-série',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get authorDoesNotExist => 'L\'auteur n\'existe pas.';
 
   @override

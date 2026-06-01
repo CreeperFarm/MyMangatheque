@@ -24,7 +24,12 @@ typedef RecordModel = ApiRecordModel;
 typedef RecordSubscriptionEvent = ApiRecordSubscriptionEvent;
 
 class RecordPage {
-  const RecordPage({required this.items, required this.page, required this.totalPages, required this.totalItems});
+  const RecordPage({
+    required this.items,
+    required this.page,
+    required this.totalPages,
+    required this.totalItems,
+  });
 
   final List<RecordModel> items;
   final int page;
@@ -39,6 +44,20 @@ class _RecordListCacheEntry {
 
   final List<RecordModel> records;
   final DateTime cachedAt;
+}
+
+class _RelationSpec {
+  const _RelationSpec({
+    required this.collectionId,
+    required this.sourceKeys,
+    required this.expandKeys,
+    required this.many,
+  });
+
+  final String collectionId;
+  final List<String> sourceKeys;
+  final List<String> expandKeys;
+  final bool many;
 }
 
 class AppwriteConnector {
@@ -57,8 +76,10 @@ class AppwriteConnector {
   final NotificationService _notifications = NotificationService();
 
   final BehaviorSubject<User?> _connectedUser = BehaviorSubject<User?>();
-  final Map<String, _RecordListCacheEntry> _fullListCache = <String, _RecordListCacheEntry>{};
-  final Map<String, Future<List<RecordModel>>> _fullListInFlight = <String, Future<List<RecordModel>>>{};
+  final Map<String, _RecordListCacheEntry> _fullListCache =
+      <String, _RecordListCacheEntry>{};
+  final Map<String, Future<List<RecordModel>>> _fullListInFlight =
+      <String, Future<List<RecordModel>>>{};
   Set<String>? _ownedVolumeIdsIndex;
   Map<String, bool>? _ownedReadStateIndex;
   Set<String>? _followedSubSeriesIdsIndex;
@@ -137,7 +158,11 @@ class AppwriteConnector {
 
   Future<User?> _loadCurrentUserProfile() async {
     try {
-      final response = await _api.get('/api/users/me', requiresApiKey: true, requiresBearer: true);
+      final response = await _api.get(
+        '/api/users/me',
+        requiresApiKey: true,
+        requiresBearer: true,
+      );
       if (response.statusCode < 200 || response.statusCode >= 300) {
         return null;
       }
@@ -165,7 +190,9 @@ class AppwriteConnector {
       final now = DateTime.now().toUtc();
       return User(
         id: accountUser.$id,
-        username: accountUser.name.isNotEmpty ? accountUser.name : accountUser.email.split('@').first,
+        username: accountUser.name.isNotEmpty
+            ? accountUser.name
+            : accountUser.email.split('@').first,
         email: accountUser.email,
         gender: 'other',
         avatar: null,
@@ -209,9 +236,16 @@ class AppwriteConnector {
     }
   }
 
-  Future<User?> loginWithEmail(String email, String password, BuildContext context) async {
+  Future<User?> loginWithEmail(
+    String email,
+    String password,
+    BuildContext context,
+  ) async {
     try {
-      await _appwrite.loginWithEmailPassword(email: email.toLowerCase(), password: password);
+      await _appwrite.loginWithEmailPassword(
+        email: email.toLowerCase(),
+        password: password,
+      );
 
       await _api.invalidateApiKey();
       await _syncConnectedUser();
@@ -256,7 +290,11 @@ class AppwriteConnector {
       throw Exception('Password and confirmation do not match');
     }
 
-    final created = await _appwrite.createAccount(email: email.toLowerCase(), password: password, name: username);
+    final created = await _appwrite.createAccount(
+      email: email.toLowerCase(),
+      password: password,
+      name: username,
+    );
 
     if (!context.mounted) {
       return created.$id;
@@ -268,7 +306,11 @@ class AppwriteConnector {
         '/api/users/me',
         requiresApiKey: true,
         requiresBearer: true,
-        body: <String, dynamic>{'pseudo': username, 'gender': gender, 'birthday': DateTime.tryParse(birthday)?.toUtc().toIso8601String()},
+        body: <String, dynamic>{
+          'pseudo': username,
+          'gender': gender,
+          'birthday': DateTime.tryParse(birthday)?.toUtc().toIso8601String(),
+        },
       );
       await _syncConnectedUser();
     } catch (e) {
@@ -310,10 +352,17 @@ class AppwriteConnector {
     required BuildContext context,
   }) async {
     try {
-      await _appwrite.completeRecovery(userId: userId, secret: secret, newPassword: newPassword);
+      await _appwrite.completeRecovery(
+        userId: userId,
+        secret: secret,
+        newPassword: newPassword,
+      );
 
       if (context.mounted) {
-        showMessage(AppLocalizations.of(context)!.modifyPasswordSuccess, context);
+        showMessage(
+          AppLocalizations.of(context)!.modifyPasswordSuccess,
+          context,
+        );
       }
     } catch (e) {
       if (context.mounted) {
@@ -323,11 +372,22 @@ class AppwriteConnector {
     }
   }
 
-  Future<void> modifyPassword(String email, String oldPassword, String newPassword, BuildContext context) async {
+  Future<void> modifyPassword(
+    String email,
+    String oldPassword,
+    String newPassword,
+    BuildContext context,
+  ) async {
     try {
-      await _appwrite.updatePassword(oldPassword: oldPassword, newPassword: newPassword);
+      await _appwrite.updatePassword(
+        oldPassword: oldPassword,
+        newPassword: newPassword,
+      );
       if (context.mounted) {
-        showMessage(AppLocalizations.of(context)!.modifyPasswordSuccess, context);
+        showMessage(
+          AppLocalizations.of(context)!.modifyPasswordSuccess,
+          context,
+        );
       }
     } catch (e) {
       if (context.mounted) {
@@ -379,7 +439,13 @@ class AppwriteConnector {
 
   List<RecordModel> _cloneRecords(List<RecordModel> records) {
     return records
-        .map((record) => RecordModel(id: record.id, collectionId: record.collectionId, data: Map<String, dynamic>.from(record.data)))
+        .map(
+          (record) => RecordModel(
+            id: record.id,
+            collectionId: record.collectionId,
+            data: Map<String, dynamic>.from(record.data),
+          ),
+        )
         .toList();
   }
 
@@ -390,12 +456,19 @@ class AppwriteConnector {
     return user;
   }
 
-  Future<bool> updateAvatar(String collectionId, String userId, String fileName, List<int>? fileBytes, BuildContext context) async {
+  Future<bool> updateAvatar(
+    String collectionId,
+    String userId,
+    String fileName,
+    List<int>? fileBytes,
+    BuildContext context,
+  ) async {
     if (fileBytes == null || fileName.isEmpty) {
       return false;
     }
 
-    final hasAuthenticatedSession = await _appwrite.hasAuthenticatedUserSession();
+    final hasAuthenticatedSession = await _appwrite
+        .hasAuthenticatedUserSession();
     if (!hasAuthenticatedSession) {
       debugPrint('Avatar upload skipped: no authenticated Appwrite session.');
       if (context.mounted) {
@@ -415,18 +488,24 @@ class AppwriteConnector {
       uploadSucceeded = true;
     } on AppwriteException catch (e) {
       debugPrint('Avatar update failed: $e');
-      debugPrint('Verify Appwrite storage permissions for bucket "user-bucket" (create/write for authenticated users).');
+      debugPrint(
+        'Verify Appwrite storage permissions for bucket "user-bucket" (create/write for authenticated users).',
+      );
       if (context.mounted) {
         showMessage(AppLocalizations.of(context)!.errorOccurred, context);
       }
       return false;
     } catch (e) {
-      final parsingBug = e.toString().contains("type 'Null' is not a subtype of type 'bool'");
+      final parsingBug = e.toString().contains(
+        "type 'Null' is not a subtype of type 'bool'",
+      );
       if (parsingBug) {
         // Appwrite Dart SDK may fail to parse `File.encryption` when null.
         // Upload can still be successful because the request already completed.
         uploadSucceeded = true;
-        debugPrint('Avatar file upload response parsing failed; continuing with known fileId: $fileId');
+        debugPrint(
+          'Avatar file upload response parsing failed; continuing with known fileId: $fileId',
+        );
       } else {
         debugPrint('Avatar update failed: $e');
         if (context.mounted) {
@@ -444,7 +523,12 @@ class AppwriteConnector {
       final coverUrl =
           '${Environment.appwritePublicEndpoint}/storage/buckets/user-bucket/files/$fileId/view?project=${Environment.appwriteProjectId}';
 
-      await _api.patch('/api/users/me', requiresApiKey: true, requiresBearer: true, body: <String, dynamic>{'coverURL': coverUrl});
+      await _api.patch(
+        '/api/users/me',
+        requiresApiKey: true,
+        requiresBearer: true,
+        body: <String, dynamic>{'coverURL': coverUrl},
+      );
 
       await _syncConnectedUser();
       return true;
@@ -486,38 +570,83 @@ class AppwriteConnector {
         _invalidateCollectionCache('genres');
         return;
       case 'owned':
-        await _api.delete('/api/users/me/owned/$entryId', requiresApiKey: true, requiresBearer: true);
+        await _api.delete(
+          '/api/users/me/owned/$entryId',
+          requiresApiKey: true,
+          requiresBearer: true,
+        );
         _invalidateCollectionCache('owned');
         return;
       case 'followed':
-        await _api.delete('/api/users/me/followed/$entryId', requiresApiKey: true, requiresBearer: true);
+        await _api.delete(
+          '/api/users/me/followed/$entryId',
+          requiresApiKey: true,
+          requiresBearer: true,
+        );
         _invalidateCollectionCache('followed');
         return;
       default:
-        throw UnsupportedError('Unsupported collection for delete: $collectionId');
+        throw UnsupportedError(
+          'Unsupported collection for delete: $collectionId',
+        );
     }
   }
 
   Future<List<RecordModel>> getOne(String collectionId, String recordId) async {
     final normalized = _normalizeCollectionId(collectionId);
     final map = await _fetchOneNormalized(normalized, recordId);
-    return <RecordModel>[RecordModel(id: map['id'].toString(), collectionId: normalized, data: map)];
+    return <RecordModel>[
+      RecordModel(
+        id: map['id'].toString(),
+        collectionId: normalized,
+        data: map,
+      ),
+    ];
   }
 
-  Future<List<RecordModel>> getOneOrder(String collectionId, String recordId, dynamic order) {
+  Future<List<RecordModel>> getOneOrder(
+    String collectionId,
+    String recordId,
+    dynamic order,
+  ) {
     return getOne(collectionId, recordId);
   }
 
-  Future<List<RecordModel>> getOneExpand(String collectionId, String recordId, String? expand) async {
+  Future<List<RecordModel>> getOneExpand(
+    String collectionId,
+    String recordId,
+    String? expand,
+  ) async {
     final normalized = _normalizeCollectionId(collectionId);
     final map = await _fetchOneNormalized(normalized, recordId, expand: expand);
-    return <RecordModel>[RecordModel(id: map['id'].toString(), collectionId: normalized, data: map)];
+    return <RecordModel>[
+      RecordModel(
+        id: map['id'].toString(),
+        collectionId: normalized,
+        data: map,
+      ),
+    ];
   }
 
-  Future<List<RecordModel>> getCollectionData(String collectionId, {String? expand}) async {
+  Future<List<RecordModel>> getCollectionData(
+    String collectionId, {
+    String? expand,
+  }) async {
     final normalized = _normalizeCollectionId(collectionId);
-    final list = await _fetchCollectionNormalized(normalized, fullList: false, expand: expand);
-    return list.map((item) => RecordModel(id: item['id'].toString(), collectionId: normalized, data: item)).toList();
+    final list = await _fetchCollectionNormalized(
+      normalized,
+      fullList: false,
+      expand: expand,
+    );
+    return list
+        .map(
+          (item) => RecordModel(
+            id: item['id'].toString(),
+            collectionId: normalized,
+            data: item,
+          ),
+        )
+        .toList();
   }
 
   Future<RecordPage> getVolumesPage({int page = 1, int limit = 30}) async {
@@ -532,7 +661,11 @@ class AppwriteConnector {
     );
   }
 
-  Future<RecordPage> getHomeRecommendationsPage({int page = 1, int limit = 30, int untilDays = 7}) async {
+  Future<RecordPage> getHomeRecommendationsPage({
+    int page = 1,
+    int limit = 30,
+    int untilDays = 7,
+  }) async {
     final normalizedUntilDays = untilDays.clamp(0, 365);
 
     // Prefer personalized recommendations when a user session exists.
@@ -550,7 +683,9 @@ class AppwriteConnector {
           requiresBearer: true,
         );
       } catch (e) {
-        debugPrint('Personalized recommendations unavailable, fallback to public home recommendations: $e');
+        debugPrint(
+          'Personalized recommendations unavailable, fallback to public home recommendations: $e',
+        );
       }
     }
 
@@ -566,7 +701,11 @@ class AppwriteConnector {
     );
   }
 
-  Future<RecordPage> getCollectionPage(String collectionId, {int page = 1, int limit = 30}) async {
+  Future<RecordPage> getCollectionPage(
+    String collectionId, {
+    int page = 1,
+    int limit = 30,
+  }) async {
     final normalized = _normalizeCollectionId(collectionId);
     switch (normalized) {
       case 'volumes':
@@ -602,13 +741,20 @@ class AppwriteConnector {
           requiresApiKey: true,
         );
       default:
-        throw UnsupportedError('Unsupported collection for paginated request: $collectionId');
+        throw UnsupportedError(
+          'Unsupported collection for paginated request: $collectionId',
+        );
     }
   }
 
   /// Server-side paged search for a collection. Uses the backend endpoint
   /// /api/{resource}/search with q and pagination parameters.
-  Future<RecordPage> searchCollectionPage(String collectionId, {String? query, int page = 1, int limit = 30}) async {
+  Future<RecordPage> searchCollectionPage(
+    String collectionId, {
+    String? query,
+    int page = 1,
+    int limit = 30,
+  }) async {
     final normalized = _normalizeCollectionId(collectionId);
     switch (normalized) {
       case 'series':
@@ -667,7 +813,9 @@ class AppwriteConnector {
           requiresApiKey: true,
         );
       default:
-        throw UnsupportedError('Unsupported collection for search request: $collectionId');
+        throw UnsupportedError(
+          'Unsupported collection for search request: $collectionId',
+        );
     }
   }
 
@@ -684,7 +832,11 @@ class AppwriteConnector {
   }) async {
     final safePage = page < 1 ? 1 : page;
     final safeLimit = limit < 1 ? 30 : limit;
-    final requestQuery = <String, dynamic>{'page': safePage, 'limit': safeLimit, ...?query};
+    final requestQuery = <String, dynamic>{
+      'page': safePage,
+      'limit': safeLimit,
+      ...?query,
+    };
 
     final response = await _api.get(
       path,
@@ -700,37 +852,77 @@ class AppwriteConnector {
 
     final data = decoded['data'];
     final dataMap = data is Map<String, dynamic> ? data : <String, dynamic>{};
-    final rows = dataMap[listKey] ?? decoded[listKey] ?? (dataMap.length == 1 ? dataMap.values.first : null);
+    final rows =
+        dataMap[listKey] ??
+        decoded[listKey] ??
+        (dataMap.length == 1 ? dataMap.values.first : null);
     final rawList = rows is List<dynamic> ? rows : const <dynamic>[];
 
     final records = rawList
         .whereType<Map<String, dynamic>>()
         .map(normalize)
-        .map((item) => RecordModel(id: item['id'].toString(), collectionId: collectionId, data: item))
+        .map(
+          (item) => RecordModel(
+            id: item['id'].toString(),
+            collectionId: collectionId,
+            data: item,
+          ),
+        )
         .toList();
 
     final paginationRaw = decoded['pagination'];
-    final pagination = paginationRaw is Map<String, dynamic> ? paginationRaw : <String, dynamic>{};
+    final pagination = paginationRaw is Map<String, dynamic>
+        ? paginationRaw
+        : <String, dynamic>{};
 
     final totalItemsFromPagination = _toIntOrDefault(
-      pagination['totalItems'] ?? pagination['total'] ?? pagination['count'] ?? pagination['totalCount'],
+      pagination['totalItems'] ??
+          pagination['total'] ??
+          pagination['count'] ??
+          pagination['totalCount'],
       0,
     );
-    final currentPage = _toIntOrDefault(pagination['currentPage'] ?? pagination['page'], safePage);
+    final currentPage = _toIntOrDefault(
+      pagination['currentPage'] ?? pagination['page'],
+      safePage,
+    );
     final inferredTotalPages = totalItemsFromPagination > 0
         ? (totalItemsFromPagination / safeLimit).ceil()
         : (rawList.length >= safeLimit ? currentPage + 1 : currentPage);
-    final totalPages = _toIntOrDefault(pagination['totalPages'] ?? pagination['pages'], inferredTotalPages);
+    final totalPages = _toIntOrDefault(
+      pagination['totalPages'] ?? pagination['pages'],
+      inferredTotalPages,
+    );
     final totalItems = totalItemsFromPagination;
 
-    return RecordPage(items: records, page: currentPage, totalPages: totalPages < 1 ? 1 : totalPages, totalItems: totalItems);
+    return RecordPage(
+      items: records,
+      page: currentPage,
+      totalPages: totalPages < 1 ? 1 : totalPages,
+      totalItems: totalItems,
+    );
   }
 
-  Future<List<RecordModel>> getCollectionFullList(String collectionId, {String? expand}) async {
+  Future<List<RecordModel>> getCollectionFullList(
+    String collectionId, {
+    String? expand,
+  }) async {
     final normalized = _normalizeCollectionId(collectionId);
     if (expand != null && expand.trim().isNotEmpty) {
-      final list = await _fetchCollectionNormalized(normalized, fullList: true, expand: expand);
-      return list.map((item) => RecordModel(id: item['id'].toString(), collectionId: normalized, data: item)).toList();
+      final list = await _fetchCollectionNormalized(
+        normalized,
+        fullList: true,
+        expand: expand,
+      );
+      return list
+          .map(
+            (item) => RecordModel(
+              id: item['id'].toString(),
+              collectionId: normalized,
+              data: item,
+            ),
+          )
+          .toList();
     }
 
     final cached = _fullListCache[normalized];
@@ -745,10 +937,22 @@ class AppwriteConnector {
 
     final future = () async {
       final list = await _fetchCollectionNormalized(normalized, fullList: true);
-      final records = list.map((item) => RecordModel(id: item['id'].toString(), collectionId: normalized, data: item)).toList();
-      final shouldCacheEmpty = normalized == 'owned' || normalized == 'followed';
+      final records = list
+          .map(
+            (item) => RecordModel(
+              id: item['id'].toString(),
+              collectionId: normalized,
+              data: item,
+            ),
+          )
+          .toList();
+      final shouldCacheEmpty =
+          normalized == 'owned' || normalized == 'followed';
       if (records.isNotEmpty || shouldCacheEmpty) {
-        _fullListCache[normalized] = _RecordListCacheEntry(_cloneRecords(records), DateTime.now());
+        _fullListCache[normalized] = _RecordListCacheEntry(
+          _cloneRecords(records),
+          DateTime.now(),
+        );
       } else {
         _fullListCache.remove(normalized);
       }
@@ -763,43 +967,119 @@ class AppwriteConnector {
     }
   }
 
-  Future<List<RecordModel>> getCollectionFullListOrder(String collectionId, String order) async {
+  Future<List<RecordModel>> getCollectionFullListOrder(
+    String collectionId,
+    String order,
+  ) async {
     final list = await getCollectionFullList(collectionId);
     return _sortRecords(list, order);
   }
 
-  Future<List<RecordModel>> getCollectionFullListOrderExpanded(String collectionId, String order, String expand) async {
-    return _sortRecords(await getCollectionFullList(collectionId, expand: expand), order);
+  Future<List<RecordModel>> getCollectionFullListOrderExpanded(
+    String collectionId,
+    String order,
+    String expand,
+  ) async {
+    return _sortRecords(
+      await getCollectionFullList(collectionId, expand: expand),
+      order,
+    );
   }
 
-  Future<List<RecordModel>> getCollectionDataWithFilter(String collectionId, String query) async {
+  Future<List<RecordModel>> getCollectionDataWithFilter(
+    String collectionId,
+    String query,
+  ) async {
     final normalized = _normalizeCollectionId(collectionId);
-    final list = await _fetchCollectionNormalized(normalized, fullList: false, filterQuery: query);
-    return list.map((item) => RecordModel(id: item['id'].toString(), collectionId: normalized, data: item)).toList();
+    final list = await _fetchCollectionNormalized(
+      normalized,
+      fullList: false,
+      filterQuery: query,
+    );
+    return list
+        .map(
+          (item) => RecordModel(
+            id: item['id'].toString(),
+            collectionId: normalized,
+            data: item,
+          ),
+        )
+        .toList();
   }
 
-  Future<List<RecordModel>> getCollectionFullDataWithFilter(String collectionId, String query) async {
+  Future<List<RecordModel>> getCollectionFullDataWithFilter(
+    String collectionId,
+    String query,
+  ) async {
     final normalized = _normalizeCollectionId(collectionId);
-    final list = await _fetchCollectionNormalized(normalized, fullList: true, filterQuery: query);
-    return list.map((item) => RecordModel(id: item['id'].toString(), collectionId: normalized, data: item)).toList();
+    final list = await _fetchCollectionNormalized(
+      normalized,
+      fullList: true,
+      filterQuery: query,
+    );
+    return list
+        .map(
+          (item) => RecordModel(
+            id: item['id'].toString(),
+            collectionId: normalized,
+            data: item,
+          ),
+        )
+        .toList();
   }
 
-  Future<List<RecordModel>> getCollectionDataWithFilterExpand(String collectionId, String query, String expand) async {
+  Future<List<RecordModel>> getCollectionDataWithFilterExpand(
+    String collectionId,
+    String query,
+    String expand,
+  ) async {
     final normalized = _normalizeCollectionId(collectionId);
-    final list = await _fetchCollectionNormalized(normalized, fullList: false, expand: expand, filterQuery: query);
-    return list.map((item) => RecordModel(id: item['id'].toString(), collectionId: normalized, data: item)).toList();
+    final list = await _fetchCollectionNormalized(
+      normalized,
+      fullList: false,
+      expand: expand,
+      filterQuery: query,
+    );
+    return list
+        .map(
+          (item) => RecordModel(
+            id: item['id'].toString(),
+            collectionId: normalized,
+            data: item,
+          ),
+        )
+        .toList();
   }
 
-  Future<List<RecordModel>> getCollectionFullDataWithFilterExpand(String collectionId, String query, String expand) async {
+  Future<List<RecordModel>> getCollectionFullDataWithFilterExpand(
+    String collectionId,
+    String query,
+    String expand,
+  ) async {
     final normalized = _normalizeCollectionId(collectionId);
-    final list = await _fetchCollectionNormalized(normalized, fullList: true, expand: expand, filterQuery: query);
-    return list.map((item) => RecordModel(id: item['id'].toString(), collectionId: normalized, data: item)).toList();
+    final list = await _fetchCollectionNormalized(
+      normalized,
+      fullList: true,
+      expand: expand,
+      filterQuery: query,
+    );
+    return list
+        .map(
+          (item) => RecordModel(
+            id: item['id'].toString(),
+            collectionId: normalized,
+            data: item,
+          ),
+        )
+        .toList();
   }
 
   Stream<List<RecordModel>> getCollectionDataListener(String collectionId) {
     final subject = PublishSubject<List<RecordModel>>();
 
-    final subscription = listenToCollectionEvents(collectionId).listen((_) async {
+    final subscription = listenToCollectionEvents(collectionId).listen((
+      _,
+    ) async {
       subject.add(await getCollectionData(collectionId));
     });
 
@@ -812,12 +1092,19 @@ class AppwriteConnector {
     return subject.stream;
   }
 
-  Stream<RecordSubscriptionEvent> listenToCollectionEvents(String collectionId) {
+  Stream<RecordSubscriptionEvent> listenToCollectionEvents(
+    String collectionId,
+  ) {
     final controller = StreamController<RecordSubscriptionEvent>();
     Timer? timer;
 
     timer = Timer.periodic(const Duration(seconds: 15), (_) {
-      controller.add(RecordSubscriptionEvent(collectionId: _normalizeCollectionId(collectionId), action: 'poll'));
+      controller.add(
+        RecordSubscriptionEvent(
+          collectionId: _normalizeCollectionId(collectionId),
+          action: 'poll',
+        ),
+      );
     });
 
     controller.onCancel = () {
@@ -829,7 +1116,10 @@ class AppwriteConnector {
 
   Future<int> getNewRegisterLast24h() async {
     try {
-      final response = await _api.get('/api/analytics/summary', requiresApiKey: true);
+      final response = await _api.get(
+        '/api/analytics/summary',
+        requiresApiKey: true,
+      );
       if (response.statusCode < 200 || response.statusCode >= 300) {
         return 0;
       }
@@ -850,7 +1140,10 @@ class AppwriteConnector {
 
   Future<String> getNewRegisterLastMonth() async {
     try {
-      final response = await _api.get('/api/analytics/most-added-volumes', query: <String, dynamic>{'days': 30, 'limit': 30});
+      final response = await _api.get(
+        '/api/analytics/most-added-volumes',
+        query: <String, dynamic>{'days': 30, 'limit': 30},
+      );
       if (response.statusCode < 200 || response.statusCode >= 300) {
         return '{}';
       }
@@ -893,20 +1186,29 @@ class AppwriteConnector {
 
   Future<List<String>> getSubSerieVolumesImages(String id) async {
     final subSeries = await getOneExpand('sub_series', id, 'volumes');
-    final volumes = (subSeries.first.data['expand']?['volumes'] as List?) ?? const <dynamic>[];
+    final volumes =
+        (subSeries.first.data['expand']?['volumes'] as List?) ??
+        const <dynamic>[];
 
-    final sorted = List<Map<String, dynamic>>.from(volumes.whereType<Map<String, dynamic>>())
-      ..sort((a, b) {
-        final aTome = (a['tome_number'] as num?) ?? 0;
-        final bTome = (b['tome_number'] as num?) ?? 0;
-        return aTome.compareTo(bTome);
-      });
+    final sorted =
+        List<Map<String, dynamic>>.from(
+          volumes.whereType<Map<String, dynamic>>(),
+        )..sort((a, b) {
+          final aTome = (a['tome_number'] as num?) ?? 0;
+          final bTome = (b['tome_number'] as num?) ?? 0;
+          return aTome.compareTo(bTome);
+        });
 
-    return sorted.map((volume) => volume['image']?.toString() ?? '').where((url) => url.isNotEmpty).toList();
+    return sorted
+        .map((volume) => volume['image']?.toString() ?? '')
+        .where((url) => url.isNotEmpty)
+        .toList();
   }
 
   Future<void> _ensureOwnedIndexes() async {
-    if (_ownedVolumeIdsIndex != null && _ownedReadStateIndex != null && _isCacheEntryFresh(_fullListCache['owned'])) {
+    if (_ownedVolumeIdsIndex != null &&
+        _ownedReadStateIndex != null &&
+        _isCacheEntryFresh(_fullListCache['owned'])) {
       return;
     }
 
@@ -926,14 +1228,22 @@ class AppwriteConnector {
   }
 
   Future<void> _ensureFollowedIndex() async {
-    if (_followedSubSeriesIdsIndex != null && _isCacheEntryFresh(_fullListCache['followed'])) {
+    if (_followedSubSeriesIdsIndex != null &&
+        _isCacheEntryFresh(_fullListCache['followed'])) {
       return;
     }
     final entries = await getCollectionFullList('followed');
-    _followedSubSeriesIdsIndex = entries.map((entry) => entry.data['sub_serie']?.toString() ?? '').where((id) => id.isNotEmpty).toSet();
+    _followedSubSeriesIdsIndex = entries
+        .map((entry) => entry.data['sub_serie']?.toString() ?? '')
+        .where((id) => id.isNotEmpty)
+        .toSet();
   }
 
-  Future<void> addVolumeToOwned(String userId, String volumeId, bool readState) async {
+  Future<void> addVolumeToOwned(
+    String userId,
+    String volumeId,
+    bool readState,
+  ) async {
     await _api.post(
       '/api/users/me/owned',
       requiresApiKey: true,
@@ -944,7 +1254,11 @@ class AppwriteConnector {
   }
 
   Future<void> removeVolumeFromOwned(String userId, String volumeId) async {
-    await _api.delete('/api/users/me/owned/$volumeId', requiresApiKey: true, requiresBearer: true);
+    await _api.delete(
+      '/api/users/me/owned/$volumeId',
+      requiresApiKey: true,
+      requiresBearer: true,
+    );
     _invalidateCollectionCache('owned');
   }
 
@@ -953,8 +1267,17 @@ class AppwriteConnector {
     return _ownedVolumeIdsIndex?.contains(volumeId) == true;
   }
 
-  Future<void> changeReadState(String userId, String volumeId, bool readState) async {
-    await _api.patch('/api/users/me/owned/$volumeId', requiresApiKey: true, requiresBearer: true, body: <String, dynamic>{'readed': readState});
+  Future<void> changeReadState(
+    String userId,
+    String volumeId,
+    bool readState,
+  ) async {
+    await _api.patch(
+      '/api/users/me/owned/$volumeId',
+      requiresApiKey: true,
+      requiresBearer: true,
+      body: <String, dynamic>{'readed': readState},
+    );
     _invalidateCollectionCache('owned');
   }
 
@@ -973,33 +1296,51 @@ class AppwriteConnector {
       final response = await tables.listRows(
         databaseId: _mangaDatabaseId,
         tableId: _reviewsCollectionId,
-        queries: <String>[Query.equal('users', userId), Query.equal('volumes', volumeId), Query.limit(1)],
+        queries: <String>[
+          Query.equal('users', userId),
+          Query.equal('volumes', volumeId),
+          Query.limit(1),
+        ],
       );
 
       if (response.rows.isEmpty) return null;
       return _normalizeReviewDocument(response.rows.first);
     } catch (e) {
-      debugPrint('Unable to fetch current user review for volume $volumeId: $e');
+      debugPrint(
+        'Unable to fetch current user review for volume $volumeId: $e',
+      );
       return null;
     }
   }
 
-  Future<List<Map<String, dynamic>>> getVolumeReviews(String volumeId, {String? includePendingForUserId}) async {
+  Future<List<Map<String, dynamic>>> getVolumeReviews(
+    String volumeId, {
+    String? includePendingForUserId,
+  }) async {
     await init();
     try {
       final tables = TablesDB(_appwrite.client);
       final response = await tables.listRows(
         databaseId: _mangaDatabaseId,
         tableId: _reviewsCollectionId,
-        queries: <String>[Query.equal('volumes', volumeId), Query.orderDesc(r'$createdAt'), Query.limit(100)],
+        queries: <String>[
+          Query.equal('volumes', volumeId),
+          Query.orderDesc(r'$createdAt'),
+          Query.limit(100),
+        ],
       );
 
       final includePendingUser = includePendingForUserId ?? '';
-      final reviews = response.rows.map<Map<String, dynamic>>((doc) => _normalizeReviewDocument(doc)).where((review) {
-        final checked = review['commentChecked'] == true;
-        final isPendingForUser = includePendingUser.isNotEmpty && review['userId']?.toString() == includePendingUser;
-        return checked || isPendingForUser;
-      }).toList();
+      final reviews = response.rows
+          .map<Map<String, dynamic>>((doc) => _normalizeReviewDocument(doc))
+          .where((review) {
+            final checked = review['commentChecked'] == true;
+            final isPendingForUser =
+                includePendingUser.isNotEmpty &&
+                review['userId']?.toString() == includePendingUser;
+            return checked || isPendingForUser;
+          })
+          .toList();
 
       return reviews;
     } catch (e) {
@@ -1022,7 +1363,11 @@ class AppwriteConnector {
 
     final normalizedStars = stars.clamp(1, 5);
     final cleanedComment = comment.trim();
-    final cleanedFavCharacters = favCharacters.map((item) => item.trim()).where((item) => item.isNotEmpty).toSet().toList();
+    final cleanedFavCharacters = favCharacters
+        .map((item) => item.trim())
+        .where((item) => item.isNotEmpty)
+        .toSet()
+        .toList();
 
     final payload = <String, dynamic>{
       'users': userId,
@@ -1051,17 +1396,33 @@ class AppwriteConnector {
       tableId: _reviewsCollectionId,
       rowId: ID.unique(),
       data: payload,
-      permissions: <String>[Permission.read(Role.any()), Permission.update(Role.user(userId)), Permission.delete(Role.user(userId))],
+      permissions: <String>[
+        Permission.read(Role.any()),
+        Permission.update(Role.user(userId)),
+        Permission.delete(Role.user(userId)),
+      ],
     );
   }
 
   Future<void> addSubSeriesToFollowed(String userId, String subSeriesId) async {
-    await _api.post('/api/users/me/followed', requiresApiKey: true, requiresBearer: true, body: <String, dynamic>{'subSeriesId': subSeriesId});
+    await _api.post(
+      '/api/users/me/followed',
+      requiresApiKey: true,
+      requiresBearer: true,
+      body: <String, dynamic>{'subSeriesId': subSeriesId},
+    );
     _invalidateCollectionCache('followed');
   }
 
-  Future<void> removeSubSeriesToFollowed(String userId, String subSeriesId) async {
-    await _api.delete('/api/users/me/followed/$subSeriesId', requiresApiKey: true, requiresBearer: true);
+  Future<void> removeSubSeriesToFollowed(
+    String userId,
+    String subSeriesId,
+  ) async {
+    await _api.delete(
+      '/api/users/me/followed/$subSeriesId',
+      requiresApiKey: true,
+      requiresBearer: true,
+    );
     _invalidateCollectionCache('followed');
   }
 
@@ -1074,16 +1435,24 @@ class AppwriteConnector {
     return (await PackageInfo.fromPlatform()).version;
   }
 
-  Future<String> get appVersion async => (await PackageInfo.fromPlatform()).version;
+  Future<String> get appVersion async =>
+      (await PackageInfo.fromPlatform()).version;
 
-  Future<String> get buildVersion async => (await PackageInfo.fromPlatform()).buildNumber;
+  Future<String> get buildVersion async =>
+      (await PackageInfo.fromPlatform()).buildNumber;
 
   String get serverUrl => 'https://api.mymangatheque.com';
 
   AppwriteCompatClient connector() => AppwriteCompatClient();
 
-  Future<void> registerPushTarget({required String deviceToken, required String targetId}) {
-    return _notifications.registerPushTarget(deviceToken: deviceToken, targetId: targetId);
+  Future<void> registerPushTarget({
+    required String deviceToken,
+    required String targetId,
+  }) {
+    return _notifications.registerPushTarget(
+      deviceToken: deviceToken,
+      targetId: targetId,
+    );
   }
 
   // ----- Internal mapping and compatibility helpers -----
@@ -1206,36 +1575,106 @@ class AppwriteConnector {
         expand: expand,
         filterQuery: filterQuery,
       ),
-      'owned' => await _fetchUserCollection('/api/users/me/owned', 'ownedVolumes', normalize: _normalizeOwnedEntry, expand: expand),
-      'followed' => await _fetchUserCollection('/api/users/me/followed', 'followedSubSeries', normalize: _normalizeFollowedEntry, expand: expand),
+      'owned' => await _fetchUserCollection(
+        '/api/users/me/owned',
+        'ownedVolumes',
+        normalize: _normalizeOwnedEntry,
+        expand: expand,
+      ),
+      'followed' => await _fetchUserCollection(
+        '/api/users/me/followed',
+        'followedSubSeries',
+        normalize: _normalizeFollowedEntry,
+        expand: expand,
+      ),
       _ => throw UnsupportedError('Unsupported collection: $collectionId'),
     };
 
-    return records;
+    final requestedExpand = expand?.trim() ?? '';
+    if (requestedExpand.isEmpty || records.isEmpty) {
+      return records;
+    }
+
+    return Future.wait(
+      records.map(
+        (record) => _appendExpand(collectionId, record, requestedExpand),
+      ),
+    );
   }
 
-  Future<Map<String, dynamic>> _fetchOneNormalized(String collectionId, String id, {String? expand}) async {
+  Future<Map<String, dynamic>> _fetchOneNormalized(
+    String collectionId,
+    String id, {
+    String? expand,
+  }) async {
     final record = switch (collectionId) {
-      'series' => await _fetchOne('/api/series/$id', _normalizeSeries, requiresApiKey: true, expand: expand),
-      'sub_series' => await _fetchOne('/api/sub-series/$id', _normalizeSubSeries, requiresApiKey: true, expand: expand),
-      'volumes' => await _fetchOne('/api/volumes/$id', _normalizeVolume, requiresApiKey: true, expand: expand),
-      'authors' => await _fetchOne('/api/authors/$id', _normalizeAuthor, requiresApiKey: true, expand: expand),
-      'editors' => await _fetchOne('/api/editors/$id', _normalizeEditor, requiresApiKey: true, expand: expand),
-      'genres' => await _fetchOne('/api/genres/$id', _normalizeGenre, requiresApiKey: true, expand: expand),
-      'owned' => (await _fetchCollectionNormalized(
-        'owned',
-        fullList: true,
+      'series' => await _fetchOne(
+        '/api/series/$id',
+        _normalizeSeries,
+        requiresApiKey: true,
         expand: expand,
-      )).firstWhere((entry) => entry['volume']?.toString() == id || entry['id']?.toString() == id, orElse: () => <String, dynamic>{'id': id}),
-      'followed' => (await _fetchCollectionNormalized(
-        'followed',
-        fullList: true,
+      ),
+      'sub_series' => await _fetchOne(
+        '/api/sub-series/$id',
+        _normalizeSubSeries,
+        requiresApiKey: true,
         expand: expand,
-      )).firstWhere((entry) => entry['sub_serie']?.toString() == id || entry['id']?.toString() == id, orElse: () => <String, dynamic>{'id': id}),
+      ),
+      'volumes' => await _fetchOne(
+        '/api/volumes/$id',
+        _normalizeVolume,
+        requiresApiKey: true,
+        expand: expand,
+      ),
+      'authors' => await _fetchOne(
+        '/api/authors/$id',
+        _normalizeAuthor,
+        requiresApiKey: true,
+        expand: expand,
+      ),
+      'editors' => await _fetchOne(
+        '/api/editors/$id',
+        _normalizeEditor,
+        requiresApiKey: true,
+        expand: expand,
+      ),
+      'genres' => await _fetchOne(
+        '/api/genres/$id',
+        _normalizeGenre,
+        requiresApiKey: true,
+        expand: expand,
+      ),
+      'owned' =>
+        (await _fetchCollectionNormalized(
+          'owned',
+          fullList: true,
+          expand: expand,
+        )).firstWhere(
+          (entry) =>
+              entry['volume']?.toString() == id ||
+              entry['id']?.toString() == id,
+          orElse: () => <String, dynamic>{'id': id},
+        ),
+      'followed' =>
+        (await _fetchCollectionNormalized(
+          'followed',
+          fullList: true,
+          expand: expand,
+        )).firstWhere(
+          (entry) =>
+              entry['sub_serie']?.toString() == id ||
+              entry['id']?.toString() == id,
+          orElse: () => <String, dynamic>{'id': id},
+        ),
       _ => throw UnsupportedError('Unsupported collection: $collectionId'),
     };
 
-    return record;
+    final requestedExpand = expand?.trim() ?? '';
+    if (requestedExpand.isEmpty) {
+      return record;
+    }
+
+    return _appendExpand(collectionId, record, requestedExpand);
   }
 
   Future<Map<String, dynamic>> _fetchOne(
@@ -1246,7 +1685,9 @@ class AppwriteConnector {
   }) async {
     final response = await _api.get(
       path,
-      query: expand == null || expand.trim().isEmpty ? null : <String, dynamic>{'expand': expand},
+      query: expand == null || expand.trim().isEmpty
+          ? null
+          : <String, dynamic>{'expand': expand},
       requiresApiKey: requiresApiKey,
     );
 
@@ -1256,24 +1697,34 @@ class AppwriteConnector {
     }
 
     final payload = _extractSingleRecordPayload(decoded, path);
-    final payloadWithExpand = _mergeTopLevelExpandIntoPayload(payload, decoded['expand']);
+    final payloadWithExpand = _mergeTopLevelExpandIntoPayload(
+      payload,
+      decoded['expand'],
+    );
     return normalize(payloadWithExpand);
   }
 
-  Map<String, dynamic> _mergeTopLevelExpandIntoPayload(Map<String, dynamic> payload, dynamic topLevelExpand) {
+  Map<String, dynamic> _mergeTopLevelExpandIntoPayload(
+    Map<String, dynamic> payload,
+    dynamic topLevelExpand,
+  ) {
     final normalizedTopLevelExpand = _normalizeTopLevelExpand(topLevelExpand);
     if (normalizedTopLevelExpand == null) {
       return payload;
     }
 
-    final mergedExpand = _mergeExpandValue(payload['expand'], normalizedTopLevelExpand);
+    final mergedExpand = _mergeExpandValue(
+      payload['expand'],
+      normalizedTopLevelExpand,
+    );
     return <String, dynamic>{...payload, 'expand': mergedExpand};
   }
 
   dynamic _normalizeTopLevelExpand(dynamic rawExpand) {
     if (rawExpand == null) return null;
     if (rawExpand is Map<String, dynamic>) return _cloneExpandValue(rawExpand);
-    if (rawExpand is Map) return _cloneExpandValue(Map<String, dynamic>.from(rawExpand));
+    if (rawExpand is Map)
+      return _cloneExpandValue(Map<String, dynamic>.from(rawExpand));
 
     if (rawExpand is List) {
       final merged = <String, dynamic>{};
@@ -1315,13 +1766,19 @@ class AppwriteConnector {
     }
 
     if (current is List && incoming is List) {
-      return <dynamic>[...current.map(_cloneExpandValue), ...incoming.map(_cloneExpandValue)];
+      return <dynamic>[
+        ...current.map(_cloneExpandValue),
+        ...incoming.map(_cloneExpandValue),
+      ];
     }
 
     return _cloneExpandValue(current);
   }
 
-  Map<String, dynamic> _extractSingleRecordPayload(Map<String, dynamic> decoded, String path) {
+  Map<String, dynamic> _extractSingleRecordPayload(
+    Map<String, dynamic> decoded,
+    String path,
+  ) {
     if (_looksLikeSingleRecord(decoded)) {
       return decoded;
     }
@@ -1334,7 +1791,17 @@ class AppwriteConnector {
       }
     }
 
-    final topLevelRecord = _pickNestedRecord(decoded, skipKeys: <String>{'status', 'message', 'pagination', 'results', 'meta', 'errors'});
+    final topLevelRecord = _pickNestedRecord(
+      decoded,
+      skipKeys: <String>{
+        'status',
+        'message',
+        'pagination',
+        'results',
+        'meta',
+        'errors',
+      },
+    );
     if (topLevelRecord != null) {
       return topLevelRecord;
     }
@@ -1342,7 +1809,10 @@ class AppwriteConnector {
     throw Exception('Unexpected single-item payload for $path: $decoded');
   }
 
-  Map<String, dynamic>? _pickNestedRecord(Map<String, dynamic> source, {Set<String> skipKeys = const <String>{}}) {
+  Map<String, dynamic>? _pickNestedRecord(
+    Map<String, dynamic> source, {
+    Set<String> skipKeys = const <String>{},
+  }) {
     for (final entry in source.entries) {
       if (skipKeys.contains(entry.key)) continue;
       final value = entry.value;
@@ -1386,8 +1856,10 @@ class AppwriteConnector {
               path: path,
               listKey: listKey,
               baseQuery: <String, dynamic>{
-                if (expand != null && expand.trim().isNotEmpty) 'expand': expand,
-                if (filterQuery != null && filterQuery.trim().isNotEmpty) 'filter': filterQuery,
+                if (expand != null && expand.trim().isNotEmpty)
+                  'expand': expand,
+                if (filterQuery != null && filterQuery.trim().isNotEmpty)
+                  'filter': filterQuery,
               },
               requiresApiKey: requiresApiKey,
             )
@@ -1397,8 +1869,10 @@ class AppwriteConnector {
                 query: <String, dynamic>{
                   'page': 1,
                   'limit': 20,
-                  if (expand != null && expand.trim().isNotEmpty) 'expand': expand,
-                  if (filterQuery != null && filterQuery.trim().isNotEmpty) 'filter': filterQuery,
+                  if (expand != null && expand.trim().isNotEmpty)
+                    'expand': expand,
+                  if (filterQuery != null && filterQuery.trim().isNotEmpty)
+                    'filter': filterQuery,
                 },
                 requiresApiKey: requiresApiKey,
               );
@@ -1418,8 +1892,12 @@ class AppwriteConnector {
       final isMissingApiKey =
           message.contains('No API Key provided') ||
           message.contains('authenticated Appwrite JWT required') ||
-          message.contains('Authorization: Bearer <appwrite-jwt> is required') ||
-          message.contains('Missing authenticated user session for Bearer request') ||
+          message.contains(
+            'Authorization: Bearer <appwrite-jwt> is required',
+          ) ||
+          message.contains(
+            'Missing authenticated user session for Bearer request',
+          ) ||
           message.contains('general_rate_limit_exceeded');
       if (isMissingApiKey) {
         debugPrint('Skipping $path while mobile API key is unavailable.');
@@ -1428,7 +1906,10 @@ class AppwriteConnector {
       rethrow;
     }
 
-    return rows.whereType<Map<String, dynamic>>().map((raw) => normalize(raw)).toList();
+    return rows
+        .whereType<Map<String, dynamic>>()
+        .map((raw) => normalize(raw))
+        .toList();
   }
 
   Future<List<Map<String, dynamic>>> _fetchUserCollection(
@@ -1441,7 +1922,9 @@ class AppwriteConnector {
     try {
       response = await _api.get(
         path,
-        query: expand == null || expand.trim().isEmpty ? null : <String, dynamic>{'expand': expand},
+        query: expand == null || expand.trim().isEmpty
+            ? null
+            : <String, dynamic>{'expand': expand},
         requiresApiKey: true,
         requiresBearer: true,
       );
@@ -1462,13 +1945,372 @@ class AppwriteConnector {
     final list = data[listKey];
     if (list is! List<dynamic>) return <Map<String, dynamic>>[];
 
-    return list.whereType<Map<String, dynamic>>().map((raw) => normalize(raw)).toList();
+    return list
+        .whereType<Map<String, dynamic>>()
+        .map((raw) => normalize(raw))
+        .toList();
+  }
+
+  Future<Map<String, dynamic>> _appendExpand(
+    String collectionId,
+    Map<String, dynamic> record,
+    String expand,
+  ) async {
+    final expandedRecord = Map<String, dynamic>.from(record);
+    final paths = expand
+        .split(',')
+        .map((path) => path.trim())
+        .where((path) => path.isNotEmpty)
+        .map(
+          (path) => path
+              .split('.')
+              .map((part) => part.trim())
+              .where((part) => part.isNotEmpty)
+              .toList(),
+        )
+        .where((parts) => parts.isNotEmpty);
+
+    for (final path in paths) {
+      await _appendExpandPath(collectionId, expandedRecord, path);
+    }
+
+    return expandedRecord;
+  }
+
+  Future<void> _appendExpandPath(
+    String collectionId,
+    Map<String, dynamic> record,
+    List<String> path,
+  ) async {
+    if (path.isEmpty) return;
+
+    final spec = _relationSpec(collectionId, path.first);
+    if (spec == null) return;
+
+    final expand = _ensureExpandMap(record);
+    var expandedValue = _findExpandedValue(expand, spec.expandKeys);
+
+    if (_hasExpandedRecords(expandedValue)) {
+      expandedValue = _normalizeExpandedValue(spec, expandedValue);
+    } else {
+      expandedValue = await _loadExpandedRelation(record, spec);
+    }
+
+    if (!_hasExpandedRecords(expandedValue)) return;
+
+    _storeExpandedValue(expand, spec.expandKeys, expandedValue);
+
+    final nestedPath = path.sublist(1);
+    if (nestedPath.isEmpty) return;
+
+    for (final nestedRecord in _expandedRecordMaps(expandedValue)) {
+      await _appendExpandPath(spec.collectionId, nestedRecord, nestedPath);
+    }
+  }
+
+  Map<String, dynamic> _ensureExpandMap(Map<String, dynamic> record) {
+    final expand = _cloneExpandMap(record['expand']);
+    record['expand'] = expand;
+    return expand;
+  }
+
+  dynamic _findExpandedValue(Map<String, dynamic> expand, List<String> keys) {
+    for (final key in keys) {
+      final value = expand[key];
+      if (_hasExpandedRecords(value)) {
+        return value;
+      }
+    }
+    return null;
+  }
+
+  bool _hasExpandedRecords(dynamic value) {
+    if (value is Map) return value.isNotEmpty;
+    if (value is List) {
+      return value.any((item) => item is Map && item.isNotEmpty);
+    }
+    return false;
+  }
+
+  List<Map<String, dynamic>> _expandedRecordMaps(dynamic value) {
+    if (value is Map<String, dynamic>) return <Map<String, dynamic>>[value];
+    if (value is Map)
+      return <Map<String, dynamic>>[Map<String, dynamic>.from(value)];
+    if (value is List) {
+      return value
+          .whereType<Map>()
+          .map(
+            (item) => item is Map<String, dynamic>
+                ? item
+                : Map<String, dynamic>.from(item),
+          )
+          .toList();
+    }
+    return <Map<String, dynamic>>[];
+  }
+
+  dynamic _normalizeExpandedValue(_RelationSpec spec, dynamic value) {
+    final records = _expandedRecordMaps(value)
+        .map((item) => _normalizeRecordForCollection(spec.collectionId, item))
+        .toList();
+    if (spec.many) return records;
+    return records.isNotEmpty ? records.first : <String, dynamic>{};
+  }
+
+  Future<dynamic> _loadExpandedRelation(
+    Map<String, dynamic> record,
+    _RelationSpec spec,
+  ) async {
+    final ids = <String>{};
+    for (final key in spec.sourceKeys) {
+      ids.addAll(_relationIds(record[key]));
+    }
+
+    if (ids.isEmpty) {
+      return spec.many ? <Map<String, dynamic>>[] : <String, dynamic>{};
+    }
+
+    final records = <Map<String, dynamic>>[];
+    for (final id in ids) {
+      try {
+        records.add(await _fetchOneNormalized(spec.collectionId, id));
+      } catch (e) {
+        debugPrint('Unable to expand ${spec.collectionId}/$id: $e');
+      }
+    }
+
+    if (spec.many) return records;
+    return records.isNotEmpty ? records.first : <String, dynamic>{};
+  }
+
+  void _storeExpandedValue(
+    Map<String, dynamic> expand,
+    List<String> keys,
+    dynamic value,
+  ) {
+    for (final key in keys) {
+      expand[key] = value;
+    }
+  }
+
+  Map<String, dynamic> _normalizeRecordForCollection(
+    String collectionId,
+    Map<String, dynamic> raw,
+  ) {
+    return switch (_normalizeCollectionId(collectionId)) {
+      'series' => _normalizeSeries(raw),
+      'sub_series' => _normalizeSubSeries(raw),
+      'volumes' => _normalizeVolume(raw),
+      'authors' => _normalizeAuthor(raw),
+      'editors' => _normalizeEditor(raw),
+      'genres' => _normalizeGenre(raw),
+      'owned' => _normalizeOwnedEntry(raw),
+      'followed' => _normalizeFollowedEntry(raw),
+      _ => Map<String, dynamic>.from(raw),
+    };
+  }
+
+  _RelationSpec? _relationSpec(String collectionId, String relation) {
+    final normalizedCollection = _normalizeCollectionId(collectionId);
+    final normalizedRelation = _normalizeRelationName(relation);
+
+    switch (normalizedCollection) {
+      case 'owned':
+        if (normalizedRelation == 'volume') {
+          return const _RelationSpec(
+            collectionId: 'volumes',
+            sourceKeys: <String>['volume', 'volumes', 'volumeId'],
+            expandKeys: <String>['volume', 'volumes'],
+            many: false,
+          );
+        }
+        break;
+      case 'followed':
+        if (normalizedRelation == 'sub_series') {
+          return const _RelationSpec(
+            collectionId: 'sub_series',
+            sourceKeys: <String>[
+              'sub_serie',
+              'sub_series',
+              'subSeries',
+              'subSeriesId',
+            ],
+            expandKeys: <String>['sub_serie', 'sub_series', 'subSeries'],
+            many: false,
+          );
+        }
+        break;
+      case 'series':
+        if (normalizedRelation == 'sub_series') {
+          return const _RelationSpec(
+            collectionId: 'sub_series',
+            sourceKeys: <String>['subSeries', 'sub_series'],
+            expandKeys: <String>['subSeries', 'sub_series'],
+            many: true,
+          );
+        }
+        if (normalizedRelation == 'authors') {
+          return const _RelationSpec(
+            collectionId: 'authors',
+            sourceKeys: <String>['authors'],
+            expandKeys: <String>['authors'],
+            many: true,
+          );
+        }
+        if (normalizedRelation == 'genres') {
+          return const _RelationSpec(
+            collectionId: 'genres',
+            sourceKeys: <String>['genres'],
+            expandKeys: <String>['genres'],
+            many: true,
+          );
+        }
+        if (normalizedRelation == 'editors') {
+          return const _RelationSpec(
+            collectionId: 'editors',
+            sourceKeys: <String>['editors', 'editor'],
+            expandKeys: <String>['editors', 'editor'],
+            many: true,
+          );
+        }
+        break;
+      case 'sub_series':
+        if (normalizedRelation == 'volumes') {
+          return const _RelationSpec(
+            collectionId: 'volumes',
+            sourceKeys: <String>['volumes'],
+            expandKeys: <String>['volumes'],
+            many: true,
+          );
+        }
+        if (normalizedRelation == 'authors') {
+          return const _RelationSpec(
+            collectionId: 'authors',
+            sourceKeys: <String>['authors'],
+            expandKeys: <String>['authors'],
+            many: true,
+          );
+        }
+        if (normalizedRelation == 'editors') {
+          return const _RelationSpec(
+            collectionId: 'editors',
+            sourceKeys: <String>['editors', 'editor'],
+            expandKeys: <String>['editors', 'editor'],
+            many: false,
+          );
+        }
+        if (normalizedRelation == 'series') {
+          return const _RelationSpec(
+            collectionId: 'series',
+            sourceKeys: <String>['series', 'serie'],
+            expandKeys: <String>['series', 'serie'],
+            many: false,
+          );
+        }
+        break;
+      case 'volumes':
+        if (normalizedRelation == 'sub_series') {
+          return const _RelationSpec(
+            collectionId: 'sub_series',
+            sourceKeys: <String>['subSeries', 'sub_series', 'sub_series_id'],
+            expandKeys: <String>['subSeries', 'sub_series', 'sub_serie'],
+            many: false,
+          );
+        }
+        if (normalizedRelation == 'series') {
+          return const _RelationSpec(
+            collectionId: 'series',
+            sourceKeys: <String>['series', 'serie'],
+            expandKeys: <String>['series', 'serie'],
+            many: false,
+          );
+        }
+        if (normalizedRelation == 'editors') {
+          return const _RelationSpec(
+            collectionId: 'editors',
+            sourceKeys: <String>['editors', 'editor'],
+            expandKeys: <String>['editors', 'editor'],
+            many: false,
+          );
+        }
+        if (normalizedRelation == 'authors') {
+          return const _RelationSpec(
+            collectionId: 'authors',
+            sourceKeys: <String>['authors'],
+            expandKeys: <String>['authors'],
+            many: true,
+          );
+        }
+        break;
+      case 'authors':
+        if (normalizedRelation == 'series') {
+          return const _RelationSpec(
+            collectionId: 'series',
+            sourceKeys: <String>['series'],
+            expandKeys: <String>['series'],
+            many: true,
+          );
+        }
+        if (normalizedRelation == 'sub_series') {
+          return const _RelationSpec(
+            collectionId: 'sub_series',
+            sourceKeys: <String>['subSeries', 'sub_series'],
+            expandKeys: <String>['subSeries', 'sub_series'],
+            many: true,
+          );
+        }
+        break;
+      case 'editors':
+        if (normalizedRelation == 'series') {
+          return const _RelationSpec(
+            collectionId: 'series',
+            sourceKeys: <String>['series'],
+            expandKeys: <String>['series'],
+            many: true,
+          );
+        }
+        if (normalizedRelation == 'sub_series') {
+          return const _RelationSpec(
+            collectionId: 'sub_series',
+            sourceKeys: <String>['subSeries', 'sub_series'],
+            expandKeys: <String>['subSeries', 'sub_series'],
+            many: true,
+          );
+        }
+        break;
+    }
+
+    return null;
+  }
+
+  String _normalizeRelationName(String relation) {
+    switch (relation) {
+      case 'sub-series':
+      case 'subseries':
+      case 'subSerie':
+      case 'sub_serie':
+      case 'sub_series':
+      case 'subSeries':
+        return 'sub_series';
+      case 'serie':
+      case 'series':
+        return 'series';
+      case 'editor':
+      case 'editors':
+        return 'editors';
+      case 'volume':
+        return 'volume';
+      case 'volumes':
+        return 'volumes';
+      default:
+        return relation;
+    }
   }
 
   Map<String, dynamic> _normalizeSeries(Map<String, dynamic> raw) {
     final id = _extractId(raw);
     final subSeries = _relationIds(raw['subSeries'] ?? raw['sub_series']);
-    final expand = _cloneExpandValue(raw['expand']);
+    final expand = _cloneExpandMap(raw['expand']);
 
     return <String, dynamic>{
       'id': id,
@@ -1477,7 +2319,9 @@ class AppwriteConnector {
       'titleJp': raw['titleJp'] ?? '',
       'titleEn': raw['titleEn'] ?? '',
       'slug': raw['slug']?.toString() ?? '',
-      'altTitles': _toStringList(raw['altTitles'] ?? raw['alternativeTitles'] ?? raw['aliases']),
+      'altTitles': _toStringList(
+        raw['altTitles'] ?? raw['alternativeTitles'] ?? raw['aliases'],
+      ),
       'image': _normalizeImageUrl(raw['coverUrl'] ?? raw['image']),
       'coverUrl': _normalizeImageUrl(raw['coverUrl'] ?? raw['image']),
       'sub_series': subSeries,
@@ -1485,7 +2329,7 @@ class AppwriteConnector {
       'authors': _relationIds(raw['authors']),
       'genres': _relationIds(raw['genres']),
       'editors': _relationIds(raw['editors']),
-      if (expand != null) 'expand': expand,
+      if (expand.isNotEmpty) 'expand': expand,
       'over18': _toBool(raw['over18']),
       'firstPublication': _toIsoDate(raw['firstPublicationDate']),
       'created': raw[r'$createdAt'] ?? raw['created'],
@@ -1495,7 +2339,7 @@ class AppwriteConnector {
 
   Map<String, dynamic> _normalizeSubSeries(Map<String, dynamic> raw) {
     final id = _extractId(raw);
-    final expand = _cloneExpandValue(raw['expand']);
+    final expand = _cloneExpandMap(raw['expand']);
     return <String, dynamic>{
       'id': id,
       'title': raw['title'] ?? raw['titleFr'] ?? '',
@@ -1512,7 +2356,7 @@ class AppwriteConnector {
       'series': _relationId(raw['series'] ?? raw['serie']) ?? '',
       'genres': _relationIds(raw['genres']),
       'support': raw['type'] ?? raw['support'] ?? 'manga',
-      if (expand != null) 'expand': expand,
+      if (expand.isNotEmpty) 'expand': expand,
       'status': raw['status'] ?? 'Unknown',
       'over18': _toBool(raw['over18']),
       'firstPublication': _toIsoDate(raw['firstPublicationDate']),
@@ -1523,7 +2367,7 @@ class AppwriteConnector {
 
   Map<String, dynamic> _normalizeVolume(Map<String, dynamic> raw) {
     final id = _extractId(raw);
-    final expand = _cloneExpandValue(raw['expand']);
+    final expand = _cloneExpandMap(raw['expand']);
 
     final parsedInfo = _parseJsonObject(raw['infoVolume'] ?? raw['info']);
     final parsedLinks = _parseJsonList(raw['bookLink'] ?? raw['book_link']);
@@ -1554,10 +2398,11 @@ class AppwriteConnector {
       'authors': _relationIds(raw['authors']),
       'contains': contains,
       'contain': contains,
-      if (expand != null) 'expand': expand,
+      if (expand.isNotEmpty) 'expand': expand,
       'info': parsedInfo,
       'book_link': parsedLinks,
-      'support': raw['support']?.toString() ?? raw['type']?.toString() ?? 'manga',
+      'support':
+          raw['support']?.toString() ?? raw['type']?.toString() ?? 'manga',
       'genre_jap': raw['genderJp'] ?? raw['genre_jap'],
       'created': raw[r'$createdAt'] ?? raw['created'],
       'updated': raw[r'$updatedAt'] ?? raw['updated'],
@@ -1567,9 +2412,11 @@ class AppwriteConnector {
   Map<String, dynamic> _normalizeAuthor(Map<String, dynamic> raw) {
     final id = _extractId(raw);
     final jobs = raw['jobs'];
-    final jobValue = jobs is List ? jobs.map((e) => e.toString()).join(', ') : raw['job']?.toString() ?? '';
+    final jobValue = jobs is List
+        ? jobs.map((e) => e.toString()).join(', ')
+        : raw['job']?.toString() ?? '';
     final subSeries = _relationIds(raw['subSeries'] ?? raw['sub_series']);
-    final expand = _cloneExpandValue(raw['expand']);
+    final expand = _cloneExpandMap(raw['expand']);
 
     return <String, dynamic>{
       'id': id,
@@ -1579,7 +2426,7 @@ class AppwriteConnector {
       'series': _relationIds(raw['series']),
       'sub_series': subSeries,
       'subSeries': subSeries,
-      if (expand != null) 'expand': expand,
+      if (expand.isNotEmpty) 'expand': expand,
       'job': jobValue,
       'created': raw[r'$createdAt'] ?? raw['created'],
       'updated': raw[r'$updatedAt'] ?? raw['updated'],
@@ -1589,18 +2436,22 @@ class AppwriteConnector {
   Map<String, dynamic> _normalizeEditor(Map<String, dynamic> raw) {
     final id = _extractId(raw);
     final subSeries = _relationIds(raw['subSeries'] ?? raw['sub_series']);
-    final expand = _cloneExpandValue(raw['expand']);
+    final expand = _cloneExpandMap(raw['expand']);
 
     return <String, dynamic>{
       'id': id,
       'name': raw['name'] ?? '',
       'image': _normalizeImageUrl(raw['coverUrl'] ?? raw['image']),
-      'logo': _normalizeImageUrl(raw['coverUrl'] ?? raw['logo'] ?? raw['image']),
-      'coverUrl': _normalizeImageUrl(raw['coverUrl'] ?? raw['image'] ?? raw['logo']),
+      'logo': _normalizeImageUrl(
+        raw['coverUrl'] ?? raw['logo'] ?? raw['image'],
+      ),
+      'coverUrl': _normalizeImageUrl(
+        raw['coverUrl'] ?? raw['image'] ?? raw['logo'],
+      ),
       'series': _relationIds(raw['series']),
       'sub_series': subSeries,
       'subSeries': subSeries,
-      if (expand != null) 'expand': expand,
+      if (expand.isNotEmpty) 'expand': expand,
       'created': raw[r'$createdAt'] ?? raw['created'],
       'updated': raw[r'$updatedAt'] ?? raw['updated'],
     };
@@ -1608,12 +2459,12 @@ class AppwriteConnector {
 
   Map<String, dynamic> _normalizeGenre(Map<String, dynamic> raw) {
     final id = _extractId(raw);
-    final expand = _cloneExpandValue(raw['expand']);
+    final expand = _cloneExpandMap(raw['expand']);
     return <String, dynamic>{
       'id': id,
       'name': raw['name'] ?? '',
       'series': _relationIds(raw['series']),
-      if (expand != null) 'expand': expand,
+      if (expand.isNotEmpty) 'expand': expand,
       'created': raw[r'$createdAt'] ?? raw['created'],
       'updated': raw[r'$updatedAt'] ?? raw['updated'],
     };
@@ -1621,8 +2472,11 @@ class AppwriteConnector {
 
   Map<String, dynamic> _normalizeOwnedEntry(Map<String, dynamic> raw) {
     final id = _extractId(raw);
-    final volumeId = raw['volumeId']?.toString() ?? _relationId(raw['volumes']) ?? '';
-    final expand = <String, dynamic>{...?(_cloneExpandValue(raw['expand']) as Map<String, dynamic>?)};
+    final volumeId =
+        raw['volumeId']?.toString() ??
+        _relationId(raw['volume'] ?? raw['volumes']) ??
+        '';
+    final expand = _cloneExpandMap(raw['expand']);
 
     final data = <String, dynamic>{
       'id': id,
@@ -1635,7 +2489,11 @@ class AppwriteConnector {
       'updated': raw[r'$updatedAt'] ?? raw['updated'],
     };
 
-    final expandedVolume = raw['volume'] ?? expand['volume'] ?? expand['volumes'];
+    final expandedVolume =
+        raw['volume'] ??
+        raw['volumes'] ??
+        expand['volume'] ??
+        expand['volumes'];
     if (expandedVolume is Map<String, dynamic>) {
       expand['volume'] = _normalizeVolume(expandedVolume);
     }
@@ -1648,8 +2506,13 @@ class AppwriteConnector {
 
   Map<String, dynamic> _normalizeFollowedEntry(Map<String, dynamic> raw) {
     final id = _extractId(raw);
-    final subSeriesId = raw['subSeriesId']?.toString() ?? _relationId(raw['subSeries']) ?? '';
-    final expand = <String, dynamic>{...?(_cloneExpandValue(raw['expand']) as Map<String, dynamic>?)};
+    final subSeriesId =
+        raw['subSeriesId']?.toString() ??
+        _relationId(
+          raw['subSeries'] ?? raw['sub_series'] ?? raw['sub_serie'],
+        ) ??
+        '';
+    final expand = _cloneExpandMap(raw['expand']);
 
     final data = <String, dynamic>{
       'id': id,
@@ -1659,7 +2522,11 @@ class AppwriteConnector {
       'updated': raw[r'$updatedAt'] ?? raw['updated'],
     };
 
-    final expandedSubSeries = raw['subSeries'] ?? expand['subSeries'] ?? expand['sub_series'] ?? expand['sub_serie'];
+    final expandedSubSeries =
+        raw['subSeries'] ??
+        expand['subSeries'] ??
+        expand['sub_series'] ??
+        expand['sub_serie'];
     if (expandedSubSeries is Map<String, dynamic>) {
       final sub = _normalizeSubSeries(expandedSubSeries);
       expand['sub_serie'] = sub;
@@ -1699,7 +2566,9 @@ class AppwriteConnector {
     if (value == null) return null;
     if (value is String) {
       final normalized = value.trim();
-      if (normalized.isEmpty || normalized == 'null' || normalized == 'undefined') {
+      if (normalized.isEmpty ||
+          normalized == 'null' ||
+          normalized == 'undefined') {
         return null;
       }
       return normalized;
@@ -1737,7 +2606,10 @@ class AppwriteConnector {
   List<String> _toStringList(dynamic value) {
     if (value == null) return <String>[];
     if (value is List) {
-      return value.map((e) => e.toString()).where((e) => e.trim().isNotEmpty).toList();
+      return value
+          .map((e) => e.toString())
+          .where((e) => e.trim().isNotEmpty)
+          .toList();
     }
     if (value is String) {
       final trimmed = value.trim();
@@ -1745,7 +2617,10 @@ class AppwriteConnector {
       try {
         final decoded = jsonDecode(trimmed);
         if (decoded is List) {
-          return decoded.map((e) => e.toString()).where((e) => e.trim().isNotEmpty).toList();
+          return decoded
+              .map((e) => e.toString())
+              .where((e) => e.trim().isNotEmpty)
+              .toList();
         }
       } catch (_) {
         // Keep plain string fallback.
@@ -1821,15 +2696,26 @@ class AppwriteConnector {
 
   dynamic _cloneExpandValue(dynamic value) {
     if (value is Map<String, dynamic>) {
-      return value.map((key, nested) => MapEntry(key, _cloneExpandValue(nested)));
+      return value.map(
+        (key, nested) => MapEntry(key, _cloneExpandValue(nested)),
+      );
     }
     if (value is Map) {
-      return value.map((key, nested) => MapEntry(key.toString(), _cloneExpandValue(nested)));
+      return value.map(
+        (key, nested) => MapEntry(key.toString(), _cloneExpandValue(nested)),
+      );
     }
     if (value is List) {
       return value.map(_cloneExpandValue).toList();
     }
     return value;
+  }
+
+  Map<String, dynamic> _cloneExpandMap(dynamic value) {
+    final cloned = _cloneExpandValue(value);
+    if (cloned is Map<String, dynamic>) return cloned;
+    if (cloned is Map) return Map<String, dynamic>.from(cloned);
+    return <String, dynamic>{};
   }
 
   List<dynamic> _parseJsonList(dynamic value) {
@@ -1866,7 +2752,9 @@ class AppwriteCompatCollection {
     Timer? timer;
 
     timer = Timer.periodic(const Duration(seconds: 15), (_) async {
-      callback(RecordSubscriptionEvent(collectionId: _collectionId, action: 'poll'));
+      callback(
+        RecordSubscriptionEvent(collectionId: _collectionId, action: 'poll'),
+      );
     });
 
     return CompatSubscription(() {

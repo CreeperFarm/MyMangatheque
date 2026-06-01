@@ -67,7 +67,10 @@ class _SubSeriePageState extends State<SubSeriePage> {
 
     try {
       final owned = await connector.getCollectionFullList('owned');
-      final ids = owned.map((entry) => entry.data['volume']?.toString() ?? '').where((id) => id.isNotEmpty).toSet();
+      final ids = owned
+          .map((entry) => entry.data['volume']?.toString() ?? '')
+          .where((id) => id.isNotEmpty)
+          .toSet();
       if (!mounted) return;
       setState(() {
         _ownedVolumeIds = ids;
@@ -117,44 +120,33 @@ class _SubSeriePageState extends State<SubSeriePage> {
         }
         if (snapshot.hasData && snapshot.data != null) {
           // ? Define variables
-          final data = snapshot.data!.isNotEmpty ? Map<String, dynamic>.from(snapshot.data!.first.data) : <String, dynamic>{};
+          final data = snapshot.data!.isNotEmpty
+              ? Map<String, dynamic>.from(snapshot.data!.first.data)
+              : <String, dynamic>{};
           final expand = SafeExpandReader.asMap(data['expand']);
           // Normalize expanded values to typed lists so we can safely sort and access elements.
           final rawVolumes = expand['volumes'];
           final List<Map<String, dynamic>> volumes = (rawVolumes is List)
-              ? rawVolumes.map<Map<String, dynamic>>((e) => (e is Map) ? Map<String, dynamic>.from(e) : <String, dynamic>{}).toList()
+              ? rawVolumes
+                    .map<Map<String, dynamic>>(
+                      (e) => (e is Map)
+                          ? Map<String, dynamic>.from(e)
+                          : <String, dynamic>{},
+                    )
+                    .toList()
               : <Map<String, dynamic>>[];
 
           final rawAuthors = expand['authors'];
           final List<Map<String, dynamic>> authors = (rawAuthors is List)
-              ? rawAuthors.map<Map<String, dynamic>>((e) => (e is Map) ? Map<String, dynamic>.from(e) : <String, dynamic>{}).toList()
+              ? rawAuthors
+                    .map<Map<String, dynamic>>(
+                      (e) => (e is Map)
+                          ? Map<String, dynamic>.from(e)
+                          : <String, dynamic>{},
+                    )
+                    .toList()
               : <Map<String, dynamic>>[];
 
-          // Normalize genres to a non-null list so calls like `genres.length` are safe.
-          final rawGenres = expand['series'][0]['expand'][0]['genres'];
-          final List<dynamic> genres = (rawGenres is List) ? List<dynamic>.from(rawGenres) : <dynamic>[];
-          final title = data['title']?.toString() ?? data['titleFr']?.toString() ?? '';
-          final titleEn = data['titleEn']?.toString() ?? '';
-          final titleJp = data['titleJp']?.toString() ?? '';
-          final cover = data['image']?.toString() ?? data['coverUrl']?.toString();
-
-          // Sort sub-series by title (falling back to French title field) in a stable and null-safe way.
-          volumes.sort((a, b) {
-            final aTitle = (a['title']?.toString() ?? a['titleFr']?.toString() ?? '').toLowerCase();
-            final bTitle = (b['title']?.toString() ?? b['titleFr']?.toString() ?? '').toLowerCase();
-            return aTitle.compareTo(bTitle);
-          });
-
-          // Sort authors by name in a null-safe way.
-          authors.sort((a, b) {
-            final aName = (a['name']?.toString() ?? '').toLowerCase();
-            final bName = (b['name']?.toString() ?? '').toLowerCase();
-            return aName.compareTo(bName);
-          });
-
-          // Helper to safely extract a Map from a dynamic expanded field.
-          // The API may return either a Map or a List (of Maps). If it's a List,
-          // take the first element when possible. Otherwise return an empty map.
           Map<String, dynamic> extractMap(dynamic value) {
             if (value == null) return <String, dynamic>{};
             if (value is Map<String, dynamic>) return value;
@@ -169,12 +161,44 @@ class _SubSeriePageState extends State<SubSeriePage> {
 
           final series = extractMap(expand['series'] ?? expand['serie']);
           final editor = extractMap(expand['editor'] ?? expand['editors']);
-          final seriesExpand = (series['expand'] is Map) ? Map<String, dynamic>.from(series['expand']) : <String, dynamic>{};
+          final seriesExpand = SafeExpandReader.asMap(series['expand']);
+
+          // Normalize genres to a non-null list so calls like `genres.length` are safe.
+          final rawGenres = seriesExpand['genres'] ?? expand['genres'];
+          final List<dynamic> genres = (rawGenres is List)
+              ? List<dynamic>.from(rawGenres)
+              : <dynamic>[];
+          final title =
+              data['title']?.toString() ?? data['titleFr']?.toString() ?? '';
+          final titleEn = data['titleEn']?.toString() ?? '';
+          final titleJp = data['titleJp']?.toString() ?? '';
+          final cover =
+              data['image']?.toString() ?? data['coverUrl']?.toString();
+
+          // Sort sub-series by title (falling back to French title field) in a stable and null-safe way.
+          volumes.sort((a, b) {
+            final aTitle =
+                (a['title']?.toString() ?? a['titleFr']?.toString() ?? '')
+                    .toLowerCase();
+            final bTitle =
+                (b['title']?.toString() ?? b['titleFr']?.toString() ?? '')
+                    .toLowerCase();
+            return aTitle.compareTo(bTitle);
+          });
+
+          // Sort authors by name in a null-safe way.
+          authors.sort((a, b) {
+            final aName = (a['name']?.toString() ?? '').toLowerCase();
+            final bName = (b['name']?.toString() ?? '').toLowerCase();
+            return aName.compareTo(bName);
+          });
 
           // ? Sort volumes
           volumes.sort((a, b) {
-            final tomeA = num.tryParse(a['tomeNumber']?.toString() ?? '') ?? 1e9;
-            final tomeB = num.tryParse(b['tomeNumber']?.toString() ?? '') ?? 1e9;
+            final tomeA =
+                num.tryParse(a['tomeNumber']?.toString() ?? '') ?? 1e9;
+            final tomeB =
+                num.tryParse(b['tomeNumber']?.toString() ?? '') ?? 1e9;
             return tomeA.compareTo(tomeB);
           });
 
@@ -277,9 +301,13 @@ class _SubSeriePageState extends State<SubSeriePage> {
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    (!isSubSeriesFollowed) ? const Icon(Icons.bookmark_border) : const Icon(Icons.bookmark),
+                                    (!isSubSeriesFollowed)
+                                        ? const Icon(Icons.bookmark_border)
+                                        : const Icon(Icons.bookmark),
                                     Text(
-                                      (!isSubSeriesFollowed) ? localizations.follow : localizations.followed,
+                                      (!isSubSeriesFollowed)
+                                          ? localizations.follow
+                                          : localizations.followed,
                                       style: TextStyle(
                                         fontSize: 15,
                                         color: (!isSubSeriesFollowed)
@@ -323,7 +351,8 @@ class _SubSeriePageState extends State<SubSeriePage> {
                                 ),
                                 child: Row(
                                   children: [
-                                    for (var i = 0; i < genres.length; i += 1) MyGenresShow(data: genres[i]),
+                                    for (var i = 0; i < genres.length; i += 1)
+                                      MyGenresShow(data: genres[i]),
                                   ],
                                 ),
                               ),

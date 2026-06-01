@@ -61,7 +61,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m15(error) => "Unable to submit review: ${error}";
 
   static String m16(count) =>
-      "${Intl.plural(count, zero: 'Series', one: 'Series', other: 'Series')}";
+      "${Intl.plural(count, zero: 'Serie', one: 'Serie', other: 'Series')}";
 
   static String m17(days) => "Shipping under ${days} days";
 
@@ -76,23 +76,26 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m21(count) =>
       "Total of ${Intl.plural(count, zero: 'Volume', one: 'Volume', other: 'Volumes')}";
 
-  static String m22(support) =>
+  static String m22(count) =>
+      "${Intl.plural(count, zero: 'Sub-serie', one: 'Sub-serie', other: 'Sub-series')}";
+
+  static String m23(support) =>
       "${Intl.select(support, {'manga': 'Manga', 'novel': 'Novel', 'artbook': 'Artbook', 'lightNovel': 'Light Novel', 'boxSet': 'Box Set', 'other': 'Other'})}";
 
-  static String m23(username) => "Your username is ${username}";
+  static String m24(username) => "Your username is ${username}";
 
-  static String m24(count) => "Volume ${count}";
+  static String m25(count) => "Volume ${count}";
 
-  static String m25(count) =>
+  static String m26(count) =>
       "${Intl.plural(count, zero: 'You own 0 volume', one: 'You own 1 volume', other: 'You own ${count} volumes')}";
 
-  static String m26(owned, total) =>
+  static String m27(owned, total) =>
       "${Intl.plural(owned, zero: '0 volume', one: '1 volume', other: '${owned} volumes')} owned over ${Intl.plural(total, zero: '0 volume', one: '1 volume', other: '${total} volumes')}";
 
-  static String m27(readed, total) =>
+  static String m28(readed, total) =>
       "${Intl.plural(readed, zero: '0 volume', one: '1 volume', other: '${readed} volumes')} read over ${Intl.plural(total, zero: '0 volume', one: '1 volume', other: '${total} volumes')}.";
 
-  static String m28(readed, total) =>
+  static String m29(readed, total) =>
       "${Intl.plural(readed, zero: '0 volume', one: '1 volume', other: '${readed} volumes')} read over ${Intl.plural(total, zero: '0 volume', one: '1 volume', other: '${total} volumes')} you own.";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -586,11 +589,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "subSerieFromAuthor": m20,
     "subSerieVolumeNumber": m21,
     "subSeries": MessageLookupByLibrary.simpleMessage("Sub-Series"),
+    "subSeriesCount": m22,
     "subSeriesDoesNotExist": MessageLookupByLibrary.simpleMessage(
       "The sub-series does not exist.",
     ),
     "summary": MessageLookupByLibrary.simpleMessage("Summary"),
-    "supportIs": m22,
+    "supportIs": m23,
     "systemMode": MessageLookupByLibrary.simpleMessage("System Mode"),
     "thirdPartyContent": MessageLookupByLibrary.simpleMessage(
       "Third-Party Content",
@@ -619,7 +623,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "You have successfully logged in.",
     ),
     "username": MessageLookupByLibrary.simpleMessage("Username"),
-    "usernameIs": m23,
+    "usernameIs": m24,
     "usernameMinLength": MessageLookupByLibrary.simpleMessage(
       "Username must be at least 3 characters long.",
     ),
@@ -648,13 +652,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "volumeNotAvailableForSale": MessageLookupByLibrary.simpleMessage(
       "This volume is not available for sale.",
     ),
-    "volumeNum": m24,
+    "volumeNum": m25,
     "volumeNumber": MessageLookupByLibrary.simpleMessage("Volume Number"),
-    "volumeOwnedNumber": m25,
-    "volumeOwnedOverX": m26,
+    "volumeOwnedNumber": m26,
+    "volumeOwnedOverX": m27,
     "volumePrice": MessageLookupByLibrary.simpleMessage("Volume Price"),
-    "volumeReadedOverSeriesX": m27,
-    "volumeReadedOverX": m28,
+    "volumeReadedOverSeriesX": m28,
+    "volumeReadedOverX": m29,
     "volumeSeriesId": MessageLookupByLibrary.simpleMessage("Volume Series ID"),
     "volumeSubSeriesId": MessageLookupByLibrary.simpleMessage(
       "Volume Sub-Series ID",

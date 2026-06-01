@@ -30,14 +30,23 @@ class MyVolumeTile extends StatelessWidget {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
-    final releaseRaw = volumeData['release']?.toString() ?? volumeData['publicationDate']?.toString();
+    final releaseRaw =
+        volumeData['release']?.toString() ??
+        volumeData['publicationDate']?.toString();
     final release = releaseRaw == null ? null : DateTime.tryParse(releaseRaw);
     final routePrefix = initRoute == "/" ? "" : initRoute;
+    final tomeNumber =
+        volumeData['tomeNumber'] ?? volumeData['tome_number'] ?? '-';
+    final coverUrl =
+        volumeData['coverUrl']?.toString() ?? volumeData['image']?.toString();
 
     return Padding(
       padding: const EdgeInsets.all(5.0),
       child: InkWell(
-        onTap: () => pushOrGo(context, '$routePrefix/volume/${volumeData['id'].toString()}'),
+        onTap: () => pushOrGo(
+          context,
+          '$routePrefix/volume/${volumeData['id'].toString()}',
+        ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -49,7 +58,7 @@ class MyVolumeTile extends StatelessWidget {
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(12),
                     child: SafeNetworkImage(
-                      imageUrl: volumeData['coverUrl']?.toString(),
+                      imageUrl: coverUrl,
                       height: 75,
                     ),
                   ),
@@ -60,7 +69,7 @@ class MyVolumeTile extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '${localizations.volume} ${volumeData['tomeNumber']}',
+                        '${localizations.volume} $tomeNumber',
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
