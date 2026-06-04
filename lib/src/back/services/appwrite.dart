@@ -154,6 +154,17 @@ class AppwriteConnector {
     _connectedUser.add(fallbackUser);
   }
 
+  Future getOwned(String userId, expand, {bool forceRefresh = false}) async {
+    final record = await _api.get(
+      '/api/users/me/owned',
+      requiresApiKey: true,
+      requiresBearer: true,
+      query: <String, dynamic>{'expand': expand},
+    );
+
+    debugPrint(record.body);
+  }
+
   Future<User?> _loadCurrentUserProfile() async {
     try {
       final response = await _api.get(
@@ -1042,18 +1053,18 @@ class AppwriteConnector {
     String query,
     String expand,
   ) async {
-    final normalized = _normalizeCollectionId(collectionId);
     final list = await _fetchCollectionNormalized(
-      normalized,
+      collectionId,
       fullList: true,
       expand: expand,
       filterQuery: query,
     );
+    debugPrint(list.toString());
     return list
         .map(
           (item) => RecordModel(
             id: item['id'].toString(),
-            collectionId: normalized,
+            collectionId: collectionId,
             data: item,
           ),
         )
@@ -1482,7 +1493,7 @@ class AppwriteConnector {
       case 'subseries':
       case 'sub_serie':
       case 'sub_series':
-        return 'sub_series';
+        return 'subSeries';
       default:
         return collectionId;
     }

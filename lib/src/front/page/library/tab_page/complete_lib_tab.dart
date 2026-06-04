@@ -45,10 +45,7 @@ class _CompleteLibTabState extends ConsumerState<CompleteLibTab> {
 
   List<Map<String, dynamic>> _asMapList(dynamic value) {
     if (value is List) {
-      return value
-          .whereType<Map>()
-          .map((item) => Map<String, dynamic>.from(item))
-          .toList();
+      return value.whereType<Map>().map((item) => Map<String, dynamic>.from(item)).toList();
     }
     return <Map<String, dynamic>>[];
   }
@@ -61,8 +58,9 @@ class _CompleteLibTabState extends ConsumerState<CompleteLibTab> {
     if (value is List) {
       return value
           .map((item) {
-            if (item is Map)
+            if (item is Map) {
               return (item['name'] ?? item['id'] ?? '').toString();
+            }
             return item.toString();
           })
           .where((item) => item.trim().isNotEmpty)
@@ -96,9 +94,7 @@ class _CompleteLibTabState extends ConsumerState<CompleteLibTab> {
       readed: false,
       authors: _asStringList(expand['authors'] ?? data['authors']),
       series: data['series']?.toString() ?? data['serie']?.toString() ?? '',
-      contains: data['contains'] != null
-          ? _asStringList(data['contains'])
-          : null,
+      contains: data['contains'] != null ? _asStringList(data['contains']) : null,
       info: _asMap(data['info']).isEmpty ? null : _asMap(data['info']),
       support: data['support']?.toString() ?? 'manga',
       japGenre: data['genre_jap']?.toString() ?? data['genderJp']?.toString(),
@@ -122,8 +118,7 @@ class _CompleteLibTabState extends ConsumerState<CompleteLibTab> {
 
   String _ownedSignature(Iterable<SubSerieForCollection> subSeries) {
     final parts = subSeries.map((subSerie) {
-      final volumeIds = subSerie.volumes.map((volume) => volume.id).toList()
-        ..sort();
+      final volumeIds = subSerie.volumes.map((volume) => volume.id).toList()..sort();
       return '${subSerie.id}:${subSerie.numberOwnedVolumes}:${volumeIds.join(',')}';
     }).toList()..sort();
     return parts.join('|');
@@ -160,16 +155,11 @@ class _CompleteLibTabState extends ConsumerState<CompleteLibTab> {
 
         final data = Map<String, dynamic>.from(resList.first.data);
         final volumes = _volumesFromSubSeriesRecord(data);
-        final ownedVolumeIds = subSerie.volumes
-            .map((volume) => volume.id)
-            .toSet();
-        final missingVolumes =
-            volumes
-                .where((volume) => !ownedVolumeIds.contains(volume.id))
-                .toList()
-              ..sort(
-                (a, b) => (a.tomeNumber ?? 0).compareTo(b.tomeNumber ?? 0),
-              );
+        final ownedVolumeIds = subSerie.volumes.map((volume) => volume.id).toSet();
+        final missingVolumes = volumes.where((volume) => !ownedVolumeIds.contains(volume.id)).toList()
+          ..sort(
+            (a, b) => (a.tomeNumber ?? 0).compareTo(b.tomeNumber ?? 0),
+          );
 
         if (missingVolumes.isEmpty) continue;
 
@@ -210,16 +200,14 @@ class _CompleteLibTabState extends ConsumerState<CompleteLibTab> {
       if (widget.order == 'releaseDate') {
         final aDate = a.volumes
             .map(
-              (volume) =>
-                  volume.release ?? DateTime.fromMillisecondsSinceEpoch(0),
+              (volume) => volume.release ?? DateTime.fromMillisecondsSinceEpoch(0),
             )
             .reduce(
               (value, element) => value.isAfter(element) ? value : element,
             );
         final bDate = b.volumes
             .map(
-              (volume) =>
-                  volume.release ?? DateTime.fromMillisecondsSinceEpoch(0),
+              (volume) => volume.release ?? DateTime.fromMillisecondsSinceEpoch(0),
             )
             .reduce(
               (value, element) => value.isAfter(element) ? value : element,
@@ -268,7 +256,9 @@ class _CompleteLibTabState extends ConsumerState<CompleteLibTab> {
         '*',
         (event) async {
           debugPrint("Got an event");
-          await ref.read(mangaOwnedProvider.notifier).initData();
+
+          final user = connector.getConnectedUser();
+          await ref.read(mangaOwnedProvider.notifier).initData(user!);
         },
       );
 
@@ -282,7 +272,8 @@ class _CompleteLibTabState extends ConsumerState<CompleteLibTab> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(mangaOwnedProvider.notifier).initData();
+      final user = connector.getConnectedUser();
+      ref.read(mangaOwnedProvider.notifier).initData(user!);
       _setupRealtimeOrFallback();
     });
   }
@@ -380,18 +371,12 @@ class _CompleteLibTabState extends ConsumerState<CompleteLibTab> {
                                   height: subSerie.volumes.isNotEmpty ? 100 : 0,
                                   child: Stack(
                                     children: [
-                                      for (
-                                        var j = 0;
-                                        j < min(9, subSerie.volumes.length);
-                                        j++
-                                      )
+                                      for (var j = 0; j < min(9, subSerie.volumes.length); j++)
                                         (j == 0)
                                             ? ClipRRect(
-                                                borderRadius:
-                                                    BorderRadius.circular(10.0),
+                                                borderRadius: BorderRadius.circular(10.0),
                                                 child: SafeNetworkImage(
-                                                  imageUrl:
-                                                      subSerie.volumes[j].image,
+                                                  imageUrl: subSerie.volumes[j].image,
                                                   width: 65,
                                                 ),
                                               )
@@ -401,12 +386,9 @@ class _CompleteLibTabState extends ConsumerState<CompleteLibTab> {
                                                   decoration: BoxDecoration(
                                                     boxShadow: [
                                                       BoxShadow(
-                                                        color: Theme.of(context)
-                                                            .colorScheme
-                                                            .onPrimary
-                                                            .withValues(
-                                                              alpha: 0.9,
-                                                            ),
+                                                        color: Theme.of(context).colorScheme.onPrimary.withValues(
+                                                          alpha: 0.9,
+                                                        ),
                                                         spreadRadius: 1,
                                                         blurRadius: 2,
                                                         offset: const Offset(
@@ -417,14 +399,11 @@ class _CompleteLibTabState extends ConsumerState<CompleteLibTab> {
                                                     ],
                                                   ),
                                                   child: ClipRRect(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                          10.0,
-                                                        ),
+                                                    borderRadius: BorderRadius.circular(
+                                                      10.0,
+                                                    ),
                                                     child: SafeNetworkImage(
-                                                      imageUrl: subSerie
-                                                          .volumes[j]
-                                                          .image,
+                                                      imageUrl: subSerie.volumes[j].image,
                                                       width: 65,
                                                     ),
                                                   ),

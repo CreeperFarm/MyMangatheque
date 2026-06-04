@@ -254,7 +254,8 @@ class _EnvyTabState extends ConsumerState<EnvyTab> {
         '*',
         (event) async {
           debugPrint("Got an event");
-          await ref.read(mangaOwnedProvider.notifier).initData();
+          final user = connector.getConnectedUser();
+          await ref.read(mangaOwnedProvider.notifier).initData(user!);
           _lastOwnedSignature = '';
           final ownedSubSeries = ref.read(mangaOwnedProvider);
           if (mounted) {
@@ -264,7 +265,8 @@ class _EnvyTabState extends ConsumerState<EnvyTab> {
       );
       _followedSubscription = connector.connector().collection('followed').subscribe('*', (event) async {
         debugPrint("Got an event");
-        await ref.read(mangaOwnedProvider.notifier).initData();
+        final user = connector.getConnectedUser();
+        await ref.read(mangaOwnedProvider.notifier).initData(user!);
         _lastOwnedSignature = '';
         final ownedSubSeries = ref.read(mangaOwnedProvider);
         if (mounted) {
@@ -282,7 +284,8 @@ class _EnvyTabState extends ConsumerState<EnvyTab> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(mangaOwnedProvider.notifier).initData();
+      final user = connector.getConnectedUser();
+      ref.read(mangaOwnedProvider.notifier).initData(user!);
       _setupRealtimeOrFallback();
     });
   }

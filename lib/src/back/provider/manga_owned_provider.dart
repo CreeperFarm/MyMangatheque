@@ -177,23 +177,14 @@ class MangaOwnedNotifier extends Notifier<Set<SubSerieForCollection>> {
   }
 
   // Init the data
-  Future<bool> initData() async {
+  Future<bool> initData(User user) async {
     final storage = getIt<LocalStorage>();
-    final cachedState = await storage.getOwnedSubSerie();
-
-    if (cachedState != null && cachedState.isNotEmpty) {
-      debugPrint(
-        'Loaded ${cachedState.length} owned sub series from local storage.',
-      );
-      state = cachedState;
-    }
 
     final nextState = <SubSerieForCollection>{};
     try {
-      final result = await AppwriteConnector().getCollectionFullDataWithFilterExpand(
-        'owned',
-        '',
-        'volume.sub_series.editor',
+      final result = await AppwriteConnector().getOwned(
+        user.id,
+        'volumes.subSeries.editors',
       );
 
       debugPrint('Owned API returned ${result.length} entries.');
@@ -214,12 +205,6 @@ class MangaOwnedNotifier extends Notifier<Set<SubSerieForCollection>> {
 
       state = nextState;
       await storage.saveOwnedSubSerie(state);
-      return true;
-    }
-
-    if (cachedState != null && cachedState.isNotEmpty) {
-      debugPrint('Keeping cached owned sub series because API returned no data.');
-      state = cachedState;
       return true;
     }
 

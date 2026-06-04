@@ -36,7 +36,8 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
 
   Future<void> initData() async {
     try {
-      await ref.read(mangaOwnedProvider.notifier).initData().then((value) {
+      final user = connector.getConnectedUser();
+      await ref.read(mangaOwnedProvider.notifier).initData(user!).then((value) {
         if (!mounted) return;
         if (value) {
           setState(() {});
@@ -129,51 +130,50 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
                     context,
                   ).colorScheme.onPrimary.withValues(alpha: 0.5),
                   color: Theme.of(context).colorScheme.surface,
-                  itemBuilder: (BuildContext context) =>
-                      <PopupMenuEntry<String>>[
-                        PopupMenuItem<String>(
-                          value: 'manga',
-                          child: SizedBox(
-                            width: 175,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                if (selectedOrder == 'manga')
-                                  const Icon(Icons.check)
-                                else
-                                  const Padding(
-                                    padding: EdgeInsets.only(right: 0),
-                                  ),
-                                Text(
-                                  localizations.alphabeticalOrder,
-                                  textAlign: TextAlign.right,
-                                ),
-                              ],
+                  itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                    PopupMenuItem<String>(
+                      value: 'manga',
+                      child: SizedBox(
+                        width: 175,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            if (selectedOrder == 'manga')
+                              const Icon(Icons.check)
+                            else
+                              const Padding(
+                                padding: EdgeInsets.only(right: 0),
+                              ),
+                            Text(
+                              localizations.alphabeticalOrder,
+                              textAlign: TextAlign.right,
                             ),
-                          ),
+                          ],
                         ),
-                        PopupMenuItem<String>(
-                          value: 'releaseDate',
-                          child: SizedBox(
-                            width: 175,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                if (selectedOrder == 'releaseDate')
-                                  const Icon(Icons.check)
-                                else
-                                  const Padding(
-                                    padding: EdgeInsets.only(right: 0),
-                                  ),
-                                Text(
-                                  localizations.lastRelease,
-                                  textAlign: TextAlign.right,
-                                ),
-                              ],
+                      ),
+                    ),
+                    PopupMenuItem<String>(
+                      value: 'releaseDate',
+                      child: SizedBox(
+                        width: 175,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            if (selectedOrder == 'releaseDate')
+                              const Icon(Icons.check)
+                            else
+                              const Padding(
+                                padding: EdgeInsets.only(right: 0),
+                              ),
+                            Text(
+                              localizations.lastRelease,
+                              textAlign: TextAlign.right,
                             ),
-                          ),
+                          ],
                         ),
-                      ],
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],

@@ -61,9 +61,8 @@ class _ReadPileTabState extends ConsumerState<ReadPileTab> {
     final pending = <SubSerieForCollection>[];
 
     for (final subSerie in subSeries) {
-      final unreadVolumes =
-          subSerie.volumes.where((volume) => !volume.readed).toList()
-            ..sort((a, b) => (a.tomeNumber ?? 0).compareTo(b.tomeNumber ?? 0));
+      final unreadVolumes = subSerie.volumes.where((volume) => !volume.readed).toList()
+        ..sort((a, b) => (a.tomeNumber ?? 0).compareTo(b.tomeNumber ?? 0));
       if (unreadVolumes.isEmpty) continue;
 
       final matchesQuery =
@@ -90,16 +89,14 @@ class _ReadPileTabState extends ConsumerState<ReadPileTab> {
       if (widget.order == 'releaseDate') {
         final aDate = a.volumes
             .map(
-              (volume) =>
-                  volume.release ?? DateTime.fromMillisecondsSinceEpoch(0),
+              (volume) => volume.release ?? DateTime.fromMillisecondsSinceEpoch(0),
             )
             .reduce(
               (value, element) => value.isAfter(element) ? value : element,
             );
         final bDate = b.volumes
             .map(
-              (volume) =>
-                  volume.release ?? DateTime.fromMillisecondsSinceEpoch(0),
+              (volume) => volume.release ?? DateTime.fromMillisecondsSinceEpoch(0),
             )
             .reduce(
               (value, element) => value.isAfter(element) ? value : element,
@@ -130,7 +127,8 @@ class _ReadPileTabState extends ConsumerState<ReadPileTab> {
         '*',
         (event) async {
           debugPrint("Got an event");
-          await ref.read(mangaOwnedProvider.notifier).initData();
+          final user = connector.getConnectedUser();
+          await ref.read(mangaOwnedProvider.notifier).initData(user!);
         },
       );
 
@@ -144,7 +142,8 @@ class _ReadPileTabState extends ConsumerState<ReadPileTab> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(mangaOwnedProvider.notifier).initData();
+      final user = connector.getConnectedUser();
+      ref.read(mangaOwnedProvider.notifier).initData(user!);
       _setupRealtimeOrFallback();
     });
   }
@@ -246,8 +245,7 @@ class _ReadPileTabState extends ConsumerState<ReadPileTab> {
                                 ),
                                 child: Text(
                                   localizations.volumeReadedOverSeriesX(
-                                    subSerie.numberOwnedVolumes -
-                                        subSerie.volumes.length,
+                                    subSerie.numberOwnedVolumes - subSerie.volumes.length,
                                     subSerie.numberOwnedVolumes,
                                   ),
                                 ),
@@ -263,18 +261,12 @@ class _ReadPileTabState extends ConsumerState<ReadPileTab> {
                                   height: subSerie.volumes.isNotEmpty ? 100 : 0,
                                   child: Stack(
                                     children: [
-                                      for (
-                                        var j = 0;
-                                        j < min(9, subSerie.volumes.length);
-                                        j++
-                                      )
+                                      for (var j = 0; j < min(9, subSerie.volumes.length); j++)
                                         (j == 0)
                                             ? ClipRRect(
-                                                borderRadius:
-                                                    BorderRadius.circular(10.0),
+                                                borderRadius: BorderRadius.circular(10.0),
                                                 child: SafeNetworkImage(
-                                                  imageUrl:
-                                                      subSerie.volumes[j].image,
+                                                  imageUrl: subSerie.volumes[j].image,
                                                   width: 65,
                                                 ),
                                               )
@@ -284,12 +276,9 @@ class _ReadPileTabState extends ConsumerState<ReadPileTab> {
                                                   decoration: BoxDecoration(
                                                     boxShadow: [
                                                       BoxShadow(
-                                                        color: Theme.of(context)
-                                                            .colorScheme
-                                                            .onPrimary
-                                                            .withValues(
-                                                              alpha: 0.9,
-                                                            ),
+                                                        color: Theme.of(context).colorScheme.onPrimary.withValues(
+                                                          alpha: 0.9,
+                                                        ),
                                                         spreadRadius: 1,
                                                         blurRadius: 2,
                                                         offset: const Offset(
@@ -300,14 +289,11 @@ class _ReadPileTabState extends ConsumerState<ReadPileTab> {
                                                     ],
                                                   ),
                                                   child: ClipRRect(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                          10.0,
-                                                        ),
+                                                    borderRadius: BorderRadius.circular(
+                                                      10.0,
+                                                    ),
                                                     child: SafeNetworkImage(
-                                                      imageUrl: subSerie
-                                                          .volumes[j]
-                                                          .image,
+                                                      imageUrl: subSerie.volumes[j].image,
                                                       width: 65,
                                                     ),
                                                   ),
