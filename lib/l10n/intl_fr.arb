@@ -483,6 +483,65 @@
   "lastUpdateDate": "Date de dernière mise à jour",
   "scanEAN": "Scan EAN",
   "openScan": "Ouvrir le scan",
+  "lastScannedEan": "Dernier EAN scanné : {ean}",
+  "@lastScannedEan": {
+    "description": "Affiche le dernier EAN scanné par le scanner de code-barres",
+    "placeholders": {
+      "ean": {
+        "type": "String"
+      }
+    }
+  },
+  "scannedVolumesPreview": "Prévisualisation des tomes scannés",
+  "scannedVolumesCount": "{count, plural, =0 {0 tome} =1{1 tome} other {{count} tomes}}",
+  "@scannedVolumesCount": {
+    "description": "Affiche le nombre de tomes scannés pendant la session de scan en cours",
+    "placeholders": {
+      "count": {
+        "type": "num",
+        "format": "compact"
+      }
+    }
+  },
+  "noScannedVolumesYet": "Aucun tome scanné pour le moment.",
+  "scannedVolumeNotFound": "Aucun tome trouvé pour l'EAN {ean}.",
+  "@scannedVolumeNotFound": {
+    "description": "Affiché quand un EAN scanné ne correspond à aucun tome",
+    "placeholders": {
+      "ean": {
+        "type": "String"
+      }
+    }
+  },
+  "scannedVolumeAlreadyInList": "Ce tome est déjà dans la liste scannée.",
+  "addScannedVolumesTitle": "Ajouter les tomes scannés ?",
+  "addScannedVolumesConfirmation": "{count, plural, =1{Voulez-vous ajouter ce tome à votre collection ?} other{Voulez-vous ajouter ces {count} tomes à votre collection ?}}",
+  "@addScannedVolumesConfirmation": {
+    "description": "Confirmation avant d'ajouter les tomes scannés à la collection",
+    "placeholders": {
+      "count": {
+        "type": "num",
+        "format": "compact"
+      }
+    }
+  },
+  "scannedVolumesAdded": "Les tomes scannés ont été ajoutés à votre collection.",
+  "completeScannedSubSeriesTitle": "Ajouter les tomes précédents ?",
+  "completeScannedSubSeriesDescription": "Vous avez scanné le tome {number} d'une nouvelle sous-série. Sélectionnez les tomes jusqu'à celui-ci que vous souhaitez ajouter.",
+  "@completeScannedSubSeriesDescription": {
+    "description": "Propose les tomes précédents après le scan d'un tome plus avancé d'une nouvelle sous-série",
+    "placeholders": {
+      "number": {
+        "type": "num"
+      }
+    }
+  },
+  "selectAllVolumes": "Tout sélectionner",
+  "clearSelection": "Effacer la sélection",
+  "addSelectedVolumes": "Ajouter les tomes sélectionnés",
+  "neverShowAgain": "Ne plus jamais afficher cette option",
+  "scanPreviousVolumesSuggestion": "Proposer les tomes précédents après un scan",
+  "scanPreviousVolumesSuggestionDescription": "Lors du scan d'un tome avancé d'une nouvelle sous-série, proposer aussi l'ajout des tomes précédents.",
   "buildAppVersionImpossibleToRetreive": "Impossible de récupérer la version de l'application et la version du build.",
   "allVolumesOwned": "Vous possedez tous les tomes de volumes. Vous les possédez tous 👏.",
   "unknownError": "Une erreur inconnue s'est produite.",

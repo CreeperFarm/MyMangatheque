@@ -64,7 +64,7 @@ All notable changes to this project are documented in reverse chronological orde
 
 ### Major Updates
 
-- Upgraded several dependencies including `flutter_riverpod`, `go_router`, and `simple_barcode_scanner`.
+- Upgraded several dependencies including `flutter_riverpod` and `go_router`.
 - Refactored `ProfilePage` to improve formatting and null safety.
 
 ### Notable Changes
@@ -192,7 +192,7 @@ Toutes les modifications notables de ce projet sont documentées par ordre chron
 
 ### Mises à jour majeures
 
-- Mise à niveau de plusieurs dépendances, y compris `flutter_riverpod`, `go_router` et `simple_barcode_scanner`.
+- Mise à niveau de plusieurs dépendances, y compris `flutter_riverpod` et `go_router`.
 - Refactorisation de la `ProfilePage` pour améliorer la mise en page et la sécurité null.
 
 ### Changements notables

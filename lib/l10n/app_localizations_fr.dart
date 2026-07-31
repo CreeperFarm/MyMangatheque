@@ -1101,6 +1101,94 @@ class AppLocalizationsFr extends AppLocalizations {
   String get openScan => 'Ouvrir le scan';
 
   @override
+  String lastScannedEan(String ean) {
+    return 'Dernier EAN scanné : $ean';
+  }
+
+  @override
+  String get scannedVolumesPreview => 'Prévisualisation des tomes scannés';
+
+  @override
+  String scannedVolumesCount(num count) {
+    final intl.NumberFormat countNumberFormat = intl.NumberFormat.compact(
+      locale: localeName,
+    );
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countString tomes',
+      one: '1 tome',
+      zero: '0 tome',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get noScannedVolumesYet => 'Aucun tome scanné pour le moment.';
+
+  @override
+  String scannedVolumeNotFound(String ean) {
+    return 'Aucun tome trouvé pour l\'EAN $ean.';
+  }
+
+  @override
+  String get scannedVolumeAlreadyInList =>
+      'Ce tome est déjà dans la liste scannée.';
+
+  @override
+  String get addScannedVolumesTitle => 'Ajouter les tomes scannés ?';
+
+  @override
+  String addScannedVolumesConfirmation(num count) {
+    final intl.NumberFormat countNumberFormat = intl.NumberFormat.compact(
+      locale: localeName,
+    );
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Voulez-vous ajouter ces $countString tomes à votre collection ?',
+      one: 'Voulez-vous ajouter ce tome à votre collection ?',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get scannedVolumesAdded =>
+      'Les tomes scannés ont été ajoutés à votre collection.';
+
+  @override
+  String get completeScannedSubSeriesTitle => 'Ajouter les tomes précédents ?';
+
+  @override
+  String completeScannedSubSeriesDescription(num number) {
+    return 'Vous avez scanné le tome $number d\'une nouvelle sous-série. Sélectionnez les tomes jusqu\'à celui-ci que vous souhaitez ajouter.';
+  }
+
+  @override
+  String get selectAllVolumes => 'Tout sélectionner';
+
+  @override
+  String get clearSelection => 'Effacer la sélection';
+
+  @override
+  String get addSelectedVolumes => 'Ajouter les tomes sélectionnés';
+
+  @override
+  String get neverShowAgain => 'Ne plus jamais afficher cette option';
+
+  @override
+  String get scanPreviousVolumesSuggestion =>
+      'Proposer les tomes précédents après un scan';
+
+  @override
+  String get scanPreviousVolumesSuggestionDescription =>
+      'Lors du scan d\'un tome avancé d\'une nouvelle sous-série, proposer aussi l\'ajout des tomes précédents.';
+
+  @override
   String get buildAppVersionImpossibleToRetreive =>
       'Impossible de récupérer la version de l\'application et la version du build.';
 

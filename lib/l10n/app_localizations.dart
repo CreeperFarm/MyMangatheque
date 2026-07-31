@@ -1682,6 +1682,108 @@ abstract class AppLocalizations {
   /// **'Open Scan'**
   String get openScan;
 
+  /// Shows the last EAN scanned by the barcode scanner
+  ///
+  /// In en, this message translates to:
+  /// **'Last scanned EAN: {ean}'**
+  String lastScannedEan(String ean);
+
+  /// No description provided for @scannedVolumesPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Scanned volumes preview'**
+  String get scannedVolumesPreview;
+
+  /// Shows how many volumes have been scanned during the current scan session
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0 {0 volume} =1{1 volume} other {{count} volumes}}'**
+  String scannedVolumesCount(num count);
+
+  /// No description provided for @noScannedVolumesYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No volume scanned yet.'**
+  String get noScannedVolumesYet;
+
+  /// Shown when a scanned EAN does not match a volume
+  ///
+  /// In en, this message translates to:
+  /// **'No volume found for EAN {ean}.'**
+  String scannedVolumeNotFound(String ean);
+
+  /// No description provided for @scannedVolumeAlreadyInList.
+  ///
+  /// In en, this message translates to:
+  /// **'This volume is already in the scanned list.'**
+  String get scannedVolumeAlreadyInList;
+
+  /// No description provided for @addScannedVolumesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add scanned volumes?'**
+  String get addScannedVolumesTitle;
+
+  /// Confirmation before adding scanned volumes to the collection
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Do you want to add this volume to your collection?} other{Do you want to add these {count} volumes to your collection?}}'**
+  String addScannedVolumesConfirmation(num count);
+
+  /// No description provided for @scannedVolumesAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Scanned volumes added to your collection.'**
+  String get scannedVolumesAdded;
+
+  /// No description provided for @completeScannedSubSeriesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add earlier volumes?'**
+  String get completeScannedSubSeriesTitle;
+
+  /// Offers earlier volumes after scanning a later volume from a new sub-series
+  ///
+  /// In en, this message translates to:
+  /// **'You scanned volume {number} from a new sub-series. Select the volumes up to this one that you want to add.'**
+  String completeScannedSubSeriesDescription(num number);
+
+  /// No description provided for @selectAllVolumes.
+  ///
+  /// In en, this message translates to:
+  /// **'Select all'**
+  String get selectAllVolumes;
+
+  /// No description provided for @clearSelection.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear selection'**
+  String get clearSelection;
+
+  /// No description provided for @addSelectedVolumes.
+  ///
+  /// In en, this message translates to:
+  /// **'Add selected volumes'**
+  String get addSelectedVolumes;
+
+  /// No description provided for @neverShowAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Never show this again'**
+  String get neverShowAgain;
+
+  /// No description provided for @scanPreviousVolumesSuggestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggest earlier volumes after scanning'**
+  String get scanPreviousVolumesSuggestion;
+
+  /// No description provided for @scanPreviousVolumesSuggestionDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'When scanning a later volume from a new sub-series, offer to add its earlier volumes too.'**
+  String get scanPreviousVolumesSuggestionDescription;
+
   /// No description provided for @buildAppVersionImpossibleToRetreive.
   ///
   /// In en, this message translates to:

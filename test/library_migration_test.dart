@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mymangatheque/src/back/provider/manga_owned_provider.dart';
 import 'package:mymangatheque/src/back/services/appwrite.dart';
 import 'package:mymangatheque/src/models/manga/volume.dart';
 import 'package:mymangatheque/src/models/manga/sub_serie_for_collection.dart';
@@ -11,41 +12,70 @@ void main() {
       expect(identical(connector1, connector2), true);
     });
 
-    test('AppwriteConnector.connector() should return AppwriteCompatClient', () {
+    test(
+      'AppwriteConnector.connector() should return AppwriteCompatClient',
+      () {
+        final connector = AppwriteConnector();
+        final compatClient = connector.connector();
+        expect(compatClient, isNotNull);
+      },
+    );
+
+    test('existing owned/followed conflicts are idempotent', () {
       final connector = AppwriteConnector();
-      final compatClient = connector.connector();
-      expect(compatClient, isNotNull);
-    });
 
-    test('Volume model should be properly constructed with required fields', () {
-      final volume = Volume(
-        id: 'vol-123',
-        title: 'Test Volume',
-        tomeNumber: 1,
-        price: 15,
-        image: 'https://example.com/image.jpg',
-        over18: false,
-        resume: 'Test resume',
-        bookLink: const [],
-        release: DateTime.now(),
-        ean: 123456789,
-        language: 'en',
-        subSeries: 'sub-series-123',
-        readed: false,
-        authors: const ['Author 1'],
-        series: 'series-123',
-        contains: null,
-        info: null,
-        support: 'manga',
-        japGenre: 'Shonen',
-        lastTimeChecked: DateTime.now(),
+      expect(
+        connector.isAlreadyExistingResponseForTesting(409, 'Conflict'),
+        isTrue,
       );
-
-      expect(volume.id, 'vol-123');
-      expect(volume.title, 'Test Volume');
-      expect(volume.tomeNumber, 1);
-      expect(volume.authors.contains('Author 1'), true);
+      expect(
+        connector.isAlreadyExistingResponseForTesting(
+          400,
+          'Sub-series already followed',
+        ),
+        isTrue,
+      );
+      expect(
+        connector.isAlreadyExistingResponseForTesting(
+          400,
+          'Volume does not exist',
+        ),
+        isFalse,
+      );
     });
+
+    test(
+      'Volume model should be properly constructed with required fields',
+      () {
+        final volume = Volume(
+          id: 'vol-123',
+          title: 'Test Volume',
+          tomeNumber: 1,
+          price: 15,
+          image: 'https://example.com/image.jpg',
+          over18: false,
+          resume: 'Test resume',
+          bookLink: const [],
+          release: DateTime.now(),
+          ean: 123456789,
+          language: 'en',
+          subSeries: 'sub-series-123',
+          readed: false,
+          authors: const ['Author 1'],
+          series: 'series-123',
+          contains: null,
+          info: null,
+          support: 'manga',
+          japGenre: 'Shonen',
+          lastTimeChecked: DateTime.now(),
+        );
+
+        expect(volume.id, 'vol-123');
+        expect(volume.title, 'Test Volume');
+        expect(volume.tomeNumber, 1);
+        expect(volume.authors.contains('Author 1'), true);
+      },
+    );
 
     test('SubSerieForCollection should aggregate volumes correctly', () {
       final vol1 = Volume(
@@ -163,5 +193,96 @@ void main() {
       expect(volumes[1].tomeNumber, 2);
       expect(volumes[2].tomeNumber, 3);
     });
+
+    test(
+      'Owned entries with expanded volume data should render in library',
+      () {
+        final notifier = MangaOwnedNotifier();
+        final result = notifier.mergeOwnedEntriesForTesting([
+          {
+            'id': 'owned-1',
+            'volume': 'vol-1',
+            'readed': true,
+            'expand': {
+              'volume': {
+                'id': 'vol-1',
+                'title': 'Volume 1',
+                'tome_number': 1,
+                'price': 12,
+                'coverUrl': 'https://example.com/vol-1.jpg',
+                'over18': false,
+                'resume': '',
+                'release': '2024-01-01T00:00:00.000Z',
+                'ean': '9780000000001',
+                'language': 'fr',
+                'sub_series': 'sub-1',
+                'expand': {
+                  'subSeries': {
+                    'id': 'sub-1',
+                    'title': 'Test Sub Series',
+                    'volumes': ['vol-1', 'vol-2'],
+                    'coverUrl': 'https://example.com/sub.jpg',
+                  },
+                },
+              },
+            },
+          },
+        ]);
+
+        expect(result, hasLength(1));
+        final subSerie = result.first;
+        expect(subSerie.id, 'sub-1');
+        expect(subSerie.title, 'Test Sub Series');
+        expect(subSerie.numberOfVolumes, 2);
+        expect(subSerie.numberOwnedVolumes, 1);
+        expect(subSerie.volumes.single.id, 'vol-1');
+        expect(subSerie.volumes.single.readed, true);
+      },
+    );
+
+    test(
+      'Owned entries with expanded volumes data should render in library',
+      () {
+        final notifier = MangaOwnedNotifier();
+        final result = notifier.mergeOwnedEntriesForTesting([
+          {
+            'id': 'owned-1',
+            'volumes': 'vol-1',
+            'readed': false,
+            'expand': {
+              'volumes': {
+                'id': 'vol-1',
+                'title': 'Volume 1',
+                'tome_number': 1,
+                'price': 12,
+                'coverUrl': 'https://example.com/vol-1.jpg',
+                'over18': false,
+                'resume': '',
+                'release': '2024-01-01T00:00:00.000Z',
+                'ean': '9780000000001',
+                'language': 'fr',
+                'subSeries': 'sub-1',
+                'expand': {
+                  'subSeries': {
+                    'id': 'sub-1',
+                    'title': 'Test Sub Series',
+                    'volumes': ['vol-1', 'vol-2'],
+                    'coverUrl': 'https://example.com/sub.jpg',
+                  },
+                },
+              },
+            },
+          },
+        ]);
+
+        expect(result, hasLength(1));
+        final subSerie = result.first;
+        expect(subSerie.id, 'sub-1');
+        expect(subSerie.numberOfVolumes, 2);
+        expect(subSerie.numberOwnedVolumes, 1);
+        expect(subSerie.volumes.single.id, 'vol-1');
+        expect(subSerie.volumes.single.readed, false);
+      },
+    );
   });
 }

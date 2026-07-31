@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mymangatheque/src/back/services/admin_service.dart';
+import 'package:mymangatheque/src/front/page/admin_pages/admin_components.dart';
 import 'package:mymangatheque/src/function/auto_push_or_go.dart';
 
 class AdminHomePage extends StatefulWidget {
@@ -11,13 +12,16 @@ class AdminHomePage extends StatefulWidget {
 
 class _AdminHomePageState extends State<AdminHomePage> {
   final AdminConnector _admin = AdminConnector();
+  bool _initialized = false;
 
   @override
   void initState() {
     super.initState();
     _admin.init().then((_) {
       if (!mounted) return;
-      setState(() {});
+      setState(() {
+        _initialized = true;
+      });
     });
   }
 
@@ -29,41 +33,102 @@ class _AdminHomePageState extends State<AdminHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    if (!_initialized) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
     final isLoggedIn = _admin.isLoggedIn();
-    return Scaffold(
-      appBar: AppBar(title: const Text('Admin')),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: ListView(
-          children: [
-            Text(
-              isLoggedIn
-                  ? 'Connecté avec ${_admin.maskedKey}'
-                  : 'Tu dois te connecter avec une clé API admin.',
+    return AdminPageScaffold(
+      title: 'Administration',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const AdminPageHeader(
+            icon: Icons.admin_panel_settings_outlined,
+            title: 'Espace de gestion',
+            description:
+                'Gérez le catalogue, suivez son activité et corrigez les anomalies de données.',
+          ),
+          const SizedBox(height: 24),
+          AdminStatusBanner(
+            icon: isLoggedIn
+                ? Icons.verified_user_outlined
+                : Icons.lock_outline_rounded,
+            title: isLoggedIn ? 'Session active' : 'Accès protégé',
+            message: isLoggedIn
+                ? 'Clé utilisée : ${_admin.maskedKey}'
+                : 'Connectez une clé administrateur ou modérateur autorisée.',
+            tone: isLoggedIn
+                ? AdminBannerTone.success
+                : AdminBannerTone.warning,
+            trailing: isLoggedIn
+                ? null
+                : FilledButton.icon(
+                    onPressed: () => pushOrGo(context, '/admin/admin_login'),
+                    icon: const Icon(Icons.login_rounded),
+                    label: const Text('Connexion'),
+                  ),
+          ),
+          if (isLoggedIn) ...[
+            const SizedBox(height: 28),
+            const AdminSectionTitle(title: 'Outils'),
+            const SizedBox(height: 12),
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final cardWidth = constraints.maxWidth >= 720
+                    ? (constraints.maxWidth - 12) / 2
+                    : constraints.maxWidth;
+                return Wrap(
+                  spacing: 12,
+                  runSpacing: 12,
+                  children: [
+                    SizedBox(
+                      width: cardWidth,
+                      child: AdminActionCard(
+                        icon: Icons.add_box_outlined,
+                        title: 'Création de données',
+                        description:
+                            'Ajoutez des auteurs, genres et volumes au catalogue.',
+                        onTap: () => pushOrGo(context, '/admin/create'),
+                      ),
+                    ),
+                    SizedBox(
+                      width: cardWidth,
+                      child: AdminActionCard(
+                        icon: Icons.query_stats_rounded,
+                        title: 'Statistiques',
+                        description:
+                            'Consultez les indicateurs et les volumes les plus ajoutés.',
+                        onTap: () => pushOrGo(context, '/admin/static_page'),
+                      ),
+                    ),
+                    SizedBox(
+                      width: cardWidth,
+                      child: AdminActionCard(
+                        icon: Icons.fact_check_outlined,
+                        title: 'Qualité des volumes',
+                        description:
+                            'Détectez et traitez les numéros de tome incohérents.',
+                        onTap: () => pushOrGo(context, '/admin/volume-quality'),
+                      ),
+                    ),
+                  ],
+                );
+              },
             ),
-            const SizedBox(height: 16),
-            if (!isLoggedIn)
-              ElevatedButton(
-                onPressed: () => pushOrGo(context, '/admin/admin_login'),
-                child: const Text('Se connecter'),
-              ),
-            if (isLoggedIn)
-              ElevatedButton(
-                onPressed: () => pushOrGo(context, '/admin/create'),
-                child: const Text('Création de données'),
-              ),
-            if (isLoggedIn)
-              ElevatedButton(
-                onPressed: () => pushOrGo(context, '/admin/static_page'),
-                child: const Text('Statistiques'),
-              ),
-            if (isLoggedIn)
-              ElevatedButton(
+            const SizedBox(height: 28),
+            const AdminSectionTitle(title: 'Session'),
+            const SizedBox(height: 10),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: OutlinedButton.icon(
                 onPressed: _logout,
-                child: const Text('Déconnexion admin'),
+                icon: const Icon(Icons.logout_rounded),
+                label: const Text('Déconnexion'),
               ),
+            ),
           ],
-        ),
+        ],
       ),
     );
   }

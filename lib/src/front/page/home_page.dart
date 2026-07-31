@@ -22,25 +22,31 @@ class MyHomePageState extends ConsumerState<MyHomePage> {
   final ScrollController _scrollController = ScrollController();
 
   final List<RecordModel> _loadedRecords = <RecordModel>[];
-  List<Map<String, dynamic>> _visibleVolumes = <Map<String, dynamic>>[];
+  final List<Map<String, dynamic>> _visibleVolumes = <Map<String, dynamic>>[];
 
   StreamSubscription<User?>? _userSubscription;
 
   bool _initialLoading = true;
   bool _loadingMore = false;
   String? _error;
+  String? _lastUserId;
 
   int _currentPage = 0;
   int _totalPages = 1;
+  int _loadGeneration = 0;
 
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
 
-    _reload();
-    _userSubscription = _connector.listenToUserChanges().listen((_) {
+    _lastUserId = _connector.getConnectedUser()?.id;
+    _reload(showInitialLoader: true);
+    _userSubscription = _connector.listenToUserChanges().listen((user) {
       if (!mounted) return;
+      final userId = user?.id;
+      if (userId == _lastUserId) return;
+      _lastUserId = userId;
       _reload();
     });
   }
@@ -62,23 +68,23 @@ class MyHomePageState extends ConsumerState<MyHomePage> {
     }
   }
 
-  Future<void> _reload() async {
+  Future<void> _reload({bool showInitialLoader = false}) async {
+    final generation = ++_loadGeneration;
     setState(() {
-      _initialLoading = true;
+      _initialLoading = showInitialLoader || _visibleVolumes.isEmpty;
       _error = null;
       _currentPage = 0;
       _totalPages = 1;
-      _loadedRecords.clear();
-      _visibleVolumes = <Map<String, dynamic>>[];
     });
 
-    await _loadNextPage(reset: true);
+    await _loadNextPage(reset: true, generation: generation);
   }
 
-  Future<void> _loadNextPage({bool reset = false}) async {
-    if (_loadingMore) return;
+  Future<void> _loadNextPage({bool reset = false, int? generation}) async {
+    if (_loadingMore && !reset) return;
     if (!reset && !_hasMorePages) return;
 
+    final loadGeneration = generation ?? _loadGeneration;
     final nextPage = reset ? 1 : (_currentPage + 1);
 
     setState(() {
@@ -87,8 +93,11 @@ class MyHomePageState extends ConsumerState<MyHomePage> {
     });
 
     try {
-      final page = await _connector.getHomeRecommendationsPage(page: nextPage, limit: _pageSize);
-      if (!mounted) return;
+      final page = await _connector.getHomeRecommendationsPage(
+        page: nextPage,
+        limit: _pageSize,
+      );
+      if (!mounted || loadGeneration != _loadGeneration) return;
 
       setState(() {
         if (reset) {
@@ -109,12 +118,12 @@ class MyHomePageState extends ConsumerState<MyHomePage> {
         _totalPages = page.totalPages;
       });
     } catch (e) {
-      if (!mounted) return;
+      if (!mounted || loadGeneration != _loadGeneration) return;
       setState(() {
         _error = e.toString();
       });
     } finally {
-      if (mounted) {
+      if (mounted && loadGeneration == _loadGeneration) {
         setState(() {
           _initialLoading = false;
           _loadingMore = false;
@@ -141,7 +150,10 @@ class MyHomePageState extends ConsumerState<MyHomePage> {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 12),
         child: Center(
-          child: TextButton(onPressed: _loadNextPage, child: Text(localizations.tryAgain)),
+          child: TextButton(
+            onPressed: _loadNextPage,
+            child: Text(localizations.tryAgain),
+          ),
         ),
       );
     }
@@ -174,7 +186,10 @@ class MyHomePageState extends ConsumerState<MyHomePage> {
               children: [
                 Text(localizations.errorOccurred, textAlign: TextAlign.center),
                 const SizedBox(height: 12),
-                ElevatedButton(onPressed: _reload, child: Text(localizations.tryAgain)),
+                ElevatedButton(
+                  onPressed: _reload,
+                  child: Text(localizations.tryAgain),
+                ),
               ],
             ),
           ),
@@ -196,14 +211,22 @@ class MyHomePageState extends ConsumerState<MyHomePage> {
             controller: _scrollController,
             physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.only(top: 50, left: 10, right: 10),
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: crossAxisCount, childAspectRatio: 0.7),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: crossAxisCount,
+              childAspectRatio: 0.7,
+            ),
             itemCount: itemCount,
             itemBuilder: (context, index) {
               if (index >= _visibleVolumes.length) {
                 return _buildFooter(localizations);
               }
 
-              return MyMangaShowTile(mangaData: _visibleVolumes[index], initRoute: '/', width: tileWidth, height: tileHeight);
+              return MyMangaShowTile(
+                mangaData: _visibleVolumes[index],
+                initRoute: '/',
+                width: tileWidth,
+                height: tileHeight,
+              );
             },
           );
         },

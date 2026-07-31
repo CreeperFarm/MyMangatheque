@@ -1093,6 +1093,94 @@ class AppLocalizationsEn extends AppLocalizations {
   String get openScan => 'Open Scan';
 
   @override
+  String lastScannedEan(String ean) {
+    return 'Last scanned EAN: $ean';
+  }
+
+  @override
+  String get scannedVolumesPreview => 'Scanned volumes preview';
+
+  @override
+  String scannedVolumesCount(num count) {
+    final intl.NumberFormat countNumberFormat = intl.NumberFormat.compact(
+      locale: localeName,
+    );
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countString volumes',
+      one: '1 volume',
+      zero: '0 volume',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get noScannedVolumesYet => 'No volume scanned yet.';
+
+  @override
+  String scannedVolumeNotFound(String ean) {
+    return 'No volume found for EAN $ean.';
+  }
+
+  @override
+  String get scannedVolumeAlreadyInList =>
+      'This volume is already in the scanned list.';
+
+  @override
+  String get addScannedVolumesTitle => 'Add scanned volumes?';
+
+  @override
+  String addScannedVolumesConfirmation(num count) {
+    final intl.NumberFormat countNumberFormat = intl.NumberFormat.compact(
+      locale: localeName,
+    );
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Do you want to add these $countString volumes to your collection?',
+      one: 'Do you want to add this volume to your collection?',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get scannedVolumesAdded => 'Scanned volumes added to your collection.';
+
+  @override
+  String get completeScannedSubSeriesTitle => 'Add earlier volumes?';
+
+  @override
+  String completeScannedSubSeriesDescription(num number) {
+    return 'You scanned volume $number from a new sub-series. Select the volumes up to this one that you want to add.';
+  }
+
+  @override
+  String get selectAllVolumes => 'Select all';
+
+  @override
+  String get clearSelection => 'Clear selection';
+
+  @override
+  String get addSelectedVolumes => 'Add selected volumes';
+
+  @override
+  String get neverShowAgain => 'Never show this again';
+
+  @override
+  String get scanPreviousVolumesSuggestion =>
+      'Suggest earlier volumes after scanning';
+
+  @override
+  String get scanPreviousVolumesSuggestionDescription =>
+      'When scanning a later volume from a new sub-series, offer to add its earlier volumes too.';
+
+  @override
   String get buildAppVersionImpossibleToRetreive =>
       'Impossible to retrieve the build and app version.';
 

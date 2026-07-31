@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mymangatheque/src/back/services/admin_service.dart';
+import 'package:mymangatheque/src/front/page/admin_pages/admin_components.dart';
 
 class AdminCreateVolumePage extends StatefulWidget {
   const AdminCreateVolumePage({super.key});
@@ -22,6 +23,7 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
 
   bool _over18 = false;
   bool _loading = false;
+  bool _messageIsError = false;
   String _message = '';
   String _language = 'french';
   String _support = 'manga';
@@ -71,6 +73,7 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
         ean == null) {
       setState(() {
         _message = 'Champs obligatoires invalides (titre, tome, prix, ean).';
+        _messageIsError = true;
       });
       return;
     }
@@ -78,6 +81,7 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
     setState(() {
       _loading = true;
       _message = '';
+      _messageIsError = false;
     });
 
     try {
@@ -99,6 +103,7 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
       setState(() {
         _loading = false;
         _message = 'Volume créé avec succès.';
+        _messageIsError = false;
       });
       _titleFrController.clear();
       _tomeController.clear();
@@ -116,121 +121,182 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
       setState(() {
         _loading = false;
         _message = e.toString();
+        _messageIsError = true;
       });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: ListView(
-        children: [
-          TextField(
-            controller: _titleFrController,
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-              labelText: 'Titre FR *',
-            ),
+    final colorScheme = Theme.of(context).colorScheme;
+    return AdminFormView(
+      children: [
+        const AdminPageHeader(
+          icon: Icons.menu_book_outlined,
+          title: 'Nouveau volume',
+          description:
+              'Renseignez les informations éditoriales et le rattachement au catalogue.',
+        ),
+        const SizedBox(height: 20),
+        TextField(
+          controller: _titleFrController,
+          textInputAction: TextInputAction.next,
+          decoration: const InputDecoration(
+            border: OutlineInputBorder(),
+            labelText: 'Titre français *',
+            prefixIcon: Icon(Icons.title_rounded),
           ),
-          const SizedBox(height: 12),
-          TextField(
-            controller: _tomeController,
-            keyboardType: TextInputType.number,
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-              labelText: 'Tome number *',
+        ),
+        const SizedBox(height: 12),
+        _responsiveRow(
+          [
+            TextField(
+              controller: _tomeController,
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
+              textInputAction: TextInputAction.next,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: 'Numéro de tome *',
+                prefixIcon: Icon(Icons.numbers_rounded),
+              ),
             ),
-          ),
-          const SizedBox(height: 12),
-          TextField(
-            controller: _priceController,
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-              labelText: 'Prix *',
+            TextField(
+              controller: _priceController,
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
+              textInputAction: TextInputAction.next,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: 'Prix *',
+                suffixText: '€',
+                prefixIcon: Icon(Icons.payments_outlined),
+              ),
             ),
-          ),
-          const SizedBox(height: 12),
-          TextField(
-            controller: _eanController,
-            keyboardType: TextInputType.number,
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-              labelText: 'EAN *',
+            TextField(
+              controller: _eanController,
+              keyboardType: TextInputType.number,
+              textInputAction: TextInputAction.next,
+              maxLength: 13,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: 'EAN-13 *',
+                prefixIcon: Icon(Icons.qr_code_2_rounded),
+                counterText: '',
+              ),
             ),
-          ),
-          const SizedBox(height: 12),
-          DropdownButtonFormField<String>(
-            initialValue: _language,
-            items: _languages
-                .map((item) => DropdownMenuItem(value: item, child: Text(item)))
-                .toList(),
-            onChanged: (value) {
-              if (value == null) return;
-              setState(() {
-                _language = value;
-              });
-            },
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-              labelText: 'Language *',
+          ],
+        ),
+        const SizedBox(height: 12),
+        _responsiveRow(
+          [
+            DropdownButtonFormField<String>(
+              key: ValueKey<String>(_language),
+              initialValue: _language,
+              items: _languages
+                  .map(
+                    (item) => DropdownMenuItem(
+                      value: item,
+                      child: Text(item),
+                    ),
+                  )
+                  .toList(),
+              onChanged: (value) {
+                if (value == null) return;
+                setState(() {
+                  _language = value;
+                });
+              },
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: 'Langue *',
+                prefixIcon: Icon(Icons.language_rounded),
+              ),
             ),
-          ),
-          const SizedBox(height: 12),
-          DropdownButtonFormField<String>(
-            initialValue: _support,
-            items: _supports
-                .map((item) => DropdownMenuItem(value: item, child: Text(item)))
-                .toList(),
-            onChanged: (value) {
-              if (value == null) return;
-              setState(() {
-                _support = value;
-              });
-            },
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-              labelText: 'Support *',
+            DropdownButtonFormField<String>(
+              key: ValueKey<String>(_support),
+              initialValue: _support,
+              items: _supports
+                  .map(
+                    (item) => DropdownMenuItem(
+                      value: item,
+                      child: Text(item),
+                    ),
+                  )
+                  .toList(),
+              onChanged: (value) {
+                if (value == null) return;
+                setState(() {
+                  _support = value;
+                });
+              },
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: 'Support *',
+                prefixIcon: Icon(Icons.category_outlined),
+              ),
             ),
-          ),
-          const SizedBox(height: 12),
-          TextField(
-            controller: _subSeriesController,
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-              labelText: 'SubSeries ID',
+          ],
+        ),
+        const SizedBox(height: 12),
+        _responsiveRow(
+          [
+            TextField(
+              controller: _subSeriesController,
+              textInputAction: TextInputAction.next,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: 'ID de sous-série',
+                prefixIcon: Icon(Icons.account_tree_outlined),
+              ),
             ),
-          ),
-          const SizedBox(height: 12),
-          TextField(
-            controller: _coverController,
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-              labelText: 'Cover URL',
+            TextField(
+              controller: _genderJpController,
+              textInputAction: TextInputAction.next,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: 'Public japonais',
+                hintText: 'shonen, seinen, shojo…',
+                prefixIcon: Icon(Icons.groups_outlined),
+              ),
             ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        TextField(
+          controller: _coverController,
+          keyboardType: TextInputType.url,
+          textInputAction: TextInputAction.next,
+          decoration: const InputDecoration(
+            border: OutlineInputBorder(),
+            labelText: 'URL de la couverture',
+            prefixIcon: Icon(Icons.image_outlined),
           ),
-          const SizedBox(height: 12),
-          TextField(
-            controller: _genderJpController,
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-              labelText: 'Gender JP (shonen/seinen/shojo/josei)',
+        ),
+        const SizedBox(height: 12),
+        TextField(
+          controller: _resumeController,
+          maxLines: 4,
+          decoration: const InputDecoration(
+            border: OutlineInputBorder(),
+            labelText: 'Résumé',
+            alignLabelWithHint: true,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Container(
+          decoration: BoxDecoration(
+            border: Border.all(color: colorScheme.outlineVariant),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: SwitchListTile(
+            title: const Text('Contenu réservé aux adultes'),
+            subtitle: const Text(
+              'Masqué lorsque le contenu adulte est désactivé.',
             ),
-          ),
-          const SizedBox(height: 12),
-          TextField(
-            controller: _resumeController,
-            maxLines: 4,
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-              labelText: 'Résumé',
-            ),
-          ),
-          const SizedBox(height: 12),
-          SwitchListTile(
-            contentPadding: EdgeInsets.zero,
-            title: const Text('Over18'),
+            secondary: const Icon(Icons.no_adult_content_outlined),
             value: _over18,
             onChanged: (value) {
               setState(() {
@@ -238,18 +304,48 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
               });
             },
           ),
-          const SizedBox(height: 12),
-          ElevatedButton(
-            onPressed: _loading ? null : _submit,
-            child: const Text('Créer volume'),
-          ),
-          const SizedBox(height: 8),
-          if (_loading)
-            const Center(child: CircularProgressIndicator())
-          else if (_message.isNotEmpty)
-            Text(_message),
+        ),
+        const SizedBox(height: 16),
+        FilledButton.icon(
+          onPressed: _loading ? null : _submit,
+          icon: const Icon(Icons.add_rounded),
+          label: const Text('Créer le volume'),
+        ),
+        if (_loading) ...[
+          const SizedBox(height: 14),
+          const LinearProgressIndicator(),
+        ] else if (_message.isNotEmpty) ...[
+          const SizedBox(height: 14),
+          AdminFeedback(message: _message, isError: _messageIsError),
         ],
-      ),
+      ],
+    );
+  }
+
+  Widget _responsiveRow(List<Widget> fields) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (constraints.maxWidth < 620) {
+          return Column(
+            children: [
+              for (var index = 0; index < fields.length; index++) ...[
+                if (index > 0) const SizedBox(height: 12),
+                fields[index],
+              ],
+            ],
+          );
+        }
+
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            for (var index = 0; index < fields.length; index++) ...[
+              if (index > 0) const SizedBox(width: 12),
+              Expanded(child: fields[index]),
+            ],
+          ],
+        );
+      },
     );
   }
 }

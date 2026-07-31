@@ -31,6 +31,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   dynamic theme;
   bool _redirectScheduled = false;
   bool _adultContentEnabled = false;
+  bool _scanPreviousVolumesSuggestionEnabled = true;
 
   //String localLanguage = PlatformDispatcher.instance.locale.languageCode;
   int numberMangaOwned = 0;
@@ -135,12 +136,32 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     );
   }
 
+  Future<void> _loadScanPreviousVolumesSuggestionPreference() async {
+    final enabled = await LocalStorage()
+        .getScanPreviousVolumesSuggestionEnabled();
+    if (!mounted) return;
+    setState(() {
+      _scanPreviousVolumesSuggestionEnabled = enabled;
+    });
+  }
+
+  Future<void> _setScanPreviousVolumesSuggestionPreference(
+    bool enabled,
+  ) async {
+    await LocalStorage().setScanPreviousVolumesSuggestionEnabled(enabled);
+    if (!mounted) return;
+    setState(() {
+      _scanPreviousVolumesSuggestionEnabled = enabled;
+    });
+  }
+
   @override
   void initState() {
     super.initState();
     getNumberOfMangaOwned();
     getNumberOfSeriesFav();
     _loadAdultContentPreference();
+    _loadScanPreviousVolumesSuggestionPreference();
   }
 
   @override
@@ -368,6 +389,20 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 subtitle: Text(localizations.adultContentPreferenceDescription),
                 value: _adultContentEnabled,
                 onChanged: _setAdultContentPreference,
+              ),
+            ),
+            MyLine(width: MediaQuery.of(context).size.width, vertical: 10),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              margin: const EdgeInsets.symmetric(horizontal: 5),
+              decoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
+              child: SwitchListTile(
+                title: Text(localizations.scanPreviousVolumesSuggestion),
+                subtitle: Text(
+                  localizations.scanPreviousVolumesSuggestionDescription,
+                ),
+                value: _scanPreviousVolumesSuggestionEnabled,
+                onChanged: _setScanPreviousVolumesSuggestionPreference,
               ),
             ),
             MyLine(width: MediaQuery.of(context).size.width, vertical: 10),

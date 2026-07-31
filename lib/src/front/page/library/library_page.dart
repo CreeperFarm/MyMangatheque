@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -25,6 +27,12 @@ class LibraryPage extends ConsumerStatefulWidget {
 class _LibraryPageState extends ConsumerState<LibraryPage> {
   final connector = AppwriteConnector();
   final TextEditingController _searchController = TextEditingController();
+  dynamic _ownedSubscription;
+  StreamSubscription<User?>? _userSubscription;
+  User? _currentUser;
+  String? _lastUserId;
+  bool _authResolved = false;
+  bool _loadingOwned = false;
 
   void changeOrder(String filter) {
     ref.read(searchOrderProvider.notifier).changeSearchOrder(filter);
@@ -34,31 +42,91 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
     setState(() {});
   }
 
-  Future<void> initData() async {
+  Future<void> initData({User? user, bool forceRefresh = false}) async {
+    final resolvedUser = user ?? _currentUser ?? connector.getConnectedUser();
+    if (resolvedUser == null) return;
+
     try {
-      final user = connector.getConnectedUser();
-      await ref.read(mangaOwnedProvider.notifier).initData(user!).then((value) {
-        if (!mounted) return;
-        if (value) {
-          setState(() {});
-        } else {
-          showMessage(
-            AppLocalizations.of(
-              context,
-            )!.errorInitializing(AppLocalizations.of(context)!.dataUndercase),
+      if (mounted) {
+        setState(() {
+          _loadingOwned = true;
+        });
+      }
+
+      final value = await ref
+          .read(mangaOwnedProvider.notifier)
+          .initData(resolvedUser, forceRefresh: forceRefresh);
+
+      if (!mounted) return;
+      if (!value) {
+        showMessage(
+          AppLocalizations.of(
             context,
-          );
-        }
-      });
+          )!.errorInitializing(AppLocalizations.of(context)!.dataUndercase),
+          context,
+        );
+      }
     } catch (e) {
       if (!mounted) return;
       debugPrint(e.toString());
       showMessage(AppLocalizations.of(context)!.errorOccurred, context);
+    } finally {
+      if (mounted) {
+        setState(() {
+          _loadingOwned = false;
+        });
+      }
     }
+  }
+
+  void _setupRealtime() {
+    if (_ownedSubscription != null || _currentUser == null) return;
+    try {
+      _ownedSubscription = connector.connector().collection('owned').subscribe(
+        '*',
+        (_) {
+          unawaited(initData(forceRefresh: true));
+        },
+      );
+    } catch (e) {
+      debugPrint('Owned realtime subscription failed: $e');
+    }
+  }
+
+  void _cancelOwnedRealtime() {
+    try {
+      _ownedSubscription?.unsubscribe();
+    } catch (_) {
+      // Ignore realtime teardown failures.
+    }
+    _ownedSubscription = null;
+  }
+
+  void _handleUserChange(User? user, {bool forceRefresh = false}) {
+    if (!mounted) return;
+
+    final userId = user?.id;
+    final userChanged = userId != _lastUserId;
+    _lastUserId = userId;
+
+    setState(() {
+      _currentUser = user;
+      _authResolved = true;
+    });
+
+    if (user == null) {
+      _cancelOwnedRealtime();
+      return;
+    }
+
+    _setupRealtime();
+    unawaited(initData(user: user, forceRefresh: forceRefresh || userChanged));
   }
 
   @override
   void dispose() {
+    _userSubscription?.cancel();
+    _cancelOwnedRealtime();
     _searchController.removeListener(_onSearchChanged);
     _searchController.dispose();
     super.dispose();
@@ -72,8 +140,27 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
     ref.read(mangaOwnedProvider);
 
     _searchController.addListener(_onSearchChanged);
+    _currentUser = connector.getConnectedUser();
+    _lastUserId = _currentUser?.id;
+
+    _userSubscription = connector.listenToUserChanges().listen((user) {
+      _handleUserChange(user);
+    });
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      initData();
+      if (!mounted) return;
+      final user = connector.getConnectedUser();
+      if (user != null) {
+        _handleUserChange(user);
+        return;
+      }
+
+      unawaited(
+        connector.refresh().then((_) {
+          if (!mounted) return;
+          _handleUserChange(connector.getConnectedUser());
+        }),
+      );
     });
   }
 
@@ -85,7 +172,12 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
-    if (!connector.isLoggedIn()) {
+    final connectedUser = _currentUser ?? connector.getConnectedUser();
+    if (!_authResolved && connectedUser == null) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
+    if (connectedUser == null) {
       return const SignInPage();
     }
     final selectedOrder = ref.watch(searchOrderProvider);
@@ -130,50 +222,51 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
                     context,
                   ).colorScheme.onPrimary.withValues(alpha: 0.5),
                   color: Theme.of(context).colorScheme.surface,
-                  itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-                    PopupMenuItem<String>(
-                      value: 'manga',
-                      child: SizedBox(
-                        width: 175,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            if (selectedOrder == 'manga')
-                              const Icon(Icons.check)
-                            else
-                              const Padding(
-                                padding: EdgeInsets.only(right: 0),
-                              ),
-                            Text(
-                              localizations.alphabeticalOrder,
-                              textAlign: TextAlign.right,
+                  itemBuilder: (BuildContext context) =>
+                      <PopupMenuEntry<String>>[
+                        PopupMenuItem<String>(
+                          value: 'manga',
+                          child: SizedBox(
+                            width: 175,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                if (selectedOrder == 'manga')
+                                  const Icon(Icons.check)
+                                else
+                                  const Padding(
+                                    padding: EdgeInsets.only(right: 0),
+                                  ),
+                                Text(
+                                  localizations.alphabeticalOrder,
+                                  textAlign: TextAlign.right,
+                                ),
+                              ],
                             ),
-                          ],
+                          ),
                         ),
-                      ),
-                    ),
-                    PopupMenuItem<String>(
-                      value: 'releaseDate',
-                      child: SizedBox(
-                        width: 175,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            if (selectedOrder == 'releaseDate')
-                              const Icon(Icons.check)
-                            else
-                              const Padding(
-                                padding: EdgeInsets.only(right: 0),
-                              ),
-                            Text(
-                              localizations.lastRelease,
-                              textAlign: TextAlign.right,
+                        PopupMenuItem<String>(
+                          value: 'releaseDate',
+                          child: SizedBox(
+                            width: 175,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                if (selectedOrder == 'releaseDate')
+                                  const Icon(Icons.check)
+                                else
+                                  const Padding(
+                                    padding: EdgeInsets.only(right: 0),
+                                  ),
+                                Text(
+                                  localizations.lastRelease,
+                                  textAlign: TextAlign.right,
+                                ),
+                              ],
                             ),
-                          ],
+                          ),
                         ),
-                      ),
-                    ),
-                  ],
+                      ],
                 ),
               ),
             ],
@@ -230,13 +323,24 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
             ),
           ),
         ),
-        body: TabBarView(
-          physics: const NeverScrollableScrollPhysics(),
+        body: Stack(
           children: [
-            ReadPileTab(searchQuery: searchQuery, order: selectedOrder),
-            CollectionTab(searchQuery: searchQuery, order: selectedOrder),
-            CompleteLibTab(searchQuery: searchQuery, order: selectedOrder),
-            EnvyTab(searchQuery: searchQuery, order: selectedOrder),
+            TabBarView(
+              physics: const NeverScrollableScrollPhysics(),
+              children: [
+                ReadPileTab(searchQuery: searchQuery, order: selectedOrder),
+                CollectionTab(searchQuery: searchQuery, order: selectedOrder),
+                CompleteLibTab(searchQuery: searchQuery, order: selectedOrder),
+                EnvyTab(searchQuery: searchQuery, order: selectedOrder),
+              ],
+            ),
+            if (_loadingOwned)
+              const Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: LinearProgressIndicator(minHeight: 2),
+              ),
           ],
         ),
       ),

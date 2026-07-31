@@ -2325,6 +2325,183 @@ class AppLocalizations {
     return Intl.message('Open Scan', name: 'openScan', desc: '', args: []);
   }
 
+  /// `Last scanned EAN: {ean}`
+  String lastScannedEan(String ean) {
+    return Intl.message(
+      'Last scanned EAN: $ean',
+      name: 'lastScannedEan',
+      desc: 'Shows the last EAN scanned by the barcode scanner',
+      args: [ean],
+    );
+  }
+
+  /// `Scanned volumes preview`
+  String get scannedVolumesPreview {
+    return Intl.message(
+      'Scanned volumes preview',
+      name: 'scannedVolumesPreview',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{count, plural, =0 {0 volume} =1{1 volume} other {{count} volumes}}`
+  String scannedVolumesCount(num count) {
+    return Intl.plural(
+      count,
+      zero: '0 volume',
+      one: '1 volume',
+      other: '$count volumes',
+      name: 'scannedVolumesCount',
+      desc:
+          'Shows how many volumes have been scanned during the current scan session',
+      args: [count],
+    );
+  }
+
+  /// `No volume scanned yet.`
+  String get noScannedVolumesYet {
+    return Intl.message(
+      'No volume scanned yet.',
+      name: 'noScannedVolumesYet',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No volume found for EAN {ean}.`
+  String scannedVolumeNotFound(String ean) {
+    return Intl.message(
+      'No volume found for EAN $ean.',
+      name: 'scannedVolumeNotFound',
+      desc: 'Shown when a scanned EAN does not match a volume',
+      args: [ean],
+    );
+  }
+
+  /// `This volume is already in the scanned list.`
+  String get scannedVolumeAlreadyInList {
+    return Intl.message(
+      'This volume is already in the scanned list.',
+      name: 'scannedVolumeAlreadyInList',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add scanned volumes?`
+  String get addScannedVolumesTitle {
+    return Intl.message(
+      'Add scanned volumes?',
+      name: 'addScannedVolumesTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{count, plural, =1{Do you want to add this volume to your collection?} other{Do you want to add these {count} volumes to your collection?}}`
+  String addScannedVolumesConfirmation(num count) {
+    return Intl.plural(
+      count,
+      one: 'Do you want to add this volume to your collection?',
+      other: 'Do you want to add these $count volumes to your collection?',
+      name: 'addScannedVolumesConfirmation',
+      desc: 'Confirmation before adding scanned volumes to the collection',
+      args: [count],
+    );
+  }
+
+  /// `Scanned volumes added to your collection.`
+  String get scannedVolumesAdded {
+    return Intl.message(
+      'Scanned volumes added to your collection.',
+      name: 'scannedVolumesAdded',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add earlier volumes?`
+  String get completeScannedSubSeriesTitle {
+    return Intl.message(
+      'Add earlier volumes?',
+      name: 'completeScannedSubSeriesTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `You scanned volume {number} from a new sub-series. Select the volumes up to this one that you want to add.`
+  String completeScannedSubSeriesDescription(num number) {
+    return Intl.message(
+      'You scanned volume $number from a new sub-series. Select the volumes up to this one that you want to add.',
+      name: 'completeScannedSubSeriesDescription',
+      desc:
+          'Offers earlier volumes after scanning a later volume from a new sub-series',
+      args: [number],
+    );
+  }
+
+  /// `Select all`
+  String get selectAllVolumes {
+    return Intl.message(
+      'Select all',
+      name: 'selectAllVolumes',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Clear selection`
+  String get clearSelection {
+    return Intl.message(
+      'Clear selection',
+      name: 'clearSelection',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add selected volumes`
+  String get addSelectedVolumes {
+    return Intl.message(
+      'Add selected volumes',
+      name: 'addSelectedVolumes',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Never show this again`
+  String get neverShowAgain {
+    return Intl.message(
+      'Never show this again',
+      name: 'neverShowAgain',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Suggest earlier volumes after scanning`
+  String get scanPreviousVolumesSuggestion {
+    return Intl.message(
+      'Suggest earlier volumes after scanning',
+      name: 'scanPreviousVolumesSuggestion',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `When scanning a later volume from a new sub-series, offer to add its earlier volumes too.`
+  String get scanPreviousVolumesSuggestionDescription {
+    return Intl.message(
+      'When scanning a later volume from a new sub-series, offer to add its earlier volumes too.',
+      name: 'scanPreviousVolumesSuggestionDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Impossible to retrieve the build and app version.`
   String get buildAppVersionImpossibleToRetreive {
     return Intl.message(

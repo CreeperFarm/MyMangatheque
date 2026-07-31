@@ -7,6 +7,12 @@ import 'package:mymangatheque/src/models/manga/sub_serie_for_collection.dart';
 import 'package:mymangatheque/src/models/manga/volume.dart';
 
 class MangaOwnedNotifier extends Notifier<Set<SubSerieForCollection>> {
+  static const Duration _freshDataDuration = Duration(seconds: 20);
+
+  Future<bool>? _initDataInFlight;
+  String? _lastLoadedUserId;
+  DateTime? _lastLoadedAt;
+
   @override
   Set<SubSerieForCollection> build() => <SubSerieForCollection>{};
 
@@ -17,7 +23,7 @@ class MangaOwnedNotifier extends Notifier<Set<SubSerieForCollection>> {
   }
 
   List<dynamic> _asList(dynamic value) {
-    return value is List<dynamic> ? value : const <dynamic>[];
+    return value is List ? List<dynamic>.from(value) : const <dynamic>[];
   }
 
   List<String> _asStringList(dynamic value) {
@@ -99,7 +105,9 @@ class MangaOwnedNotifier extends Notifier<Set<SubSerieForCollection>> {
       readed: readed,
       authors: authors,
       series: data['series']?.toString() ?? data['serie']?.toString() ?? '',
-      contains: data['contains'] != null ? _asStringList(data['contains']) : null,
+      contains: data['contains'] != null
+          ? _asStringList(data['contains'])
+          : null,
       info: _asMap(data['info']).isEmpty ? null : _asMap(data['info']),
       support: data['support']?.toString() ?? 'manga',
       japGenre: data['genre_jap']?.toString() ?? data['genderJp']?.toString(),
@@ -130,7 +138,10 @@ class MangaOwnedNotifier extends Notifier<Set<SubSerieForCollection>> {
         '';
     if (subSeriesId.isEmpty) return null;
 
-    final title = subSeries['title']?.toString() ?? subSeries['titleFr']?.toString() ?? '';
+    final title =
+        subSeries['title']?.toString() ??
+        subSeries['titleFr']?.toString() ??
+        '';
     final volumeModel = _buildVolumeFromExpandedData(volumeData, readed);
     if (volumeModel == null) return null;
     final totalVolumes = _volumeCount(subSeries);
@@ -141,7 +152,8 @@ class MangaOwnedNotifier extends Notifier<Set<SubSerieForCollection>> {
       numberOfVolumes: totalVolumes < 1 ? 1 : totalVolumes,
       numberOwnedVolumes: 1,
       volumes: <Volume>[volumeModel],
-      cover: subSeries['coverUrl']?.toString() ?? subSeries['image']?.toString(),
+      cover:
+          subSeries['coverUrl']?.toString() ?? subSeries['image']?.toString(),
     );
   }
 
@@ -150,47 +162,110 @@ class MangaOwnedNotifier extends Notifier<Set<SubSerieForCollection>> {
     Map<String, dynamic> entryData,
   ) {
     final expand = _asMap(entryData['expand']);
-    // Primary source: expand.volume
-    var volume = _asMap(expand['volume']);
-    // Fallbacks in case the new API returns different shapes
+
+    // After _normalizeOwnedEntry, the volume map is at expand['volume'].
+    // Fallback: top-level 'volume' key if expand is absent.
+    var volume = _asMap(expand['volume'] ?? expand['volumes']);
     if (volume.isEmpty) {
-      // try top-level keys or the entry itself
-      volume = _firstMap(entryData['volume'] ?? entryData['volumes'] ?? entryData);
+      volume = _firstMap(
+        entryData['volume'] ?? entryData['volumes'] ?? entryData['volumeData'],
+      );
     }
+
+    // Last resort: the entry data itself might be the volume (flat API shape)
+    if (volume.isEmpty && entryData.containsKey('sub_series')) {
+      volume = entryData;
+    }
+
+    if (volume.isEmpty) {
+      debugPrint(
+        '_mergeOwnedEntry: could not resolve volume from entry: $entryData',
+      );
+      return;
+    }
+
     final readed = entryData['readed'] == true;
-
     final built = _buildSubSeriesFromExpandedData(volume, readed);
-    if (built == null) return;
+    if (built == null) {
+      debugPrint(
+        '_mergeOwnedEntry: _buildSubSeriesFromExpandedData returned null for volume: $volume',
+      );
+      return;
+    }
 
-    final existingIndex = currentState.toList().indexWhere(
-      (item) => item.id == built.id && item.title == built.title,
-    );
+    SubSerieForCollection? existing;
+    for (final item in currentState) {
+      if (item.id == built.id) {
+        existing = item;
+        break;
+      }
+    }
 
-    if (existingIndex == -1) {
+    if (existing == null) {
       currentState.add(built);
       return;
     }
 
-    final existing = currentState.elementAt(existingIndex);
-    existing.numberOwnedVolumes += 1;
-    existing.volumes.addAll(built.volumes);
+    for (final volume in built.volumes) {
+      if (!existing.volumes.any((item) => item.id == volume.id)) {
+        existing.volumes.add(volume);
+        existing.numberOwnedVolumes += 1;
+      }
+    }
+  }
+
+  @visibleForTesting
+  Set<SubSerieForCollection> mergeOwnedEntriesForTesting(
+    Iterable<Map<String, dynamic>> entries,
+  ) {
+    final nextState = <SubSerieForCollection>{};
+    for (final entry in entries) {
+      _mergeOwnedEntry(nextState, entry);
+    }
+    return nextState;
+  }
+
+  Future<bool> initData(User user, {bool forceRefresh = false}) {
+    final lastLoadedAt = _lastLoadedAt;
+    final isFresh =
+        _lastLoadedUserId == user.id &&
+        lastLoadedAt != null &&
+        DateTime.now().difference(lastLoadedAt) < _freshDataDuration;
+
+    if (!forceRefresh && state.isNotEmpty && isFresh) {
+      return Future<bool>.value(true);
+    }
+
+    final inFlight = _initDataInFlight;
+    if (!forceRefresh && inFlight != null) {
+      return inFlight;
+    }
+
+    final future = _loadOwnedData(user, forceRefresh: forceRefresh);
+    _initDataInFlight = future;
+    return future.whenComplete(() {
+      if (identical(_initDataInFlight, future)) {
+        _initDataInFlight = null;
+      }
+    });
   }
 
   // Init the data
-  Future<bool> initData(User user) async {
+  Future<bool> _loadOwnedData(User user, {required bool forceRefresh}) async {
     final storage = getIt<LocalStorage>();
-
     final nextState = <SubSerieForCollection>{};
+
     try {
       final result = await AppwriteConnector().getOwned(
         user.id,
         'volumes.subSeries.editors',
+        forceRefresh: forceRefresh,
       );
 
-      debugPrint('Owned API returned ${result.length} entries.');
+      debugPrint('getOwned returned ${result.length} entries.');
 
       for (final entry in result) {
-        _mergeOwnedEntry(nextState, Map<String, dynamic>.from(entry.data));
+        _mergeOwnedEntry(nextState, entry.data);
       }
     } catch (e) {
       debugPrint('Unable to load owned sub series from API: $e');
@@ -202,14 +277,36 @@ class MangaOwnedNotifier extends Notifier<Set<SubSerieForCollection>> {
           (a, b) => (a.tomeNumber ?? 0).compareTo(b.tomeNumber ?? 0),
         );
       }
-
       state = nextState;
+      _lastLoadedUserId = user.id;
+      _lastLoadedAt = DateTime.now();
       await storage.saveOwnedSubSerie(state);
       return true;
     }
 
+    // Do NOT overwrite with empty if we already have local state
+    final existing = state;
+    if (existing.isNotEmpty) {
+      debugPrint(
+        'getOwned returned empty but local state exists - keeping local state.',
+      );
+      return true;
+    }
+
+    final cached = await storage.getOwnedSubSerie();
+    if (cached != null && cached.isNotEmpty) {
+      state = cached;
+      _lastLoadedUserId = user.id;
+      _lastLoadedAt = DateTime.now();
+      debugPrint(
+        'getOwned returned empty - restored owned sub series from local cache.',
+      );
+      return true;
+    }
+
     state = <SubSerieForCollection>{};
-    await storage.saveOwnedSubSerie(state);
+    _lastLoadedUserId = user.id;
+    _lastLoadedAt = DateTime.now();
     return true;
   }
 
@@ -300,6 +397,7 @@ class MangaOwnedNotifier extends Notifier<Set<SubSerieForCollection>> {
   }
 }
 
-final mangaOwnedProvider = NotifierProvider<MangaOwnedNotifier, Set<SubSerieForCollection>>(() {
-  return MangaOwnedNotifier();
-});
+final mangaOwnedProvider =
+    NotifierProvider<MangaOwnedNotifier, Set<SubSerieForCollection>>(() {
+      return MangaOwnedNotifier();
+    });

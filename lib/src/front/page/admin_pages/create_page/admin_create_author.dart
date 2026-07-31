@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mymangatheque/src/back/services/admin_service.dart';
+import 'package:mymangatheque/src/front/page/admin_pages/admin_components.dart';
 
 class AdminCreateAuthorPage extends StatefulWidget {
   const AdminCreateAuthorPage({super.key});
@@ -14,6 +15,7 @@ class _AdminCreateAuthorPageState extends State<AdminCreateAuthorPage> {
   final TextEditingController _jobsController = TextEditingController();
   final TextEditingController _coverController = TextEditingController();
   bool _loading = false;
+  bool _messageIsError = false;
   String _message = '';
 
   @override
@@ -28,6 +30,7 @@ class _AdminCreateAuthorPageState extends State<AdminCreateAuthorPage> {
     if (_nameController.text.trim().isEmpty) {
       setState(() {
         _message = 'Le nom est obligatoire.';
+        _messageIsError = true;
       });
       return;
     }
@@ -41,6 +44,7 @@ class _AdminCreateAuthorPageState extends State<AdminCreateAuthorPage> {
     setState(() {
       _loading = true;
       _message = '';
+      _messageIsError = false;
     });
 
     try {
@@ -53,6 +57,7 @@ class _AdminCreateAuthorPageState extends State<AdminCreateAuthorPage> {
       setState(() {
         _loading = false;
         _message = 'Auteur créé avec succès.';
+        _messageIsError = false;
       });
       _nameController.clear();
       _jobsController.clear();
@@ -62,51 +67,61 @@ class _AdminCreateAuthorPageState extends State<AdminCreateAuthorPage> {
       setState(() {
         _loading = false;
         _message = e.toString();
+        _messageIsError = true;
       });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: ListView(
-        children: [
-          TextField(
-            controller: _nameController,
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-              labelText: 'Nom *',
-            ),
+    return AdminFormView(
+      children: [
+        const AdminPageHeader(
+          icon: Icons.person_add_alt_1_outlined,
+          title: 'Nouvel auteur',
+          description: 'Ajoutez une personne et ses métiers dans le catalogue.',
+        ),
+        const SizedBox(height: 20),
+        TextField(
+          controller: _nameController,
+          decoration: const InputDecoration(
+            border: OutlineInputBorder(),
+            labelText: 'Nom *',
+            prefixIcon: Icon(Icons.person_outline_rounded),
           ),
-          const SizedBox(height: 12),
-          TextField(
-            controller: _jobsController,
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-              labelText: 'Jobs (séparés par des virgules)',
-            ),
+        ),
+        const SizedBox(height: 12),
+        TextField(
+          controller: _jobsController,
+          decoration: const InputDecoration(
+            border: OutlineInputBorder(),
+            labelText: 'Métiers (séparés par des virgules)',
+            prefixIcon: Icon(Icons.work_outline_rounded),
           ),
-          const SizedBox(height: 12),
-          TextField(
-            controller: _coverController,
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-              labelText: 'Cover URL',
-            ),
+        ),
+        const SizedBox(height: 12),
+        TextField(
+          controller: _coverController,
+          decoration: const InputDecoration(
+            border: OutlineInputBorder(),
+            labelText: 'URL de l’image',
+            prefixIcon: Icon(Icons.image_outlined),
           ),
-          const SizedBox(height: 12),
-          ElevatedButton(
-            onPressed: _loading ? null : _submit,
-            child: const Text('Créer auteur'),
-          ),
-          const SizedBox(height: 8),
-          if (_loading)
-            const Center(child: CircularProgressIndicator())
-          else if (_message.isNotEmpty)
-            Text(_message),
+        ),
+        const SizedBox(height: 16),
+        FilledButton.icon(
+          onPressed: _loading ? null : _submit,
+          icon: const Icon(Icons.add_rounded),
+          label: const Text('Créer l’auteur'),
+        ),
+        if (_loading) ...[
+          const SizedBox(height: 14),
+          const LinearProgressIndicator(),
+        ] else if (_message.isNotEmpty) ...[
+          const SizedBox(height: 14),
+          AdminFeedback(message: _message, isError: _messageIsError),
         ],
-      ),
+      ],
     );
   }
 }

@@ -8,6 +8,7 @@ import 'package:mymangatheque/src/front/page/admin_pages/admin_create_page.dart'
 import 'package:mymangatheque/src/front/page/admin_pages/admin_home.dart';
 import 'package:mymangatheque/src/front/page/admin_pages/admin_login_page.dart';
 import 'package:mymangatheque/src/front/page/admin_pages/admin_statistics.dart';
+import 'package:mymangatheque/src/front/page/admin_pages/admin_volume_quality_page.dart';
 import 'package:mymangatheque/src/front/page/auth/auth_callback_page.dart';
 import 'package:mymangatheque/src/front/page/auth/delete_account_page.dart'; // Import DeleteAccountPage
 import 'package:mymangatheque/src/front/page/auth/forgot_password_page.dart';
@@ -219,6 +220,13 @@ class AppNavigation {
                         name: 'Admin Static Page',
                         builder: (context, state) {
                           return StatisticsPage(key: state.pageKey);
+                        },
+                      ),
+                      GoRoute(
+                        path: 'volume-quality',
+                        name: 'Admin Volume Quality',
+                        builder: (context, state) {
+                          return AdminVolumeQualityPage(key: state.pageKey);
                         },
                       ),
                     ],

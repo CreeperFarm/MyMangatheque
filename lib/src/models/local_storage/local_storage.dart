@@ -22,6 +22,8 @@ class LocalStorage {
   static const _cacheAuthorsKey = 'cacheAuthors';
   static const _cacheEditorsKey = 'cacheEditors';
   static const _adultContentEnabledKey = 'adultContentEnabled';
+  static const _scanPreviousVolumesSuggestionEnabledKey =
+      'scanPreviousVolumesSuggestionEnabled';
 
   // * Token ----------------------------------------------------------------------------------------------------------
   Future<String?> getToken() async {
@@ -266,4 +268,14 @@ class LocalStorage {
   }
 
   // * End of adult content preference --------------------------------------------------------------------------------
+
+  Future<bool> getScanPreviousVolumesSuggestionEnabled() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_scanPreviousVolumesSuggestionEnabledKey) ?? true;
+  }
+
+  Future<void> setScanPreviousVolumesSuggestionEnabled(bool enabled) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_scanPreviousVolumesSuggestionEnabledKey, enabled);
+  }
 }

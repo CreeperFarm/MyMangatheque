@@ -3,8 +3,10 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_custom_tabs/flutter_custom_tabs_lite.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:mymangatheque/l10n/app_localizations.dart';
+import 'package:mymangatheque/src/back/provider/manga_owned_provider.dart';
 import 'package:mymangatheque/src/back/services/appwrite.dart';
 import 'package:mymangatheque/src/const/assets.dart';
 import 'package:mymangatheque/src/const/own_icon.dart';
@@ -20,17 +22,17 @@ import 'package:mymangatheque/src/front/components/my_volume_tile.dart';
 import 'package:mymangatheque/src/function/auto_push_or_go.dart';
 import 'package:mymangatheque/src/models/local_storage/local_storage.dart';
 
-class VolumePage extends StatefulWidget {
+class VolumePage extends ConsumerStatefulWidget {
   final String volumeId;
   final String initRoute;
 
   const VolumePage({required this.volumeId, required this.initRoute, super.key});
 
   @override
-  State<VolumePage> createState() => _VolumePageState();
+  ConsumerState<VolumePage> createState() => _VolumePageState();
 }
 
-class _VolumePageState extends State<VolumePage> {
+class _VolumePageState extends ConsumerState<VolumePage> {
   static const String signInRoute = '/profile/signin';
   static const String _volumeExpandFields = 'subSeries.authors,subSeries.editors';
 
@@ -42,6 +44,8 @@ class _VolumePageState extends State<VolumePage> {
   bool showMore = false;
   int _reviewsReloadNonce = 0;
   bool _adultContentEnabled = false;
+  bool _isUpdatingOwned = false;
+  bool _isUpdatingFollowed = false;
 
   final AppwriteConnector connector = AppwriteConnector();
   late Future<List<RecordModel>> _volumeFuture;
@@ -187,33 +191,57 @@ class _VolumePageState extends State<VolumePage> {
   }
 
   Future<void> _handleOwnedPressed(String volumeId, String subSeriesId) async {
+    if (_isUpdatingOwned) return;
     final userId = _connectedUserId();
     if (userId == null) {
       pushOrGo(context, signInRoute);
       return;
     }
 
-    if (!isVolumeOwned) {
-      connector.addVolumeToOwned(userId, volumeId, false);
-      if (!isSubSeriesFollowed && subSeriesId.isNotEmpty) {
-        connector.addSubSeriesToFollowed(userId, subSeriesId);
-      }
-      setState(() {
-        isVolumeOwned = true;
-        if (!isSubSeriesFollowed && subSeriesId.isNotEmpty) {
-          isSubSeriesFollowed = true;
-        }
-      });
-      return;
-    }
-
-    connector.removeVolumeFromOwned(userId, volumeId);
     setState(() {
-      isVolumeOwned = false;
+      _isUpdatingOwned = true;
     });
+
+    try {
+      if (!isVolumeOwned) {
+        final result = await connector.addVolumeToOwned(
+          userId,
+          volumeId,
+          false,
+          subSeriesId: subSeriesId,
+        );
+        await _refreshOwnedLibrary();
+        if (!mounted) return;
+        setState(() {
+          isVolumeOwned = true;
+          if (result.subSeriesFollowed) isSubSeriesFollowed = true;
+        });
+        if (result.followError != null) {
+          _showMutationError(result.followError!);
+        }
+        return;
+      }
+
+      await connector.removeVolumeFromOwned(userId, volumeId);
+      await _refreshOwnedLibrary();
+      if (!mounted) return;
+      setState(() {
+        isVolumeOwned = false;
+      });
+    } catch (error) {
+      if (!mounted) return;
+      _showMutationError(error);
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isUpdatingOwned = false;
+        });
+      }
+    }
   }
 
   Future<void> _handleFollowPressed(String subSeriesId) async {
+    if (_isUpdatingFollowed) return;
     final userId = _connectedUserId();
     if (userId == null) {
       pushOrGo(context, signInRoute);
@@ -221,18 +249,56 @@ class _VolumePageState extends State<VolumePage> {
     }
     if (subSeriesId.isEmpty) return;
 
-    if (!isSubSeriesFollowed) {
-      connector.addSubSeriesToFollowed(userId, subSeriesId);
-      setState(() {
-        isSubSeriesFollowed = true;
-      });
-      return;
-    }
-
-    connector.removeSubSeriesToFollowed(userId, subSeriesId);
     setState(() {
-      isSubSeriesFollowed = false;
+      _isUpdatingFollowed = true;
     });
+    try {
+      if (!isSubSeriesFollowed) {
+        await connector.addSubSeriesToFollowed(userId, subSeriesId);
+        if (!mounted) return;
+        setState(() {
+          isSubSeriesFollowed = true;
+        });
+        return;
+      }
+
+      await connector.removeSubSeriesToFollowed(userId, subSeriesId);
+      if (!mounted) return;
+      setState(() {
+        isSubSeriesFollowed = false;
+      });
+    } catch (error) {
+      if (!mounted) return;
+      _showMutationError(error);
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isUpdatingFollowed = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _refreshOwnedLibrary() async {
+    final user = connector.getConnectedUser();
+    if (user == null) return;
+    try {
+      await ref
+          .read(mangaOwnedProvider.notifier)
+          .initData(user, forceRefresh: true);
+    } catch (error) {
+      debugPrint('Unable to refresh the owned library: $error');
+    }
+  }
+
+  void _showMutationError(Object error) {
+    if (!mounted) return;
+    final localizations = AppLocalizations.of(context);
+    final message = localizations?.errorOccurredMessage(error.toString()) ??
+        error.toString();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
   }
 
   Future<void> _handleReadPressed(String volumeId) async {
@@ -571,7 +637,9 @@ class _VolumePageState extends State<VolumePage> {
                                           : WidgetStateProperty.all<Color>(Theme.of(context).colorScheme.onPrimary),
                                       elevation: WidgetStateProperty.all<double>(0),
                                     ),
-                                    onPressed: () => _handleOwnedPressed(volumeId, subSeriesId),
+                                    onPressed: _isUpdatingOwned
+                                        ? null
+                                        : () => _handleOwnedPressed(volumeId, subSeriesId),
                                     child: Row(
                                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: [
@@ -609,7 +677,9 @@ class _VolumePageState extends State<VolumePage> {
                                           : WidgetStateProperty.all<Color>(Theme.of(context).colorScheme.onPrimary),
                                       elevation: WidgetStateProperty.all<double>(0),
                                     ),
-                                    onPressed: () => _handleFollowPressed(subSeriesId),
+                                    onPressed: _isUpdatingFollowed
+                                        ? null
+                                        : () => _handleFollowPressed(subSeriesId),
                                     child: Row(
                                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: [

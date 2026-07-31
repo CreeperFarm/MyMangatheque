@@ -4,7 +4,7 @@ import 'package:mymangatheque/l10n/app_localizations.dart';
 import 'package:mymangatheque/src/const/assets.dart';
 import 'package:mymangatheque/src/const/own_icon.dart';
 import 'package:mymangatheque/src/front/components/my_line.dart';
-import 'package:simple_barcode_scanner/simple_barcode_scanner.dart';
+import 'package:mymangatheque/src/function/auto_push_or_go.dart';
 
 class MyTomeNumberShow extends StatelessWidget {
   final String tomeTotal;
@@ -52,18 +52,7 @@ class MyTomeNumberShow extends StatelessWidget {
                         ),
                         elevation: WidgetStateProperty.all<double>(0),
                       ),
-                      onPressed: () async {
-                        await SimpleBarcodeScanner.scanBarcode(
-                          context,
-                          barcodeAppBar: const BarcodeAppBar(
-                            enableBackButton: true,
-                            backButtonIcon: Icon(Icons.arrow_back_ios),
-                          ),
-                          isShowFlashIcon: true,
-                          delayMillis: 2000,
-                          cameraFace: CameraFace.front,
-                        );
-                      },
+                      onPressed: () => pushOrGo(context, '/library/scan'),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         mainAxisAlignment: MainAxisAlignment.center,

@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mymangatheque/l10n/app_localizations.dart';
 import 'package:mymangatheque/src/back/provider/manga_owned_provider.dart';
-import 'package:mymangatheque/src/back/services/appwrite.dart';
 import 'package:mymangatheque/src/const/assets.dart';
 import 'package:mymangatheque/src/const/own_icon.dart';
 import 'package:mymangatheque/src/const/routes.dart';
@@ -27,9 +26,6 @@ class ReadPileTab extends ConsumerStatefulWidget {
 }
 
 class _ReadPileTabState extends ConsumerState<ReadPileTab> {
-  final connector = AppwriteConnector();
-  dynamic _ownedSubscription;
-
   int numberVolumeReaded(List<Volume> volumes) {
     int volumeReaded = 0;
     for (var volume in volumes) {
@@ -61,8 +57,9 @@ class _ReadPileTabState extends ConsumerState<ReadPileTab> {
     final pending = <SubSerieForCollection>[];
 
     for (final subSerie in subSeries) {
-      final unreadVolumes = subSerie.volumes.where((volume) => !volume.readed).toList()
-        ..sort((a, b) => (a.tomeNumber ?? 0).compareTo(b.tomeNumber ?? 0));
+      final unreadVolumes =
+          subSerie.volumes.where((volume) => !volume.readed).toList()
+            ..sort((a, b) => (a.tomeNumber ?? 0).compareTo(b.tomeNumber ?? 0));
       if (unreadVolumes.isEmpty) continue;
 
       final matchesQuery =
@@ -89,14 +86,16 @@ class _ReadPileTabState extends ConsumerState<ReadPileTab> {
       if (widget.order == 'releaseDate') {
         final aDate = a.volumes
             .map(
-              (volume) => volume.release ?? DateTime.fromMillisecondsSinceEpoch(0),
+              (volume) =>
+                  volume.release ?? DateTime.fromMillisecondsSinceEpoch(0),
             )
             .reduce(
               (value, element) => value.isAfter(element) ? value : element,
             );
         final bDate = b.volumes
             .map(
-              (volume) => volume.release ?? DateTime.fromMillisecondsSinceEpoch(0),
+              (volume) =>
+                  volume.release ?? DateTime.fromMillisecondsSinceEpoch(0),
             )
             .reduce(
               (value, element) => value.isAfter(element) ? value : element,
@@ -107,51 +106,6 @@ class _ReadPileTabState extends ConsumerState<ReadPileTab> {
     });
 
     return pending;
-  }
-
-  void _cancelRealtime() {
-    try {
-      if (_ownedSubscription != null) {
-        try {
-          _ownedSubscription.unsubscribe();
-        } catch (_) {}
-        _ownedSubscription = null;
-      }
-    } catch (_) {}
-  }
-
-  void _setupRealtimeOrFallback() {
-    _cancelRealtime();
-    try {
-      _ownedSubscription = connector.connector().collection('owned').subscribe(
-        '*',
-        (event) async {
-          debugPrint("Got an event");
-          final user = connector.getConnectedUser();
-          await ref.read(mangaOwnedProvider.notifier).initData(user!);
-        },
-      );
-
-      debugPrint('Realtime subscriptions established.');
-    } catch (e) {
-      debugPrint('Realtime subscription failed: $e');
-    }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final user = connector.getConnectedUser();
-      ref.read(mangaOwnedProvider.notifier).initData(user!);
-      _setupRealtimeOrFallback();
-    });
-  }
-
-  @override
-  void dispose() {
-    _cancelRealtime();
-    super.dispose();
   }
 
   @override
@@ -245,7 +199,8 @@ class _ReadPileTabState extends ConsumerState<ReadPileTab> {
                                 ),
                                 child: Text(
                                   localizations.volumeReadedOverSeriesX(
-                                    subSerie.numberOwnedVolumes - subSerie.volumes.length,
+                                    subSerie.numberOwnedVolumes -
+                                        subSerie.volumes.length,
                                     subSerie.numberOwnedVolumes,
                                   ),
                                 ),
@@ -261,12 +216,18 @@ class _ReadPileTabState extends ConsumerState<ReadPileTab> {
                                   height: subSerie.volumes.isNotEmpty ? 100 : 0,
                                   child: Stack(
                                     children: [
-                                      for (var j = 0; j < min(9, subSerie.volumes.length); j++)
+                                      for (
+                                        var j = 0;
+                                        j < min(9, subSerie.volumes.length);
+                                        j++
+                                      )
                                         (j == 0)
                                             ? ClipRRect(
-                                                borderRadius: BorderRadius.circular(10.0),
+                                                borderRadius:
+                                                    BorderRadius.circular(10.0),
                                                 child: SafeNetworkImage(
-                                                  imageUrl: subSerie.volumes[j].image,
+                                                  imageUrl:
+                                                      subSerie.volumes[j].image,
                                                   width: 65,
                                                 ),
                                               )
@@ -276,9 +237,12 @@ class _ReadPileTabState extends ConsumerState<ReadPileTab> {
                                                   decoration: BoxDecoration(
                                                     boxShadow: [
                                                       BoxShadow(
-                                                        color: Theme.of(context).colorScheme.onPrimary.withValues(
-                                                          alpha: 0.9,
-                                                        ),
+                                                        color: Theme.of(context)
+                                                            .colorScheme
+                                                            .onPrimary
+                                                            .withValues(
+                                                              alpha: 0.9,
+                                                            ),
                                                         spreadRadius: 1,
                                                         blurRadius: 2,
                                                         offset: const Offset(
@@ -289,11 +253,14 @@ class _ReadPileTabState extends ConsumerState<ReadPileTab> {
                                                     ],
                                                   ),
                                                   child: ClipRRect(
-                                                    borderRadius: BorderRadius.circular(
-                                                      10.0,
-                                                    ),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          10.0,
+                                                        ),
                                                     child: SafeNetworkImage(
-                                                      imageUrl: subSerie.volumes[j].image,
+                                                      imageUrl: subSerie
+                                                          .volumes[j]
+                                                          .image,
                                                       width: 65,
                                                     ),
                                                   ),

@@ -6,6 +6,239 @@ import 'package:http/http.dart' as http;
 import 'package:mymangatheque/src/back/services/api/mobile_api_client.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+enum AdminVolumeIssueType {
+  zeroTomeNumber('zero_tome_number'),
+  duplicateTomeNumber('duplicate_tome_number'),
+  unknown('unknown')
+  ;
+
+  const AdminVolumeIssueType(this.apiValue);
+
+  final String apiValue;
+
+  static AdminVolumeIssueType fromApi(dynamic value) {
+    final normalized = value?.toString().trim().toLowerCase() ?? '';
+    return switch (normalized) {
+      'zero_tome_number' ||
+      'zero_tome' ||
+      'tome_number_zero' => AdminVolumeIssueType.zeroTomeNumber,
+      'duplicate_tome_number' ||
+      'duplicate_tome' ||
+      'duplicate' => AdminVolumeIssueType.duplicateTomeNumber,
+      _ => AdminVolumeIssueType.unknown,
+    };
+  }
+}
+
+enum AdminVolumeIssueStatus {
+  open('open'),
+  resolved('resolved')
+  ;
+
+  const AdminVolumeIssueStatus(this.apiValue);
+
+  final String apiValue;
+
+  static AdminVolumeIssueStatus fromApi(dynamic value) {
+    return value?.toString().trim().toLowerCase() == 'resolved'
+        ? AdminVolumeIssueStatus.resolved
+        : AdminVolumeIssueStatus.open;
+  }
+}
+
+class AdminIssueVolume {
+  const AdminIssueVolume({
+    required this.id,
+    required this.title,
+    required this.tomeNumber,
+    required this.ean,
+    required this.coverUrl,
+  });
+
+  factory AdminIssueVolume.fromJson(Map<String, dynamic> json) {
+    return AdminIssueVolume(
+      id: (json['id'] ?? json[r'$id'] ?? '').toString(),
+      title: (json['titleFr'] ?? json['title'] ?? '').toString(),
+      tomeNumber: _adminNum(json['tomeNumber'] ?? json['tome_number']),
+      ean: json['ean']?.toString() ?? '',
+      coverUrl: (json['coverUrl'] ?? json['image'] ?? '').toString(),
+    );
+  }
+
+  final String id;
+  final String title;
+  final num? tomeNumber;
+  final String ean;
+  final String coverUrl;
+}
+
+class AdminVolumeIssue {
+  const AdminVolumeIssue({
+    required this.id,
+    required this.type,
+    required this.status,
+    required this.fingerprint,
+    required this.subSeriesId,
+    required this.subSeriesTitle,
+    required this.tomeNumber,
+    required this.volumes,
+    required this.isCurrentlyPresent,
+    this.firstDetectedAt,
+    this.lastDetectedAt,
+    this.resolvedAt,
+    this.resolvedBy,
+    this.resolutionNote,
+  });
+
+  factory AdminVolumeIssue.fromJson(Map<String, dynamic> json) {
+    final subSeries = _adminMap(json['subSeries'] ?? json['sub_series']);
+    final rawVolumes = json['volumes'] ?? json['volume'];
+    final volumeMaps = rawVolumes is List
+        ? rawVolumes.map(_adminMap).whereType<Map<String, dynamic>>()
+        : <Map<String, dynamic>>[
+            if (_adminMap(rawVolumes) case final volume?) volume,
+          ];
+    final volumes = volumeMaps.map(AdminIssueVolume.fromJson).toList();
+
+    if (volumes.isEmpty && json['volumeIds'] is List) {
+      volumes.addAll(
+        (json['volumeIds'] as List).map(
+          (id) => AdminIssueVolume(
+            id: id.toString(),
+            title: '',
+            tomeNumber: _adminNum(json['tomeNumber'] ?? json['tome_number']),
+            ean: '',
+            coverUrl: '',
+          ),
+        ),
+      );
+    }
+
+    return AdminVolumeIssue(
+      id: (json['id'] ?? json[r'$id'] ?? '').toString(),
+      type: AdminVolumeIssueType.fromApi(json['issueType'] ?? json['type']),
+      status: AdminVolumeIssueStatus.fromApi(json['status']),
+      fingerprint: json['fingerprint']?.toString() ?? '',
+      subSeriesId:
+          (json['subSeriesId'] ?? subSeries?['id'] ?? subSeries?[r'$id'] ?? '')
+              .toString(),
+      subSeriesTitle:
+          (json['subSeriesTitle'] ??
+                  subSeries?['titleFr'] ??
+                  subSeries?['title'] ??
+                  '')
+              .toString(),
+      tomeNumber: _adminNum(json['tomeNumber'] ?? json['tome_number']),
+      volumes: volumes,
+      isCurrentlyPresent: _adminBool(
+        json['isCurrentlyPresent'],
+        fallback: true,
+      ),
+      firstDetectedAt: _adminDate(json['firstDetectedAt']),
+      lastDetectedAt: _adminDate(json['lastDetectedAt']),
+      resolvedAt: _adminDate(json['resolvedAt']),
+      resolvedBy: json['resolvedBy']?.toString(),
+      resolutionNote: json['resolutionNote']?.toString(),
+    );
+  }
+
+  final String id;
+  final AdminVolumeIssueType type;
+  final AdminVolumeIssueStatus status;
+  final String fingerprint;
+  final String subSeriesId;
+  final String subSeriesTitle;
+  final num? tomeNumber;
+  final List<AdminIssueVolume> volumes;
+  final bool isCurrentlyPresent;
+  final DateTime? firstDetectedAt;
+  final DateTime? lastDetectedAt;
+  final DateTime? resolvedAt;
+  final String? resolvedBy;
+  final String? resolutionNote;
+}
+
+class AdminVolumeIssuePage {
+  const AdminVolumeIssuePage({
+    required this.issues,
+    required this.page,
+    required this.totalPages,
+    required this.totalItems,
+  });
+
+  factory AdminVolumeIssuePage.fromJson(Map<String, dynamic> json) {
+    final data = _adminMap(json['data']) ?? json;
+    final rawIssues = data['issues'] ?? json['issues'];
+    final issues = rawIssues is List
+        ? rawIssues
+              .map(_adminMap)
+              .whereType<Map<String, dynamic>>()
+              .map(AdminVolumeIssue.fromJson)
+              .toList()
+        : <AdminVolumeIssue>[];
+    final pagination =
+        _adminMap(data['pagination']) ??
+        _adminMap(json['pagination']) ??
+        const <String, dynamic>{};
+
+    return AdminVolumeIssuePage(
+      issues: issues,
+      page: _adminInt(pagination['page'] ?? pagination['currentPage'], 1),
+      totalPages: _adminInt(pagination['totalPages'], 1),
+      totalItems: _adminInt(
+        pagination['totalItems'] ?? pagination['total'],
+        issues.length,
+      ),
+    );
+  }
+
+  final List<AdminVolumeIssue> issues;
+  final int page;
+  final int totalPages;
+  final int totalItems;
+}
+
+class AdminApiException implements Exception {
+  const AdminApiException(this.statusCode, this.message);
+
+  final int statusCode;
+  final String message;
+
+  @override
+  String toString() => message;
+}
+
+Map<String, dynamic>? _adminMap(dynamic value) {
+  if (value is Map<String, dynamic>) return value;
+  if (value is Map) return Map<String, dynamic>.from(value);
+  return null;
+}
+
+num? _adminNum(dynamic value) {
+  if (value is num) return value;
+  return num.tryParse(value?.toString().replaceAll(',', '.') ?? '');
+}
+
+int _adminInt(dynamic value, int fallback) {
+  if (value is int) return value;
+  return int.tryParse(value?.toString() ?? '') ?? fallback;
+}
+
+bool _adminBool(dynamic value, {required bool fallback}) {
+  if (value is bool) return value;
+  if (value is num) return value != 0;
+  if (value is String) {
+    if (value.toLowerCase() == 'true') return true;
+    if (value.toLowerCase() == 'false') return false;
+  }
+  return fallback;
+}
+
+DateTime? _adminDate(dynamic value) {
+  if (value == null) return null;
+  return DateTime.tryParse(value.toString());
+}
+
 class AdminConnector {
   AdminConnector._internal();
 
@@ -85,6 +318,63 @@ class AdminConnector {
     return _decodeMap(response.body);
   }
 
+  Future<AdminVolumeIssuePage> getVolumeQualityIssues({
+    AdminVolumeIssueType? type,
+    AdminVolumeIssueStatus status = AdminVolumeIssueStatus.open,
+    int page = 1,
+    int limit = 50,
+  }) async {
+    await init();
+    final response = await _request(
+      'GET',
+      '/api/admin/volume-quality/issues',
+      query: <String, dynamic>{
+        'status': status.apiValue,
+        if (type != null && type != AdminVolumeIssueType.unknown)
+          'type': type.apiValue,
+        'page': page,
+        'limit': limit,
+      },
+    );
+    return AdminVolumeIssuePage.fromJson(_decodeMap(response.body));
+  }
+
+  Future<int> scanVolumeQualityIssues() async {
+    await init();
+    final response = await _request(
+      'POST',
+      '/api/admin/volume-quality/issues/scan',
+    );
+    final decoded = _decodeMap(response.body);
+    final data = _adminMap(decoded['data']) ?? decoded;
+    return _adminInt(
+      data['openIssues'] ?? data['detectedIssues'] ?? data['count'],
+      0,
+    );
+  }
+
+  Future<void> resolveVolumeQualityIssue(
+    String issueId, {
+    String? note,
+  }) async {
+    await init();
+    await _request(
+      'POST',
+      '/api/admin/volume-quality/issues/$issueId/resolve',
+      body: <String, dynamic>{
+        if ((note ?? '').trim().isNotEmpty) 'note': note!.trim(),
+      },
+    );
+  }
+
+  Future<void> reopenVolumeQualityIssue(String issueId) async {
+    await init();
+    await _request(
+      'POST',
+      '/api/admin/volume-quality/issues/$issueId/reopen',
+    );
+  }
+
   Future<void> createAuthor({
     required String name,
     List<String> jobs = const <String>[],
@@ -152,12 +442,22 @@ class AdminConnector {
 
   Future<bool> _canUseAsAdmin(String apiKey) async {
     try {
-      final response = await _rawRequest(
+      await _rawRequest(
         'GET',
         '/api/auth/keys',
         apiKey: apiKey,
       );
-      return response.statusCode >= 200 && response.statusCode < 300;
+      return true;
+    } catch (_) {}
+
+    try {
+      await _rawRequest(
+        'GET',
+        '/api/admin/volume-quality/issues',
+        apiKey: apiKey,
+        query: const <String, dynamic>{'status': 'open', 'page': 1, 'limit': 1},
+      );
+      return true;
     } catch (_) {
       return false;
     }
@@ -223,7 +523,10 @@ class AdminConnector {
     }
 
     if (response.statusCode < 200 || response.statusCode >= 300) {
-      throw Exception(_extractApiError(response));
+      throw AdminApiException(
+        response.statusCode,
+        _extractApiError(response),
+      );
     }
     return response;
   }
