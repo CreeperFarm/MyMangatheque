@@ -84,6 +84,7 @@ class _AdminCreateAuthorPageState extends State<AdminCreateAuthorPage> {
         const SizedBox(height: 20),
         TextField(
           controller: _nameController,
+          maxLength: 200,
           decoration: const InputDecoration(
             border: OutlineInputBorder(),
             labelText: 'Nom *',
@@ -102,9 +103,10 @@ class _AdminCreateAuthorPageState extends State<AdminCreateAuthorPage> {
         const SizedBox(height: 12),
         TextField(
           controller: _coverController,
+          keyboardType: TextInputType.url,
           decoration: const InputDecoration(
             border: OutlineInputBorder(),
-            labelText: 'URL de l’image',
+            labelText: 'URL HTTPS de l’image',
             prefixIcon: Icon(Icons.image_outlined),
           ),
         ),

@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class MobileApiKey {
   const MobileApiKey({required this.value, required this.expiresAt});
@@ -43,9 +42,9 @@ class MobileApiKeyManager {
   }
 
   Future<void> saveKey(MobileApiKey key) async {
-    _cached = key;
     await _writeSecure(_keyStorageKey, key.value);
     await _writeSecure(_keyExpiryStorageKey, key.expiresAt.toIso8601String());
+    _cached = key;
   }
 
   Future<void> clear() async {
@@ -75,7 +74,7 @@ class MobileApiKeyManager {
       return await _secureStorage.read(key: key);
     } catch (e) {
       debugPrint('Secure storage read failed for $key: $e');
-      return _readFallback(key);
+      return null;
     }
   }
 
@@ -85,7 +84,7 @@ class MobileApiKeyManager {
       return;
     } catch (e) {
       debugPrint('Secure storage write failed for $key: $e');
-      await _writeFallback(key, value);
+      throw StateError('Secure storage is unavailable for the mobile API key.');
     }
   }
 
@@ -95,23 +94,7 @@ class MobileApiKeyManager {
       return;
     } catch (e) {
       debugPrint('Secure storage delete failed for $key: $e');
-      await _deleteFallback(key);
     }
-  }
-
-  Future<String?> _readFallback(String key) async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(key);
-  }
-
-  Future<void> _writeFallback(String key, String value) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(key, value);
-  }
-
-  Future<void> _deleteFallback(String key) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(key);
   }
 
   MobileApiKey parseKeyFromResponseBody(String responseBody) {

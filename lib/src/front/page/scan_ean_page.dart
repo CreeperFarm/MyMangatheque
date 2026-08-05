@@ -179,18 +179,33 @@ class _ScanEanPageState extends ConsumerState<ScanEanPage> {
           .toList();
       final addedVolumeIds = <String>{};
       final addErrors = <Object>[];
-      final followErrors = <Object>[];
+      final followErrors = <String, Object>{};
+      final followableSubSeriesIds = <String>{};
+      final confirmedFollowedSubSeriesIds = <String>{};
+
+      for (final volume in _scannedVolumes) {
+        if (!ownedVolumeIds.contains(volume.id)) continue;
+        final subSeriesId = _subSeriesIdForVolume(volume);
+        if (subSeriesId.isNotEmpty) followableSubSeriesIds.add(subSeriesId);
+      }
+
       for (final volume in volumesToAdd) {
+        final subSeriesId = _subSeriesIdForVolume(volume);
         try {
           final result = await _connector.addVolumeToOwned(
             user.id,
             volume.id,
             false,
-            subSeriesId: _subSeriesIdForVolume(volume),
+            subSeriesId: subSeriesId,
           );
           addedVolumeIds.add(volume.id);
-          if (result.followError != null) {
-            followErrors.add(result.followError!);
+          if (subSeriesId.isNotEmpty) {
+            followableSubSeriesIds.add(subSeriesId);
+            if (result.subSeriesFollowed) {
+              confirmedFollowedSubSeriesIds.add(subSeriesId);
+            } else if (result.followError != null) {
+              followErrors[subSeriesId] = result.followError!;
+            }
           }
         } catch (error) {
           addErrors.add(error);
@@ -198,14 +213,26 @@ class _ScanEanPageState extends ConsumerState<ScanEanPage> {
         }
       }
 
-      if (addedVolumeIds.isNotEmpty) {
+      // A scan must also repair the follow state of a volume that was already
+      // owned. POST is idempotent: an existing follow is accepted as success.
+      for (final subSeriesId in followableSubSeriesIds.difference(
+        confirmedFollowedSubSeriesIds,
+      )) {
         try {
-          await ref
-              .read(mangaOwnedProvider.notifier)
-              .initData(user, forceRefresh: true);
+          await _connector.addSubSeriesToFollowed(user.id, subSeriesId);
+          followErrors.remove(subSeriesId);
         } catch (error) {
-          debugPrint('Unable to refresh the owned library after scan: $error');
+          followErrors[subSeriesId] = error;
+          debugPrint(
+            'Unable to follow scanned sub-series $subSeriesId: $error',
+          );
         }
+      }
+
+      if (addedVolumeIds.isNotEmpty) {
+        await ref
+            .read(mangaOwnedProvider.notifier)
+            .initData(user, forceRefresh: true);
       }
 
       if (!mounted) return;
@@ -227,7 +254,9 @@ class _ScanEanPageState extends ConsumerState<ScanEanPage> {
         );
       } else if (followErrors.isNotEmpty) {
         showMessage(
-          localizations.errorOccurredMessage(followErrors.first.toString()),
+          localizations.errorOccurredMessage(
+            followErrors.values.first.toString(),
+          ),
           context,
         );
       }

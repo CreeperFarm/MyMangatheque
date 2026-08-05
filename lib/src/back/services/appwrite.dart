@@ -1640,16 +1640,33 @@ class AppwriteConnector {
     }
     final entries = await getCollectionFullList('followed');
     _followedSubSeriesIdsIndex = entries
-        .map(
-          (entry) =>
-              entry.data['sub_serie']?.toString() ??
-              entry.data['sub_series']?.toString() ??
-              entry.data['subSeries']?.toString() ??
-              entry.data['subSeriesId']?.toString() ??
-              '',
-        )
+        .map((entry) => _followedEntrySubSeriesId(entry.data))
         .where((id) => id.isNotEmpty)
         .toSet();
+  }
+
+  String _followedEntrySubSeriesId(Map<String, dynamic> data) {
+    final expand = _asRecordMap(data['expand']);
+    for (final candidate in <dynamic>[
+      data['subSeriesId'],
+      data['subSeries'],
+      data['subSerie'],
+      data['sub_series'],
+      data['sub_serie'],
+      expand?['subSeries'],
+      expand?['subSerie'],
+      expand?['sub_series'],
+      expand?['sub_serie'],
+    ]) {
+      final id = _relationId(candidate);
+      if (id != null && id.isNotEmpty) return id;
+    }
+    return '';
+  }
+
+  @visibleForTesting
+  String followedEntrySubSeriesIdForTesting(Map<String, dynamic> data) {
+    return _followedEntrySubSeriesId(data);
   }
 
   Future<AddVolumeToOwnedResult> addVolumeToOwned(
@@ -1736,11 +1753,6 @@ class AppwriteConnector {
         normalizedBody.contains('already owned') ||
         normalizedBody.contains('already followed') ||
         normalizedBody.contains('duplicate');
-  }
-
-  @visibleForTesting
-  bool isAlreadyExistingResponseForTesting(int statusCode, String body) {
-    return _isAlreadyExistingResponse(statusCode, body);
   }
 
   Future<void> removeVolumeFromOwned(String userId, String volumeId) async {
@@ -3203,13 +3215,11 @@ class AppwriteConnector {
 
   Map<String, dynamic> _normalizeFollowedEntry(Map<String, dynamic> raw) {
     final id = _extractId(raw);
-    final subSeriesId =
-        raw['subSeriesId']?.toString() ??
-        _relationId(
-          raw['subSeries'] ?? raw['sub_series'] ?? raw['sub_serie'],
-        ) ??
-        '';
     final expand = _cloneExpandMap(raw['expand']);
+    final subSeriesId = _followedEntrySubSeriesId(<String, dynamic>{
+      ...raw,
+      if (expand.isNotEmpty) 'expand': expand,
+    });
 
     final data = <String, dynamic>{
       'id': id,
@@ -3221,7 +3231,11 @@ class AppwriteConnector {
 
     final expandedSubSeries =
         raw['subSeries'] ??
+        raw['subSerie'] ??
+        raw['sub_series'] ??
+        raw['sub_serie'] ??
         expand['subSeries'] ??
+        expand['subSerie'] ??
         expand['sub_series'] ??
         expand['sub_serie'];
     if (expandedSubSeries is Map<String, dynamic>) {

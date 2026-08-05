@@ -88,7 +88,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
                         icon: Icons.add_box_outlined,
                         title: 'Création de données',
                         description:
-                            'Ajoutez des auteurs, genres et volumes au catalogue.',
+                            'Ajoutez auteurs, genres, éditeurs, séries, sous-séries et volumes.',
                         onTap: () => pushOrGo(context, '/admin/create'),
                       ),
                     ),

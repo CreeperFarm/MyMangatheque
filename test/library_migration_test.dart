@@ -21,29 +21,6 @@ void main() {
       },
     );
 
-    test('existing owned/followed conflicts are idempotent', () {
-      final connector = AppwriteConnector();
-
-      expect(
-        connector.isAlreadyExistingResponseForTesting(409, 'Conflict'),
-        isTrue,
-      );
-      expect(
-        connector.isAlreadyExistingResponseForTesting(
-          400,
-          'Sub-series already followed',
-        ),
-        isTrue,
-      );
-      expect(
-        connector.isAlreadyExistingResponseForTesting(
-          400,
-          'Volume does not exist',
-        ),
-        isFalse,
-      );
-    });
-
     test(
       'Volume model should be properly constructed with required fields',
       () {

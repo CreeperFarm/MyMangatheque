@@ -282,13 +282,9 @@ class _VolumePageState extends ConsumerState<VolumePage> {
   Future<void> _refreshOwnedLibrary() async {
     final user = connector.getConnectedUser();
     if (user == null) return;
-    try {
-      await ref
-          .read(mangaOwnedProvider.notifier)
-          .initData(user, forceRefresh: true);
-    } catch (error) {
-      debugPrint('Unable to refresh the owned library: $error');
-    }
+    await ref
+        .read(mangaOwnedProvider.notifier)
+        .initData(user, forceRefresh: true);
   }
 
   void _showMutationError(Object error) {

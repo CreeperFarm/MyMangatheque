@@ -4,7 +4,189 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:mymangatheque/src/back/services/api/mobile_api_client.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+
+class AdminInputException implements Exception {
+  const AdminInputException(this.message);
+
+  final String message;
+
+  @override
+  String toString() => message;
+}
+
+/// Validation is repeated in the connector so a future caller cannot bypass
+/// the form-level checks and send an unsafe or unexpectedly large payload.
+class AdminInputValidator {
+  const AdminInputValidator._();
+
+  static String requiredText(
+    String value, {
+    required String label,
+    int maxLength = 200,
+  }) {
+    final normalized = value.trim();
+    if (normalized.isEmpty) {
+      throw AdminInputException('$label est obligatoire.');
+    }
+    if (normalized.length > maxLength) {
+      throw AdminInputException(
+        '$label ne peut pas dépasser $maxLength caractères.',
+      );
+    }
+    if (_hasControlCharacters(normalized)) {
+      throw AdminInputException('$label contient des caractères interdits.');
+    }
+    return normalized;
+  }
+
+  static String? optionalText(
+    String? value, {
+    required String label,
+    int maxLength = 2000,
+  }) {
+    final normalized = value?.trim() ?? '';
+    if (normalized.isEmpty) return null;
+    return requiredText(normalized, label: label, maxLength: maxLength);
+  }
+
+  static String? httpsUrl(String? value, {required String label}) {
+    final normalized = optionalText(
+      value,
+      label: label,
+      maxLength: 2048,
+    );
+    if (normalized == null) return null;
+    final uri = Uri.tryParse(normalized);
+    if (uri == null ||
+        uri.scheme.toLowerCase() != 'https' ||
+        uri.host.isEmpty ||
+        uri.userInfo.isNotEmpty) {
+      throw AdminInputException(
+        '$label doit être une URL HTTPS valide, sans identifiants intégrés.',
+      );
+    }
+    return uri.toString();
+  }
+
+  static String relationId(String value, {required String label}) {
+    final normalized = requiredText(
+      value,
+      label: label,
+      maxLength: 128,
+    );
+    if (!RegExp(r'^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$').hasMatch(normalized)) {
+      throw AdminInputException('$label n’est pas un identifiant valide.');
+    }
+    return normalized;
+  }
+
+  static List<String> textList(
+    Iterable<String> values, {
+    required String label,
+    int maxItems = 50,
+    int maxItemLength = 200,
+    bool relationIds = false,
+  }) {
+    final normalized = <String>[];
+    for (final raw in values) {
+      final item = raw.trim();
+      if (item.isEmpty) continue;
+      final checked = relationIds
+          ? relationId(item, label: label)
+          : requiredText(item, label: label, maxLength: maxItemLength);
+      if (!normalized.contains(checked)) normalized.add(checked);
+    }
+    if (normalized.length > maxItems) {
+      throw AdminInputException(
+        '$label ne peut pas contenir plus de $maxItems éléments.',
+      );
+    }
+    return normalized;
+  }
+
+  static List<String> httpsUrlList(
+    Iterable<String> values, {
+    required String label,
+    int maxItems = 20,
+  }) {
+    final normalized = <String>[];
+    for (final value in values) {
+      final checked = httpsUrl(value, label: label);
+      if (checked != null && !normalized.contains(checked)) {
+        normalized.add(checked);
+      }
+    }
+    if (normalized.length > maxItems) {
+      throw AdminInputException(
+        '$label ne peut pas contenir plus de $maxItems éléments.',
+      );
+    }
+    return normalized;
+  }
+
+  static Map<String, String> metadata(Map<String, String> values) {
+    if (values.length > 50) {
+      throw const AdminInputException(
+        'Les informations complémentaires sont limitées à 50 entrées.',
+      );
+    }
+    final normalized = <String, String>{};
+    for (final entry in values.entries) {
+      final key = requiredText(
+        entry.key,
+        label: 'La clé d’information',
+        maxLength: 80,
+      );
+      if (!RegExp(
+        r'^[A-Za-z0-9À-ÖØ-öø-ÿ][A-Za-z0-9À-ÖØ-öø-ÿ _.-]*$',
+      ).hasMatch(key)) {
+        throw const AdminInputException(
+          'Une clé d’information contient des caractères interdits.',
+        );
+      }
+      normalized[key] = requiredText(
+        entry.value,
+        label: 'La valeur d’information',
+        maxLength: 500,
+      );
+    }
+    return normalized;
+  }
+
+  static num nonNegativeNumber(num value, {required String label}) {
+    if (!value.isFinite || value < 0) {
+      throw AdminInputException('$label doit être un nombre positif ou nul.');
+    }
+    return value;
+  }
+
+  static int ean13(int value) {
+    final ean = value.toString().padLeft(13, '0');
+    if (!RegExp(r'^\d{13}$').hasMatch(ean)) {
+      throw const AdminInputException(
+        'L’EAN doit contenir exactement 13 chiffres.',
+      );
+    }
+    var sum = 0;
+    for (var index = 0; index < 12; index++) {
+      final digit = int.parse(ean[index]);
+      sum += index.isEven ? digit : digit * 3;
+    }
+    final expectedCheckDigit = (10 - (sum % 10)) % 10;
+    if (expectedCheckDigit != int.parse(ean[12])) {
+      throw const AdminInputException(
+        'La clé de contrôle EAN-13 est invalide.',
+      );
+    }
+    return value;
+  }
+
+  static bool _hasControlCharacters(String value) {
+    return value.runes.any(
+      (codePoint) => codePoint < 32 && codePoint != 9 && codePoint != 10,
+    );
+  }
+}
 
 enum AdminVolumeIssueType {
   zeroTomeNumber('zero_tome_number'),
@@ -248,6 +430,7 @@ class AdminConnector {
 
   static const String _apiBaseUrl = 'https://api.mymangatheque.com';
   static const String _storageKey = 'mmt_admin_api_key';
+  static const Duration _requestTimeout = Duration(seconds: 20);
 
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
   final MobileApiClient _mobileApiClient = MobileApiClient();
@@ -278,8 +461,8 @@ class AdminConnector {
     final verified = await _canUseAsAdmin(sanitized);
     if (!verified) return false;
 
-    _adminApiKey = sanitized;
     await _writeSecure(_storageKey, sanitized);
+    _adminApiKey = sanitized;
     return true;
   }
 
@@ -289,8 +472,8 @@ class AdminConnector {
     final verified = await _canUseAsAdmin(sessionKey);
     if (!verified) return false;
 
-    _adminApiKey = sessionKey;
     await _writeSecure(_storageKey, sessionKey);
+    _adminApiKey = sessionKey;
     return true;
   }
 
@@ -299,9 +482,13 @@ class AdminConnector {
     await _deleteSecure(_storageKey);
   }
 
-  Future<Map<String, dynamic>> getSummary() async {
+  Future<Map<String, dynamic>> getSummary({int days = 30}) async {
     await init();
-    final response = await _request('GET', '/api/analytics/summary');
+    final response = await _request(
+      'GET',
+      '/api/analytics/summary',
+      query: <String, dynamic>{'days': days},
+    );
     return _decodeMap(response.body);
   }
 
@@ -358,20 +545,33 @@ class AdminConnector {
     String? note,
   }) async {
     await init();
+    final safeIssueId = AdminInputValidator.relationId(
+      issueId,
+      label: 'L’anomalie',
+    );
+    final safeNote = AdminInputValidator.optionalText(
+      note,
+      label: 'La note de résolution',
+      maxLength: 1000,
+    );
     await _request(
       'POST',
-      '/api/admin/volume-quality/issues/$issueId/resolve',
+      '/api/admin/volume-quality/issues/$safeIssueId/resolve',
       body: <String, dynamic>{
-        if ((note ?? '').trim().isNotEmpty) 'note': note!.trim(),
+        if (safeNote != null) 'note': safeNote,
       },
     );
   }
 
   Future<void> reopenVolumeQualityIssue(String issueId) async {
     await init();
+    final safeIssueId = AdminInputValidator.relationId(
+      issueId,
+      label: 'L’anomalie',
+    );
     await _request(
       'POST',
-      '/api/admin/volume-quality/issues/$issueId/reopen',
+      '/api/admin/volume-quality/issues/$safeIssueId/reopen',
     );
   }
 
@@ -382,10 +582,21 @@ class AdminConnector {
   }) async {
     await init();
 
+    final safeName = AdminInputValidator.requiredText(name, label: 'Le nom');
+    final safeJobs = AdminInputValidator.textList(
+      jobs,
+      label: 'Les métiers',
+      maxItems: 20,
+      maxItemLength: 80,
+    );
+    final safeCoverUrl = AdminInputValidator.httpsUrl(
+      coverUrl,
+      label: 'L’image',
+    );
     final body = <String, dynamic>{
-      'name': name.trim(),
-      if (jobs.isNotEmpty) 'jobs': jobs,
-      if ((coverUrl ?? '').trim().isNotEmpty) 'coverUrl': coverUrl!.trim(),
+      'name': safeName,
+      if (safeJobs.isNotEmpty) 'jobs': safeJobs,
+      if (safeCoverUrl != null) 'coverUrl': safeCoverUrl,
     };
 
     await _request('POST', '/api/authors', body: body);
@@ -396,8 +607,121 @@ class AdminConnector {
     await _request(
       'POST',
       '/api/genres',
-      body: <String, dynamic>{'name': name.trim()},
+      body: <String, dynamic>{
+        'name': AdminInputValidator.requiredText(name, label: 'Le nom'),
+      },
     );
+  }
+
+  Future<void> createEditor({required String name, String? coverUrl}) async {
+    await init();
+    final safeCoverUrl = AdminInputValidator.httpsUrl(
+      coverUrl,
+      label: 'Le logo',
+    );
+    await _request(
+      'POST',
+      '/api/editors',
+      body: <String, dynamic>{
+        'name': AdminInputValidator.requiredText(name, label: 'Le nom'),
+        if (safeCoverUrl != null) 'coverUrl': safeCoverUrl,
+      },
+    );
+  }
+
+  Future<void> createSeries({
+    required String titleFr,
+    String? titleJp,
+    String? titleEn,
+    List<String> altTitles = const <String>[],
+    String? coverUrl,
+    List<String> authorIds = const <String>[],
+    List<String> editorIds = const <String>[],
+    List<String> genreIds = const <String>[],
+    DateTime? firstPublicationDate,
+    bool over18 = false,
+  }) async {
+    await init();
+    final body =
+        _catalogTitlePayload(
+          titleFr: titleFr,
+          titleJp: titleJp,
+          titleEn: titleEn,
+          coverUrl: coverUrl,
+        )..addAll(<String, dynamic>{
+          if (altTitles.isNotEmpty)
+            'altTitles': AdminInputValidator.textList(
+              altTitles,
+              label: 'Les titres alternatifs',
+              maxItems: 30,
+            ),
+          if (authorIds.isNotEmpty)
+            'authors': _safeRelationIds(authorIds, 'Les auteurs'),
+          if (editorIds.isNotEmpty)
+            'editors': _safeRelationIds(editorIds, 'Les éditeurs'),
+          if (genreIds.isNotEmpty)
+            'genres': _safeRelationIds(genreIds, 'Les genres'),
+          if (firstPublicationDate != null)
+            'firstPublicationDate': firstPublicationDate
+                .toUtc()
+                .toIso8601String(),
+          'over18': over18,
+        });
+    await _request('POST', '/api/series', body: body);
+  }
+
+  Future<void> createSubSeries({
+    required String titleFr,
+    String? titleJp,
+    String? titleEn,
+    String? coverUrl,
+    required String seriesId,
+    List<String> authorIds = const <String>[],
+    String? editorId,
+    List<String> genreIds = const <String>[],
+    required String support,
+    required String status,
+    DateTime? firstPublicationDate,
+    bool over18 = false,
+  }) async {
+    await init();
+    final body =
+        _catalogTitlePayload(
+          titleFr: titleFr,
+          titleJp: titleJp,
+          titleEn: titleEn,
+          coverUrl: coverUrl,
+        )..addAll(<String, dynamic>{
+          'series': AdminInputValidator.relationId(
+            seriesId,
+            label: 'La série parente',
+          ),
+          if (authorIds.isNotEmpty)
+            'authors': _safeRelationIds(authorIds, 'Les auteurs'),
+          if ((editorId ?? '').trim().isNotEmpty)
+            'editors': AdminInputValidator.relationId(
+              editorId!,
+              label: 'L’éditeur',
+            ),
+          if (genreIds.isNotEmpty)
+            'genres': _safeRelationIds(genreIds, 'Les genres'),
+          'type': AdminInputValidator.requiredText(
+            support,
+            label: 'Le support',
+            maxLength: 40,
+          ),
+          'status': AdminInputValidator.requiredText(
+            status,
+            label: 'Le statut',
+            maxLength: 40,
+          ),
+          if (firstPublicationDate != null)
+            'firstPublicationDate': firstPublicationDate
+                .toUtc()
+                .toIso8601String(),
+          'over18': over18,
+        });
+    await _request('POST', '/api/sub-series', body: body);
   }
 
   Future<void> createVolume({
@@ -414,30 +738,119 @@ class AdminConnector {
     required String support,
     String? genderJp,
     String? subSeriesId,
+    List<String> bookLinks = const <String>[],
+    List<String> containsIds = const <String>[],
+    Map<String, String> info = const <String, String>{},
     bool over18 = false,
   }) async {
     await init();
-
+    final safeTitleFr = AdminInputValidator.requiredText(
+      titleFr,
+      label: 'Le titre français',
+    );
+    final safeTitleJp = AdminInputValidator.optionalText(
+      titleJp,
+      label: 'Le titre japonais',
+    );
+    final safeTitleEn = AdminInputValidator.optionalText(
+      titleEn,
+      label: 'Le titre anglais',
+    );
+    final safeCoverUrl = AdminInputValidator.httpsUrl(
+      coverUrl,
+      label: 'La couverture',
+    );
+    final safeResume = AdminInputValidator.optionalText(
+      resume,
+      label: 'Le résumé',
+      maxLength: 10000,
+    );
+    final safeGenderJp = AdminInputValidator.optionalText(
+      genderJp,
+      label: 'Le public japonais',
+      maxLength: 80,
+    );
     final body = <String, dynamic>{
-      'titleFr': titleFr.trim(),
-      if ((titleJp ?? '').trim().isNotEmpty) 'titleJp': titleJp!.trim(),
-      if ((titleEn ?? '').trim().isNotEmpty) 'titleEn': titleEn!.trim(),
-      'tomeNumber': tomeNumber,
-      'price': price,
-      if ((coverUrl ?? '').trim().isNotEmpty) 'coverUrl': coverUrl!.trim(),
-      if ((resume ?? '').trim().isNotEmpty) 'resume': resume!.trim(),
+      'titleFr': safeTitleFr,
+      if (safeTitleJp != null) 'titleJp': safeTitleJp,
+      if (safeTitleEn != null) 'titleEn': safeTitleEn,
+      'tomeNumber': AdminInputValidator.nonNegativeNumber(
+        tomeNumber,
+        label: 'Le numéro de tome',
+      ),
+      'price': AdminInputValidator.nonNegativeNumber(price, label: 'Le prix'),
+      if (safeCoverUrl != null) 'coverUrl': safeCoverUrl,
+      if (safeResume != null) 'resume': safeResume,
       if (publicationDate != null)
         'publicationDate': publicationDate.toUtc().toIso8601String(),
-      'ean': ean,
-      'language': language,
-      'support': support,
-      if ((genderJp ?? '').trim().isNotEmpty) 'genderJp': genderJp!.trim(),
+      'ean': AdminInputValidator.ean13(ean),
+      'language': AdminInputValidator.requiredText(
+        language,
+        label: 'La langue',
+        maxLength: 40,
+      ),
+      'support': AdminInputValidator.requiredText(
+        support,
+        label: 'Le support',
+        maxLength: 40,
+      ),
+      if (safeGenderJp != null) 'genderJp': safeGenderJp,
       if ((subSeriesId ?? '').trim().isNotEmpty)
-        'subSeries': subSeriesId!.trim(),
+        'subSeries': AdminInputValidator.relationId(
+          subSeriesId!,
+          label: 'La sous-série',
+        ),
+      if (bookLinks.isNotEmpty)
+        'bookLink': AdminInputValidator.httpsUrlList(
+          bookLinks,
+          label: 'Les liens d’achat',
+        ),
+      if (containsIds.isNotEmpty)
+        'contain': _safeRelationIds(containsIds, 'Les contenus inclus'),
+      if (info.isNotEmpty) 'infoVolume': AdminInputValidator.metadata(info),
       'over18': over18,
     };
 
     await _request('POST', '/api/volumes', body: body);
+  }
+
+  Map<String, dynamic> _catalogTitlePayload({
+    required String titleFr,
+    String? titleJp,
+    String? titleEn,
+    String? coverUrl,
+  }) {
+    final safeTitleJp = AdminInputValidator.optionalText(
+      titleJp,
+      label: 'Le titre japonais',
+    );
+    final safeTitleEn = AdminInputValidator.optionalText(
+      titleEn,
+      label: 'Le titre anglais',
+    );
+    final safeCoverUrl = AdminInputValidator.httpsUrl(
+      coverUrl,
+      label: 'La couverture',
+    );
+    return <String, dynamic>{
+      'titleFr': AdminInputValidator.requiredText(
+        titleFr,
+        label: 'Le titre français',
+      ),
+      if (safeTitleJp != null) 'titleJp': safeTitleJp,
+      if (safeTitleEn != null) 'titleEn': safeTitleEn,
+      if (safeCoverUrl != null) 'coverUrl': safeCoverUrl,
+    };
+  }
+
+  List<String> _safeRelationIds(Iterable<String> ids, String label) {
+    return AdminInputValidator.textList(
+      ids,
+      label: label,
+      maxItems: 100,
+      maxItemLength: 128,
+      relationIds: true,
+    );
   }
 
   Future<bool> _canUseAsAdmin(String apiKey) async {
@@ -507,16 +920,24 @@ class AdminConnector {
 
     switch (method) {
       case 'GET':
-        response = await http.get(uri, headers: headers);
+        response = await http
+            .get(uri, headers: headers)
+            .timeout(_requestTimeout);
         break;
       case 'POST':
-        response = await http.post(uri, headers: headers, body: payload);
+        response = await http
+            .post(uri, headers: headers, body: payload)
+            .timeout(_requestTimeout);
         break;
       case 'PATCH':
-        response = await http.patch(uri, headers: headers, body: payload);
+        response = await http
+            .patch(uri, headers: headers, body: payload)
+            .timeout(_requestTimeout);
         break;
       case 'DELETE':
-        response = await http.delete(uri, headers: headers, body: payload);
+        response = await http
+            .delete(uri, headers: headers, body: payload)
+            .timeout(_requestTimeout);
         break;
       default:
         throw UnsupportedError('Méthode HTTP non supportée: $method');
@@ -532,17 +953,26 @@ class AdminConnector {
   }
 
   String _extractApiError(http.Response response) {
+    if (response.statusCode >= 500) {
+      return 'Erreur API (${response.statusCode}): service temporairement indisponible.';
+    }
     try {
       final decoded = jsonDecode(response.body);
       if (decoded is Map<String, dynamic>) {
         final message = decoded['message']?.toString();
         if (message != null && message.isNotEmpty) {
-          return 'Erreur API (${response.statusCode}): $message';
+          final safeMessage = message
+              .replaceAll(RegExp(r'[\x00-\x1F\x7F]'), ' ')
+              .trim();
+          final truncated = safeMessage.length > 300
+              ? safeMessage.substring(0, 300)
+              : safeMessage;
+          return 'Erreur API (${response.statusCode}): $truncated';
         }
       }
     } catch (_) {}
 
-    return 'Erreur API (${response.statusCode}): ${response.body}';
+    return 'Erreur API (${response.statusCode}): requête refusée.';
   }
 
   Map<String, dynamic> _decodeMap(String body) {
@@ -556,8 +986,7 @@ class AdminConnector {
       return await _secureStorage.read(key: key);
     } catch (e) {
       debugPrint('Secure storage read failed for $key: $e');
-      final prefs = await SharedPreferences.getInstance();
-      return prefs.getString(key);
+      return null;
     }
   }
 
@@ -566,8 +995,9 @@ class AdminConnector {
       await _secureStorage.write(key: key, value: value);
     } catch (e) {
       debugPrint('Secure storage write failed for $key: $e');
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(key, value);
+      throw StateError(
+        'Le stockage sécurisé est indisponible. La clé admin n’a pas été conservée.',
+      );
     }
   }
 
@@ -576,8 +1006,6 @@ class AdminConnector {
       await _secureStorage.delete(key: key);
     } catch (e) {
       debugPrint('Secure storage delete failed for $key: $e');
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.remove(key);
     }
   }
 }

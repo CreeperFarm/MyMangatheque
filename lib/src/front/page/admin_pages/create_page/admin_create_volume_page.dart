@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mymangatheque/src/back/services/admin_service.dart';
 import 'package:mymangatheque/src/front/page/admin_pages/admin_components.dart';
+import 'package:mymangatheque/src/front/page/admin_pages/create_page/admin_create_form_helpers.dart';
 
 class AdminCreateVolumePage extends StatefulWidget {
   const AdminCreateVolumePage({super.key});
@@ -13,20 +14,26 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
   final AdminConnector _admin = AdminConnector();
 
   final TextEditingController _titleFrController = TextEditingController();
+  final TextEditingController _titleJpController = TextEditingController();
+  final TextEditingController _titleEnController = TextEditingController();
   final TextEditingController _tomeController = TextEditingController();
   final TextEditingController _priceController = TextEditingController();
   final TextEditingController _eanController = TextEditingController();
   final TextEditingController _coverController = TextEditingController();
   final TextEditingController _resumeController = TextEditingController();
   final TextEditingController _subSeriesController = TextEditingController();
-  final TextEditingController _genderJpController = TextEditingController();
+  final TextEditingController _bookLinksController = TextEditingController();
+  final TextEditingController _containsController = TextEditingController();
+  final TextEditingController _infoController = TextEditingController();
 
+  DateTime? _publicationDate;
   bool _over18 = false;
   bool _loading = false;
   bool _messageIsError = false;
   String _message = '';
   String _language = 'french';
   String _support = 'manga';
+  String _genderJp = '';
 
   static const List<String> _languages = [
     'french',
@@ -52,13 +59,17 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
   @override
   void dispose() {
     _titleFrController.dispose();
+    _titleJpController.dispose();
+    _titleEnController.dispose();
     _tomeController.dispose();
     _priceController.dispose();
     _eanController.dispose();
     _coverController.dispose();
     _resumeController.dispose();
     _subSeriesController.dispose();
-    _genderJpController.dispose();
+    _bookLinksController.dispose();
+    _containsController.dispose();
+    _infoController.dispose();
     super.dispose();
   }
 
@@ -87,6 +98,8 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
     try {
       await _admin.createVolume(
         titleFr: _titleFrController.text.trim(),
+        titleJp: _titleJpController.text.trim(),
+        titleEn: _titleEnController.text.trim(),
         tomeNumber: tomeNumber,
         price: price,
         ean: ean,
@@ -94,8 +107,12 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
         support: _support,
         coverUrl: _coverController.text.trim(),
         resume: _resumeController.text.trim(),
+        publicationDate: _publicationDate,
         subSeriesId: _subSeriesController.text.trim(),
-        genderJp: _genderJpController.text.trim(),
+        genderJp: _genderJp,
+        bookLinks: parseAdminList(_bookLinksController.text),
+        containsIds: parseAdminList(_containsController.text),
+        info: parseAdminMetadata(_infoController.text),
         over18: _over18,
       );
 
@@ -106,16 +123,22 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
         _messageIsError = false;
       });
       _titleFrController.clear();
+      _titleJpController.clear();
+      _titleEnController.clear();
       _tomeController.clear();
       _priceController.clear();
       _eanController.clear();
       _coverController.clear();
       _resumeController.clear();
       _subSeriesController.clear();
-      _genderJpController.clear();
+      _bookLinksController.clear();
+      _containsController.clear();
+      _infoController.clear();
+      _publicationDate = null;
       _over18 = false;
       _language = 'french';
       _support = 'manga';
+      _genderJp = '';
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -128,7 +151,6 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     return AdminFormView(
       children: [
         const AdminPageHeader(
@@ -138,18 +160,43 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
               'Renseignez les informations éditoriales et le rattachement au catalogue.',
         ),
         const SizedBox(height: 20),
-        TextField(
-          controller: _titleFrController,
-          textInputAction: TextInputAction.next,
-          decoration: const InputDecoration(
-            border: OutlineInputBorder(),
-            labelText: 'Titre français *',
-            prefixIcon: Icon(Icons.title_rounded),
-          ),
+        AdminResponsiveFields(
+          children: [
+            TextField(
+              controller: _titleFrController,
+              maxLength: 200,
+              textInputAction: TextInputAction.next,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: 'Titre français *',
+                prefixIcon: Icon(Icons.title_rounded),
+              ),
+            ),
+            TextField(
+              controller: _titleEnController,
+              maxLength: 200,
+              textInputAction: TextInputAction.next,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: 'Titre anglais',
+                prefixIcon: Icon(Icons.translate_rounded),
+              ),
+            ),
+            TextField(
+              controller: _titleJpController,
+              maxLength: 200,
+              textInputAction: TextInputAction.next,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: 'Titre japonais',
+                prefixIcon: Icon(Icons.translate_rounded),
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: 12),
-        _responsiveRow(
-          [
+        AdminResponsiveFields(
+          children: [
             TextField(
               controller: _tomeController,
               keyboardType: const TextInputType.numberWithOptions(
@@ -190,8 +237,8 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
           ],
         ),
         const SizedBox(height: 12),
-        _responsiveRow(
-          [
+        AdminResponsiveFields(
+          children: [
             DropdownButtonFormField<String>(
               key: ValueKey<String>(_language),
               initialValue: _language,
@@ -241,8 +288,8 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
           ],
         ),
         const SizedBox(height: 12),
-        _responsiveRow(
-          [
+        AdminResponsiveFields(
+          children: [
             TextField(
               controller: _subSeriesController,
               textInputAction: TextInputAction.next,
@@ -252,13 +299,20 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
                 prefixIcon: Icon(Icons.account_tree_outlined),
               ),
             ),
-            TextField(
-              controller: _genderJpController,
-              textInputAction: TextInputAction.next,
+            DropdownButtonFormField<String>(
+              key: ValueKey<String>(_genderJp),
+              initialValue: _genderJp,
+              items: const <DropdownMenuItem<String>>[
+                DropdownMenuItem(value: '', child: Text('Non renseigné')),
+                DropdownMenuItem(value: 'shonen', child: Text('Shōnen')),
+                DropdownMenuItem(value: 'seinen', child: Text('Seinen')),
+                DropdownMenuItem(value: 'shojo', child: Text('Shōjo')),
+                DropdownMenuItem(value: 'josei', child: Text('Josei')),
+              ],
+              onChanged: (value) => setState(() => _genderJp = value ?? ''),
               decoration: const InputDecoration(
                 border: OutlineInputBorder(),
                 labelText: 'Public japonais',
-                hintText: 'shonen, seinen, shojo…',
                 prefixIcon: Icon(Icons.groups_outlined),
               ),
             ),
@@ -271,9 +325,15 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
           textInputAction: TextInputAction.next,
           decoration: const InputDecoration(
             border: OutlineInputBorder(),
-            labelText: 'URL de la couverture',
+            labelText: 'URL HTTPS de la couverture',
             prefixIcon: Icon(Icons.image_outlined),
           ),
+        ),
+        const SizedBox(height: 12),
+        AdminDateField(
+          label: 'Date de publication',
+          value: _publicationDate,
+          onChanged: (value) => setState(() => _publicationDate = value),
         ),
         const SizedBox(height: 12),
         TextField(
@@ -286,24 +346,47 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
           ),
         ),
         const SizedBox(height: 12),
-        Container(
-          decoration: BoxDecoration(
-            border: Border.all(color: colorScheme.outlineVariant),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: SwitchListTile(
-            title: const Text('Contenu réservé aux adultes'),
-            subtitle: const Text(
-              'Masqué lorsque le contenu adulte est désactivé.',
+        AdminResponsiveFields(
+          children: [
+            TextField(
+              controller: _bookLinksController,
+              maxLines: 3,
+              keyboardType: TextInputType.url,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: 'Liens d’achat HTTPS',
+                helperText: 'Une URL par ligne ou séparées par des virgules.',
+                prefixIcon: Icon(Icons.link_rounded),
+              ),
             ),
-            secondary: const Icon(Icons.no_adult_content_outlined),
-            value: _over18,
-            onChanged: (value) {
-              setState(() {
-                _over18 = value;
-              });
-            },
+            TextField(
+              controller: _containsController,
+              maxLines: 3,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: 'IDs des volumes inclus',
+                helperText: 'Pour un coffret ou une intégrale.',
+                prefixIcon: Icon(Icons.inventory_2_outlined),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        TextField(
+          controller: _infoController,
+          maxLines: 4,
+          decoration: const InputDecoration(
+            border: OutlineInputBorder(),
+            labelText: 'Informations complémentaires',
+            hintText: 'pages=192\nformat=Tankōbon',
+            helperText: 'Une paire clé=valeur par ligne, 50 maximum.',
+            prefixIcon: Icon(Icons.info_outline_rounded),
           ),
+        ),
+        const SizedBox(height: 12),
+        AdminAdultContentField(
+          value: _over18,
+          onChanged: (value) => setState(() => _over18 = value),
         ),
         const SizedBox(height: 16),
         FilledButton.icon(
@@ -319,33 +402,6 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
           AdminFeedback(message: _message, isError: _messageIsError),
         ],
       ],
-    );
-  }
-
-  Widget _responsiveRow(List<Widget> fields) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        if (constraints.maxWidth < 620) {
-          return Column(
-            children: [
-              for (var index = 0; index < fields.length; index++) ...[
-                if (index > 0) const SizedBox(height: 12),
-                fields[index],
-              ],
-            ],
-          );
-        }
-
-        return Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            for (var index = 0; index < fields.length; index++) ...[
-              if (index > 0) const SizedBox(width: 12),
-              Expanded(child: fields[index]),
-            ],
-          ],
-        );
-      },
     );
   }
 }

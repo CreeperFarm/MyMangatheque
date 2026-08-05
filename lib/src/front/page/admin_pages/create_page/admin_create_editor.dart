@@ -2,16 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:mymangatheque/src/back/services/admin_service.dart';
 import 'package:mymangatheque/src/front/page/admin_pages/admin_components.dart';
 
-class AdminCreateGenrePage extends StatefulWidget {
-  const AdminCreateGenrePage({super.key});
+class AdminCreateEditorPage extends StatefulWidget {
+  const AdminCreateEditorPage({super.key});
 
   @override
-  State<AdminCreateGenrePage> createState() => _AdminCreateGenrePageState();
+  State<AdminCreateEditorPage> createState() => _AdminCreateEditorPageState();
 }
 
-class _AdminCreateGenrePageState extends State<AdminCreateGenrePage> {
+class _AdminCreateEditorPageState extends State<AdminCreateEditorPage> {
   final AdminConnector _admin = AdminConnector();
   final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _coverController = TextEditingController();
   bool _loading = false;
   bool _messageIsError = false;
   String _message = '';
@@ -19,39 +20,34 @@ class _AdminCreateGenrePageState extends State<AdminCreateGenrePage> {
   @override
   void dispose() {
     _nameController.dispose();
+    _coverController.dispose();
     super.dispose();
   }
 
   Future<void> _submit() async {
-    if (_nameController.text.trim().isEmpty) {
-      setState(() {
-        _message = 'Le nom est obligatoire.';
-        _messageIsError = true;
-      });
-      return;
-    }
-
     setState(() {
       _loading = true;
       _message = '';
-      _messageIsError = false;
     });
-
     try {
-      await _admin.createGenre(name: _nameController.text.trim());
+      await _admin.createEditor(
+        name: _nameController.text,
+        coverUrl: _coverController.text,
+      );
       if (!mounted) return;
-      setState(() {
-        _loading = false;
-        _message = 'Genre créé avec succès.';
-        _messageIsError = false;
-      });
       _nameController.clear();
-    } catch (e) {
+      _coverController.clear();
+      setState(() {
+        _loading = false;
+        _messageIsError = false;
+        _message = 'Éditeur créé avec succès.';
+      });
+    } catch (error) {
       if (!mounted) return;
       setState(() {
         _loading = false;
-        _message = e.toString();
         _messageIsError = true;
+        _message = error.toString();
       });
     }
   }
@@ -61,25 +57,36 @@ class _AdminCreateGenrePageState extends State<AdminCreateGenrePage> {
     return AdminFormView(
       children: [
         const AdminPageHeader(
-          icon: Icons.sell_outlined,
-          title: 'Nouveau genre',
-          description: 'Ajoutez un genre utilisable dans le catalogue.',
+          icon: Icons.business_outlined,
+          title: 'Nouvel éditeur',
+          description: 'Ajoutez une maison d’édition et son identité visuelle.',
         ),
         const SizedBox(height: 20),
         TextField(
           controller: _nameController,
           maxLength: 200,
+          textInputAction: TextInputAction.next,
           decoration: const InputDecoration(
             border: OutlineInputBorder(),
             labelText: 'Nom *',
-            prefixIcon: Icon(Icons.label_outline_rounded),
+            prefixIcon: Icon(Icons.business_outlined),
+          ),
+        ),
+        const SizedBox(height: 12),
+        TextField(
+          controller: _coverController,
+          keyboardType: TextInputType.url,
+          decoration: const InputDecoration(
+            border: OutlineInputBorder(),
+            labelText: 'URL HTTPS du logo',
+            prefixIcon: Icon(Icons.image_outlined),
           ),
         ),
         const SizedBox(height: 16),
         FilledButton.icon(
           onPressed: _loading ? null : _submit,
           icon: const Icon(Icons.add_rounded),
-          label: const Text('Créer le genre'),
+          label: const Text('Créer l’éditeur'),
         ),
         if (_loading) ...[
           const SizedBox(height: 14),

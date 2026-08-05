@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:mymangatheque/src/back/services/admin_service.dart';
 import 'package:mymangatheque/src/front/page/admin_pages/admin_components.dart';
 import 'package:mymangatheque/src/front/page/admin_pages/create_page/admin_create_author.dart';
+import 'package:mymangatheque/src/front/page/admin_pages/create_page/admin_create_editor.dart';
 import 'package:mymangatheque/src/front/page/admin_pages/create_page/admin_create_genre.dart';
+import 'package:mymangatheque/src/front/page/admin_pages/create_page/admin_create_series.dart';
+import 'package:mymangatheque/src/front/page/admin_pages/create_page/admin_create_sub_series.dart';
 import 'package:mymangatheque/src/front/page/admin_pages/create_page/admin_create_volume_page.dart';
 import 'package:mymangatheque/src/function/auto_push_or_go.dart';
 
@@ -22,7 +25,7 @@ class _AdminCreatePageState extends State<AdminCreatePage>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 6, vsync: this);
     _admin.init().then((_) {
       if (!mounted) return;
       setState(() {
@@ -62,9 +65,13 @@ class _AdminCreatePageState extends State<AdminCreatePage>
       maxWidth: 1080,
       appBarBottom: TabBar(
         controller: _tabController,
+        isScrollable: true,
         tabs: const [
           Tab(icon: Icon(Icons.person_add_alt_1_outlined), text: 'Auteur'),
           Tab(icon: Icon(Icons.sell_outlined), text: 'Genre'),
+          Tab(icon: Icon(Icons.business_outlined), text: 'Éditeur'),
+          Tab(icon: Icon(Icons.collections_bookmark_outlined), text: 'Série'),
+          Tab(icon: Icon(Icons.account_tree_outlined), text: 'Sous-série'),
           Tab(icon: Icon(Icons.menu_book_outlined), text: 'Volume'),
         ],
       ),
@@ -73,6 +80,9 @@ class _AdminCreatePageState extends State<AdminCreatePage>
         children: const [
           AdminCreateAuthorPage(),
           AdminCreateGenrePage(),
+          AdminCreateEditorPage(),
+          AdminCreateSeriesPage(),
+          AdminCreateSubSeriesPage(),
           AdminCreateVolumePage(),
         ],
       ),

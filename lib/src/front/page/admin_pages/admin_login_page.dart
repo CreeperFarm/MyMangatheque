@@ -48,19 +48,27 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
       _messageIsError = false;
     });
 
-    final ok = await _admin.loginAsAdmin(_apiKeyController.text.trim());
-    if (!mounted) return;
-
-    setState(() {
-      _loading = false;
-      _messageIsError = !ok;
-      _message = ok
-          ? 'Connexion admin réussie.'
-          : 'Clé API invalide ou non admin.';
-    });
-
-    if (ok) {
-      pushOrGo(context, '/admin');
+    try {
+      final ok = await _admin.loginAsAdmin(_apiKeyController.text.trim());
+      if (!mounted) return;
+      setState(() {
+        _loading = false;
+        _messageIsError = !ok;
+        _message = ok
+            ? 'Connexion admin réussie.'
+            : 'Clé API invalide ou non admin.';
+      });
+      if (ok) {
+        _apiKeyController.clear();
+        pushOrGo(context, '/admin');
+      }
+    } catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _loading = false;
+        _messageIsError = true;
+        _message = error.toString();
+      });
     }
   }
 
@@ -142,6 +150,7 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
                   const SizedBox(height: 14),
                   TextField(
                     controller: _apiKeyController,
+                    maxLength: 4096,
                     autocorrect: false,
                     enableSuggestions: false,
                     obscureText: _obscureKey,
