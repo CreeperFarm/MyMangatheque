@@ -5,7 +5,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:mymangatheque/l10n/app_localizations.dart';
-import 'package:mymangatheque/src/back/services/pocketbase.dart';
+import 'package:mymangatheque/src/back/services/appwrite.dart';
 import 'package:mymangatheque/src/const/assets.dart';
 import 'package:mymangatheque/src/const/own_icon.dart';
 import 'package:mymangatheque/src/front/components/my_button.dart';
@@ -14,7 +14,6 @@ import 'package:mymangatheque/src/front/components/my_square_tile.dart';
 import 'package:mymangatheque/src/front/components/my_textfield.dart';
 import 'package:mymangatheque/src/function/auto_push_or_go.dart';
 import 'package:mymangatheque/src/function/show_message_function.dart';
-import 'package:pocketbase/pocketbase.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -39,12 +38,11 @@ class _SignUpPageState extends State<SignUpPage> {
   final selectedGender = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
-  final pb = PocketBase('https://api.mymangatheque.com', lang: "fr-FR");
-
+  
   String errorText = "";
 
   void signingUpProcess() async {
-    PocketBaseConnector connector = PocketBaseConnector();
+    AppwriteConnector connector = AppwriteConnector();
 
     await connector.createUser(
       usernameController.text,
@@ -101,7 +99,7 @@ class _SignUpPageState extends State<SignUpPage> {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
-    final PocketBaseConnector connector = PocketBaseConnector();
+    final AppwriteConnector connector = AppwriteConnector();
 
     return Scaffold(
       appBar: AppBar(

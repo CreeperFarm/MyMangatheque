@@ -1260,6 +1260,11 @@ class AppLocalizations {
     );
   }
 
+  /// `Sub-Serie`
+  String get subSerie {
+    return Intl.message('Sub-Serie', name: 'subSerie', desc: '', args: []);
+  }
+
   /// `Sub-Series`
   String get subSeries {
     return Intl.message('Sub-Series', name: 'subSeries', desc: '', args: []);
@@ -1714,15 +1719,28 @@ class AppLocalizations {
     );
   }
 
-  /// `{count, plural, =0 {Series} =1{Series} other {Series}}`
+  /// `{count, plural, =0 {Serie} =1{Serie} other {Series}}`
   String seriesCount(num count) {
     return Intl.plural(
       count,
-      zero: 'Series',
-      one: 'Series',
+      zero: 'Serie',
+      one: 'Serie',
       other: 'Series',
       name: 'seriesCount',
       desc: 'A message that indicates the number of series',
+      args: [count],
+    );
+  }
+
+  /// `{count, plural, =0 {Sub-serie} =1{Sub-serie} other {Sub-series}}`
+  String subSeriesCount(num count) {
+    return Intl.plural(
+      count,
+      zero: 'Sub-serie',
+      one: 'Sub-serie',
+      other: 'Sub-series',
+      name: 'subSeriesCount',
+      desc: 'A message that indicates the number of sub-series',
       args: [count],
     );
   }
@@ -1876,7 +1894,7 @@ class AppLocalizations {
         'available': 'Available',
         'unavailable': 'Unavailable',
         'onPreorder': 'On Preorder',
-        'other': availability,
+        'other': '$availability',
       },
       name: 'availability',
       desc: 'A message that indicates the availability of a volume',
@@ -2307,6 +2325,183 @@ class AppLocalizations {
     return Intl.message('Open Scan', name: 'openScan', desc: '', args: []);
   }
 
+  /// `Last scanned EAN: {ean}`
+  String lastScannedEan(String ean) {
+    return Intl.message(
+      'Last scanned EAN: $ean',
+      name: 'lastScannedEan',
+      desc: 'Shows the last EAN scanned by the barcode scanner',
+      args: [ean],
+    );
+  }
+
+  /// `Scanned volumes preview`
+  String get scannedVolumesPreview {
+    return Intl.message(
+      'Scanned volumes preview',
+      name: 'scannedVolumesPreview',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{count, plural, =0 {0 volume} =1{1 volume} other {{count} volumes}}`
+  String scannedVolumesCount(num count) {
+    return Intl.plural(
+      count,
+      zero: '0 volume',
+      one: '1 volume',
+      other: '$count volumes',
+      name: 'scannedVolumesCount',
+      desc:
+          'Shows how many volumes have been scanned during the current scan session',
+      args: [count],
+    );
+  }
+
+  /// `No volume scanned yet.`
+  String get noScannedVolumesYet {
+    return Intl.message(
+      'No volume scanned yet.',
+      name: 'noScannedVolumesYet',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No volume found for EAN {ean}.`
+  String scannedVolumeNotFound(String ean) {
+    return Intl.message(
+      'No volume found for EAN $ean.',
+      name: 'scannedVolumeNotFound',
+      desc: 'Shown when a scanned EAN does not match a volume',
+      args: [ean],
+    );
+  }
+
+  /// `This volume is already in the scanned list.`
+  String get scannedVolumeAlreadyInList {
+    return Intl.message(
+      'This volume is already in the scanned list.',
+      name: 'scannedVolumeAlreadyInList',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add scanned volumes?`
+  String get addScannedVolumesTitle {
+    return Intl.message(
+      'Add scanned volumes?',
+      name: 'addScannedVolumesTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{count, plural, =1{Do you want to add this volume to your collection?} other{Do you want to add these {count} volumes to your collection?}}`
+  String addScannedVolumesConfirmation(num count) {
+    return Intl.plural(
+      count,
+      one: 'Do you want to add this volume to your collection?',
+      other: 'Do you want to add these $count volumes to your collection?',
+      name: 'addScannedVolumesConfirmation',
+      desc: 'Confirmation before adding scanned volumes to the collection',
+      args: [count],
+    );
+  }
+
+  /// `Scanned volumes added to your collection.`
+  String get scannedVolumesAdded {
+    return Intl.message(
+      'Scanned volumes added to your collection.',
+      name: 'scannedVolumesAdded',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add earlier volumes?`
+  String get completeScannedSubSeriesTitle {
+    return Intl.message(
+      'Add earlier volumes?',
+      name: 'completeScannedSubSeriesTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `You scanned volume {number} from a new sub-series. Select the volumes up to this one that you want to add.`
+  String completeScannedSubSeriesDescription(num number) {
+    return Intl.message(
+      'You scanned volume $number from a new sub-series. Select the volumes up to this one that you want to add.',
+      name: 'completeScannedSubSeriesDescription',
+      desc:
+          'Offers earlier volumes after scanning a later volume from a new sub-series',
+      args: [number],
+    );
+  }
+
+  /// `Select all`
+  String get selectAllVolumes {
+    return Intl.message(
+      'Select all',
+      name: 'selectAllVolumes',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Clear selection`
+  String get clearSelection {
+    return Intl.message(
+      'Clear selection',
+      name: 'clearSelection',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add selected volumes`
+  String get addSelectedVolumes {
+    return Intl.message(
+      'Add selected volumes',
+      name: 'addSelectedVolumes',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Never show this again`
+  String get neverShowAgain {
+    return Intl.message(
+      'Never show this again',
+      name: 'neverShowAgain',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Suggest earlier volumes after scanning`
+  String get scanPreviousVolumesSuggestion {
+    return Intl.message(
+      'Suggest earlier volumes after scanning',
+      name: 'scanPreviousVolumesSuggestion',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `When scanning a later volume from a new sub-series, offer to add its earlier volumes too.`
+  String get scanPreviousVolumesSuggestionDescription {
+    return Intl.message(
+      'When scanning a later volume from a new sub-series, offer to add its earlier volumes too.',
+      name: 'scanPreviousVolumesSuggestionDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Impossible to retrieve the build and app version.`
   String get buildAppVersionImpossibleToRetreive {
     return Intl.message(
@@ -2418,6 +2613,216 @@ class AppLocalizations {
     );
   }
 
+  /// `Try again`
+  String get tryAgain {
+    return Intl.message('Try again', name: 'tryAgain', desc: '', args: []);
+  }
+
+  /// `No results`
+  String get noResults {
+    return Intl.message('No results', name: 'noResults', desc: '', args: []);
+  }
+
+  /// `Not available`
+  String get notAvailable {
+    return Intl.message(
+      'Not available',
+      name: 'notAvailable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Reviews`
+  String get reviews {
+    return Intl.message('Reviews', name: 'reviews', desc: '', args: []);
+  }
+
+  /// `No reviews for this volume yet.`
+  String get noReviewsForThisVolumeYet {
+    return Intl.message(
+      'No reviews for this volume yet.',
+      name: 'noReviewsForThisVolumeYet',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Pending moderation`
+  String get pendingModeration {
+    return Intl.message(
+      'Pending moderation',
+      name: 'pendingModeration',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Review questionnaire`
+  String get reviewQuestionnaireTitle {
+    return Intl.message(
+      'Review questionnaire',
+      name: 'reviewQuestionnaireTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Now that this volume is marked as read, you can rate it and leave a comment.`
+  String get reviewQuestionnaireDescription {
+    return Intl.message(
+      'Now that this volume is marked as read, you can rate it and leave a comment.',
+      name: 'reviewQuestionnaireDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Open questionnaire`
+  String get openQuestionnaire {
+    return Intl.message(
+      'Open questionnaire',
+      name: 'openQuestionnaire',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Stars: {count}/5`
+  String reviewStars(num count) {
+    return Intl.message(
+      'Stars: $count/5',
+      name: 'reviewStars',
+      desc: 'Label showing review stars count over five',
+      args: [count],
+    );
+  }
+
+  /// `Favorite character(s)`
+  String get favoriteCharacters {
+    return Intl.message(
+      'Favorite character(s)',
+      name: 'favoriteCharacters',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Tanjiro, Nezuko, ...`
+  String get favoriteCharactersHint {
+    return Intl.message(
+      'Tanjiro, Nezuko, ...',
+      name: 'favoriteCharactersHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Favorite character(s): {characters}`
+  String favoriteCharactersLabel(String characters) {
+    return Intl.message(
+      'Favorite character(s): $characters',
+      name: 'favoriteCharactersLabel',
+      desc: 'Label for favorite characters in a review',
+      args: [characters],
+    );
+  }
+
+  /// `Comment`
+  String get comment {
+    return Intl.message('Comment', name: 'comment', desc: '', args: []);
+  }
+
+  /// `What did you think about this volume?`
+  String get reviewCommentHint {
+    return Intl.message(
+      'What did you think about this volume?',
+      name: 'reviewCommentHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Review submitted successfully.`
+  String get reviewSubmittedSuccess {
+    return Intl.message(
+      'Review submitted successfully.',
+      name: 'reviewSubmittedSuccess',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Unable to submit review: {error}`
+  String reviewSubmitFailed(String error) {
+    return Intl.message(
+      'Unable to submit review: $error',
+      name: 'reviewSubmitFailed',
+      desc: 'Review submit failure message',
+      args: [error],
+    );
+  }
+
+  /// `Allow displaying covers and details marked 18+.`
+  String get adultContentPreferenceDescription {
+    return Intl.message(
+      'Allow displaying covers and details marked 18+.',
+      name: 'adultContentPreferenceDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Adult content display enabled.`
+  String get adultContentEnabled {
+    return Intl.message(
+      'Adult content display enabled.',
+      name: 'adultContentEnabled',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Adult content display disabled.`
+  String get adultContentDisabled {
+    return Intl.message(
+      'Adult content display disabled.',
+      name: 'adultContentDisabled',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This volume is marked as 18+. Enable adult content in profile settings to display the cover.`
+  String get adultContentBlockedDescription {
+    return Intl.message(
+      'This volume is marked as 18+. Enable adult content in profile settings to display the cover.',
+      name: 'adultContentBlockedDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Open content settings`
+  String get openContentSettings {
+    return Intl.message(
+      'Open content settings',
+      name: 'openContentSettings',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Availability unknown`
+  String get availabilityUnknown {
+    return Intl.message(
+      'Availability unknown',
+      name: 'availabilityUnknown',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Are you sure you want to delete your account? This action cannot be undone. All your data will be permanently deleted.`
   String get areYouSureDeleteAccount {
     return Intl.message(
@@ -2458,6 +2863,36 @@ class AppLocalizations {
     return Intl.message(
       'An error occurred, your account has not been deleted, you have been log out of your account.',
       name: 'errorDeleteAccount',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `English Title`
+  String get englishTitle {
+    return Intl.message(
+      'English Title',
+      name: 'englishTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Japanese Title`
+  String get japaneseTitle {
+    return Intl.message(
+      'Japanese Title',
+      name: 'japaneseTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `English and Japanese Title`
+  String get englishAndJapaneseTitle {
+    return Intl.message(
+      'English and Japanese Title',
+      name: 'englishAndJapaneseTitle',
       desc: '',
       args: [],
     );

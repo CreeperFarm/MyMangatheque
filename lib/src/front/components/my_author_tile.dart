@@ -3,6 +3,7 @@ import 'package:mymangatheque/l10n/app_localizations.dart';
 import 'package:mymangatheque/src/const/assets.dart';
 import 'package:mymangatheque/src/const/own_icon.dart';
 import 'package:mymangatheque/src/function/auto_push_or_go.dart';
+import 'package:mymangatheque/src/front/components/safe_network_image.dart';
 
 class MyAuthorTile extends StatelessWidget {
   final Map<String, dynamic> authorData;
@@ -22,6 +23,11 @@ class MyAuthorTile extends StatelessWidget {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
+    final job = authorData['job']?.toString() ?? '';
+    final jobs = job.isEmpty ? const <String>[] : job.split(', ');
+    final imageUrl =
+        authorData['image']?.toString() ?? authorData['coverUrl']?.toString();
+
     return Padding(
       padding: const EdgeInsets.all(5.0),
       child: InkWell(
@@ -39,8 +45,8 @@ class MyAuthorTile extends StatelessWidget {
                   padding: const EdgeInsets.all(5),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(12),
-                    child: Image.network(
-                      "https://api.mymangatheque.com/api/files/hper195bzhpmjp9/${authorData['id'].toString()}/${authorData['image'].toString()}",
+                    child: SafeNetworkImage(
+                      imageUrl: imageUrl,
                       height: 50,
                     ),
                   ),
@@ -61,18 +67,10 @@ class MyAuthorTile extends StatelessWidget {
                       ),
                       Row(
                         children: [
-                          for (
-                            var i = 0;
-                            i < authorData['job'].split(', ').length;
-                            i++
-                          )
+                          for (var i = 0; i < jobs.length; i++)
                             Text(
-                              localizations.jobsName(
-                                    authorData['job'].split(', ')[i],
-                                  ) +
-                                  (i != authorData['job'].split(', ').length - 1
-                                      ? ", "
-                                      : ""),
+                              localizations.jobsName(jobs[i]) +
+                                  (i != jobs.length - 1 ? ", " : ""),
                               textAlign: TextAlign.left,
                               style: const TextStyle(fontSize: 13),
                               softWrap: true,

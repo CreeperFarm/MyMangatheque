@@ -1,126 +1,277 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mymangatheque/l10n/app_localizations.dart';
 import 'package:mymangatheque/src/back/provider/manga_owned_provider.dart';
-import 'package:mymangatheque/src/back/services/pocketbase.dart';
+import 'package:mymangatheque/src/back/services/appwrite.dart';
 import 'package:mymangatheque/src/const/assets.dart';
 import 'package:mymangatheque/src/const/own_icon.dart';
-import 'package:mymangatheque/src/front/components/my_line.dart';
-import 'package:mymangatheque/src/front/components/my_tome_number_show.dart';
-import 'package:mymangatheque/src/function/auto_push_or_go.dart';
-import 'package:mymangatheque/src/models/manga/sub_serie_for_collection.dart';
 import 'package:mymangatheque/src/const/routes.dart';
+import 'package:mymangatheque/src/front/components/my_line.dart';
+import 'package:mymangatheque/src/front/components/my_scroll_column.dart';
+import 'package:mymangatheque/src/front/components/my_tome_number_show.dart';
+import 'package:mymangatheque/src/front/components/safe_network_image.dart';
+import 'package:mymangatheque/src/function/auto_push_or_go.dart';
+import 'package:mymangatheque/src/function/safe_expand_reader.dart';
+import 'package:mymangatheque/src/models/manga/sub_serie_for_collection.dart';
+import 'package:mymangatheque/src/models/manga/volume.dart';
 
 class EnvyTab extends ConsumerStatefulWidget {
-  const EnvyTab({super.key});
+  const EnvyTab({this.searchQuery = '', this.order = 'manga', super.key});
+
+  final String searchQuery;
+  final String order;
 
   @override
   ConsumerState createState() => _EnvyTabState();
 }
 
 class _EnvyTabState extends ConsumerState<EnvyTab> {
-  PocketBaseConnector connector = PocketBaseConnector();
+  final AppwriteConnector connector = AppwriteConnector();
   int followedVolumeNumber = 0;
   int followedSubSeriesNumber = 0;
-  List<SubSerieForCollection> ownedSubSeriesList = [];
   List<SubSerieForCollection> followedSubSeriesList = [];
-  List authorsNameLinkSubSeriesId = [];
-  dynamic
-  _ownedSubscription; // Subscription to listen to changes in owned manga
-  dynamic
-  _followedSubscription; // Subscription to listen to changes in followed manga
-  dynamic ownedSubSeries;
+  Map<String, String> authorNamesBySubSeriesId = <String, String>{};
+  dynamic _followedSubscription;
+  String _lastOwnedSignature = '';
+  bool _isFetching = false;
 
-  int getNumberVolumesOwnedOfSubSeries(String id) {
-    int count = 0;
-    for (var subSeries in ownedSubSeriesList) {
-      if (subSeries.id == id) {
-        count = subSeries.numberOwnedVolumes;
-        break;
+  Map<String, dynamic> _asMap(dynamic value) {
+    if (value is Map<String, dynamic>) return value;
+    if (value is Map) return Map<String, dynamic>.from(value);
+    return <String, dynamic>{};
+  }
+
+  Map<String, dynamic> _firstMap(dynamic value) {
+    final direct = _asMap(value);
+    if (direct.isNotEmpty) return direct;
+    if (value is List) {
+      for (final item in value) {
+        final map = _asMap(item);
+        if (map.isNotEmpty) return map;
       }
     }
-    return count;
+    return <String, dynamic>{};
+  }
+
+  List<Map<String, dynamic>> _asMapList(dynamic value) {
+    if (value is List) {
+      return value
+          .whereType<Map>()
+          .map((item) => Map<String, dynamic>.from(item))
+          .toList();
+    }
+    return <Map<String, dynamic>>[];
+  }
+
+  int _volumeCount(Map<String, dynamic> subSeries) {
+    final volumes = subSeries['volumes'];
+    if (volumes is List) return volumes.length;
+
+    final candidates = <dynamic>[
+      subSeries['numberOfVolumes'],
+      subSeries['volumeCount'],
+      subSeries['volumesCount'],
+      subSeries['totalVolumes'],
+    ];
+    for (final candidate in candidates) {
+      if (candidate is int) return candidate;
+      if (candidate is num) return candidate.toInt();
+      final parsed = int.tryParse(candidate?.toString() ?? '');
+      if (parsed != null) return parsed;
+    }
+
+    return 0;
+  }
+
+  int getNumberVolumesOwnedOfSubSeries(
+    String id,
+    Iterable<SubSerieForCollection> ownedSubSeries,
+  ) {
+    for (var subSeries in ownedSubSeries) {
+      if (subSeries.id == id) {
+        return subSeries.numberOwnedVolumes;
+      }
+    }
+    return 0;
+  }
+
+  String _authorNamesFromSubSeries(Map<String, dynamic> subSeries) {
+    final expand = SafeExpandReader.asMap(subSeries['expand']);
+    final authors = _asMapList(expand['authors'] ?? subSeries['authors']);
+    final names = authors
+        .map((author) => author['name']?.toString() ?? '')
+        .where((name) => name.isNotEmpty)
+        .toList();
+    return names.join(', ');
   }
 
   Future<String> getAuthorNameOfSubSeries(String id) async {
-    String authorName = "";
     final res = await connector.getOneExpand("sub_series", id, "authors");
-    final data = json.decode(res.toString());
-    final length = data[0]['expand']['authors'].length;
-    for (var i = 0; i < length; i++) {
-      if (i != length - 1) {
-        authorName += data[0]['expand']['authors'][i]['name'] + ", ";
-      } else {
-        authorName += data[0]['expand']['authors'][i]['name'];
-      }
-    }
-    if (authorName == "") {
-      authorName = "error";
-    }
-    return authorName;
+    if (res.isEmpty) return "error";
+    final data = Map<String, dynamic>.from(res.first.data);
+    final authorName = _authorNamesFromSubSeries(data);
+    return authorName.isEmpty ? "error" : authorName;
   }
 
   String displayAuthorWithSubSeriesId(String id) {
-    String authorName = "error";
-    for (var subSerie in authorsNameLinkSubSeriesId) {
-      if (subSerie['id'] == id) {
-        authorName = subSerie['author'];
-        break;
-      }
-    }
-    return authorName;
+    return authorNamesBySubSeriesId[id] ?? "error";
   }
 
-  Future<void> _fetchData() async {
-    ownedSubSeriesList = ownedSubSeries.toList();
-    followedSubSeriesList = [];
-    followedVolumeNumber = 0;
-    followedSubSeriesNumber = 0;
+  String _ownedSignature(Iterable<SubSerieForCollection> subSeries) {
+    final parts =
+        subSeries
+            .map((subSerie) => '${subSerie.id}:${subSerie.numberOwnedVolumes}')
+            .toList()
+          ..sort();
+    return parts.join('|');
+  }
 
-    // Get the favorite sub series from local storage
+  void _scheduleFetchIfNeeded(Set<SubSerieForCollection> ownedSubSeries) {
+    final signature = _ownedSignature(ownedSubSeries);
+    if (_isFetching || signature == _lastOwnedSignature) return;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _fetchData(ownedSubSeries, signature);
+    });
+  }
+
+  Future<void> _fetchData(
+    Set<SubSerieForCollection> ownedSubSeries,
+    String signature,
+  ) async {
+    setState(() {
+      _isFetching = true;
+    });
+
     final res = await connector.getCollectionFullDataWithFilterExpand(
       "followed",
-      "user='${PocketBaseConnector().getConnectedUser()!.id}'",
-      'sub_serie',
+      '',
+      'subSeries.authors',
     );
-    final data = json.decode(res.toString());
-    for (var followed in data) {
-      if (getNumberVolumesOwnedOfSubSeries(followed["sub_serie"]) == 0) {
-        followedSubSeriesList.add(
-          SubSerieForCollection(
-            id: followed['sub_serie'],
-            title: followed['expand']['sub_serie']['title'],
-            numberOfVolumes: followed['expand']['sub_serie']['volumes'].length,
-            volumes: [],
-            numberOwnedVolumes: 0,
-            cover:
-                'https://api.mymangatheque.com/api/files/ofwxwbyrhy5dcor/${followed['sub_serie']}/${followed['expand']['sub_serie']['image']}',
-          ),
-        );
-        followedSubSeriesNumber += 1;
-      }
-    }
+    final ownedSubSeriesIds = ownedSubSeries
+        .map((subSeries) => subSeries.id)
+        .toSet();
 
-    for (var subSerie in followedSubSeriesList) {
-      followedVolumeNumber += subSerie.numberOfVolumes;
-      final author = await getAuthorNameOfSubSeries(subSerie.id);
-      authorsNameLinkSubSeriesId.add({'id': subSerie.id, 'author': author});
+    final loadedEntries =
+        await Future.wait<MapEntry<SubSerieForCollection, String>?>(
+          res.map((followedRecord) async {
+            final followed = Map<String, dynamic>.from(followedRecord.data);
+            final expand = SafeExpandReader.asMap(followed['expand']);
+
+            // Helper to get the subSeries map from multiple possible locations
+            Map<String, dynamic> extractSubSeriesMap() {
+              // Try expanded forms first
+              final candidates = [
+                expand['sub_serie'],
+                expand['sub_series'],
+                expand['subSeries'],
+                expand['sub_serie'] is List
+                    ? (expand['sub_serie'] as List).firstWhere(
+                        (_) => true,
+                        orElse: () => null,
+                      )
+                    : null,
+              ];
+              for (final c in candidates) {
+                final m = _firstMap(c);
+                if (m.isNotEmpty) return m;
+              }
+
+              // Try top-level keys on followed
+              final top = _firstMap(
+                followed['sub_serie'] ??
+                    followed['subSeries'] ??
+                    followed['sub_series'] ??
+                    followed['subSerie'],
+              );
+              if (top.isNotEmpty) return top;
+
+              return <String, dynamic>{};
+            }
+
+            final subSerie = extractSubSeriesMap();
+            final subSerieId =
+                (followed['sub_serie'] ??
+                        followed['subSeries'] ??
+                        followed['sub_series'] ??
+                        subSerie['id'])
+                    ?.toString() ??
+                '';
+
+            if (subSerieId.isEmpty || ownedSubSeriesIds.contains(subSerieId)) {
+              return null;
+            }
+
+            final numberOfVolumes = _volumeCount(subSerie);
+            final subSeries = SubSerieForCollection(
+              id: subSerieId,
+              title:
+                  subSerie['title']?.toString() ??
+                  subSerie['titleFr']?.toString() ??
+                  '',
+              numberOfVolumes: numberOfVolumes,
+              volumes: const <Volume>[],
+              numberOwnedVolumes: 0,
+              cover:
+                  subSerie['coverUrl']?.toString() ??
+                  subSerie['image']?.toString() ??
+                  '',
+            );
+
+            var author = _authorNamesFromSubSeries(subSerie);
+            if (author.isEmpty) {
+              author = await getAuthorNameOfSubSeries(subSerieId);
+            }
+            return MapEntry(subSeries, author);
+          }),
+        );
+
+    final nextFollowed = <SubSerieForCollection>[];
+    final nextAuthors = <String, String>{};
+    var nextVolumeNumber = 0;
+
+    for (final entry
+        in loadedEntries.whereType<MapEntry<SubSerieForCollection, String>>()) {
+      final subSeries = entry.key;
+      nextFollowed.add(subSeries);
+      nextAuthors[subSeries.id] = entry.value;
+      nextVolumeNumber += subSeries.numberOfVolumes;
     }
 
     if (!mounted) return;
-    setState(() {});
+    setState(() {
+      followedSubSeriesList = nextFollowed;
+      followedVolumeNumber = nextVolumeNumber;
+      followedSubSeriesNumber = nextFollowed.length;
+      authorNamesBySubSeriesId = nextAuthors;
+      _lastOwnedSignature = signature;
+      _isFetching = false;
+    });
+  }
+
+  List<SubSerieForCollection> _visibleSubSeries() {
+    final query = widget.searchQuery.trim().toLowerCase();
+    final visible = followedSubSeriesList.where((subSerie) {
+      if (query.isEmpty) return true;
+      return subSerie.title.toLowerCase().contains(query) ||
+          displayAuthorWithSubSeriesId(
+            subSerie.id,
+          ).toLowerCase().contains(query);
+    }).toList();
+
+    visible.sort((a, b) {
+      if (widget.order == 'releaseDate') {
+        return b.numberOfVolumes.compareTo(a.numberOfVolumes);
+      }
+      return a.title.toLowerCase().compareTo(b.title.toLowerCase());
+    });
+
+    return visible;
   }
 
   void _cancelRealtime() {
     try {
-      if (_ownedSubscription != null) {
-        try {
-          _ownedSubscription.unsubscribe();
-        } catch (_) {}
-        _ownedSubscription = null;
-      }
       if (_followedSubscription != null) {
         try {
           _followedSubscription.unsubscribe();
@@ -133,21 +284,16 @@ class _EnvyTabState extends ConsumerState<EnvyTab> {
   void _setupRealtimeOrFallback() {
     _cancelRealtime();
     try {
-      _ownedSubscription = connector.connector().collection('owned').subscribe(
-        '*',
-        (event) async {
-          debugPrint("Got an event");
-          await ref.read(mangaOwnedProvider.notifier).initData();
-          _fetchData();
-        },
-      );
       _followedSubscription = connector
           .connector()
           .collection('followed')
           .subscribe('*', (event) async {
             debugPrint("Got an event");
-            await ref.read(mangaOwnedProvider.notifier).initData();
-            _fetchData();
+            _lastOwnedSignature = '';
+            final ownedSubSeries = ref.read(mangaOwnedProvider);
+            if (mounted) {
+              _fetchData(ownedSubSeries, _ownedSignature(ownedSubSeries));
+            }
           });
 
       debugPrint('Realtime subscriptions established.');
@@ -160,15 +306,8 @@ class _EnvyTabState extends ConsumerState<EnvyTab> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      // Initialize the owned subseries data
-      ownedSubSeries = ref.read(mangaOwnedProvider);
-      _initDatas();
+      _setupRealtimeOrFallback();
     });
-  }
-
-  Future<void> _initDatas() async {
-    _fetchData();
-    _setupRealtimeOrFallback();
   }
 
   @override
@@ -179,22 +318,25 @@ class _EnvyTabState extends ConsumerState<EnvyTab> {
 
   @override
   Widget build(BuildContext context) {
-    // Get localization - return early if not available
     var localizations = AppLocalizations.of(context);
     if (localizations == null) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
+    final ownedSubSeries = ref.watch(mangaOwnedProvider);
+    _scheduleFetchIfNeeded(ownedSubSeries);
+    final visibleSubSeries = _visibleSubSeries();
+
     return Padding(
       padding: const EdgeInsets.all(10),
-      child: Column(
+      child: MyScrollColumn(
         children: [
           MyTomeNumberShow(
             tomeTotal: "$followedVolumeNumber",
             editionTotal: "$followedSubSeriesNumber",
             localizations: localizations,
           ),
-          (followedVolumeNumber == 0)
+          (followedVolumeNumber == 0 && !_isFetching)
               ? Center(
                   child: Text(
                     localizations.noFollowedSubSerie,
@@ -205,78 +347,71 @@ class _EnvyTabState extends ConsumerState<EnvyTab> {
                   ),
                 )
               : const SizedBox(),
-          Column(
-            children: [
-              for (var subSerie in followedSubSeriesList)
-                Column(
-                  children: [
-                    InkWell(
-                      onTap: () => pushOrGo(
-                        context,
-                        Routes.librarySubSerie(subSerie.id),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(10.0),
-                              child: Image.network(
-                                subSerie.cover ??
-                                    'https://placehold.co/514x728?text=No%20Image',
-                                width: 65,
-                              ),
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    subSerie.title.replaceAll(
-                                      ' - Edition Standard',
-                                      '',
-                                    ),
-                                    style: const TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                    softWrap: true,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  Text(
-                                    localizations.subSerieVolumeNumber(
-                                      subSerie.numberOfVolumes,
-                                    ),
-                                  ),
-                                  Text(
-                                    localizations.subSerieFromAuthor(
-                                      displayAuthorWithSubSeriesId(subSerie.id),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            OwnIcon(
-                              iconColor: Theme.of(context).colorScheme.primary,
-                              iconSrc: Assets.icons.arrowRight,
-                            ),
-                          ],
+          for (var subSerie in visibleSubSeries)
+            Column(
+              children: [
+                InkWell(
+                  onTap: () =>
+                      pushOrGo(context, Routes.librarySubSerie(subSerie.id)),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(10.0),
+                          child: SafeNetworkImage(
+                            imageUrl: subSerie.cover,
+                            width: 65,
+                          ),
                         ),
-                      ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Text(
+                                subSerie.title.replaceAll(
+                                  ' - Edition Standard',
+                                  '',
+                                ),
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                softWrap: true,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              Text(
+                                localizations.subSerieVolumeNumber(
+                                  subSerie.numberOfVolumes,
+                                ),
+                              ),
+                              Text(
+                                localizations.subSerieFromAuthor(
+                                  displayAuthorWithSubSeriesId(subSerie.id),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        OwnIcon(
+                          iconColor: Theme.of(context).colorScheme.primary,
+                          iconSrc: Assets.icons.arrowRight,
+                        ),
+                      ],
                     ),
-                    MyLine(
-                      width: MediaQuery.of(context).size.width,
-                      vertical: 10,
-                      horizontal: 0,
-                    ),
-                  ],
+                  ),
                 ),
-            ],
-          ),
+                MyLine(
+                  width: MediaQuery.of(context).size.width,
+                  vertical: 10,
+                  horizontal: 0,
+                ),
+              ],
+            ),
         ],
       ),
     );

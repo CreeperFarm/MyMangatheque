@@ -1,37 +1,27 @@
-import 'package:pocketbase/pocketbase.dart';
+class AppwriteFile {
+  AppwriteFile({
+    required this.url,
+    this.id,
+    this.bucketId,
+    this.fileName,
+  });
 
-class PocketBaseFile {
-  final String _id;
-  final String _collectionId;
-  final String _fileName;
+  final String url;
+  final String? id;
+  final String? bucketId;
+  final String? fileName;
 
-  PocketBaseFile({
-    required String id,
-    required String collectionId,
-    required String fileName,
-  }) : _id = id,
-       _collectionId = collectionId,
-       _fileName = fileName;
+  String? get path => url;
 
-  PocketBaseFile.fromRecordModel(RecordModel model, String fieldName)
-    : this(
-        id: model.id,
-        collectionId: model.collectionId,
-        fileName: model.data[fieldName],
-      );
-
-  String? get path => 'api/files/$_collectionId/$_id/$_fileName';
+  factory AppwriteFile.fromUrl(String? url) {
+    return AppwriteFile(url: url ?? '');
+  }
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is PocketBaseFile &&
-          runtimeType == other.runtimeType &&
-          _id == other._id &&
-          _collectionId == other._collectionId &&
-          _fileName == other._fileName;
+      other is AppwriteFile && runtimeType == other.runtimeType && url == other.url;
 
   @override
-  int get hashCode =>
-      _id.hashCode ^ _collectionId.hashCode ^ _fileName.hashCode;
+  int get hashCode => url.hashCode;
 }

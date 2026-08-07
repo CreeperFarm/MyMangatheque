@@ -257,6 +257,7 @@
   "volumeAdd": "Ajouter un volume",
   "volumeAddSuccess": "Volume ajouté avec succès.",
   "volumeAddError": "Une erreur est survenue, le volume n'a pas été ajouté.",
+  "subSerie": "Sous-série",
   "subSeries": "Sous-séries",
   "editor": "Éditeur",
   "genre": "Genre",
@@ -319,6 +320,16 @@
   "seriesCount": "{count, plural, =0 {Série} =1{Série} other {Séries}}",
   "@seriesCount": {
     "description": "Un message qui affiche le nombre de séries",
+    "placeholders": {
+      "count": {
+        "type": "num",
+        "format": "compact"
+      }
+    }
+  },
+  "subSeriesCount": "{count, plural, =0 {Sous-série} =1{Sous-série} other {Sous-séries}}",
+  "@subSeriesCount": {
+    "description": "Un message qui affiche le nombre de sous-séries",
     "placeholders": {
       "count": {
         "type": "num",
@@ -472,6 +483,65 @@
   "lastUpdateDate": "Date de dernière mise à jour",
   "scanEAN": "Scan EAN",
   "openScan": "Ouvrir le scan",
+  "lastScannedEan": "Dernier EAN scanné : {ean}",
+  "@lastScannedEan": {
+    "description": "Affiche le dernier EAN scanné par le scanner de code-barres",
+    "placeholders": {
+      "ean": {
+        "type": "String"
+      }
+    }
+  },
+  "scannedVolumesPreview": "Prévisualisation des tomes scannés",
+  "scannedVolumesCount": "{count, plural, =0 {0 tome} =1{1 tome} other {{count} tomes}}",
+  "@scannedVolumesCount": {
+    "description": "Affiche le nombre de tomes scannés pendant la session de scan en cours",
+    "placeholders": {
+      "count": {
+        "type": "num",
+        "format": "compact"
+      }
+    }
+  },
+  "noScannedVolumesYet": "Aucun tome scanné pour le moment.",
+  "scannedVolumeNotFound": "Aucun tome trouvé pour l'EAN {ean}.",
+  "@scannedVolumeNotFound": {
+    "description": "Affiché quand un EAN scanné ne correspond à aucun tome",
+    "placeholders": {
+      "ean": {
+        "type": "String"
+      }
+    }
+  },
+  "scannedVolumeAlreadyInList": "Ce tome est déjà dans la liste scannée.",
+  "addScannedVolumesTitle": "Ajouter les tomes scannés ?",
+  "addScannedVolumesConfirmation": "{count, plural, =1{Voulez-vous ajouter ce tome à votre collection ?} other{Voulez-vous ajouter ces {count} tomes à votre collection ?}}",
+  "@addScannedVolumesConfirmation": {
+    "description": "Confirmation avant d'ajouter les tomes scannés à la collection",
+    "placeholders": {
+      "count": {
+        "type": "num",
+        "format": "compact"
+      }
+    }
+  },
+  "scannedVolumesAdded": "Les tomes scannés ont été ajoutés à votre collection.",
+  "completeScannedSubSeriesTitle": "Ajouter les tomes précédents ?",
+  "completeScannedSubSeriesDescription": "Vous avez scanné le tome {number} d'une nouvelle sous-série. Sélectionnez les tomes jusqu'à celui-ci que vous souhaitez ajouter.",
+  "@completeScannedSubSeriesDescription": {
+    "description": "Propose les tomes précédents après le scan d'un tome plus avancé d'une nouvelle sous-série",
+    "placeholders": {
+      "number": {
+        "type": "num"
+      }
+    }
+  },
+  "selectAllVolumes": "Tout sélectionner",
+  "clearSelection": "Effacer la sélection",
+  "addSelectedVolumes": "Ajouter les tomes sélectionnés",
+  "neverShowAgain": "Ne plus jamais afficher cette option",
+  "scanPreviousVolumesSuggestion": "Proposer les tomes précédents après un scan",
+  "scanPreviousVolumesSuggestionDescription": "Lors du scan d'un tome avancé d'une nouvelle sous-série, proposer aussi l'ajout des tomes précédents.",
   "buildAppVersionImpossibleToRetreive": "Impossible de récupérer la version de l'application et la version du build.",
   "allVolumesOwned": "Vous possedez tous les tomes de volumes. Vous les possédez tous 👏.",
   "unknownError": "Une erreur inconnue s'est produite.",
@@ -509,10 +579,60 @@
       }
     }
   },
+  "tryAgain": "Réessayer",
+  "noResults": "Aucun résultat",
+  "notAvailable": "Non disponible",
+  "reviews": "Avis",
+  "noReviewsForThisVolumeYet": "Aucun avis pour ce tome pour le moment.",
+  "pendingModeration": "En attente de modération",
+  "reviewQuestionnaireTitle": "Questionnaire d'avis",
+  "reviewQuestionnaireDescription": "Maintenant que ce tome est marqué comme lu, vous pouvez le noter et laisser un commentaire.",
+  "openQuestionnaire": "Ouvrir le questionnaire",
+  "reviewStars": "Étoiles : {count}/5",
+  "@reviewStars": {
+    "description": "Libellé affichant la note sur cinq étoiles",
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "favoriteCharacters": "Personnage(s) favori(s)",
+  "favoriteCharactersHint": "Tanjiro, Nezuko, ...",
+  "favoriteCharactersLabel": "Personnage(s) favori(s) : {characters}",
+  "@favoriteCharactersLabel": {
+    "description": "Libellé des personnages favoris dans un avis",
+    "placeholders": {
+      "characters": {
+        "type": "String"
+      }
+    }
+  },
+  "comment": "Commentaire",
+  "reviewCommentHint": "Qu'avez-vous pensé de ce tome ?",
+  "reviewSubmittedSuccess": "Avis envoyé avec succès.",
+  "reviewSubmitFailed": "Impossible d'envoyer l'avis : {error}",
+  "@reviewSubmitFailed": {
+    "description": "Message d'échec d'envoi d'avis",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "adultContentPreferenceDescription": "Autoriser l'affichage des couvertures et contenus marqués 18+.",
+  "adultContentEnabled": "Affichage du contenu adulte activé.",
+  "adultContentDisabled": "Affichage du contenu adulte désactivé.",
+  "adultContentBlockedDescription": "Ce tome est marqué 18+. Activez le contenu adulte dans les réglages du profil pour afficher la couverture.",
+  "openContentSettings": "Ouvrir les réglages du contenu",
+  "availabilityUnknown": "Disponibilité inconnue",
   "areYouSureDeleteAccount": "Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible et entraînera la suppression de toutes vos données, y compris votre collection, vos séries suivies et vos informations de profil.",
   "cancel": "Annuler",
   "confirm": "Confirmer",
   "ok": "OK",
   "accountHaveBeenDeleted": "Votre compte a été supprimé avec succès.",
-  "errorDeleteAccount": "Une erreur est survenue lors de la suppression de votre compte. Veuillez réessayer plus tard."
+  "errorDeleteAccount": "Une erreur est survenue lors de la suppression de votre compte. Veuillez réessayer plus tard.",
+  "englishTitle": "Titre anglais",
+  "japaneseTitle": "Titre japonais",
+  "englishAndJapaneseTitle": "Titre anglais et japonais"
 }

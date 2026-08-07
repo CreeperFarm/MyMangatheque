@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mymangatheque/src/back/services/pocketbase.dart';
+import 'package:mymangatheque/src/back/services/appwrite.dart';
 import 'package:mymangatheque/src/front/page/auth/delete_account_page.dart';
 import 'package:mymangatheque/src/front/page/auth/signin_page.dart';
 import 'package:mymangatheque/src/front/page/profile/profile_page.dart';
@@ -11,11 +11,11 @@ class RedirectToProfile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: StreamBuilder(
-        stream: PocketBaseConnector().listenToUserChanges(),
+        stream: AppwriteConnector().listenToUserChanges(),
         builder: (context, snapshot) {
           print('snapshot: $snapshot');
           //user is logged in
-          if (PocketBaseConnector().isLoggedIn()) {
+          if (AppwriteConnector().isLoggedIn()) {
             return const ProfilePage();
           }
           //user is NOT logged in
@@ -35,11 +35,11 @@ class RedirectToDelete extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: StreamBuilder(
-        stream: PocketBaseConnector().listenToUserChanges(),
+        stream: AppwriteConnector().listenToUserChanges(),
         builder: (context, snapshot) {
           print('snapshot: $snapshot');
           //user is logged in
-          if (PocketBaseConnector().isLoggedIn()) {
+          if (AppwriteConnector().isLoggedIn()) {
             return const DeleteAccountPage();
           }
           //user is NOT logged in

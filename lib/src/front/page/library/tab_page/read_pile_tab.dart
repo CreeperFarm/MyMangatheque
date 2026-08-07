@@ -4,53 +4,28 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mymangatheque/l10n/app_localizations.dart';
 import 'package:mymangatheque/src/back/provider/manga_owned_provider.dart';
-import 'package:mymangatheque/src/back/services/pocketbase.dart';
 import 'package:mymangatheque/src/const/assets.dart';
 import 'package:mymangatheque/src/const/own_icon.dart';
+import 'package:mymangatheque/src/const/routes.dart';
 import 'package:mymangatheque/src/front/components/my_line.dart';
 import 'package:mymangatheque/src/front/components/my_loader_display.dart';
 import 'package:mymangatheque/src/front/components/my_scroll_column.dart';
+import 'package:mymangatheque/src/front/components/safe_network_image.dart';
 import 'package:mymangatheque/src/function/auto_push_or_go.dart';
+import 'package:mymangatheque/src/models/manga/sub_serie_for_collection.dart';
 import 'package:mymangatheque/src/models/manga/volume.dart';
-import 'package:mymangatheque/src/const/routes.dart';
 
 class ReadPileTab extends ConsumerStatefulWidget {
-  const ReadPileTab({super.key});
+  const ReadPileTab({this.searchQuery = '', this.order = 'manga', super.key});
+
+  final String searchQuery;
+  final String order;
 
   @override
   ConsumerState createState() => _ReadPileTabState();
 }
 
 class _ReadPileTabState extends ConsumerState<ReadPileTab> {
-  int volumeReaded = 0;
-  int volumeOwned = 0;
-  List<dynamic> readSubSeriesList = [];
-  List<dynamic> notReadedSubSeriesList = [];
-  final connector = PocketBaseConnector();
-  dynamic _ownedSubscription;
-
-  dynamic readedSubSeries;
-
-  void _fetchData() {
-    readSubSeriesList = readedSubSeries.toList();
-    notReadedSubSeriesList = [];
-
-    for (var subSerie in readedSubSeries) {
-      notReadedSubSeriesList.add(subSerie);
-      for (int i = 0; i < subSerie.volumes.length; i++) {
-        Volume volume = subSerie.volumes[i];
-        if (volume.readed) {
-          volumeReaded++;
-          notReadedSubSeriesList.remove(volume);
-        }
-        volumeOwned++;
-      }
-    }
-
-    if (!mounted) return;
-    setState(() {});
-  }
-
   int numberVolumeReaded(List<Volume> volumes) {
     int volumeReaded = 0;
     for (var volume in volumes) {
@@ -61,54 +36,76 @@ class _ReadPileTabState extends ConsumerState<ReadPileTab> {
     return volumeReaded;
   }
 
-  void _cancelRealtime() {
-    try {
-      if (_ownedSubscription != null) {
-        try {
-          _ownedSubscription.unsubscribe();
-        } catch (_) {}
-        _ownedSubscription = null;
-      }
-    } catch (_) {}
+  int _numberVolumeOwned(Iterable<SubSerieForCollection> subSeries) {
+    return subSeries.fold<int>(
+      0,
+      (total, subSerie) => total + subSerie.numberOwnedVolumes,
+    );
   }
 
-  void _setupRealtimeOrFallback() {
-    _cancelRealtime();
-    try {
-      _ownedSubscription = connector.connector().collection('owned').subscribe(
-        '*',
-        (event) async {
-          debugPrint("Got an event");
-          await ref.read(mangaOwnedProvider.notifier).initData();
-          _fetchData();
-        },
+  int _numberVolumeReaded(Iterable<SubSerieForCollection> subSeries) {
+    return subSeries.fold<int>(
+      0,
+      (total, subSerie) => total + numberVolumeReaded(subSerie.volumes),
+    );
+  }
+
+  List<SubSerieForCollection> _pendingSubSeries(
+    Iterable<SubSerieForCollection> subSeries,
+  ) {
+    final query = widget.searchQuery.trim().toLowerCase();
+    final pending = <SubSerieForCollection>[];
+
+    for (final subSerie in subSeries) {
+      final unreadVolumes =
+          subSerie.volumes.where((volume) => !volume.readed).toList()
+            ..sort((a, b) => (a.tomeNumber ?? 0).compareTo(b.tomeNumber ?? 0));
+      if (unreadVolumes.isEmpty) continue;
+
+      final matchesQuery =
+          query.isEmpty ||
+          subSerie.title.toLowerCase().contains(query) ||
+          unreadVolumes.any(
+            (volume) => volume.title.toLowerCase().contains(query),
+          );
+      if (!matchesQuery) continue;
+
+      pending.add(
+        SubSerieForCollection(
+          id: subSerie.id,
+          title: subSerie.title,
+          numberOfVolumes: subSerie.numberOfVolumes,
+          numberOwnedVolumes: subSerie.numberOwnedVolumes,
+          volumes: unreadVolumes,
+          cover: subSerie.cover,
+        ),
       );
-
-      debugPrint('Realtime subscriptions established.');
-    } catch (e) {
-      debugPrint('Realtime subscription failed: $e');
     }
-  }
 
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      // Initialize the owned subseries data
-      readedSubSeries = ref.read(mangaOwnedProvider);
-      _initDatas();
+    pending.sort((a, b) {
+      if (widget.order == 'releaseDate') {
+        final aDate = a.volumes
+            .map(
+              (volume) =>
+                  volume.release ?? DateTime.fromMillisecondsSinceEpoch(0),
+            )
+            .reduce(
+              (value, element) => value.isAfter(element) ? value : element,
+            );
+        final bDate = b.volumes
+            .map(
+              (volume) =>
+                  volume.release ?? DateTime.fromMillisecondsSinceEpoch(0),
+            )
+            .reduce(
+              (value, element) => value.isAfter(element) ? value : element,
+            );
+        return bDate.compareTo(aDate);
+      }
+      return a.title.toLowerCase().compareTo(b.title.toLowerCase());
     });
-  }
 
-  Future<void> _initDatas() async {
-    _fetchData();
-    _setupRealtimeOrFallback();
-  }
-
-  @override
-  void dispose() {
-    _cancelRealtime();
-    super.dispose();
+    return pending;
   }
 
   @override
@@ -118,10 +115,10 @@ class _ReadPileTabState extends ConsumerState<ReadPileTab> {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
-    readedSubSeries = ref.read(mangaOwnedProvider);
-    if (readedSubSeries == null) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
-    }
+    final subSeries = ref.watch(mangaOwnedProvider);
+    final volumeOwned = _numberVolumeOwned(subSeries);
+    final volumeReaded = _numberVolumeReaded(subSeries);
+    final pendingSubSeries = _pendingSubSeries(subSeries);
 
     return Padding(
       padding: const EdgeInsets.all(10),
@@ -156,7 +153,7 @@ class _ReadPileTabState extends ConsumerState<ReadPileTab> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    MyLoaderDisplay(percentage: (volumeReaded / volumeOwned)),
+                    MyLoaderDisplay(percentage: volumeReaded / volumeOwned),
                   ],
                 ),
           MyLine(
@@ -164,13 +161,10 @@ class _ReadPileTabState extends ConsumerState<ReadPileTab> {
             vertical: 10,
             horizontal: 0,
           ),
-          for (var i = 0; i < readedSubSeries.length; i++)
+          for (final subSerie in pendingSubSeries)
             InkWell(
               onTap: () {
-                pushOrGo(
-                  context,
-                  Routes.librarySubSerie(readSubSeriesList[i].id),
-                );
+                pushOrGo(context, Routes.librarySubSerie(subSerie.id));
               },
               child: Container(
                 constraints: BoxConstraints(
@@ -183,10 +177,7 @@ class _ReadPileTabState extends ConsumerState<ReadPileTab> {
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 10.0),
                       child: Text(
-                        readSubSeriesList[i].title.replaceAll(
-                          ' - Edition Standard',
-                          '',
-                        ),
+                        subSerie.title.replaceAll(' - Edition Standard', ''),
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -195,141 +186,99 @@ class _ReadPileTabState extends ConsumerState<ReadPileTab> {
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    (numberVolumeReaded(readSubSeriesList[i].volumes) ==
-                            readSubSeriesList[i].numberOwnedVolumes)
-                        ? Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10.0,
-                            ),
-                            child: Text(
-                              localizations.allVolumesReadedSubSeries,
-                            ),
-                          )
-                        : Row(
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Expanded(
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 10,
-                                      ),
-                                      child: Text(
-                                        localizations.volumeReadedOverSeriesX(
-                                          numberVolumeReaded(
-                                            readSubSeriesList[i].volumes,
-                                          ),
-                                          readSubSeriesList[i]
-                                              .numberOwnedVolumes,
-                                        ),
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.only(
-                                        top: 10,
-                                        left: 10,
-                                        right: 10,
-                                      ),
-                                      child: SizedBox(
-                                        width: MediaQuery.of(
-                                          context,
-                                        ).size.width,
-                                        height:
-                                            (readSubSeriesList[i]
-                                                        .numberOwnedVolumes -
-                                                    numberVolumeReaded(
-                                                      readSubSeriesList[i]
-                                                          .volumes,
-                                                    ) !=
-                                                0)
-                                            ? 100
-                                            : 0,
-                                        child: Stack(
-                                          children: [
-                                            for (
-                                              var j = 0;
-                                              j <
-                                                  min(
-                                                    9,
-                                                    readSubSeriesList[i]
-                                                            .numberOwnedVolumes -
-                                                        numberVolumeReaded(
-                                                          readSubSeriesList[i]
-                                                              .volumes,
-                                                        ),
-                                                  );
-                                              j++
-                                            )
-                                              (j == 0)
-                                                  ? ClipRRect(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                            10.0,
-                                                          ),
-                                                      child: Image.network(
-                                                        notReadedSubSeriesList[i]
-                                                            .volumes[j]
-                                                            .image,
-                                                        width: 65,
-                                                      ),
-                                                    )
-                                                  : Positioned(
-                                                      left: j * 45.0,
-                                                      child: Container(
-                                                        decoration: BoxDecoration(
-                                                          boxShadow: [
-                                                            BoxShadow(
-                                                              color:
-                                                                  Theme.of(
-                                                                        context,
-                                                                      )
-                                                                      .colorScheme
-                                                                      .onPrimary
-                                                                      .withValues(
-                                                                        alpha:
-                                                                            0.9,
-                                                                      ),
-                                                              spreadRadius: 1,
-                                                              blurRadius: 2,
-                                                              offset:
-                                                                  const Offset(
-                                                                    0,
-                                                                    1,
-                                                                  ),
-                                                            ),
-                                                          ],
-                                                        ),
-                                                        child: ClipRRect(
-                                                          borderRadius:
-                                                              BorderRadius.circular(
-                                                                10.0,
-                                                              ),
-                                                          child: Image.network(
-                                                            notReadedSubSeriesList[i]
-                                                                .volumes[j]
-                                                                .image,
-                                                            width: 65,
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ],
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                ),
+                                child: Text(
+                                  localizations.volumeReadedOverSeriesX(
+                                    subSerie.numberOwnedVolumes -
+                                        subSerie.volumes.length,
+                                    subSerie.numberOwnedVolumes,
+                                  ),
                                 ),
                               ),
-                              OwnIcon(
-                                iconColor: Theme.of(
-                                  context,
-                                ).colorScheme.primary,
-                                iconSrc: Assets.icons.arrowRight,
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                  top: 10,
+                                  left: 10,
+                                  right: 10,
+                                ),
+                                child: SizedBox(
+                                  width: MediaQuery.of(context).size.width,
+                                  height: subSerie.volumes.isNotEmpty ? 100 : 0,
+                                  child: Stack(
+                                    children: [
+                                      for (
+                                        var j = 0;
+                                        j < min(9, subSerie.volumes.length);
+                                        j++
+                                      )
+                                        (j == 0)
+                                            ? ClipRRect(
+                                                borderRadius:
+                                                    BorderRadius.circular(10.0),
+                                                child: SafeNetworkImage(
+                                                  imageUrl:
+                                                      subSerie.volumes[j].image,
+                                                  width: 65,
+                                                ),
+                                              )
+                                            : Positioned(
+                                                left: j * 45.0,
+                                                child: Container(
+                                                  decoration: BoxDecoration(
+                                                    boxShadow: [
+                                                      BoxShadow(
+                                                        color: Theme.of(context)
+                                                            .colorScheme
+                                                            .onPrimary
+                                                            .withValues(
+                                                              alpha: 0.9,
+                                                            ),
+                                                        spreadRadius: 1,
+                                                        blurRadius: 2,
+                                                        offset: const Offset(
+                                                          0,
+                                                          1,
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  child: ClipRRect(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          10.0,
+                                                        ),
+                                                    child: SafeNetworkImage(
+                                                      imageUrl: subSerie
+                                                          .volumes[j]
+                                                          .image,
+                                                      width: 65,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                    ],
+                                  ),
+                                ),
                               ),
                             ],
                           ),
+                        ),
+                        OwnIcon(
+                          iconColor: Theme.of(context).colorScheme.primary,
+                          iconSrc: Assets.icons.arrowRight,
+                        ),
+                      ],
+                    ),
                     MyLine(
                       width: MediaQuery.of(context).size.width,
                       vertical: 10,

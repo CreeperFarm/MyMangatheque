@@ -1,362 +1,615 @@
-import 'dart:convert';
+import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:mymangatheque/src/back/provider/search_filter_provider.dart';
-import 'package:mymangatheque/src/back/services/pocketbase.dart';
+import 'package:mymangatheque/l10n/app_localizations.dart';
+import 'package:mymangatheque/src/back/services/appwrite.dart';
+import 'package:mymangatheque/src/back/services/search_service.dart';
 import 'package:mymangatheque/src/const/assets.dart';
-import 'package:mymangatheque/src/front/components/my_line.dart';
+import 'package:mymangatheque/src/const/own_icon.dart';
+import 'package:mymangatheque/src/front/components/safe_network_image.dart';
 import 'package:mymangatheque/src/function/auto_push_or_go.dart';
 import 'package:video_player/video_player.dart';
 
-class SearchPage extends ConsumerStatefulWidget {
+class SearchPage extends StatefulWidget {
   const SearchPage({super.key});
 
   @override
-  ConsumerState<SearchPage> createState() => _SearchPageState();
+  State<SearchPage> createState() => _SearchPageState();
 }
 
-class _SearchPageState extends ConsumerState<SearchPage> {
-  List _allResults = [];
-  List _resultsList = [];
+class _SearchPageState extends State<SearchPage> {
+  static const int _pageSize = 30;
+  static const Map<String, String> _accentMap = <String, String>{
+    'à': 'a',
+    'á': 'a',
+    'â': 'a',
+    'ã': 'a',
+    'ä': 'a',
+    'å': 'a',
+    'ç': 'c',
+    'è': 'e',
+    'é': 'e',
+    'ê': 'e',
+    'ë': 'e',
+    'ì': 'i',
+    'í': 'i',
+    'î': 'i',
+    'ï': 'i',
+    'ñ': 'n',
+    'ò': 'o',
+    'ó': 'o',
+    'ô': 'o',
+    'õ': 'o',
+    'ö': 'o',
+    'ù': 'u',
+    'ú': 'u',
+    'û': 'u',
+    'ü': 'u',
+    'ý': 'y',
+    'ÿ': 'y',
+    'œ': 'oe',
+    'æ': 'ae',
+  };
+
+  static const List<String> _searchModes = <String>['series', 'authors', 'editors'];
+
+  final AppwriteConnector _connector = AppwriteConnector();
   final TextEditingController _searchController = TextEditingController();
-  final PocketBaseConnector connector = PocketBaseConnector();
+  final ScrollController _scrollController = ScrollController();
+
+  final List<RecordModel> _loadedRecords = <RecordModel>[];
+  List<RecordModel> _filteredResults = <RecordModel>[];
+
+  String _selectedMode = 'series';
+  int _currentPage = 0;
+  bool _reachedEnd = false;
+  int _loadGeneration = 0;
+  bool _loading = false;
+  String? _error;
+  String? _activeSearchQuery;
 
   VideoPlayerController? _videoController;
   Future<void>? _initializeVideoFuture;
 
-  void getClientStream() async {
-    var data = await connector.getCollectionFullListOrderExpanded(
-      'series',
-      'title',
-      'authors',
-    );
-    /*var data = await FirebaseFirestore.instance
-        .collection('manga')
-        .orderBy(ref.watch(searchFilterProvider))
-        .get();*/
-    debugPrint(data.toString());
-    setState(() {
-      _allResults = data;
-    });
-  }
+  Timer? _debounceTimer;
+  List<RecordModel> _realtimeSuggestions = <RecordModel>[];
+  bool _usingRealtimeSuggestions = false;
+  bool _performingFullSearch = false;
+  bool _loadingRealtime = false;
 
-  String getAllAuthorsName(List authorsExpanded) {
-    debugPrint(authorsExpanded.toString());
-    var authors = [];
-    for (var i = 0; i < authorsExpanded.length; i++) {
-      authors.add(authorsExpanded[i]['name']);
-    }
-    return authors.join(" et ");
-  }
+  bool get _hasMorePages => !_reachedEnd;
 
-  void _onSearchChanged() {
-    searchResultsList();
-
-    // Pause the Bad Apple video when the search is no longer 'bad apple',
-    // and resume it when the search becomes 'bad apple' again.
-    final query = _searchController.text.toLowerCase().trim();
-    if (query != 'bad apple') {
-      if (_videoController != null &&
-          _videoController!.value.isInitialized &&
-          _videoController!.value.isPlaying) {
-        _videoController!.pause();
-      }
-    } else {
-      if (_videoController != null &&
-          _videoController!.value.isInitialized &&
-          !_videoController!.value.isPlaying) {
-        _videoController!.play();
-      }
-    }
-  }
-
-  String textLength(String text, int length) {
-    if (text.length > length) {
-      return "${text.substring(0, length)}...";
-    } else {
-      return text;
-    }
-  }
-
-  void searchResultsList() {
-    var showResults = [];
-    //var filter = ref.watch(searchFilterProvider); // TODO: Create searchFilterProvider
-
-    if (_searchController.text != "") {
-      for (var clientSnapshot in _allResults) {
-        var name = json
-            .decode(clientSnapshot.toString())["title"]
-            .toString()
-            .toLowerCase();
-        if (name.contains(_searchController.text.toLowerCase())) {
-          showResults.add(clientSnapshot);
-        }
-      }
-    } else {
-      showResults = List.from(_allResults);
-    }
-
-    setState(() {
-      _resultsList = showResults;
-    });
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+    _searchController.addListener(_onSearchChanged);
+    _reload();
   }
 
   @override
   void dispose() {
-    _searchController.removeListener(() {});
+    _debounceTimer?.cancel();
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    _searchController.removeListener(_onSearchChanged);
     _searchController.dispose();
-    if (_videoController != null) {
-      _videoController!.pause();
-      _videoController!.dispose();
-      _videoController = null;
-    }
+    _videoController?.dispose();
     super.dispose();
   }
 
-  @override
-  void didChangeDependencies() {
-    getClientStream();
-    super.didChangeDependencies();
+  void _onScroll() {
+    if (!_scrollController.hasClients) return;
+    if (_usingRealtimeSuggestions) return; // do not paginate while showing realtime suggestions
+    if (_scrollController.position.extentAfter < 600) {
+      _loadNextPage();
+    }
   }
 
-  @override
-  void initState() {
-    ref.read(searchFilterProvider);
-    getClientStream();
-    _searchController.addListener(_onSearchChanged);
-    super.initState();
+  void _onModeChanged(String? value) {
+    if (value == null || value == _selectedMode) return;
+    setState(() {
+      _selectedMode = value;
+      _usingRealtimeSuggestions = false;
+      _realtimeSuggestions = <RecordModel>[];
+      _loadingRealtime = false;
+      _activeSearchQuery = null;
+    });
+    _reload();
   }
 
-  /// Construit un lecteur vidéo pour la vidéo locale « assets/videos/bad-apple.mp4 ».
-  /// L'initialisation est faite paresseusement : le contrôleur est créé la première
-  /// fois que cette méthode est appelée. La vidéo est lancée automatiquement et mise en
-  /// boucle.
+  Future<void> _reload() async {
+    _loadGeneration++;
+    final generation = _loadGeneration;
+    setState(() {
+      _loadedRecords.clear();
+      _filteredResults = <RecordModel>[];
+      _currentPage = 0;
+      _reachedEnd = false;
+      _error = null;
+    });
+    await _loadNextPage(generation: generation, force: true);
+  }
+
+  Future<void> _loadNextPage({int? generation, bool force = false}) async {
+    final activeGeneration = generation ?? _loadGeneration;
+    if (_loading && !force) return;
+    if (!force && _loadedRecords.isNotEmpty && !_hasMorePages) return;
+
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+
+    try {
+      final nextPage = _currentPage + 1;
+      final page = (_activeSearchQuery == null || _activeSearchQuery!.trim().isEmpty)
+          ? await _connector.getCollectionPage(_selectedMode, page: nextPage, limit: _pageSize)
+          : await _connector.searchCollectionPage(_selectedMode, query: _activeSearchQuery, page: nextPage, limit: _pageSize);
+      if (!mounted || activeGeneration != _loadGeneration) return;
+
+      setState(() {
+        final existingIds = _loadedRecords.map((record) => record.id).toSet();
+        var addedCount = 0;
+        for (final record in page.items) {
+          if (existingIds.add(record.id)) {
+            _loadedRecords.add(record);
+            addedCount += 1;
+          }
+        }
+        _currentPage = nextPage;
+        // Do not trust backend total counters alone during migration;
+        // keep loading until a short/empty page is returned.
+        _reachedEnd = page.items.isEmpty || addedCount == 0 || page.items.length < _pageSize;
+        _filteredResults = _computeFilteredResults();
+      });
+    } catch (e) {
+      if (!mounted || activeGeneration != _loadGeneration) return;
+      setState(() {
+        _error = e.toString();
+      });
+    } finally {
+      if (mounted && activeGeneration == _loadGeneration) {
+        setState(() {
+          _loading = false;
+        });
+      }
+    }
+  }
+
+  void _onSearchChanged() {
+    // keep local filtering behavior for empty queries
+    final text = _searchController.text.trim();
+    if (text.length < 2) {
+      _debounceTimer?.cancel();
+      final shouldResetToBrowse = text.isEmpty && _activeSearchQuery != null;
+      setState(() {
+        _usingRealtimeSuggestions = false;
+        _realtimeSuggestions = <RecordModel>[];
+        _loadingRealtime = false;
+        if (!shouldResetToBrowse) {
+          _filteredResults = _computeFilteredResults();
+        }
+      });
+      if (shouldResetToBrowse) {
+        _activeSearchQuery = null;
+        _reload();
+      }
+      return;
+    }
+
+    // Debounce realtime suggestions between 150-250ms; use 200ms default.
+    _debounceTimer?.cancel();
+    _debounceTimer = Timer(const Duration(milliseconds: 200), () async {
+      final q = text;
+      // Skip if already loading realtime (rapid typing protection)
+      if (_loadingRealtime) return;
+      try {
+        setState(() => _loadingRealtime = true);
+        // request realtime suggestions
+        final suggestions = await searchRealtime(_selectedMode, q: q, limit: 8);
+        if (!mounted) return;
+        setState(() {
+          _usingRealtimeSuggestions = true;
+          _realtimeSuggestions = suggestions;
+          _filteredResults = List<RecordModel>.from(_realtimeSuggestions);
+          _loadingRealtime = false;
+        });
+      } catch (e) {
+        if (!mounted) return;
+        setState(() {
+          _usingRealtimeSuggestions = false;
+          _realtimeSuggestions = <RecordModel>[];
+          _filteredResults = _computeFilteredResults();
+          _error = e.toString();
+          _loadingRealtime = false;
+        });
+      }
+    });
+
+    // also update UI for small local filtering while waiting
+    setState(() {
+      _filteredResults = _computeFilteredResults();
+    });
+  }
+
+  Future<void> _performFullSearch(String query) async {
+    // Called on submit/enter. Use server-side paged search endpoint.
+    _debounceTimer?.cancel();
+    setState(() {
+      _performingFullSearch = true;
+      _usingRealtimeSuggestions = false;
+      _reachedEnd = false;
+      _loadedRecords.clear();
+      _filteredResults = <RecordModel>[];
+      _currentPage = 0;
+      _error = null;
+      _loadingRealtime = false;
+      _activeSearchQuery = query.trim().isEmpty ? null : query.trim();
+    });
+
+    try {
+      final page = await _connector.searchCollectionPage(_selectedMode, query: query, page: 1, limit: _pageSize);
+      if (!mounted) return;
+      setState(() {
+        _loadedRecords.addAll(page.items);
+        _currentPage = page.page;
+        _reachedEnd = !page.hasMore;
+        _filteredResults = _computeFilteredResults();
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.toString();
+      });
+    } finally {
+      if (mounted) setState(() => _performingFullSearch = false);
+    }
+  }
+
+  List<RecordModel> _computeFilteredResults() {
+    // When using realtime suggestions prefer them over local filtering
+    if (_usingRealtimeSuggestions) return List<RecordModel>.from(_realtimeSuggestions);
+
+    final query = _normalizeText(_searchController.text.trim());
+    final source = List<RecordModel>.from(_loadedRecords);
+    source.sort((a, b) => _recordLabel(a).compareTo(_recordLabel(b)));
+
+    if (query.isEmpty) {
+      return source;
+    }
+
+    final filtered = source.where((record) => _recordSearchText(record).contains(query)).toList();
+
+    filtered.sort((a, b) {
+      final aText = _recordSearchText(a);
+      final bText = _recordSearchText(b);
+      final aStarts = aText.startsWith(query);
+      final bStarts = bText.startsWith(query);
+      if (aStarts != bStarts) return aStarts ? -1 : 1;
+      return _recordLabel(a).compareTo(_recordLabel(b));
+    });
+
+    return filtered;
+  }
+
   Widget _buildBadApplePlayer() {
     if (_videoController == null) {
       _videoController = VideoPlayerController.asset(Assets.videos.badApple);
       _initializeVideoFuture = _videoController!.initialize().then((_) {
         _videoController!.setLooping(true);
         _videoController!.play();
-        // Après l'initialisation on demande un rebuild pour que l'AspectRatio prenne la bonne taille
-        setState(() {});
+        if (mounted) setState(() {});
       });
     }
 
     return FutureBuilder<void>(
       future: _initializeVideoFuture,
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.done &&
-            _videoController != null) {
+        if (snapshot.connectionState == ConnectionState.done && _videoController != null) {
           final aspect = _videoController!.value.aspectRatio;
-          return AspectRatio(
-            aspectRatio: aspect > 0 ? aspect : 4 / 3,
-            child: VideoPlayer(_videoController!),
-          );
-        } else {
-          return const Center(child: CircularProgressIndicator());
+          return AspectRatio(aspectRatio: aspect > 0 ? aspect : 4 / 3, child: VideoPlayer(_videoController!));
         }
+        return const Center(child: CircularProgressIndicator());
       },
+    );
+  }
+
+  String _recordLabel(RecordModel record) {
+    switch (record.collectionId) {
+      case 'series':
+        return (record.data['title'] ?? record.data['titleFr'] ?? '').toString().toLowerCase();
+      case 'authors':
+      case 'editors':
+        return (record.data['name'] ?? '').toString().toLowerCase();
+      default:
+        return '';
+    }
+  }
+
+  String _recordSearchText(RecordModel record) {
+    final data = record.data;
+    final tokens = <String>[];
+
+    void collect(dynamic value, {int depth = 0}) {
+      if (depth > 3 || value == null) return;
+      if (value is String) {
+        final text = value.trim();
+        if (text.isEmpty) return;
+        if (text.startsWith('http://') || text.startsWith('https://')) return;
+        tokens.add(text);
+        return;
+      }
+      if (value is num || value is bool) {
+        tokens.add(value.toString());
+        return;
+      }
+      if (value is List) {
+        for (final entry in value) {
+          collect(entry, depth: depth + 1);
+        }
+        return;
+      }
+      if (value is Map) {
+        for (final entry in value.entries) {
+          final key = entry.key.toString();
+          if (key == 'id' ||
+              key == r'$id' ||
+              key == 'created' ||
+              key == 'updated' ||
+              key == r'$createdAt' ||
+              key == r'$updatedAt' ||
+              key == 'image' ||
+              key == 'coverUrl' ||
+              key == 'logo') {
+            continue;
+          }
+          collect(entry.value, depth: depth + 1);
+        }
+      }
+    }
+
+    collect(data);
+    return _normalizeText(tokens.join(' '));
+  }
+
+  String _searchModeLabel(AppLocalizations localizations, String mode) {
+    switch (mode) {
+      case 'series':
+        return localizations.series;
+      case 'authors':
+        return localizations.authors;
+      case 'editors':
+        return localizations.editors;
+      default:
+        return mode;
+    }
+  }
+
+  String _normalizeText(String input) {
+    var output = input.toLowerCase();
+    _accentMap.forEach((key, value) {
+      output = output.replaceAll(key, value);
+    });
+    output = output.replaceAll(RegExp(r'[^a-z0-9]+'), ' ');
+    output = output.replaceAll(RegExp(r'\s+'), ' ').trim();
+    return output;
+  }
+
+  String _recordRoute(RecordModel record) {
+    switch (record.collectionId) {
+      case 'series':
+        return '/search/serie/${record.id}';
+      case 'authors':
+        return '/search/author/${record.id}';
+      case 'editors':
+        return '/search/editor/${record.id}';
+      default:
+        return '/search';
+    }
+  }
+
+  String _recordSubtitle(RecordModel record, AppLocalizations localizations) {
+    if (record.collectionId == 'series') return localizations.series;
+    if (record.collectionId == 'authors') return localizations.author;
+    if (record.collectionId == 'editors') return localizations.editor;
+    return '';
+  }
+
+  Widget _buildResultTile(RecordModel record, AppLocalizations localizations) {
+    final data = record.data;
+    final title = record.collectionId == 'authors' || record.collectionId == 'editors'
+        ? (data['name'] ?? '').toString()
+        : (data['title'] ?? data['titleFr'] ?? '').toString();
+
+    final imageUrl = (data['image'] ?? data['coverUrl'] ?? data['logo'] ?? data['imageUrl'] ?? '').toString();
+
+    return ListTile(
+      title: Text(
+        title,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: const TextStyle(
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      subtitle: Text(
+        // Prefer authors list for series when available in expand
+        record.collectionId == 'series'
+            ? (() {
+                final expand = data['expand'];
+                if (expand is Map && expand['authors'] is List) {
+                  final names = (expand['authors'] as List)
+                      .whereType<Map<String, dynamic>>()
+                      .map((a) => (a['name'] ?? a['pseudo'] ?? '').toString())
+                      .where((s) => s.isNotEmpty)
+                      .join(', ');
+                  if (names.isNotEmpty) return names;
+                }
+                return _recordSubtitle(record, localizations);
+              })()
+            : _recordSubtitle(record, localizations),
+      ),
+      leading: ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: SizedBox(
+          width: 45,
+          height: 68,
+          child: SafeNetworkImage(
+            imageUrl: imageUrl,
+          ),
+        ),
+      ),
+      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+      onTap: () => pushOrGo(context, _recordRoute(record)),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final selectedFilter = ref.watch(searchFilterProvider);
-
-    searchResultsList();
-
-    //TODO : Add the bad apple video from assets
+    final query = _searchController.text.toLowerCase().trim();
+    final localizations = AppLocalizations.of(context);
+    if (localizations == null) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
 
     return Scaffold(
       appBar: AppBar(
         title: Row(
           children: [
             Expanded(
-              child: CupertinoSearchTextField(
+              child: CupertinoTextField(
                 controller: _searchController,
-                placeholder: 'Recherche',
+                placeholder: localizations.search,
+                onSubmitted: (value) => _performFullSearch(value.trim()),
                 placeholderStyle: TextStyle(
                   color: Theme.of(context).colorScheme.primary,
                 ),
-                style: TextStyle(color: Theme.of(context).colorScheme.primary),
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                cursorColor: Theme.of(context).colorScheme.primary,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surface,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                prefix: Padding(
+                  padding: const EdgeInsetsDirectional.only(start: 8),
+                  child: Icon(
+                    CupertinoIcons.search,
+                    color: Theme.of(context).colorScheme.primary,
+                    size: 20,
+                  ),
+                ),
+                suffixMode: OverlayVisibilityMode.editing,
+                suffix: GestureDetector(
+                  onTap: () {
+                    _debounceTimer?.cancel();
+                    _searchController.clear();
+                  },
+                  child: Padding(
+                    padding: const EdgeInsetsDirectional.only(end: 8),
+                    child: OwnIcon(
+                      iconColor: Theme.of(context).colorScheme.primary,
+                      iconSrc: Assets.icons.cross,
+                    ),
+                  ),
+                ),
               ),
             ),
-            // TODO: Create searchFilterProvider and manage the selected filter
-            /*PopupMenuButton<String>(
-              icon: OwnIcon(iconColor: Theme.of(context).colorScheme.primary, iconName: "filter_right"),
-              onSelected: (String result) {
-                setState(() {
-                  //changeFilter(result); // TODO: Create changeFilter function
-                });
-              },
-              offset: const Offset(0, 50),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
+            const SizedBox(width: 8),
+            PopupMenuButton<String>(
+              tooltip: localizations.search,
+              icon: OwnIcon(
+                iconColor: Theme.of(context).colorScheme.primary,
+                iconSrc: Assets.icons.filterRight,
               ),
-              shadowColor: Theme.of(
-                context,
-              ).colorScheme.primary.withValues(alpha: 0.5),
-              color: Theme.of(context).colorScheme.onPrimary,
-              itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-                PopupMenuItem<String>(
-                  value: 'manga',
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      if (selectedFilter == 'manga') const Icon(Icons.check) else const Padding(padding: EdgeInsets.only(right: 0)),
-                      const Text('Manga'),
-                    ],
-                  ),
-                ),
-                PopupMenuItem<String>(
-                    value: 'editor',
+              onSelected: (value) {
+                _onModeChanged(value);
+              },
+              itemBuilder: (context) {
+                return _searchModes.map((mode) {
+                  final selected = mode == _selectedMode;
+                  return PopupMenuItem<String>(
+                    value: mode,
                     child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        if (selectedFilter == 'editor') const Icon(Icons.check) else const Padding(padding: EdgeInsets.only(right: 0)),
-                        const Text('Éditeur'),
+                        Expanded(child: Text(_searchModeLabel(localizations, mode))),
+                        if (selected) const Icon(Icons.check, size: 16),
                       ],
-                    )),
-                PopupMenuItem<String>(
-                  value: 'author',
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      if (selectedFilter == 'author') const Icon(Icons.check) else const Padding(padding: EdgeInsets.only(right: 0)),
-                      const Text('Auteur'),
-                    ],
-                  ),
-                ),
-              ],
-            ),*/
+                    ),
+                  );
+                }).toList();
+              },
+            ),
           ],
         ),
       ),
-      body: (_searchController.text.toLowerCase() == 'bad apple')
-          ? Center(
-              child: _buildBadApplePlayer(),
-            ) // TODO: Add the bad apple video
-          : (_resultsList.isEmpty)
-          ? Center(
-              child: Text(
-                'Aucun résultat',
-                style: TextStyle(
-                  fontSize: 20,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-              ),
-            )
-          : ListView.builder(
-              itemCount: _resultsList.length,
-              itemBuilder: (context, index) {
-                if (selectedFilter == 'manga') {
-                  final manga = json.decode(_resultsList[index].toString());
-                  return Column(
-                    children: [
-                      ListTile(
-                        title: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Row(
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.only(right: 10),
-                                  child: SizedBox(
-                                    width: 50,
-                                    child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(10.0),
-                                      child: Image.network(
-                                        'https://api.mymangatheque.com/api/files/utbujxtz8wtq0ar/${manga['id'].toString()}/${manga['image'].toString()}',
-                                        width: 50,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(
-                                  width:
-                                      MediaQuery.of(context).size.width -
-                                      (MediaQuery.of(context).padding.left +
-                                          MediaQuery.of(context).padding.right +
-                                          124),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        manga['title'],
-                                        softWrap: false,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 17,
-                                          color: Theme.of(
-                                            context,
-                                          ).colorScheme.primary,
-                                        ),
-                                      ),
-
-                                      // manga['author'].toString()
-                                      Text(
-                                        getAllAuthorsName(
-                                          manga['expand']['authors'],
-                                        ),
-                                        softWrap: false,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(
-                                          color: Theme.of(
-                                            context,
-                                          ).colorScheme.primary,
-                                          fontSize: 14,
-                                        ),
-                                      ),
-                                      Text(
-                                        DateTime.parse(
-                                          manga['first_publication'],
-                                        ).year.toString(),
-                                        style: TextStyle(
-                                          color: Theme.of(
-                                            context,
-                                          ).colorScheme.primary,
-                                          fontSize: 14,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Icon(
-                              Icons.arrow_forward_ios,
-                              color: Theme.of(context).colorScheme.primary,
-                            ),
-                          ],
+      body: _performingFullSearch
+          ? const Center(child: CircularProgressIndicator())
+          : query == 'bad apple'
+          ? Center(child: _buildBadApplePlayer())
+          : RefreshIndicator(
+              onRefresh: _reload,
+              child: _filteredResults.isEmpty && _loading
+                  ? const Center(child: CircularProgressIndicator())
+                  : _filteredResults.isEmpty && _error != null
+                  ? ListView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      children: [
+                        const SizedBox(height: 120),
+                        Center(child: Text(localizations.errorOccurred)),
+                        const SizedBox(height: 8),
+                        Center(
+                          child: TextButton(onPressed: _reload, child: Text(localizations.tryAgain)),
                         ),
-                        onTap: () {
-                          pushOrGo(context, '/search/serie/${manga['id']}');
-                        },
-                      ),
-                      (index != _resultsList.length - 1)
-                          ? MyLine(
-                              width: MediaQuery.of(context).size.width,
-                              vertical: 0,
-                            )
-                          : const Padding(padding: EdgeInsets.only(bottom: 60)),
-                    ],
-                  );
-                } else if (selectedFilter == 'author') {
-                  return Text(
-                    "Author"
-                    "WIP",
-                  );
-                } else {
-                  return Text(
-                    "Editor"
-                    "WIP",
-                  );
-                }
-              },
+                      ],
+                    )
+                  : (_usingRealtimeSuggestions && _loadingRealtime)
+                  ? ListView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      children: const [
+                        SizedBox(height: 120),
+                        Center(child: CircularProgressIndicator()),
+                      ],
+                    )
+                  : _filteredResults.isEmpty
+                  ? ListView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      children: [
+                        SizedBox(height: 120),
+                        Center(child: Text(localizations.noResults)),
+                      ],
+                    )
+                  : ListView.builder(
+                      controller: _scrollController,
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      itemCount: _filteredResults.length + 1,
+                      itemBuilder: (context, index) {
+                        if (index >= _filteredResults.length) {
+                          if (_loading) {
+                            return const Padding(
+                              padding: EdgeInsets.symmetric(vertical: 18),
+                              child: Center(child: CircularProgressIndicator()),
+                            );
+                          }
+
+                          if (_error != null) {
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                              child: Center(
+                                child: TextButton(onPressed: _loadNextPage, child: Text(localizations.tryAgain)),
+                              ),
+                            );
+                          }
+
+                          return const SizedBox(height: 80);
+                        }
+
+                        return _buildResultTile(_filteredResults[index], localizations);
+                      },
+                    ),
             ),
     );
   }

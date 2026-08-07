@@ -257,6 +257,7 @@
   "volumeAdd": "Add Volume",
   "volumeAddSuccess": "Volume successfully added.",
   "volumeAddError": "An error occurred, the volume has not been added.",
+  "subSerie": "Sub-Serie",
   "subSeries": "Sub-Series",
   "editor": "Editor",
   "genre": "Genre",
@@ -315,9 +316,19 @@
       }
     }
   },
-  "seriesCount": "{count, plural, =0 {Series} =1{Series} other {Series}}",
+  "seriesCount": "{count, plural, =0 {Serie} =1{Serie} other {Series}}",
   "@seriesCount": {
     "description": "A message that indicates the number of series",
+    "placeholders": {
+      "count": {
+        "type": "num",
+        "format": "compact"
+      }
+    }
+  },
+  "subSeriesCount": "{count, plural, =0 {Sub-serie} =1{Sub-serie} other {Sub-series}}",
+  "@subSeriesCount": {
+    "description": "A message that indicates the number of sub-series",
     "placeholders": {
       "count": {
         "type": "num",
@@ -471,6 +482,65 @@
   "lastUpdateDate": "Last Update Date",
   "scanEAN": "Scan EAN",
   "openScan": "Open Scan",
+  "lastScannedEan": "Last scanned EAN: {ean}",
+  "@lastScannedEan": {
+    "description": "Shows the last EAN scanned by the barcode scanner",
+    "placeholders": {
+      "ean": {
+        "type": "String"
+      }
+    }
+  },
+  "scannedVolumesPreview": "Scanned volumes preview",
+  "scannedVolumesCount": "{count, plural, =0 {0 volume} =1{1 volume} other {{count} volumes}}",
+  "@scannedVolumesCount": {
+    "description": "Shows how many volumes have been scanned during the current scan session",
+    "placeholders": {
+      "count": {
+        "type": "num",
+        "format": "compact"
+      }
+    }
+  },
+  "noScannedVolumesYet": "No volume scanned yet.",
+  "scannedVolumeNotFound": "No volume found for EAN {ean}.",
+  "@scannedVolumeNotFound": {
+    "description": "Shown when a scanned EAN does not match a volume",
+    "placeholders": {
+      "ean": {
+        "type": "String"
+      }
+    }
+  },
+  "scannedVolumeAlreadyInList": "This volume is already in the scanned list.",
+  "addScannedVolumesTitle": "Add scanned volumes?",
+  "addScannedVolumesConfirmation": "{count, plural, =1{Do you want to add this volume to your collection?} other{Do you want to add these {count} volumes to your collection?}}",
+  "@addScannedVolumesConfirmation": {
+    "description": "Confirmation before adding scanned volumes to the collection",
+    "placeholders": {
+      "count": {
+        "type": "num",
+        "format": "compact"
+      }
+    }
+  },
+  "scannedVolumesAdded": "Scanned volumes added to your collection.",
+  "completeScannedSubSeriesTitle": "Add earlier volumes?",
+  "completeScannedSubSeriesDescription": "You scanned volume {number} from a new sub-series. Select the volumes up to this one that you want to add.",
+  "@completeScannedSubSeriesDescription": {
+    "description": "Offers earlier volumes after scanning a later volume from a new sub-series",
+    "placeholders": {
+      "number": {
+        "type": "num"
+      }
+    }
+  },
+  "selectAllVolumes": "Select all",
+  "clearSelection": "Clear selection",
+  "addSelectedVolumes": "Add selected volumes",
+  "neverShowAgain": "Never show this again",
+  "scanPreviousVolumesSuggestion": "Suggest earlier volumes after scanning",
+  "scanPreviousVolumesSuggestionDescription": "When scanning a later volume from a new sub-series, offer to add its earlier volumes too.",
   "buildAppVersionImpossibleToRetreive": "Impossible to retrieve the build and app version.",
   "allVolumesOwned": "You own all the volumes of your collection.",
   "unknownError": "An unknown error occurred.",
@@ -508,10 +578,60 @@
       }
     }
   },
+  "tryAgain": "Try again",
+  "noResults": "No results",
+  "notAvailable": "Not available",
+  "reviews": "Reviews",
+  "noReviewsForThisVolumeYet": "No reviews for this volume yet.",
+  "pendingModeration": "Pending moderation",
+  "reviewQuestionnaireTitle": "Review questionnaire",
+  "reviewQuestionnaireDescription": "Now that this volume is marked as read, you can rate it and leave a comment.",
+  "openQuestionnaire": "Open questionnaire",
+  "reviewStars": "Stars: {count}/5",
+  "@reviewStars": {
+    "description": "Label showing review stars count over five",
+    "placeholders": {
+      "count": {
+        "type": "num"
+      }
+    }
+  },
+  "favoriteCharacters": "Favorite character(s)",
+  "favoriteCharactersHint": "Tanjiro, Nezuko, ...",
+  "favoriteCharactersLabel": "Favorite character(s): {characters}",
+  "@favoriteCharactersLabel": {
+    "description": "Label for favorite characters in a review",
+    "placeholders": {
+      "characters": {
+        "type": "String"
+      }
+    }
+  },
+  "comment": "Comment",
+  "reviewCommentHint": "What did you think about this volume?",
+  "reviewSubmittedSuccess": "Review submitted successfully.",
+  "reviewSubmitFailed": "Unable to submit review: {error}",
+  "@reviewSubmitFailed": {
+    "description": "Review submit failure message",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "adultContentPreferenceDescription": "Allow displaying covers and details marked 18+.",
+  "adultContentEnabled": "Adult content display enabled.",
+  "adultContentDisabled": "Adult content display disabled.",
+  "adultContentBlockedDescription": "This volume is marked as 18+. Enable adult content in profile settings to display the cover.",
+  "openContentSettings": "Open content settings",
+  "availabilityUnknown": "Availability unknown",
   "areYouSureDeleteAccount": "Are you sure you want to delete your account? This action cannot be undone. All your data will be permanently deleted.",
   "cancel": "Cancel",
   "confirm": "Confirm",
   "ok": "OK",
   "accountHaveBeenDeleted": "Your account has been successfully deleted.",
-  "errorDeleteAccount": "An error occurred, your account has not been deleted, you have been log out of your account."
+  "errorDeleteAccount": "An error occurred, your account has not been deleted, you have been log out of your account.",
+  "englishTitle": "English Title",
+  "japaneseTitle": "Japanese Title",
+  "englishAndJapaneseTitle": "English and Japanese Title"
 }

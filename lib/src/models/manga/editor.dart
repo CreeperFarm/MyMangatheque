@@ -13,11 +13,15 @@ class Editor {
   List<String> series; // * Get the IDs of series of the editor
   DateTime lastTimeChecked; // * Get the last time the editor was checked
 
+  static String _resolveImage(Map<String, dynamic> json) {
+    return (json['image'] ?? json['coverUrl'] ?? '').toString();
+  }
+
   factory Editor.fromJson(Map<String, dynamic> json) {
     return Editor(
       id: json['id'],
       name: json['name'],
-      image: json['image'],
+      image: _resolveImage(json),
       series: List<String>.from(json['series']),
       lastTimeChecked: DateTime.parse(json['lastTimeChecked']),
     );
@@ -28,6 +32,7 @@ class Editor {
       'id': id,
       'name': name,
       'image': image,
+      'coverUrl': image,
       'series': series,
       'lastTimeChecked': lastTimeChecked.toIso8601String(),
     };

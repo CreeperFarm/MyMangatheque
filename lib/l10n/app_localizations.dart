@@ -968,6 +968,12 @@ abstract class AppLocalizations {
   /// **'An error occurred, the volume has not been added.'**
   String get volumeAddError;
 
+  /// No description provided for @subSerie.
+  ///
+  /// In en, this message translates to:
+  /// **'Sub-Serie'**
+  String get subSerie;
+
   /// No description provided for @subSeries.
   ///
   /// In en, this message translates to:
@@ -1271,8 +1277,14 @@ abstract class AppLocalizations {
   /// A message that indicates the number of series
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =0 {Series} =1{Series} other {Series}}'**
+  /// **'{count, plural, =0 {Serie} =1{Serie} other {Series}}'**
   String seriesCount(num count);
+
+  /// A message that indicates the number of sub-series
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0 {Sub-serie} =1{Sub-serie} other {Sub-series}}'**
+  String subSeriesCount(num count);
 
   /// No description provided for @authorDoesNotExist.
   ///
@@ -1670,6 +1682,108 @@ abstract class AppLocalizations {
   /// **'Open Scan'**
   String get openScan;
 
+  /// Shows the last EAN scanned by the barcode scanner
+  ///
+  /// In en, this message translates to:
+  /// **'Last scanned EAN: {ean}'**
+  String lastScannedEan(String ean);
+
+  /// No description provided for @scannedVolumesPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Scanned volumes preview'**
+  String get scannedVolumesPreview;
+
+  /// Shows how many volumes have been scanned during the current scan session
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0 {0 volume} =1{1 volume} other {{count} volumes}}'**
+  String scannedVolumesCount(num count);
+
+  /// No description provided for @noScannedVolumesYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No volume scanned yet.'**
+  String get noScannedVolumesYet;
+
+  /// Shown when a scanned EAN does not match a volume
+  ///
+  /// In en, this message translates to:
+  /// **'No volume found for EAN {ean}.'**
+  String scannedVolumeNotFound(String ean);
+
+  /// No description provided for @scannedVolumeAlreadyInList.
+  ///
+  /// In en, this message translates to:
+  /// **'This volume is already in the scanned list.'**
+  String get scannedVolumeAlreadyInList;
+
+  /// No description provided for @addScannedVolumesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add scanned volumes?'**
+  String get addScannedVolumesTitle;
+
+  /// Confirmation before adding scanned volumes to the collection
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Do you want to add this volume to your collection?} other{Do you want to add these {count} volumes to your collection?}}'**
+  String addScannedVolumesConfirmation(num count);
+
+  /// No description provided for @scannedVolumesAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Scanned volumes added to your collection.'**
+  String get scannedVolumesAdded;
+
+  /// No description provided for @completeScannedSubSeriesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add earlier volumes?'**
+  String get completeScannedSubSeriesTitle;
+
+  /// Offers earlier volumes after scanning a later volume from a new sub-series
+  ///
+  /// In en, this message translates to:
+  /// **'You scanned volume {number} from a new sub-series. Select the volumes up to this one that you want to add.'**
+  String completeScannedSubSeriesDescription(num number);
+
+  /// No description provided for @selectAllVolumes.
+  ///
+  /// In en, this message translates to:
+  /// **'Select all'**
+  String get selectAllVolumes;
+
+  /// No description provided for @clearSelection.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear selection'**
+  String get clearSelection;
+
+  /// No description provided for @addSelectedVolumes.
+  ///
+  /// In en, this message translates to:
+  /// **'Add selected volumes'**
+  String get addSelectedVolumes;
+
+  /// No description provided for @neverShowAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Never show this again'**
+  String get neverShowAgain;
+
+  /// No description provided for @scanPreviousVolumesSuggestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggest earlier volumes after scanning'**
+  String get scanPreviousVolumesSuggestion;
+
+  /// No description provided for @scanPreviousVolumesSuggestionDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'When scanning a later volume from a new sub-series, offer to add its earlier volumes too.'**
+  String get scanPreviousVolumesSuggestionDescription;
+
   /// No description provided for @buildAppVersionImpossibleToRetreive.
   ///
   /// In en, this message translates to:
@@ -1742,6 +1856,144 @@ abstract class AppLocalizations {
   /// **'{author, select, error{} other{By {author}}}'**
   String subSerieFromAuthor(String author);
 
+  /// No description provided for @tryAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get tryAgain;
+
+  /// No description provided for @noResults.
+  ///
+  /// In en, this message translates to:
+  /// **'No results'**
+  String get noResults;
+
+  /// No description provided for @notAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Not available'**
+  String get notAvailable;
+
+  /// No description provided for @reviews.
+  ///
+  /// In en, this message translates to:
+  /// **'Reviews'**
+  String get reviews;
+
+  /// No description provided for @noReviewsForThisVolumeYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No reviews for this volume yet.'**
+  String get noReviewsForThisVolumeYet;
+
+  /// No description provided for @pendingModeration.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending moderation'**
+  String get pendingModeration;
+
+  /// No description provided for @reviewQuestionnaireTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Review questionnaire'**
+  String get reviewQuestionnaireTitle;
+
+  /// No description provided for @reviewQuestionnaireDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Now that this volume is marked as read, you can rate it and leave a comment.'**
+  String get reviewQuestionnaireDescription;
+
+  /// No description provided for @openQuestionnaire.
+  ///
+  /// In en, this message translates to:
+  /// **'Open questionnaire'**
+  String get openQuestionnaire;
+
+  /// Label showing review stars count over five
+  ///
+  /// In en, this message translates to:
+  /// **'Stars: {count}/5'**
+  String reviewStars(num count);
+
+  /// No description provided for @favoriteCharacters.
+  ///
+  /// In en, this message translates to:
+  /// **'Favorite character(s)'**
+  String get favoriteCharacters;
+
+  /// No description provided for @favoriteCharactersHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tanjiro, Nezuko, ...'**
+  String get favoriteCharactersHint;
+
+  /// Label for favorite characters in a review
+  ///
+  /// In en, this message translates to:
+  /// **'Favorite character(s): {characters}'**
+  String favoriteCharactersLabel(String characters);
+
+  /// No description provided for @comment.
+  ///
+  /// In en, this message translates to:
+  /// **'Comment'**
+  String get comment;
+
+  /// No description provided for @reviewCommentHint.
+  ///
+  /// In en, this message translates to:
+  /// **'What did you think about this volume?'**
+  String get reviewCommentHint;
+
+  /// No description provided for @reviewSubmittedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Review submitted successfully.'**
+  String get reviewSubmittedSuccess;
+
+  /// Review submit failure message
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to submit review: {error}'**
+  String reviewSubmitFailed(String error);
+
+  /// No description provided for @adultContentPreferenceDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow displaying covers and details marked 18+.'**
+  String get adultContentPreferenceDescription;
+
+  /// No description provided for @adultContentEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Adult content display enabled.'**
+  String get adultContentEnabled;
+
+  /// No description provided for @adultContentDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Adult content display disabled.'**
+  String get adultContentDisabled;
+
+  /// No description provided for @adultContentBlockedDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'This volume is marked as 18+. Enable adult content in profile settings to display the cover.'**
+  String get adultContentBlockedDescription;
+
+  /// No description provided for @openContentSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Open content settings'**
+  String get openContentSettings;
+
+  /// No description provided for @availabilityUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Availability unknown'**
+  String get availabilityUnknown;
+
   /// No description provided for @areYouSureDeleteAccount.
   ///
   /// In en, this message translates to:
@@ -1777,6 +2029,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'An error occurred, your account has not been deleted, you have been log out of your account.'**
   String get errorDeleteAccount;
+
+  /// No description provided for @englishTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'English Title'**
+  String get englishTitle;
+
+  /// No description provided for @japaneseTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Japanese Title'**
+  String get japaneseTitle;
+
+  /// No description provided for @englishAndJapaneseTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'English and Japanese Title'**
+  String get englishAndJapaneseTitle;
 }
 
 class _AppLocalizationsDelegate

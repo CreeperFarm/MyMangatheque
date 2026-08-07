@@ -43,13 +43,17 @@ class Volume {
   bool readed; // * Get if the volume is readed
   DateTime lastTimeChecked; // * Get the last time checked of the volume
 
+  static String _resolveImage(Map<String, dynamic> json) {
+    return (json['image'] ?? json['coverUrl'] ?? '').toString();
+  }
+
   factory Volume.fromJson(Map<String, dynamic> json) {
     return Volume(
       id: json['id'],
       title: json['title'],
       tomeNumber: json['tomeNumber'],
       price: json['price'],
-      image: json['image'],
+      image: _resolveImage(json),
       over18: json['over18'],
       resume: json['resume'],
       bookLink: json['bookLink'],
@@ -59,9 +63,7 @@ class Volume {
       subSeries: json['subSeries'],
       series: json['series'],
       authors: List<String>.from(json['authors']),
-      contains: json['contains'] != null
-          ? List<String>.from(json['contains'])
-          : null,
+      contains: json['contains'] != null ? List<String>.from(json['contains']) : null,
       info: json['info'],
       support: json['support'],
       japGenre: json['japGenre'],
@@ -77,6 +79,7 @@ class Volume {
       'tomeNumber': tomeNumber,
       'price': price,
       'image': image,
+      'coverUrl': image,
       'over18': over18,
       'resume': resume,
       'bookLink': bookLink,

@@ -1,33 +1,47 @@
 import 'package:mymangatheque/src/models/file.dart';
 
 class User {
+  User({
+    required this.id,
+    required this.username,
+    required this.email,
+    required this.gender,
+    required this.avatar,
+    required this.birthday,
+    required this.created,
+    required this.updated,
+  });
+
   final String id;
   final String username;
   final String email;
   final String gender;
-  final PocketBaseFile? avatar;
+  final AppwriteFile? avatar;
   final DateTime birthday;
   final DateTime created;
   final DateTime updated;
 
-  User.fromJSON(
-    this.id,
-    String collectionId,
-    Map<String, dynamic> json,
-    String created,
-    String updated,
-    String birthday,
-  ) : username = json['username'],
-      email = json['email'],
-      gender = json['gender'],
-      avatar = json['avatar'] != null
-          ? PocketBaseFile(
-              id: id,
-              collectionId: collectionId,
-              fileName: json['avatar'],
-            )
+  factory User.fromApiJson(Map<String, dynamic> json) {
+    final now = DateTime.now().toUtc();
+
+    DateTime parseDate(dynamic value, DateTime fallback) {
+      if (value == null) return fallback;
+      return DateTime.tryParse(value.toString())?.toUtc() ?? fallback;
+    }
+
+    final avatarUrl = json['coverURL']?.toString();
+
+    return User(
+      id: (json['id'] ?? '').toString(),
+      username: (json['pseudo'] ?? json['username'] ?? '').toString(),
+      email: (json['mail'] ?? json['email'] ?? '').toString(),
+      gender: (json['gender'] ?? 'other').toString(),
+      avatar: (avatarUrl != null && avatarUrl.isNotEmpty)
+          ? AppwriteFile.fromUrl(avatarUrl)
           : null,
-      created = DateTime.parse(created),
-      updated = DateTime.parse(updated),
-      birthday = DateTime.parse(birthday);
+      birthday: parseDate(json['birthday'], now),
+      created: parseDate(json['created'] ?? json[r'$createdAt'], now),
+      updated: parseDate(json['updated'] ?? json[r'$updatedAt'], now),
+    );
+  }
 }

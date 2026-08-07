@@ -6,7 +6,7 @@ import 'package:mymangatheque/l10n/app_localizations.dart';
 import 'package:mymangatheque/src/back/app_router/app_navigation.dart';
 import 'package:mymangatheque/src/back/language/language.dart';
 import 'package:mymangatheque/src/back/language/language_repository.dart';
-import 'package:mymangatheque/src/back/services/pocketbase.dart';
+import 'package:mymangatheque/src/back/services/appwrite.dart';
 import 'package:mymangatheque/src/const/theme/dark_mode.dart';
 import 'package:mymangatheque/src/const/theme/light_mode.dart';
 import 'package:mymangatheque/src/models/local_storage/service_locator.dart';
@@ -18,7 +18,7 @@ Future<void> main() async {
 
   final savedThemeMode = await AdaptiveTheme.getThemeMode();
 
-  await PocketBaseConnector().init();
+  await AppwriteConnector().init();
 
   setPathUrlStrategy();
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);

@@ -1,215 +1,280 @@
-import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mymangatheque/l10n/app_localizations.dart';
 import 'package:mymangatheque/src/back/provider/manga_owned_provider.dart';
-import 'package:mymangatheque/src/back/services/pocketbase.dart';
+import 'package:mymangatheque/src/back/services/appwrite.dart';
 import 'package:mymangatheque/src/const/assets.dart';
 import 'package:mymangatheque/src/const/own_icon.dart';
 import 'package:mymangatheque/src/front/components/my_line.dart';
 import 'package:mymangatheque/src/front/components/my_scroll_column.dart';
 import 'package:mymangatheque/src/front/components/my_tome_number_show.dart';
+import 'package:mymangatheque/src/front/components/safe_network_image.dart';
 import 'package:mymangatheque/src/function/auto_push_or_go.dart';
+import 'package:mymangatheque/src/function/safe_expand_reader.dart';
 import 'package:mymangatheque/src/models/manga/sub_serie_for_collection.dart';
 import 'package:mymangatheque/src/models/manga/volume.dart';
 
 class CompleteLibTab extends ConsumerStatefulWidget {
-  const CompleteLibTab({super.key});
+  const CompleteLibTab({
+    this.searchQuery = '',
+    this.order = 'manga',
+    super.key,
+  });
+
+  final String searchQuery;
+  final String order;
 
   @override
   ConsumerState createState() => _CompleteLibTabState();
 }
 
 class _CompleteLibTabState extends ConsumerState<CompleteLibTab> {
-  PocketBaseConnector connector = PocketBaseConnector();
-  int volumeNotOwned = 0;
-  int volumeOwned = 0;
-  List<SubSerieForCollection> ownedSubSeriesList = [];
+  final AppwriteConnector connector = AppwriteConnector();
   List<SubSerieForCollection> notOwnedSubSeriesList = [];
-  dynamic
-  _ownedSubscription; // Subscription to listen to changes in owned manga
+  String _lastOwnedSignature = '';
+  bool _isFetching = false;
 
-  dynamic ownedSubSeries;
-
-  Future<void> _fetchData() async {
-    ownedSubSeriesList = ownedSubSeries.toList();
-    notOwnedSubSeriesList = [];
-
-    for (var subSerie in ownedSubSeries) {
-      final resList = await connector.getOneExpand(
-        "sub_series",
-        subSerie.id,
-        "volumes",
-      );
-      final res = json.decode(resList.toString());
-      List<Volume> volumes = [];
-
-      for (var volumeData in res[0]['expand']['volumes']) {
-        volumes.add(
-          Volume(
-            id: volumeData['id'],
-            title: volumeData['title'],
-            tomeNumber: volumeData['tome_number'],
-            price: volumeData['price'],
-            image:
-                'https://api.mymangatheque.com/api/files/tnof8u6oqfepdq6/${volumeData['id']}/${volumeData['image']}',
-            over18: volumeData['over18'],
-            resume: volumeData['resume'],
-            bookLink: volumeData['book_link'],
-            release: DateTime.parse(volumeData['release']),
-            ean: volumeData['ean'],
-            language: volumeData['language'],
-            subSeries: volumeData['sub_series'],
-            readed: false,
-            // Not owned volumes are not readed
-            authors: volumeData['authors'] != null
-                ? List<String>.from(volumeData['authors'])
-                : [],
-            series: volumeData['series'],
-            contains: volumeData['contains'],
-            info: volumeData['info'],
-            support: volumeData['support'],
-            japGenre: volumeData['genre_jap'],
-            lastTimeChecked: DateTime.now(),
-          ),
-        );
-      }
-
-      notOwnedSubSeriesList.add(
-        SubSerieForCollection(
-          id: subSerie.id,
-          title: subSerie.title,
-          numberOfVolumes: subSerie.numberOfVolumes,
-          numberOwnedVolumes: subSerie.numberOwnedVolumes,
-          volumes: volumes,
-        ),
-      );
-      for (int j = 0; j < notOwnedSubSeriesList.length; j++) {
-        if (notOwnedSubSeriesList[j].id == subSerie.id) {
-          for (int i = 0; i < notOwnedSubSeriesList[j].volumes.length; i++) {
-            Volume volume = notOwnedSubSeriesList[j].volumes[i];
-
-            if (subSerie.containsVolume(volume)) {
-              volumeNotOwned++;
-              notOwnedSubSeriesList[j].removeVolume(volume);
-            } else {
-              volumeNotOwned++;
-            }
-          }
-
-          if (notOwnedSubSeriesList[j].volumes.isEmpty) {
-            notOwnedSubSeriesList.removeAt(j);
-          } else {
-            // Order volumes by tome number
-            notOwnedSubSeriesList[j].volumes.sort(
-              (a, b) => (a.tomeNumber ?? 0).compareTo(b.tomeNumber ?? 0),
-            );
-          }
-        }
-      }
-    }
-
-    if (!mounted) return;
-    setState(() {});
+  Map<String, dynamic> _asMap(dynamic value) {
+    if (value is Map<String, dynamic>) return value;
+    if (value is Map) return Map<String, dynamic>.from(value);
+    return <String, dynamic>{};
   }
 
-  int getNumberVolumesNotOwned() {
-    final subSeries = ref.watch(mangaOwnedProvider);
+  List<Map<String, dynamic>> _asMapList(dynamic value) {
+    if (value is List) {
+      return value
+          .whereType<Map>()
+          .map((item) => Map<String, dynamic>.from(item))
+          .toList();
+    }
+    return <Map<String, dynamic>>[];
+  }
+
+  List<dynamic> _asList(dynamic value) {
+    return value is List ? value : <dynamic>[];
+  }
+
+  List<String> _asStringList(dynamic value) {
+    if (value is List) {
+      return value
+          .map((item) {
+            if (item is Map) {
+              return (item['name'] ?? item['id'] ?? '').toString();
+            }
+            return item.toString();
+          })
+          .where((item) => item.trim().isNotEmpty)
+          .toList();
+    }
+    if (value == null) return <String>[];
+    final item = value.toString().trim();
+    return item.isEmpty ? <String>[] : <String>[item];
+  }
+
+  Volume? _volumeFromMap(Map<String, dynamic> data) {
+    final id = data['id']?.toString() ?? '';
+    if (id.isEmpty) return null;
+
+    final expand = _asMap(data['expand']);
+    return Volume(
+      id: id,
+      title: data['title']?.toString() ?? data['titleFr']?.toString() ?? '',
+      tomeNumber: data['tome_number'] ?? data['tomeNumber'],
+      price: data['price'] ?? -1,
+      image: data['coverUrl']?.toString() ?? data['image']?.toString() ?? '',
+      over18: data['over18'] == true,
+      resume: data['resume']?.toString() ?? '',
+      bookLink: _asList(data['book_link'] ?? data['bookLink']),
+      release: DateTime.tryParse(
+        (data['release'] ?? data['publicationDate'])?.toString() ?? '',
+      ),
+      ean: num.tryParse(data['ean']?.toString() ?? '') ?? 0,
+      language: data['language']?.toString(),
+      subSeries: (data['sub_series'] ?? data['subSeries'])?.toString() ?? '',
+      readed: false,
+      authors: _asStringList(expand['authors'] ?? data['authors']),
+      series: data['series']?.toString() ?? data['serie']?.toString() ?? '',
+      contains: data['contains'] != null
+          ? _asStringList(data['contains'])
+          : null,
+      info: _asMap(data['info']).isEmpty ? null : _asMap(data['info']),
+      support: data['support']?.toString() ?? 'manga',
+      japGenre: data['genre_jap']?.toString() ?? data['genderJp']?.toString(),
+      lastTimeChecked: DateTime.now(),
+    );
+  }
+
+  List<Volume> _volumesFromSubSeriesRecord(Map<String, dynamic> data) {
+    final expand = SafeExpandReader.asMap(data['expand']);
+    final volumeMaps = _asMapList(expand['volumes']);
+    final volumes = <Volume>[];
+
+    for (final volumeData in volumeMaps) {
+      final volume = _volumeFromMap(volumeData);
+      if (volume != null) volumes.add(volume);
+    }
+
+    volumes.sort((a, b) => (a.tomeNumber ?? 0).compareTo(b.tomeNumber ?? 0));
+    return volumes;
+  }
+
+  String _ownedSignature(Iterable<SubSerieForCollection> subSeries) {
+    final parts = subSeries.map((subSerie) {
+      final volumeIds = subSerie.volumes.map((volume) => volume.id).toList()
+        ..sort();
+      return '${subSerie.id}:${subSerie.numberOwnedVolumes}:${volumeIds.join(',')}';
+    }).toList()..sort();
+    return parts.join('|');
+  }
+
+  void _scheduleFetchIfNeeded(Set<SubSerieForCollection> ownedSubSeries) {
+    final signature = _ownedSignature(ownedSubSeries);
+    if (_isFetching || signature == _lastOwnedSignature) return;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _fetchData(ownedSubSeries, signature);
+    });
+  }
+
+  Future<void> _fetchData(
+    Set<SubSerieForCollection> ownedSubSeries,
+    String signature,
+  ) async {
+    setState(() {
+      _isFetching = true;
+    });
+
+    final loadedSubSeries = await Future.wait(
+      ownedSubSeries.map((subSerie) async {
+        try {
+          final resList = await connector.getOneExpand(
+            "sub_series",
+            subSerie.id,
+            "volumes",
+          );
+          if (resList.isEmpty) return null;
+
+          final data = Map<String, dynamic>.from(resList.first.data);
+          final volumes = _volumesFromSubSeriesRecord(data);
+          final ownedVolumeIds = subSerie.volumes
+              .map((volume) => volume.id)
+              .toSet();
+          final missingVolumes =
+              volumes
+                  .where((volume) => !ownedVolumeIds.contains(volume.id))
+                  .toList()
+                ..sort(
+                  (a, b) => (a.tomeNumber ?? 0).compareTo(b.tomeNumber ?? 0),
+                );
+
+          if (missingVolumes.isEmpty) return null;
+
+          return SubSerieForCollection(
+            id: subSerie.id,
+            title: subSerie.title,
+            numberOfVolumes: max(subSerie.numberOfVolumes, volumes.length),
+            numberOwnedVolumes: subSerie.numberOwnedVolumes,
+            volumes: missingVolumes,
+            cover: subSerie.cover,
+          );
+        } catch (e) {
+          debugPrint('Unable to load missing volumes for ${subSerie.id}: $e');
+          return null;
+        }
+      }),
+    );
+
+    final nextNotOwned = loadedSubSeries
+        .whereType<SubSerieForCollection>()
+        .toList();
+
+    if (!mounted) return;
+    setState(() {
+      notOwnedSubSeriesList = nextNotOwned;
+      _lastOwnedSignature = signature;
+      _isFetching = false;
+    });
+  }
+
+  List<SubSerieForCollection> _visibleSubSeries() {
+    final query = widget.searchQuery.trim().toLowerCase();
+    final visible = notOwnedSubSeriesList.where((subSerie) {
+      if (query.isEmpty) return true;
+      return subSerie.title.toLowerCase().contains(query) ||
+          subSerie.volumes.any(
+            (volume) => volume.title.toLowerCase().contains(query),
+          );
+    }).toList();
+
+    visible.sort((a, b) {
+      if (widget.order == 'releaseDate') {
+        final aDate = a.volumes
+            .map(
+              (volume) =>
+                  volume.release ?? DateTime.fromMillisecondsSinceEpoch(0),
+            )
+            .reduce(
+              (value, element) => value.isAfter(element) ? value : element,
+            );
+        final bDate = b.volumes
+            .map(
+              (volume) =>
+                  volume.release ?? DateTime.fromMillisecondsSinceEpoch(0),
+            )
+            .reduce(
+              (value, element) => value.isAfter(element) ? value : element,
+            );
+        return bDate.compareTo(aDate);
+      }
+      return a.title.toLowerCase().compareTo(b.title.toLowerCase());
+    });
+
+    return visible;
+  }
+
+  int getNumberVolumesNotOwned(Set<SubSerieForCollection> subSeries) {
     int number = 0;
     for (var subSerie in subSeries) {
-      number += subSerie.numberOfVolumes - subSerie.numberOwnedVolumes;
+      number += max(0, subSerie.numberOfVolumes - subSerie.numberOwnedVolumes);
     }
     return number;
   }
 
-  int getNumberSeriesNotOwned() {
-    final subSeries = ref.watch(mangaOwnedProvider);
+  int getNumberSeriesNotOwned(Set<SubSerieForCollection> subSeries) {
     int number = 0;
     for (var subSerie in subSeries) {
-      if (subSerie.numberOwnedVolumes == subSerie.numberOfVolumes) {
-        number = number;
-      } else {
+      if (subSerie.numberOwnedVolumes < subSerie.numberOfVolumes) {
         number += 1;
       }
     }
     return number;
   }
 
-  void _cancelRealtime() {
-    try {
-      if (_ownedSubscription != null) {
-        try {
-          _ownedSubscription.unsubscribe();
-        } catch (_) {}
-        _ownedSubscription = null;
-      }
-    } catch (_) {}
-  }
-
-  void _setupRealtimeOrFallback() {
-    _cancelRealtime();
-    try {
-      _ownedSubscription = connector.connector().collection('owned').subscribe(
-        '*',
-        (event) async {
-          debugPrint("Got an event");
-          await ref.read(mangaOwnedProvider.notifier).initData();
-          _fetchData();
-        },
-      );
-
-      debugPrint('Realtime subscriptions established.');
-    } catch (e) {
-      debugPrint('Realtime subscription failed: $e');
-    }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      // Initialize the owned subseries data
-      ownedSubSeries = ref.read(mangaOwnedProvider);
-      _initDatas();
-    });
-  }
-
-  Future<void> _initDatas() async {
-    _fetchData();
-    _setupRealtimeOrFallback();
-  }
-
-  @override
-  void dispose() {
-    _cancelRealtime();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
-    // Get localization - return early if not available
     var localizations = AppLocalizations.of(context);
     if (localizations == null) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
-    ownedSubSeries = ref.read(mangaOwnedProvider);
-    if (ownedSubSeries == null) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
-    }
+    final ownedSubSeries = ref.watch(mangaOwnedProvider);
+    _scheduleFetchIfNeeded(ownedSubSeries);
+    final visibleSubSeries = _visibleSubSeries();
+    final volumeNotOwned = getNumberVolumesNotOwned(ownedSubSeries);
 
     return Padding(
       padding: const EdgeInsets.all(10),
       child: MyScrollColumn(
         children: [
           MyTomeNumberShow(
-            tomeTotal: getNumberVolumesNotOwned().toString(),
-            editionTotal: getNumberSeriesNotOwned().toString(),
+            tomeTotal: volumeNotOwned.toString(),
+            editionTotal: getNumberSeriesNotOwned(ownedSubSeries).toString(),
             localizations: localizations,
           ),
-          (volumeNotOwned == 0)
+          (volumeNotOwned == 0 && !_isFetching)
               ? Text(
                   localizations.allVolumesOwned,
                   style: const TextStyle(
@@ -218,15 +283,12 @@ class _CompleteLibTabState extends ConsumerState<CompleteLibTab> {
                   ),
                 )
               : const SizedBox(),
-          for (var i = 0; i < notOwnedSubSeriesList.length; i++)
+          for (final subSerie in visibleSubSeries)
             Column(
               children: [
                 InkWell(
                   onTap: () {
-                    pushOrGo(
-                      context,
-                      '/library/sub_serie/${notOwnedSubSeriesList[i].id}',
-                    );
+                    pushOrGo(context, '/library/sub_serie/${subSerie.id}');
                   },
                   child: Container(
                     constraints: BoxConstraints(
@@ -244,7 +306,7 @@ class _CompleteLibTabState extends ConsumerState<CompleteLibTab> {
                                   horizontal: 10.0,
                                 ),
                                 child: Text(
-                                  notOwnedSubSeriesList[i].title.replaceAll(
+                                  subSerie.title.replaceAll(
                                     ' - Edition Standard',
                                     '',
                                   ),
@@ -262,8 +324,8 @@ class _CompleteLibTabState extends ConsumerState<CompleteLibTab> {
                                 ),
                                 child: Text(
                                   localizations.volumeOwnedOverX(
-                                    notOwnedSubSeriesList[i].numberOwnedVolumes,
-                                    notOwnedSubSeriesList[i].numberOfVolumes,
+                                    subSerie.numberOwnedVolumes,
+                                    subSerie.numberOfVolumes,
                                   ),
                                 ),
                               ),
@@ -275,33 +337,21 @@ class _CompleteLibTabState extends ConsumerState<CompleteLibTab> {
                                 ),
                                 child: SizedBox(
                                   width: MediaQuery.of(context).size.width,
-                                  height:
-                                      (notOwnedSubSeriesList[i]
-                                              .numberOwnedVolumes !=
-                                          0)
-                                      ? 100
-                                      : 0,
+                                  height: subSerie.volumes.isNotEmpty ? 100 : 0,
                                   child: Stack(
                                     children: [
                                       for (
                                         var j = 0;
-                                        j <
-                                            min(
-                                              9,
-                                              notOwnedSubSeriesList[i]
-                                                  .volumes
-                                                  .length,
-                                            );
+                                        j < min(9, subSerie.volumes.length);
                                         j++
                                       )
                                         (j == 0)
                                             ? ClipRRect(
                                                 borderRadius:
                                                     BorderRadius.circular(10.0),
-                                                child: Image.network(
-                                                  notOwnedSubSeriesList[i]
-                                                      .volumes[j]
-                                                      .image,
+                                                child: SafeNetworkImage(
+                                                  imageUrl:
+                                                      subSerie.volumes[j].image,
                                                   width: 65,
                                                 ),
                                               )
@@ -331,8 +381,8 @@ class _CompleteLibTabState extends ConsumerState<CompleteLibTab> {
                                                         BorderRadius.circular(
                                                           10.0,
                                                         ),
-                                                    child: Image.network(
-                                                      notOwnedSubSeriesList[i]
+                                                    child: SafeNetworkImage(
+                                                      imageUrl: subSerie
                                                           .volumes[j]
                                                           .image,
                                                       width: 65,

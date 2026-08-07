@@ -1,63 +1,135 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:mymangatheque/l10n/app_localizations.dart';
-import 'package:mymangatheque/src/back/provider/last_ean.dart';
-import 'package:mymangatheque/src/back/services/pocketbaseadmin.dart';
-import 'package:mymangatheque/src/front/components/my_scroll_column.dart';
-import 'package:mymangatheque/src/front/page/admin_pages/admin_login_page.dart';
+import 'package:mymangatheque/src/back/services/admin_service.dart';
+import 'package:mymangatheque/src/front/page/admin_pages/admin_components.dart';
 import 'package:mymangatheque/src/function/auto_push_or_go.dart';
 
-class AdminHomePage extends ConsumerWidget {
+class AdminHomePage extends StatefulWidget {
   const AdminHomePage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    // Get localization - return early if not available
-    var localizations = AppLocalizations.of(context);
-    if (localizations == null) {
+  State<AdminHomePage> createState() => _AdminHomePageState();
+}
+
+class _AdminHomePageState extends State<AdminHomePage> {
+  final AdminConnector _admin = AdminConnector();
+  bool _initialized = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _admin.init().then((_) {
+      if (!mounted) return;
+      setState(() {
+        _initialized = true;
+      });
+    });
+  }
+
+  Future<void> _logout() async {
+    await _admin.logout();
+    if (!mounted) return;
+    setState(() {});
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_initialized) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
-    var lastEAN = ref.watch(lastEANProvider);
-
-    if (PocketBaseAdminConnector().isLoggedIn()) {
-      return Scaffold(
-        appBar: AppBar(title: Text(localizations.adminHomePage)),
-        body: MyScrollColumn(
-          children: [
-            Center(
-              child: Column(
-                children: [
-                  Text(localizations.adminHomePage),
-                  Text(localizations.adminHomePageDescription),
-                  ElevatedButton(
-                    onPressed: () => pushOrGo(context, '/admin/create'),
-                    child: const Text("Go to Admin Create Page"),
+    final isLoggedIn = _admin.isLoggedIn();
+    return AdminPageScaffold(
+      title: 'Administration',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const AdminPageHeader(
+            icon: Icons.admin_panel_settings_outlined,
+            title: 'Espace de gestion',
+            description:
+                'Gérez le catalogue, suivez son activité et corrigez les anomalies de données.',
+          ),
+          const SizedBox(height: 24),
+          AdminStatusBanner(
+            icon: isLoggedIn
+                ? Icons.verified_user_outlined
+                : Icons.lock_outline_rounded,
+            title: isLoggedIn ? 'Session active' : 'Accès protégé',
+            message: isLoggedIn
+                ? 'Clé utilisée : ${_admin.maskedKey}'
+                : 'Connectez une clé administrateur ou modérateur autorisée.',
+            tone: isLoggedIn
+                ? AdminBannerTone.success
+                : AdminBannerTone.warning,
+            trailing: isLoggedIn
+                ? null
+                : FilledButton.icon(
+                    onPressed: () => pushOrGo(context, '/admin/admin_login'),
+                    icon: const Icon(Icons.login_rounded),
+                    label: const Text('Connexion'),
                   ),
-                  ElevatedButton(
-                    child: Text(localizations.scanEAN),
-                    onPressed: () => pushOrGo(context, '/library/scan'),
-                  ),
-                  ElevatedButton(
-                    child: Text('Copy last EAN: $lastEAN'),
-                    onPressed: () async {
-                      await Clipboard.setData(ClipboardData(text: lastEAN));
-                      // copied successfully
-                    },
-                  ),
-                  ElevatedButton(
-                    child: const Text("Stats"),
-                    onPressed: () => pushOrGo(context, '/admin/static_page'),
-                  ),
-                ],
+          ),
+          if (isLoggedIn) ...[
+            const SizedBox(height: 28),
+            const AdminSectionTitle(title: 'Outils'),
+            const SizedBox(height: 12),
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final cardWidth = constraints.maxWidth >= 720
+                    ? (constraints.maxWidth - 12) / 2
+                    : constraints.maxWidth;
+                return Wrap(
+                  spacing: 12,
+                  runSpacing: 12,
+                  children: [
+                    SizedBox(
+                      width: cardWidth,
+                      child: AdminActionCard(
+                        icon: Icons.add_box_outlined,
+                        title: 'Création de données',
+                        description:
+                            'Ajoutez auteurs, genres, éditeurs, séries, sous-séries et volumes.',
+                        onTap: () => pushOrGo(context, '/admin/create'),
+                      ),
+                    ),
+                    SizedBox(
+                      width: cardWidth,
+                      child: AdminActionCard(
+                        icon: Icons.query_stats_rounded,
+                        title: 'Statistiques',
+                        description:
+                            'Consultez les indicateurs et les volumes les plus ajoutés.',
+                        onTap: () => pushOrGo(context, '/admin/static_page'),
+                      ),
+                    ),
+                    SizedBox(
+                      width: cardWidth,
+                      child: AdminActionCard(
+                        icon: Icons.fact_check_outlined,
+                        title: 'Qualité des volumes',
+                        description:
+                            'Détectez et traitez les numéros de tome incohérents.',
+                        onTap: () => pushOrGo(context, '/admin/volume-quality'),
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
+            const SizedBox(height: 28),
+            const AdminSectionTitle(title: 'Session'),
+            const SizedBox(height: 10),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: OutlinedButton.icon(
+                onPressed: _logout,
+                icon: const Icon(Icons.logout_rounded),
+                label: const Text('Déconnexion'),
               ),
             ),
           ],
-        ),
-      );
-    } else {
-      return const AdminLoginPage();
-    }
+        ],
+      ),
+    );
   }
 }

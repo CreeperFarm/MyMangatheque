@@ -43,11 +43,14 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String pronoun(String gender) {
-    String _temp0 = intl.Intl.selectLogic(gender, {
-      'male': 'il',
-      'female': 'elle',
-      'other': 'iel',
-    });
+    String _temp0 = intl.Intl.selectLogic(
+      gender,
+      {
+        'male': 'il',
+        'female': 'elle',
+        'other': 'iel',
+      },
+    );
     return '$_temp0';
   }
 
@@ -463,14 +466,17 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String supportIs(String support) {
-    String _temp0 = intl.Intl.selectLogic(support, {
-      'manga': 'Manga',
-      'novel': 'Roman',
-      'artbook': 'Artbook',
-      'lightNovel': 'Light Novel',
-      'boxSet': 'Coffret',
-      'other': 'Other',
-    });
+    String _temp0 = intl.Intl.selectLogic(
+      support,
+      {
+        'manga': 'Manga',
+        'novel': 'Roman',
+        'artbook': 'Artbook',
+        'lightNovel': 'Light Novel',
+        'boxSet': 'Coffret',
+        'other': 'Other',
+      },
+    );
     return '$_temp0';
   }
 
@@ -543,6 +549,9 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get volumeAddError =>
       'Une erreur est survenue, le volume n\'a pas été ajouté.';
+
+  @override
+  String get subSerie => 'Sous-série';
 
   @override
   String get subSeries => 'Sous-séries';
@@ -705,25 +714,28 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String jobsName(String job) {
-    String _temp0 = intl.Intl.selectLogic(job, {
-      'writerMen': 'Écrivain',
-      'writerWomen': 'Écrivaine',
-      'artistMen': 'Dessinateur',
-      'artistWomen': 'Dessinatrice',
-      'editorMen': 'Éditeur',
-      'editorWomen': 'Éditrice',
-      'illustratorMen': 'Illustrateur',
-      'illustratorWomen': 'Illustratrice',
-      'scriptwriterMen': 'Scénariste',
-      'scriptwriterWomen': 'Scénariste',
-      'authorMen': 'Auteur',
-      'authorWomen': 'Auteure',
-      'mangakaMen': 'Mangaka',
-      'mangakaWomen': 'Mangaka',
-      'charaDesignMen': 'Chara Design',
-      'charaDesignWomen': 'Chara Design',
-      'other': 'Other',
-    });
+    String _temp0 = intl.Intl.selectLogic(
+      job,
+      {
+        'writerMen': 'Écrivain',
+        'writerWomen': 'Écrivaine',
+        'artistMen': 'Dessinateur',
+        'artistWomen': 'Dessinatrice',
+        'editorMen': 'Éditeur',
+        'editorWomen': 'Éditrice',
+        'illustratorMen': 'Illustrateur',
+        'illustratorWomen': 'Illustratrice',
+        'scriptwriterMen': 'Scénariste',
+        'scriptwriterWomen': 'Scénariste',
+        'authorMen': 'Auteur',
+        'authorWomen': 'Auteure',
+        'mangakaMen': 'Mangaka',
+        'mangakaWomen': 'Mangaka',
+        'charaDesignMen': 'Chara Design',
+        'charaDesignWomen': 'Chara Design',
+        'other': 'Other',
+      },
+    );
     return '$_temp0';
   }
 
@@ -740,6 +752,23 @@ class AppLocalizationsFr extends AppLocalizations {
       other: 'Séries',
       one: 'Série',
       zero: 'Série',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String subSeriesCount(num count) {
+    final intl.NumberFormat countNumberFormat = intl.NumberFormat.compact(
+      locale: localeName,
+    );
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Sous-séries',
+      one: 'Sous-série',
+      zero: 'Sous-série',
     );
     return '$_temp0';
   }
@@ -811,13 +840,16 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String availability(String availability) {
-    String _temp0 = intl.Intl.selectLogic(availability, {
-      'inStock': 'En Stock',
-      'available': 'Disponible',
-      'unavailable': 'Indisponible',
-      'onPreorder': 'En Précommande',
-      'other': '$availability',
-    });
+    String _temp0 = intl.Intl.selectLogic(
+      availability,
+      {
+        'inStock': 'En Stock',
+        'available': 'Disponible',
+        'unavailable': 'Indisponible',
+        'onPreorder': 'En Précommande',
+        'other': '$availability',
+      },
+    );
     return '$_temp0';
   }
 
@@ -833,11 +865,14 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String shippingUnderWeeks(String count) {
-    String _temp0 = intl.Intl.selectLogic(count, {
-      '0': '0 semaine',
-      '1': '1 semaine',
-      'other': '$count semaines',
-    });
+    String _temp0 = intl.Intl.selectLogic(
+      count,
+      {
+        '0': '0 semaine',
+        '1': '1 semaine',
+        'other': '$count semaines',
+      },
+    );
     return 'Expédition sous $_temp0';
   }
 
@@ -1066,6 +1101,94 @@ class AppLocalizationsFr extends AppLocalizations {
   String get openScan => 'Ouvrir le scan';
 
   @override
+  String lastScannedEan(String ean) {
+    return 'Dernier EAN scanné : $ean';
+  }
+
+  @override
+  String get scannedVolumesPreview => 'Prévisualisation des tomes scannés';
+
+  @override
+  String scannedVolumesCount(num count) {
+    final intl.NumberFormat countNumberFormat = intl.NumberFormat.compact(
+      locale: localeName,
+    );
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countString tomes',
+      one: '1 tome',
+      zero: '0 tome',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get noScannedVolumesYet => 'Aucun tome scanné pour le moment.';
+
+  @override
+  String scannedVolumeNotFound(String ean) {
+    return 'Aucun tome trouvé pour l\'EAN $ean.';
+  }
+
+  @override
+  String get scannedVolumeAlreadyInList =>
+      'Ce tome est déjà dans la liste scannée.';
+
+  @override
+  String get addScannedVolumesTitle => 'Ajouter les tomes scannés ?';
+
+  @override
+  String addScannedVolumesConfirmation(num count) {
+    final intl.NumberFormat countNumberFormat = intl.NumberFormat.compact(
+      locale: localeName,
+    );
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Voulez-vous ajouter ces $countString tomes à votre collection ?',
+      one: 'Voulez-vous ajouter ce tome à votre collection ?',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get scannedVolumesAdded =>
+      'Les tomes scannés ont été ajoutés à votre collection.';
+
+  @override
+  String get completeScannedSubSeriesTitle => 'Ajouter les tomes précédents ?';
+
+  @override
+  String completeScannedSubSeriesDescription(num number) {
+    return 'Vous avez scanné le tome $number d\'une nouvelle sous-série. Sélectionnez les tomes jusqu\'à celui-ci que vous souhaitez ajouter.';
+  }
+
+  @override
+  String get selectAllVolumes => 'Tout sélectionner';
+
+  @override
+  String get clearSelection => 'Effacer la sélection';
+
+  @override
+  String get addSelectedVolumes => 'Ajouter les tomes sélectionnés';
+
+  @override
+  String get neverShowAgain => 'Ne plus jamais afficher cette option';
+
+  @override
+  String get scanPreviousVolumesSuggestion =>
+      'Proposer les tomes précédents après un scan';
+
+  @override
+  String get scanPreviousVolumesSuggestionDescription =>
+      'Lors du scan d\'un tome avancé d\'une nouvelle sous-série, proposer aussi l\'ajout des tomes précédents.';
+
+  @override
   String get buildAppVersionImpossibleToRetreive =>
       'Impossible de récupérer la version de l\'application et la version du build.';
 
@@ -1121,12 +1244,94 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String subSerieFromAuthor(String author) {
-    String _temp0 = intl.Intl.selectLogic(author, {
-      'error': '',
-      'other': 'De $author',
-    });
+    String _temp0 = intl.Intl.selectLogic(
+      author,
+      {
+        'error': '',
+        'other': 'De $author',
+      },
+    );
     return '$_temp0';
   }
+
+  @override
+  String get tryAgain => 'Réessayer';
+
+  @override
+  String get noResults => 'Aucun résultat';
+
+  @override
+  String get notAvailable => 'Non disponible';
+
+  @override
+  String get reviews => 'Avis';
+
+  @override
+  String get noReviewsForThisVolumeYet =>
+      'Aucun avis pour ce tome pour le moment.';
+
+  @override
+  String get pendingModeration => 'En attente de modération';
+
+  @override
+  String get reviewQuestionnaireTitle => 'Questionnaire d\'avis';
+
+  @override
+  String get reviewQuestionnaireDescription =>
+      'Maintenant que ce tome est marqué comme lu, vous pouvez le noter et laisser un commentaire.';
+
+  @override
+  String get openQuestionnaire => 'Ouvrir le questionnaire';
+
+  @override
+  String reviewStars(num count) {
+    return 'Étoiles : $count/5';
+  }
+
+  @override
+  String get favoriteCharacters => 'Personnage(s) favori(s)';
+
+  @override
+  String get favoriteCharactersHint => 'Tanjiro, Nezuko, ...';
+
+  @override
+  String favoriteCharactersLabel(String characters) {
+    return 'Personnage(s) favori(s) : $characters';
+  }
+
+  @override
+  String get comment => 'Commentaire';
+
+  @override
+  String get reviewCommentHint => 'Qu\'avez-vous pensé de ce tome ?';
+
+  @override
+  String get reviewSubmittedSuccess => 'Avis envoyé avec succès.';
+
+  @override
+  String reviewSubmitFailed(String error) {
+    return 'Impossible d\'envoyer l\'avis : $error';
+  }
+
+  @override
+  String get adultContentPreferenceDescription =>
+      'Autoriser l\'affichage des couvertures et contenus marqués 18+.';
+
+  @override
+  String get adultContentEnabled => 'Affichage du contenu adulte activé.';
+
+  @override
+  String get adultContentDisabled => 'Affichage du contenu adulte désactivé.';
+
+  @override
+  String get adultContentBlockedDescription =>
+      'Ce tome est marqué 18+. Activez le contenu adulte dans les réglages du profil pour afficher la couverture.';
+
+  @override
+  String get openContentSettings => 'Ouvrir les réglages du contenu';
+
+  @override
+  String get availabilityUnknown => 'Disponibilité inconnue';
 
   @override
   String get areYouSureDeleteAccount =>
@@ -1148,4 +1353,13 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get errorDeleteAccount =>
       'Une erreur est survenue lors de la suppression de votre compte. Veuillez réessayer plus tard.';
+
+  @override
+  String get englishTitle => 'Titre anglais';
+
+  @override
+  String get japaneseTitle => 'Titre japonais';
+
+  @override
+  String get englishAndJapaneseTitle => 'Titre anglais et japonais';
 }

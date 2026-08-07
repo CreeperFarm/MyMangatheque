@@ -1,15 +1,6 @@
-import 'dart:convert';
-
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:mymangatheque/l10n/app_localizations.dart';
-import 'package:mymangatheque/src/back/services/pocketbaseadmin.dart';
-import 'package:mymangatheque/src/const/assets.dart';
-import 'package:mymangatheque/src/front/components/my_button.dart';
-import 'package:mymangatheque/src/front/components/my_scroll_column.dart';
-import 'package:mymangatheque/src/front/components/my_textfield.dart';
-import 'package:mymangatheque/src/function/show_message_function.dart';
+import 'package:mymangatheque/src/back/services/admin_service.dart';
+import 'package:mymangatheque/src/front/page/admin_pages/admin_components.dart';
 
 class AdminCreateAuthorPage extends StatefulWidget {
   const AdminCreateAuthorPage({super.key});
@@ -19,154 +10,119 @@ class AdminCreateAuthorPage extends StatefulWidget {
 }
 
 class _AdminCreateAuthorPageState extends State<AdminCreateAuthorPage> {
-  final TextEditingController authorNameController = TextEditingController();
-  final TextEditingController authorJobController = TextEditingController();
-  final TextEditingController imagePathAuthorController =
-      TextEditingController();
-  final TextEditingController imageNameAuthorController =
-      TextEditingController();
-  final TextEditingController seriesIdController = TextEditingController();
-  XFile? pickedImageAuthor;
-
-  void uploadImage() async {
-    final image = await ImagePicker().pickImage(
-      source: ImageSource.gallery,
-      maxHeight: 512,
-      maxWidth: 512,
-      imageQuality: 75,
-    );
-    pickedImageAuthor = image;
-    imagePathAuthorController.text = image!.path;
-    imageNameAuthorController.text = image.name;
-    Future.delayed(const Duration(milliseconds: 200), () {
-      if (!mounted) return;
-      setState(() {});
-    });
-  }
+  final AdminConnector _admin = AdminConnector();
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _jobsController = TextEditingController();
+  final TextEditingController _coverController = TextEditingController();
+  bool _loading = false;
+  bool _messageIsError = false;
+  String _message = '';
 
   @override
   void dispose() {
-    authorNameController.dispose();
-    authorJobController.dispose();
-    imagePathAuthorController.dispose();
-    imageNameAuthorController.dispose();
+    _nameController.dispose();
+    _jobsController.dispose();
+    _coverController.dispose();
     super.dispose();
+  }
+
+  Future<void> _submit() async {
+    if (_nameController.text.trim().isEmpty) {
+      setState(() {
+        _message = 'Le nom est obligatoire.';
+        _messageIsError = true;
+      });
+      return;
+    }
+
+    final jobs = _jobsController.text
+        .split(',')
+        .map((e) => e.trim())
+        .where((e) => e.isNotEmpty)
+        .toList();
+
+    setState(() {
+      _loading = true;
+      _message = '';
+      _messageIsError = false;
+    });
+
+    try {
+      await _admin.createAuthor(
+        name: _nameController.text.trim(),
+        jobs: jobs,
+        coverUrl: _coverController.text.trim(),
+      );
+      if (!mounted) return;
+      setState(() {
+        _loading = false;
+        _message = 'Auteur créé avec succès.';
+        _messageIsError = false;
+      });
+      _nameController.clear();
+      _jobsController.clear();
+      _coverController.clear();
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _loading = false;
+        _message = e.toString();
+        _messageIsError = true;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    // Get localization - return early if not available
-    var localizations = AppLocalizations.of(context);
-    if (localizations == null) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
-    }
-
-    PocketBaseAdminConnector connector = PocketBaseAdminConnector();
-    return MyScrollColumn(
-      scrollPadding: const EdgeInsets.symmetric(horizontal: 10),
+    return AdminFormView(
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          child: Text(
-            localizations.createAuthor,
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        const AdminPageHeader(
+          icon: Icons.person_add_alt_1_outlined,
+          title: 'Nouvel auteur',
+          description: 'Ajoutez une personne et ses métiers dans le catalogue.',
+        ),
+        const SizedBox(height: 20),
+        TextField(
+          controller: _nameController,
+          maxLength: 200,
+          decoration: const InputDecoration(
+            border: OutlineInputBorder(),
+            labelText: 'Nom *',
+            prefixIcon: Icon(Icons.person_outline_rounded),
           ),
         ),
-        Form(
-          child: Column(
-            children: [
-              Stack(
-                children: [
-                  GestureDetector(
-                    onTap: () {
-                      uploadImage();
-                    },
-                    child: Center(
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(20.0),
-                        child: Image.asset(
-                          imagePathAuthorController.text != ""
-                              ? imagePathAuthorController.text
-                              : Assets.images.unknown,
-                          width: MediaQuery.of(context).size.width * 0.4,
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    right: MediaQuery.of(context).size.width * 0.15,
-                    bottom: 0,
-                    child: IconButton(
-                      onPressed: () {
-                        imagePathAuthorController.text = "";
-                        imageNameAuthorController.text = "";
-                        setState(() {});
-                      },
-                      icon: const Icon(CupertinoIcons.delete_left_fill),
-                    ),
-                  ),
-                ],
-              ),
-              MyTextField(
-                verticalPadding: 5,
-                controller: authorNameController,
-                labelText: localizations.authorName,
-                errorMessage: localizations.provideAuthorName,
-              ),
-              MyTextField(
-                verticalPadding: 5,
-                controller: authorJobController,
-                labelText: localizations.authorJobs,
-                errorMessage: localizations.provideAuthorJobs,
-              ),
-              MyTextField(
-                verticalPadding: 5,
-                controller: seriesIdController,
-                skipEmptyVerification: true,
-                labelText: localizations.seriesIdOfAuthor,
-                errorMessage: localizations.provideSeriesIdOfAuthor,
-              ),
-            ],
+        const SizedBox(height: 12),
+        TextField(
+          controller: _jobsController,
+          decoration: const InputDecoration(
+            border: OutlineInputBorder(),
+            labelText: 'Métiers (séparés par des virgules)',
+            prefixIcon: Icon(Icons.work_outline_rounded),
           ),
         ),
-        MyButton(
-          verticalPadding: 5,
-          text: localizations.authorAdd,
-          onTap: () async {
-            final data = jsonDecode(
-              (await connector.getCollectionFullList('authors')).toString(),
-            );
-            var authorAlreadyExists = false;
-            data.forEach((element) {
-              if (element['name'] == authorNameController.text) {
-                setState(() {
-                  authorAlreadyExists = true;
-                });
-              }
-            });
-            if (!authorAlreadyExists) {
-              final body = {
-                "name": authorNameController.text,
-                "job": authorJobController.text,
-                "series": jsonDecode(seriesIdController.text),
-              };
-              List<int>? bytes;
-              if (pickedImageAuthor != null) {
-                bytes = await pickedImageAuthor!.readAsBytes();
-              }
-              await connector.createAuthor(
-                body,
-                imageNameAuthorController.text,
-                bytes,
-              );
-              if (!mounted) return;
-              showMessage(localizations.authorAddSuccess, context);
-            } else {
-              showMessage(localizations.authorDuplicate, context);
-            }
-          },
+        const SizedBox(height: 12),
+        TextField(
+          controller: _coverController,
+          keyboardType: TextInputType.url,
+          decoration: const InputDecoration(
+            border: OutlineInputBorder(),
+            labelText: 'URL HTTPS de l’image',
+            prefixIcon: Icon(Icons.image_outlined),
+          ),
         ),
+        const SizedBox(height: 16),
+        FilledButton.icon(
+          onPressed: _loading ? null : _submit,
+          icon: const Icon(Icons.add_rounded),
+          label: const Text('Créer l’auteur'),
+        ),
+        if (_loading) ...[
+          const SizedBox(height: 14),
+          const LinearProgressIndicator(),
+        ] else if (_message.isNotEmpty) ...[
+          const SizedBox(height: 14),
+          AdminFeedback(message: _message, isError: _messageIsError),
+        ],
       ],
     );
   }

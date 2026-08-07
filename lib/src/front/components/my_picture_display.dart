@@ -1,11 +1,19 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:mymangatheque/src/front/components/safe_network_image.dart';
 
 class MyPictureDisplay extends StatelessWidget {
   final String pictureUrl;
+  final bool blurMainPicture;
+  final Widget? blurOverlay;
 
-  const MyPictureDisplay({required this.pictureUrl, super.key});
+  const MyPictureDisplay({
+    required this.pictureUrl,
+    this.blurMainPicture = false,
+    this.blurOverlay,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -32,9 +40,9 @@ class MyPictureDisplay extends StatelessWidget {
                 children: [
                   Transform.translate(
                     offset: Offset(0, -MediaQuery.of(context).size.width / 2),
-                    child: Image.network(
+                    child: SafeNetworkImage(
+                      imageUrl: pictureUrl,
                       scale: 1 / (MediaQuery.of(context).size.width / height),
-                      pictureUrl,
                       fit: BoxFit.fill,
                     ),
                   ),
@@ -56,7 +64,23 @@ class MyPictureDisplay extends StatelessWidget {
             width: ((height * 16.5) / 24),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(10.0),
-              child: Image.network(pictureUrl, fit: BoxFit.fill),
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  SafeNetworkImage(imageUrl: pictureUrl, fit: BoxFit.fill),
+                  if (blurMainPicture)
+                    Positioned.fill(
+                      child: BackdropFilter(
+                        filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+                        child: Container(
+                          color: Colors.black.withValues(alpha: 0.2),
+                        ),
+                      ),
+                    ),
+                  if (blurMainPicture && blurOverlay != null)
+                    Positioned.fill(child: blurOverlay!),
+                ],
+              ),
             ),
           ),
         ],

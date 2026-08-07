@@ -21,6 +21,9 @@ class LocalStorage {
   static const _cacheVolumesKey = 'cacheVolumes';
   static const _cacheAuthorsKey = 'cacheAuthors';
   static const _cacheEditorsKey = 'cacheEditors';
+  static const _adultContentEnabledKey = 'adultContentEnabled';
+  static const _scanPreviousVolumesSuggestionEnabledKey =
+      'scanPreviousVolumesSuggestionEnabled';
 
   // * Token ----------------------------------------------------------------------------------------------------------
   Future<String?> getToken() async {
@@ -247,4 +250,32 @@ class LocalStorage {
   }
 
   // * End of clear all cache -----------------------------------------------------------------------------------------
+
+  // * Adult content preference ---------------------------------------------------------------------------------------
+  Future<bool> getAdultContentEnabled() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_adultContentEnabledKey) ?? false;
+  }
+
+  Future<void> setAdultContentEnabled(bool enabled) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_adultContentEnabledKey, enabled);
+  }
+
+  Future<void> deleteAdultContentEnabled() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_adultContentEnabledKey);
+  }
+
+  // * End of adult content preference --------------------------------------------------------------------------------
+
+  Future<bool> getScanPreviousVolumesSuggestionEnabled() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_scanPreviousVolumesSuggestionEnabledKey) ?? true;
+  }
+
+  Future<void> setScanPreviousVolumesSuggestionEnabled(bool enabled) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_scanPreviousVolumesSuggestionEnabledKey, enabled);
+  }
 }

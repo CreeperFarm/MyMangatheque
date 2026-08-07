@@ -1,11 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mymangatheque/l10n/app_localizations.dart';
 import 'package:mymangatheque/src/back/provider/manga_owned_provider.dart';
-import 'package:mymangatheque/src/back/provider/search_filter_provider.dart';
 import 'package:mymangatheque/src/back/provider/search_order_provider.dart';
-import 'package:mymangatheque/src/back/services/pocketbase.dart';
+import 'package:mymangatheque/src/back/services/appwrite.dart';
 import 'package:mymangatheque/src/const/assets.dart';
 import 'package:mymangatheque/src/const/own_icon.dart';
 import 'package:mymangatheque/src/front/components/my_tab_bar_item.dart';
@@ -24,74 +25,108 @@ class LibraryPage extends ConsumerStatefulWidget {
 }
 
 class _LibraryPageState extends ConsumerState<LibraryPage> {
-  final connector = PocketBaseConnector();
-  final List _allResults = [];
-  List _resultsList = [];
+  final connector = AppwriteConnector();
   final TextEditingController _searchController = TextEditingController();
+  dynamic _ownedSubscription;
+  StreamSubscription<User?>? _userSubscription;
+  User? _currentUser;
+  String? _lastUserId;
+  bool _authResolved = false;
+  bool _loadingOwned = false;
 
   void changeOrder(String filter) {
-    ref.read(searchFilterProvider.notifier).changeSearchFilter(filter);
-  }
-
-  Future<void> getClientStream() async {
-    ref.watch(searchOrderProvider);
+    ref.read(searchOrderProvider.notifier).changeSearchOrder(filter);
   }
 
   void _onSearchChanged() {
-    searchResultsList();
+    setState(() {});
   }
 
-  void searchResultsList() {
-    var showResults = [];
-    var order = ref.watch(searchOrderProvider);
+  Future<void> initData({User? user, bool forceRefresh = false}) async {
+    final resolvedUser = user ?? _currentUser ?? connector.getConnectedUser();
+    if (resolvedUser == null) return;
 
-    if (_searchController.text != "") {
-      for (var clientSnapshot in _allResults) {
-        var name = clientSnapshot[order].toString().toLowerCase();
-
-        if (name.contains(_searchController.text.toLowerCase())) {
-          showResults.add(clientSnapshot);
-        }
-      }
-    } else {
-      showResults = List.from(_allResults);
-    }
-
-    setState(() {
-      _resultsList = showResults;
-    });
-  }
-
-  @override
-  void didChangeDependencies() {
-    getClientStream();
-    super.didChangeDependencies();
-  }
-
-  Future<void> initData() async {
     try {
-      await ref.read(mangaOwnedProvider.notifier).initData().then((value) {
-        if (!mounted) return;
-        if (value) {
-          setState(() {});
-        } else {
-          showMessage(
-            AppLocalizations.of(
-              context,
-            )!.errorInitializing(AppLocalizations.of(context)!.dataUndercase),
+      if (mounted) {
+        setState(() {
+          _loadingOwned = true;
+        });
+      }
+
+      final value = await ref
+          .read(mangaOwnedProvider.notifier)
+          .initData(resolvedUser, forceRefresh: forceRefresh);
+
+      if (!mounted) return;
+      if (!value) {
+        showMessage(
+          AppLocalizations.of(
             context,
-          );
-        }
-      });
+          )!.errorInitializing(AppLocalizations.of(context)!.dataUndercase),
+          context,
+        );
+      }
     } catch (e) {
       if (!mounted) return;
       debugPrint(e.toString());
       showMessage(AppLocalizations.of(context)!.errorOccurred, context);
+    } finally {
+      if (mounted) {
+        setState(() {
+          _loadingOwned = false;
+        });
+      }
     }
+  }
+
+  void _setupRealtime() {
+    if (_ownedSubscription != null || _currentUser == null) return;
+    try {
+      _ownedSubscription = connector.connector().collection('owned').subscribe(
+        '*',
+        (_) {
+          unawaited(initData(forceRefresh: true));
+        },
+      );
+    } catch (e) {
+      debugPrint('Owned realtime subscription failed: $e');
+    }
+  }
+
+  void _cancelOwnedRealtime() {
+    try {
+      _ownedSubscription?.unsubscribe();
+    } catch (_) {
+      // Ignore realtime teardown failures.
+    }
+    _ownedSubscription = null;
+  }
+
+  void _handleUserChange(User? user, {bool forceRefresh = false}) {
+    if (!mounted) return;
+
+    final userId = user?.id;
+    final userChanged = userId != _lastUserId;
+    _lastUserId = userId;
+
+    setState(() {
+      _currentUser = user;
+      _authResolved = true;
+    });
+
+    if (user == null) {
+      _cancelOwnedRealtime();
+      return;
+    }
+
+    _setupRealtime();
+    unawaited(initData(user: user, forceRefresh: forceRefresh || userChanged));
   }
 
   @override
   void dispose() {
+    _userSubscription?.cancel();
+    _cancelOwnedRealtime();
     _searchController.removeListener(_onSearchChanged);
     _searchController.dispose();
     super.dispose();
@@ -104,8 +139,29 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
     ref.read(searchOrderProvider);
     ref.read(mangaOwnedProvider);
 
-    getClientStream();
     _searchController.addListener(_onSearchChanged);
+    _currentUser = connector.getConnectedUser();
+    _lastUserId = _currentUser?.id;
+
+    _userSubscription = connector.listenToUserChanges().listen((user) {
+      _handleUserChange(user);
+    });
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final user = connector.getConnectedUser();
+      if (user != null) {
+        _handleUserChange(user);
+        return;
+      }
+
+      unawaited(
+        connector.refresh().then((_) {
+          if (!mounted) return;
+          _handleUserChange(connector.getConnectedUser());
+        }),
+      );
+    });
   }
 
   @override
@@ -116,12 +172,16 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
-    if (!connector.isLoggedIn()) {
+    final connectedUser = _currentUser ?? connector.getConnectedUser();
+    if (!_authResolved && connectedUser == null) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
+    if (connectedUser == null) {
       return const SignInPage();
     }
     final selectedOrder = ref.watch(searchOrderProvider);
-    final _ = _resultsList.length;
-    searchResultsList();
+    final searchQuery = _searchController.text;
 
     return DefaultTabController(
       initialIndex: 1,
@@ -263,13 +323,24 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
             ),
           ),
         ),
-        body: TabBarView(
-          physics: const NeverScrollableScrollPhysics(),
+        body: Stack(
           children: [
-            ReadPileTab(),
-            CollectionTab(),
-            CompleteLibTab(),
-            EnvyTab(),
+            TabBarView(
+              physics: const NeverScrollableScrollPhysics(),
+              children: [
+                ReadPileTab(searchQuery: searchQuery, order: selectedOrder),
+                CollectionTab(searchQuery: searchQuery, order: selectedOrder),
+                CompleteLibTab(searchQuery: searchQuery, order: selectedOrder),
+                EnvyTab(searchQuery: searchQuery, order: selectedOrder),
+              ],
+            ),
+            if (_loadingOwned)
+              const Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: LinearProgressIndicator(minHeight: 2),
+              ),
           ],
         ),
       ),

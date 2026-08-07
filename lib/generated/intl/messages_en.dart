@@ -22,71 +22,93 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m0(date) => "Account created on ${date}";
 
-  static String m1(appVersion, buildVersion) =>
+  static String m1(count) =>
+      "${Intl.plural(count, one: 'Do you want to add this volume to your collection?', other: 'Do you want to add these ${count} volumes to your collection?')}";
+
+  static String m2(appVersion, buildVersion) =>
       "App Version: ${appVersion} & Build Version: ${buildVersion}";
 
-  static String m2(availability) =>
+  static String m3(availability) =>
       "${Intl.select(availability, {'inStock': 'In Stock', 'available': 'Available', 'unavailable': 'Unavailable', 'onPreorder': 'On Preorder', 'other': '${availability}'})}";
 
-  static String m3(date) => "Your birthday is on ${date}";
+  static String m4(date) => "Your birthday is on ${date}";
 
-  static String m4(store) => "Buy on ${store}";
+  static String m5(store) => "Buy on ${store}";
 
-  static String m5(email) => "Your email is ${email}";
+  static String m6(number) =>
+      "You scanned volume ${number} from a new sub-series. Select the volumes up to this one that you want to add.";
 
-  static String m6(object) =>
+  static String m7(email) => "Your email is ${email}";
+
+  static String m8(object) =>
       "An error occurred while initializing ${object}, please try again later.";
 
-  static String m7(message) => "An error occurred : ${message} .";
+  static String m9(message) => "An error occurred : ${message} .";
 
-  static String m8(count) =>
+  static String m10(characters) => "Favorite character(s): ${characters}";
+
+  static String m11(count) =>
       "${Intl.plural(count, zero: 'You have 0 favorite series', one: 'You have 1 favorite series', other: 'You have ${count} favorite series')}";
 
-  static String m9(job) =>
+  static String m12(job) =>
       "${Intl.select(job, {'writerMen': 'Writer', 'writerWomen': 'Writer', 'artistMen': 'Artist', 'artistWomen': 'Artist', 'editorMen': 'Editor', 'editorWomen': 'Editor', 'illustratorMen': 'Illustrator', 'illustratorWomen': 'Illustrator', 'scriptwriterMen': 'Scriptwriter', 'scriptwriterWomen': 'Scriptwriter', 'authorMen': 'Author', 'authorWomen': 'Author', 'mangakaMen': 'Mangaka', 'mangakaWomen': 'Mangaka', 'charaDesignMen': 'Chara Design', 'charaDesignWomen': 'Chara Design', 'other': 'Other'})}";
 
-  static String m10(maxLength) =>
+  static String m13(ean) => "Last scanned EAN: ${ean}";
+
+  static String m14(maxLength) =>
       "The maximum allowed number of characters is ${maxLength}.";
 
-  static String m11(minLength) =>
+  static String m15(minLength) =>
       "The minimum required number of characters is ${minLength}.";
 
-  static String m12(gender) =>
+  static String m16(gender) =>
       "${Intl.gender(gender, female: 'she', male: 'he', other: 'they')}";
 
-  static String m13(count) =>
-      "${Intl.plural(count, zero: 'Series', one: 'Series', other: 'Series')}";
+  static String m17(count) => "Stars: ${count}/5";
 
-  static String m14(days) => "Shipping under ${days} days";
+  static String m18(error) => "Unable to submit review: ${error}";
 
-  static String m15(count) =>
+  static String m19(ean) => "No volume found for EAN ${ean}.";
+
+  static String m20(count) =>
+      "${Intl.plural(count, zero: '0 volume', one: '1 volume', other: '${count} volumes')}";
+
+  static String m21(count) =>
+      "${Intl.plural(count, zero: 'Serie', one: 'Serie', other: 'Series')}";
+
+  static String m22(days) => "Shipping under ${days} days";
+
+  static String m23(count) =>
       "Shipping under {count, select, 0 {0 weeks} 1{1 week} other{${count} weeks}}";
 
-  static String m16(seller) => "Sold and shipped by ${seller}";
+  static String m24(seller) => "Sold and shipped by ${seller}";
 
-  static String m17(author) =>
+  static String m25(author) =>
       "${Intl.select(author, {'error': '', 'other': 'By ${author}'})}";
 
-  static String m18(count) =>
+  static String m26(count) =>
       "Total of ${Intl.plural(count, zero: 'Volume', one: 'Volume', other: 'Volumes')}";
 
-  static String m19(support) =>
+  static String m27(count) =>
+      "${Intl.plural(count, zero: 'Sub-serie', one: 'Sub-serie', other: 'Sub-series')}";
+
+  static String m28(support) =>
       "${Intl.select(support, {'manga': 'Manga', 'novel': 'Novel', 'artbook': 'Artbook', 'lightNovel': 'Light Novel', 'boxSet': 'Box Set', 'other': 'Other'})}";
 
-  static String m20(username) => "Your username is ${username}";
+  static String m29(username) => "Your username is ${username}";
 
-  static String m21(count) => "Volume ${count}";
+  static String m30(count) => "Volume ${count}";
 
-  static String m22(count) =>
+  static String m31(count) =>
       "${Intl.plural(count, zero: 'You own 0 volume', one: 'You own 1 volume', other: 'You own ${count} volumes')}";
 
-  static String m23(owned, total) =>
+  static String m32(owned, total) =>
       "${Intl.plural(owned, zero: '0 volume', one: '1 volume', other: '${owned} volumes')} owned over ${Intl.plural(total, zero: '0 volume', one: '1 volume', other: '${total} volumes')}";
 
-  static String m24(readed, total) =>
+  static String m33(readed, total) =>
       "${Intl.plural(readed, zero: '0 volume', one: '1 volume', other: '${readed} volumes')} read over ${Intl.plural(total, zero: '0 volume', one: '1 volume', other: '${total} volumes')}.";
 
-  static String m25(readed, total) =>
+  static String m34(readed, total) =>
       "${Intl.plural(readed, zero: '0 volume', one: '1 volume', other: '${readed} volumes')} read over ${Intl.plural(total, zero: '0 volume', one: '1 volume', other: '${total} volumes')} you own.";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -99,6 +121,13 @@ class MessageLookup extends MessageLookupByLibrary {
       "Your account has been successfully deleted.",
     ),
     "add": MessageLookupByLibrary.simpleMessage("Add"),
+    "addScannedVolumesConfirmation": m1,
+    "addScannedVolumesTitle": MessageLookupByLibrary.simpleMessage(
+      "Add scanned volumes?",
+    ),
+    "addSelectedVolumes": MessageLookupByLibrary.simpleMessage(
+      "Add selected volumes",
+    ),
     "adminHomePage": MessageLookupByLibrary.simpleMessage("Admin Home Page"),
     "adminHomePageDescription": MessageLookupByLibrary.simpleMessage(
       "Welcome on the admin home page. This is the admin home page where you can manage authors, genres, and volumes.",
@@ -108,6 +137,18 @@ class MessageLookup extends MessageLookupByLibrary {
       "You have successfully logged in as an admin.",
     ),
     "adultContent": MessageLookupByLibrary.simpleMessage("Adult Content"),
+    "adultContentBlockedDescription": MessageLookupByLibrary.simpleMessage(
+      "This volume is marked as 18+. Enable adult content in profile settings to display the cover.",
+    ),
+    "adultContentDisabled": MessageLookupByLibrary.simpleMessage(
+      "Adult content display disabled.",
+    ),
+    "adultContentEnabled": MessageLookupByLibrary.simpleMessage(
+      "Adult content display enabled.",
+    ),
+    "adultContentPreferenceDescription": MessageLookupByLibrary.simpleMessage(
+      "Allow displaying covers and details marked 18+.",
+    ),
     "adultContentWarning": MessageLookupByLibrary.simpleMessage(
       "Warning: Adult Content",
     ),
@@ -126,7 +167,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "alreadyHaveAnAccount": MessageLookupByLibrary.simpleMessage(
       "Already have an account?",
     ),
-    "appVersionAndAppBuildVersion": m1,
+    "appVersionAndAppBuildVersion": m2,
     "applicableLawAndCompetentJurisdiction":
         MessageLookupByLibrary.simpleMessage(
           "Applicable Law and Competent Jurisdiction",
@@ -164,13 +205,16 @@ class MessageLookup extends MessageLookupByLibrary {
       "MyMangatheque and its content (texts, images, videos, etc.) are protected by intellectual property laws in force in France. Any reproduction, representation, modification, publication, or adaptation of all or part of the elements of the site, regardless of the means or process used, is prohibited without prior written authorization or for personal use as a code challenge but without publication.",
     ),
     "authors": MessageLookupByLibrary.simpleMessage("Authors"),
-    "availability": m2,
-    "birthdayDateIs": m3,
+    "availability": m3,
+    "availabilityUnknown": MessageLookupByLibrary.simpleMessage(
+      "Availability unknown",
+    ),
+    "birthdayDateIs": m4,
     "boxSet": MessageLookupByLibrary.simpleMessage("Box Set"),
     "buildAppVersionImpossibleToRetreive": MessageLookupByLibrary.simpleMessage(
       "Impossible to retrieve the build and app version.",
     ),
-    "buyOn": m4,
+    "buyOn": m5,
     "cancel": MessageLookupByLibrary.simpleMessage("Cancel"),
     "chooseVolumeLanguage": MessageLookupByLibrary.simpleMessage(
       "Please choose the language of the volume",
@@ -182,8 +226,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "clearCacheSuccess": MessageLookupByLibrary.simpleMessage(
       "Cache successfully cleared.",
     ),
+    "clearSelection": MessageLookupByLibrary.simpleMessage("Clear selection"),
     "collection": MessageLookupByLibrary.simpleMessage("Collection"),
+    "comment": MessageLookupByLibrary.simpleMessage("Comment"),
     "completeLibrary": MessageLookupByLibrary.simpleMessage("Complete"),
+    "completeScannedSubSeriesDescription": m6,
+    "completeScannedSubSeriesTitle": MessageLookupByLibrary.simpleMessage(
+      "Add earlier volumes?",
+    ),
     "confirm": MessageLookupByLibrary.simpleMessage("Confirm"),
     "confirmNewPassword": MessageLookupByLibrary.simpleMessage(
       "Confirm New Password",
@@ -235,11 +285,15 @@ class MessageLookup extends MessageLookupByLibrary {
       "The editor does not exist.",
     ),
     "editors": MessageLookupByLibrary.simpleMessage("Editors"),
-    "emailIs": m5,
+    "emailIs": m7,
     "emailResetSent": MessageLookupByLibrary.simpleMessage(
       "A password reset email has been sent to your email address.",
     ),
     "english": MessageLookupByLibrary.simpleMessage("English"),
+    "englishAndJapaneseTitle": MessageLookupByLibrary.simpleMessage(
+      "English and Japanese Title",
+    ),
+    "englishTitle": MessageLookupByLibrary.simpleMessage("English Title"),
     "enterEmailForSendingEmailReset": MessageLookupByLibrary.simpleMessage(
       "Enter your email to receive a link to reset your password.",
     ),
@@ -247,17 +301,24 @@ class MessageLookup extends MessageLookupByLibrary {
     "errorDeleteAccount": MessageLookupByLibrary.simpleMessage(
       "An error occurred, your account has not been deleted, you have been log out of your account.",
     ),
-    "errorInitializing": m6,
+    "errorInitializing": m8,
     "errorOccurred": MessageLookupByLibrary.simpleMessage(
       "An error occurred, please try again later.",
     ),
-    "errorOccurredMessage": m7,
+    "errorOccurredMessage": m9,
     "externalLinks": MessageLookupByLibrary.simpleMessage("External Links"),
     "externalLinksLane1": MessageLookupByLibrary.simpleMessage(
       "The MyMangatheque website may contain links to external sites. We are not responsible for the content and privacy practices of these sites. These links are provided as a service to users of the Site or the websites of its subsidiaries and affiliated entities. The decision to activate links is solely up to the users.",
     ),
     "favorite": MessageLookupByLibrary.simpleMessage("Favorite"),
-    "favoriteSeriesNumber": m8,
+    "favoriteCharacters": MessageLookupByLibrary.simpleMessage(
+      "Favorite character(s)",
+    ),
+    "favoriteCharactersHint": MessageLookupByLibrary.simpleMessage(
+      "Tanjiro, Nezuko, ...",
+    ),
+    "favoriteCharactersLabel": m10,
+    "favoriteSeriesNumber": m11,
     "february": MessageLookupByLibrary.simpleMessage("February"),
     "female": MessageLookupByLibrary.simpleMessage("Female"),
     "follow": MessageLookupByLibrary.simpleMessage("Follow"),
@@ -288,10 +349,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "italian": MessageLookupByLibrary.simpleMessage("Italian"),
     "january": MessageLookupByLibrary.simpleMessage("January"),
     "japanese": MessageLookupByLibrary.simpleMessage("Japanese"),
-    "jobsName": m9,
+    "japaneseTitle": MessageLookupByLibrary.simpleMessage("Japanese Title"),
+    "jobsName": m12,
     "july": MessageLookupByLibrary.simpleMessage("July"),
     "june": MessageLookupByLibrary.simpleMessage("June"),
     "lastRelease": MessageLookupByLibrary.simpleMessage("Last Release"),
+    "lastScannedEan": m13,
     "lastUpdateDate": MessageLookupByLibrary.simpleMessage("Last Update Date"),
     "legalNotice": MessageLookupByLibrary.simpleMessage("Legal Notice"),
     "lightMode": MessageLookupByLibrary.simpleMessage("Light Mode"),
@@ -321,12 +384,15 @@ class MessageLookup extends MessageLookupByLibrary {
     "male": MessageLookupByLibrary.simpleMessage("Male"),
     "manga": MessageLookupByLibrary.simpleMessage("Manga"),
     "march": MessageLookupByLibrary.simpleMessage("March"),
-    "maxLengthExceeded": m10,
+    "maxLengthExceeded": m14,
     "may": MessageLookupByLibrary.simpleMessage("May"),
-    "minLengthNotReached": m11,
+    "minLengthNotReached": m15,
     "modifyPassword": MessageLookupByLibrary.simpleMessage("Modify Password"),
     "modifyPasswordSuccess": MessageLookupByLibrary.simpleMessage(
       "Password successfully changed.",
+    ),
+    "neverShowAgain": MessageLookupByLibrary.simpleMessage(
+      "Never show this again",
     ),
     "newPassword": MessageLookupByLibrary.simpleMessage("New Password"),
     "noAccountYet": MessageLookupByLibrary.simpleMessage(
@@ -336,15 +402,29 @@ class MessageLookup extends MessageLookupByLibrary {
     "noFollowedSubSerie": MessageLookupByLibrary.simpleMessage(
       "You do not follow any series, you can follow them by searching in the search page.",
     ),
+    "noResults": MessageLookupByLibrary.simpleMessage("No results"),
+    "noReviewsForThisVolumeYet": MessageLookupByLibrary.simpleMessage(
+      "No reviews for this volume yet.",
+    ),
+    "noScannedVolumesYet": MessageLookupByLibrary.simpleMessage(
+      "No volume scanned yet.",
+    ),
     "noVolumeOwned": MessageLookupByLibrary.simpleMessage(
       "You do not own any volumes, you can add them buy searching in the search page or by scanning their ean (Comming soon...).",
     ),
+    "notAvailable": MessageLookupByLibrary.simpleMessage("Not available"),
     "novel": MessageLookupByLibrary.simpleMessage("Novel"),
     "november": MessageLookupByLibrary.simpleMessage("November"),
     "numberOfPages": MessageLookupByLibrary.simpleMessage("Number of Pages"),
     "october": MessageLookupByLibrary.simpleMessage("October"),
     "ok": MessageLookupByLibrary.simpleMessage("OK"),
     "oldPassword": MessageLookupByLibrary.simpleMessage("Old Password"),
+    "openContentSettings": MessageLookupByLibrary.simpleMessage(
+      "Open content settings",
+    ),
+    "openQuestionnaire": MessageLookupByLibrary.simpleMessage(
+      "Open questionnaire",
+    ),
     "openScan": MessageLookupByLibrary.simpleMessage("Open Scan"),
     "orContinueWith": MessageLookupByLibrary.simpleMessage("Or continue with"),
     "other": MessageLookupByLibrary.simpleMessage("Other"),
@@ -360,6 +440,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "passwordsDoNotMatch": MessageLookupByLibrary.simpleMessage(
       "The new password and confirmation do not match.",
+    ),
+    "pendingModeration": MessageLookupByLibrary.simpleMessage(
+      "Pending moderation",
     ),
     "personalData": MessageLookupByLibrary.simpleMessage("Personal Data"),
     "pleaseConfirmPassword": MessageLookupByLibrary.simpleMessage(
@@ -393,7 +476,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "profileSettings": MessageLookupByLibrary.simpleMessage(
       "Profile & Settings Page",
     ),
-    "pronoun": m12,
+    "pronoun": m16,
     "protectionOfPersonalData": MessageLookupByLibrary.simpleMessage(
       "Protection of Personal Data",
     ),
@@ -493,7 +576,40 @@ class MessageLookup extends MessageLookupByLibrary {
     "readPile": MessageLookupByLibrary.simpleMessage("Read Pile"),
     "readed": MessageLookupByLibrary.simpleMessage("Readed"),
     "remove": MessageLookupByLibrary.simpleMessage("Remove"),
+    "reviewCommentHint": MessageLookupByLibrary.simpleMessage(
+      "What did you think about this volume?",
+    ),
+    "reviewQuestionnaireDescription": MessageLookupByLibrary.simpleMessage(
+      "Now that this volume is marked as read, you can rate it and leave a comment.",
+    ),
+    "reviewQuestionnaireTitle": MessageLookupByLibrary.simpleMessage(
+      "Review questionnaire",
+    ),
+    "reviewStars": m17,
+    "reviewSubmitFailed": m18,
+    "reviewSubmittedSuccess": MessageLookupByLibrary.simpleMessage(
+      "Review submitted successfully.",
+    ),
+    "reviews": MessageLookupByLibrary.simpleMessage("Reviews"),
     "scanEAN": MessageLookupByLibrary.simpleMessage("Scan EAN"),
+    "scanPreviousVolumesSuggestion": MessageLookupByLibrary.simpleMessage(
+      "Suggest earlier volumes after scanning",
+    ),
+    "scanPreviousVolumesSuggestionDescription":
+        MessageLookupByLibrary.simpleMessage(
+          "When scanning a later volume from a new sub-series, offer to add its earlier volumes too.",
+        ),
+    "scannedVolumeAlreadyInList": MessageLookupByLibrary.simpleMessage(
+      "This volume is already in the scanned list.",
+    ),
+    "scannedVolumeNotFound": m19,
+    "scannedVolumesAdded": MessageLookupByLibrary.simpleMessage(
+      "Scanned volumes added to your collection.",
+    ),
+    "scannedVolumesCount": m20,
+    "scannedVolumesPreview": MessageLookupByLibrary.simpleMessage(
+      "Scanned volumes preview",
+    ),
     "scanner": MessageLookupByLibrary.simpleMessage("Scanner"),
     "scannerDescription": MessageLookupByLibrary.simpleMessage(
       "Scan the barcode of your volume to add it to your collection.",
@@ -501,32 +617,35 @@ class MessageLookup extends MessageLookupByLibrary {
     "search": MessageLookupByLibrary.simpleMessage("Search"),
     "seeLess": MessageLookupByLibrary.simpleMessage("See Less"),
     "seeMore": MessageLookupByLibrary.simpleMessage("See More"),
+    "selectAllVolumes": MessageLookupByLibrary.simpleMessage("Select all"),
     "selectDate": MessageLookupByLibrary.simpleMessage("Select Date"),
     "september": MessageLookupByLibrary.simpleMessage("September"),
     "series": MessageLookupByLibrary.simpleMessage("Series"),
-    "seriesCount": m13,
+    "seriesCount": m21,
     "seriesDoesNotExist": MessageLookupByLibrary.simpleMessage(
       "The series does not exist.",
     ),
     "seriesIdOfAuthor": MessageLookupByLibrary.simpleMessage(
       "Series ID of the Author",
     ),
-    "shippingUnderDays": m14,
-    "shippingUnderWeeks": m15,
+    "shippingUnderDays": m22,
+    "shippingUnderWeeks": m23,
     "signIn": MessageLookupByLibrary.simpleMessage("Sign In"),
     "signInPage": MessageLookupByLibrary.simpleMessage("Sign In Page"),
     "signUp": MessageLookupByLibrary.simpleMessage("Sign Up"),
     "signUpPage": MessageLookupByLibrary.simpleMessage("Sign Up Page"),
-    "soldAndShippedBy": m16,
+    "soldAndShippedBy": m24,
     "spanish": MessageLookupByLibrary.simpleMessage("Spanish"),
-    "subSerieFromAuthor": m17,
-    "subSerieVolumeNumber": m18,
+    "subSerie": MessageLookupByLibrary.simpleMessage("Sub-Serie"),
+    "subSerieFromAuthor": m25,
+    "subSerieVolumeNumber": m26,
     "subSeries": MessageLookupByLibrary.simpleMessage("Sub-Series"),
+    "subSeriesCount": m27,
     "subSeriesDoesNotExist": MessageLookupByLibrary.simpleMessage(
       "The sub-series does not exist.",
     ),
     "summary": MessageLookupByLibrary.simpleMessage("Summary"),
-    "supportIs": m19,
+    "supportIs": m28,
     "systemMode": MessageLookupByLibrary.simpleMessage("System Mode"),
     "thirdPartyContent": MessageLookupByLibrary.simpleMessage(
       "Third-Party Content",
@@ -534,6 +653,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "thirdPartyContentLane1": MessageLookupByLibrary.simpleMessage(
       "Third-party content used on the MyMangatheque site belongs to their respective author.",
     ),
+    "tryAgain": MessageLookupByLibrary.simpleMessage("Try again"),
     "unknownError": MessageLookupByLibrary.simpleMessage(
       "An unknown error occurred.",
     ),
@@ -554,7 +674,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "You have successfully logged in.",
     ),
     "username": MessageLookupByLibrary.simpleMessage("Username"),
-    "usernameIs": m20,
+    "usernameIs": m29,
     "usernameMinLength": MessageLookupByLibrary.simpleMessage(
       "Username must be at least 3 characters long.",
     ),
@@ -583,13 +703,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "volumeNotAvailableForSale": MessageLookupByLibrary.simpleMessage(
       "This volume is not available for sale.",
     ),
-    "volumeNum": m21,
+    "volumeNum": m30,
     "volumeNumber": MessageLookupByLibrary.simpleMessage("Volume Number"),
-    "volumeOwnedNumber": m22,
-    "volumeOwnedOverX": m23,
+    "volumeOwnedNumber": m31,
+    "volumeOwnedOverX": m32,
     "volumePrice": MessageLookupByLibrary.simpleMessage("Volume Price"),
-    "volumeReadedOverSeriesX": m24,
-    "volumeReadedOverX": m25,
+    "volumeReadedOverSeriesX": m33,
+    "volumeReadedOverX": m34,
     "volumeSeriesId": MessageLookupByLibrary.simpleMessage("Volume Series ID"),
     "volumeSubSeriesId": MessageLookupByLibrary.simpleMessage(
       "Volume Sub-Series ID",

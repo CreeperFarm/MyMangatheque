@@ -7,8 +7,9 @@ import 'package:glass_kit/glass_kit.dart';
 import 'package:go_router/go_router.dart';
 import 'package:keyboard_detection/keyboard_detection.dart';
 import 'package:mymangatheque/l10n/app_localizations.dart';
-import 'package:mymangatheque/src/back/services/pocketbase.dart';
+import 'package:mymangatheque/src/back/services/appwrite.dart';
 import 'package:mymangatheque/src/const/assets.dart';
+import 'package:mymangatheque/src/const/layout.dart';
 import 'package:mymangatheque/src/const/own_icon.dart';
 import 'package:mymangatheque/src/front/components/my_drawer.dart';
 import 'package:mymangatheque/src/front/components/my_drawer_tile.dart';
@@ -62,7 +63,7 @@ class _MainWrapperState extends ConsumerState<MainWrapper> {
     // Looped with future callback
     keyboardDetectionController.registerCallback((state) async {
       await Future.delayed(const Duration(milliseconds: 100));
-      print('Listen to onChanged with looped future Callback: $state');
+      debugPrint('Listen to onChanged with looped future Callback: $state');
 
       // This callback will be looped
       return true;
@@ -107,7 +108,7 @@ class _MainWrapperState extends ConsumerState<MainWrapper> {
           if (constraints.maxWidth > 1200) {
             return _buildDesktopLayout(navIconsSrc, navTitle, navRoute);
           }
-          if (constraints.maxWidth > 600) {
+          if (constraints.maxWidth > phoneNavigationMaxWidth) {
             return _buildTabletLayout(
               navIconsSrc,
               navTitle,
@@ -232,11 +233,11 @@ class _MainWrapperState extends ConsumerState<MainWrapper> {
 
   Widget _buildDesktopProfileArea() {
     return StreamBuilder(
-      stream: PocketBaseConnector().listenToUserChanges(),
+      stream: AppwriteConnector().listenToUserChanges(),
       builder: (context, snapshot) {
-        final isLoggedIn = PocketBaseConnector().isLoggedIn();
+        final isLoggedIn = AppwriteConnector().isLoggedIn();
         if (isLoggedIn) {
-          final user = PocketBaseConnector().getConnectedUser();
+          final user = AppwriteConnector().getConnectedUser();
           return Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -332,8 +333,12 @@ class _MainWrapperState extends ConsumerState<MainWrapper> {
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
               ),
-              height: 60,
-              margin: const EdgeInsets.only(bottom: 32, left: 16, right: 16),
+              height: phoneBottomNavigationBarHeight,
+              margin: const EdgeInsets.only(
+                bottom: phoneBottomNavigationBarBottomMargin,
+                left: 16,
+                right: 16,
+              ),
               borderColor: Colors.transparent,
               borderRadius: const BorderRadius.all(Radius.circular(100)),
               shadowColor: Colors.black.withAlpha(20),

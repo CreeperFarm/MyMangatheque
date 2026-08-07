@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:mymangatheque/l10n/app_localizations.dart';
 import 'package:mymangatheque/src/const/assets.dart';
 import 'package:mymangatheque/src/const/own_icon.dart';
+import 'package:mymangatheque/src/front/components/safe_network_image.dart';
 import 'package:mymangatheque/src/function/auto_push_or_go.dart';
 
 import 'my_collection_badge.dart';
@@ -29,13 +30,22 @@ class MyVolumeTile extends StatelessWidget {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
-    final DateTime release = DateTime.parse(volumeData['release']);
+    final releaseRaw =
+        volumeData['release']?.toString() ??
+        volumeData['publicationDate']?.toString();
+    final release = releaseRaw == null ? null : DateTime.tryParse(releaseRaw);
+    final routePrefix = initRoute == "/" ? "" : initRoute;
+    final tomeNumber =
+        volumeData['tomeNumber'] ?? volumeData['tome_number'] ?? '-';
+    final coverUrl =
+        volumeData['coverUrl']?.toString() ?? volumeData['image']?.toString();
+
     return Padding(
       padding: const EdgeInsets.all(5.0),
       child: InkWell(
         onTap: () => pushOrGo(
           context,
-          '$initRoute/volume/${volumeData['id'].toString()}',
+          '$routePrefix/volume/${volumeData['id'].toString()}',
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -47,8 +57,8 @@ class MyVolumeTile extends StatelessWidget {
                   padding: const EdgeInsets.all(5),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(12),
-                    child: Image.network(
-                      "https://api.mymangatheque.com/api/files/tnof8u6oqfepdq6/${volumeData['id'].toString()}/${volumeData['image'].toString()}",
+                    child: SafeNetworkImage(
+                      imageUrl: coverUrl,
                       height: 75,
                     ),
                   ),
@@ -59,7 +69,7 @@ class MyVolumeTile extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '${localizations.volume} ${volumeData['tome_number']}',
+                        '${localizations.volume} $tomeNumber',
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -68,24 +78,23 @@ class MyVolumeTile extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                       ),
                       Text(
-                        DateFormat.yMMMMd(
-                          localizations.localeName,
-                        ).format(release),
+                        release == null
+                            ? '-'
+                            : DateFormat.yMMMMd(
+                                localizations.localeName,
+                              ).format(release),
                         style: const TextStyle(fontSize: 13),
                         softWrap: false,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      (!subSerieData!.containsKey(
-                                volumeData['sub_serie_id'].toString(),
-                              ) &&
-                              isVolumeOwned != true)
-                          ? const SizedBox()
-                          : Padding(
+                      (isVolumeOwned == true)
+                          ? Padding(
                               padding: const EdgeInsets.only(top: 1.0),
                               child: MyCollectionBadge(
                                 localizations: localizations,
                               ),
-                            ),
+                            )
+                          : const SizedBox(),
                     ],
                   ),
                 ),
