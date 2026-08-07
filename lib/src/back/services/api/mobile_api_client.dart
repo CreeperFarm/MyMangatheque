@@ -37,7 +37,8 @@ class MobileApiClient {
     await init();
 
     final current = await _keyManager.getKey();
-    if (current != null && !current.willExpireWithin(const Duration(minutes: 5))) {
+    if (current != null &&
+        !current.willExpireWithin(const Duration(minutes: 5))) {
       return current.value;
     }
 
@@ -51,7 +52,8 @@ class MobileApiClient {
 
   Future<String> _refreshApiKey() async {
     String? jwt;
-    final hasAuthenticatedSession = await _appwriteClient.hasAuthenticatedUserSession();
+    final hasAuthenticatedSession = await _appwriteClient
+        .hasAuthenticatedUserSession();
 
     if (hasAuthenticatedSession) {
       jwt = await _tryCreateJwt();
@@ -61,7 +63,11 @@ class MobileApiClient {
       jwt = await _tryCreateJwt(silentUnauthorized: true);
     }
 
-    final response = await _requestMobileKey(authorizationBearer: jwt);
+    final candidate = _keyManager.generateCandidate();
+    final response = await _requestMobileKey(
+      authorizationBearer: jwt,
+      keyHash: candidate.keyHash,
+    );
 
     if (response.statusCode < 200 || response.statusCode >= 300) {
       throw Exception(
@@ -69,7 +75,10 @@ class MobileApiClient {
       );
     }
 
-    final parsed = _keyManager.parseKeyFromResponseBody(response.body);
+    final parsed = _keyManager.parseKeyFromResponseBody(
+      response.body,
+      clientGeneratedKey: candidate.value,
+    );
     await _keyManager.saveKey(parsed);
     return parsed.value;
   }
@@ -78,14 +87,18 @@ class MobileApiClient {
     return _currentJwtOrNull(silentUnauthorized: silentUnauthorized);
   }
 
-  Future<http.Response> _requestMobileKey({String? authorizationBearer}) {
+  Future<http.Response> _requestMobileKey({
+    required String keyHash,
+    String? authorizationBearer,
+  }) {
     return http.post(
       Uri.parse('$_apiBaseUrl/api/auth/keys/mobile'),
       headers: <String, String>{
-        if (authorizationBearer != null && authorizationBearer.isNotEmpty) 'Authorization': 'Bearer $authorizationBearer',
+        if (authorizationBearer != null && authorizationBearer.isNotEmpty)
+          'Authorization': 'Bearer $authorizationBearer',
         'Content-Type': 'application/json',
       },
-      body: jsonEncode(<String, dynamic>{}),
+      body: jsonEncode(<String, dynamic>{'keyHash': keyHash}),
     );
   }
 
@@ -143,7 +156,8 @@ class MobileApiClient {
       _jwtRateLimitedUntilUtc = null;
       return _cachedJwt;
     } on AppwriteException catch (e) {
-      final unauthorized = e.code == 401 || e.type == 'general_unauthorized_scope';
+      final unauthorized =
+          e.code == 401 || e.type == 'general_unauthorized_scope';
       if (unauthorized) {
         if (!silentUnauthorized) {
           debugPrint('JWT generation failed (unauthorized): $e');
@@ -152,7 +166,8 @@ class MobileApiClient {
         return null;
       }
 
-      final rateLimited = e.code == 429 || e.type == 'general_rate_limit_exceeded';
+      final rateLimited =
+          e.code == 429 || e.type == 'general_rate_limit_exceeded';
       if (rateLimited) {
         _jwtRateLimitedUntilUtc = DateTime.now().toUtc().add(
           const Duration(seconds: 45),
@@ -264,7 +279,8 @@ class MobileApiClient {
     }
 
     if (requiresBearer) {
-      final hasAuthenticatedSession = await _appwriteClient.hasAuthenticatedUserSession();
+      final hasAuthenticatedSession = await _appwriteClient
+          .hasAuthenticatedUserSession();
       if (!hasAuthenticatedSession) {
         debugPrint(
           'Bearer JWT requested for $path but no authenticated session is active.',
@@ -315,7 +331,9 @@ class MobileApiClient {
         throw UnsupportedError('HTTP method not supported: $method');
     }
 
-    if (requiresApiKey && !retryingAfterKeyRefresh && (response.statusCode == 401 || response.statusCode == 403)) {
+    if (requiresApiKey &&
+        !retryingAfterKeyRefresh &&
+        (response.statusCode == 401 || response.statusCode == 403)) {
       await forceRefreshApiKey();
       return _request(
         method,

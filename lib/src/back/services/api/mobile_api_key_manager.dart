@@ -1,5 +1,7 @@
 import 'dart:convert';
+import 'dart:math';
 
+import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
@@ -16,6 +18,13 @@ class MobileApiKey {
   }
 }
 
+class MobileApiKeyCandidate {
+  const MobileApiKeyCandidate({required this.value, required this.keyHash});
+
+  final String value;
+  final String keyHash;
+}
+
 class MobileApiKeyManager {
   MobileApiKeyManager._internal();
 
@@ -27,7 +36,19 @@ class MobileApiKeyManager {
   static const String _keyExpiryStorageKey = 'mmt_api_key_expiry';
 
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
+  final Random _secureRandom = Random.secure();
   MobileApiKey? _cached;
+
+  MobileApiKeyCandidate generateCandidate() {
+    final bytes = List<int>.generate(
+      32,
+      (_) => _secureRandom.nextInt(256),
+      growable: false,
+    );
+    final value = base64UrlEncode(bytes).replaceAll('=', '');
+    final keyHash = sha256.convert(utf8.encode(value)).toString();
+    return MobileApiKeyCandidate(value: value, keyHash: keyHash);
+  }
 
   Future<void> init() async {
     if (_cached != null) return;
@@ -97,7 +118,10 @@ class MobileApiKeyManager {
     }
   }
 
-  MobileApiKey parseKeyFromResponseBody(String responseBody) {
+  MobileApiKey parseKeyFromResponseBody(
+    String responseBody, {
+    String? clientGeneratedKey,
+  }) {
     dynamic decoded;
     try {
       decoded = jsonDecode(responseBody);
@@ -105,12 +129,12 @@ class MobileApiKeyManager {
       decoded = responseBody;
     }
 
-    String? key;
+    String? key = clientGeneratedKey;
     String? expiresAtRaw;
 
     if (decoded is Map<String, dynamic>) {
       final data = decoded['data'];
-      key =
+      key ??=
           decoded['key']?.toString() ??
           decoded['apiKey']?.toString() ??
           (data is Map<String, dynamic>
@@ -122,7 +146,7 @@ class MobileApiKeyManager {
           (data is Map<String, dynamic>
               ? data['expiresAt']?.toString() ?? data['expires_at']?.toString()
               : null);
-    } else if (decoded is String && decoded.trim().isNotEmpty) {
+    } else if (key == null && decoded is String && decoded.trim().isNotEmpty) {
       key = decoded.trim();
     }
 

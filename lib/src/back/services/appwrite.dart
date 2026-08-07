@@ -367,7 +367,8 @@ class AppwriteConnector {
 
     alreadyClick = 1;
     try {
-      await _appwrite.loginWithGoogle();
+      final webRedirectStarted = await _appwrite.loginWithGoogle();
+      if (webRedirectStarted) return;
       await _api.invalidateApiKey();
       await _syncConnectedUser();
       await _api.ensureApiKey();

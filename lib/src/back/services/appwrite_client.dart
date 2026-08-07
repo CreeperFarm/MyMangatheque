@@ -1,14 +1,15 @@
 import 'package:appwrite/appwrite.dart';
-import 'package:appwrite/enums.dart' as enums;
 import 'package:appwrite/models.dart' as models;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
 import 'package:mymangatheque/environment.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class AppwriteClientService {
   AppwriteClientService._internal();
 
-  static final AppwriteClientService _singleton = AppwriteClientService._internal();
+  static final AppwriteClientService _singleton =
+      AppwriteClientService._internal();
 
   factory AppwriteClientService() => _singleton;
 
@@ -29,7 +30,8 @@ class AppwriteClientService {
       ..setProject(Environment.appwriteProjectId);
 
     // Keep self-signed only in local debug environments.
-    if (!kReleaseMode && Environment.appwritePublicEndpoint.contains('localhost')) {
+    if (!kReleaseMode &&
+        Environment.appwritePublicEndpoint.contains('localhost')) {
       _client.setSelfSigned(status: true);
     }
 
@@ -116,22 +118,37 @@ class AppwriteClientService {
     );
   }
 
-  Future<void> loginWithGoogle() async {
+  /// Starts Google OAuth.
+  ///
+  /// Returns `true` when Web navigation has started, because the current app
+  /// instance must stop its post-login work and let the callback route finish
+  /// it after the full-page redirect.
+  Future<bool> loginWithGoogle() async {
     await init();
 
-    final webSuccessUrl = 'https://mymangatheque.com/auth/callback';
-    final webFailureUrl = 'https://mymangatheque.com/auth/callback?error=true';
-
     if (kIsWeb) {
-      await _account.createOAuth2Session(
-        provider: enums.OAuthProvider.google,
-        success: webSuccessUrl,
-        failure: webFailureUrl,
-      );
-      return;
+      const successUrl = 'https://mymangatheque.com/auth/callback';
+      const failureUrl = 'https://mymangatheque.com/auth/callback?error=true';
+      final oauthUrl =
+          Uri.parse(
+            '${Environment.appwritePublicEndpoint}/account/sessions/oauth2/google',
+          ).replace(
+            queryParameters: <String, String>{
+              'project': Environment.appwriteProjectId,
+              'success': successUrl,
+              'failure': failureUrl,
+            },
+          );
+
+      final launched = await launchUrl(oauthUrl, webOnlyWindowName: '_self');
+      if (!launched) {
+        throw AppwriteException('Unable to open the Google OAuth page.', 500);
+      }
+      return true;
     }
 
     await _loginWithGoogleMobile();
+    return false;
   }
 
   Future<void> _loginWithGoogleMobile() async {
@@ -160,10 +177,18 @@ class AppwriteClientService {
     final callbackParams = _queryAndFragmentParams(callbackUri);
 
     final callbackHost = callbackUri.host.toLowerCase();
-    final hasOAuthError = callbackHost == 'oauth2failure' || callbackParams.containsKey('error') || callbackParams.containsKey('error_description');
+    final hasOAuthError =
+        callbackHost == 'oauth2failure' ||
+        callbackParams.containsKey('error') ||
+        callbackParams.containsKey('error_description');
     if (hasOAuthError) {
-      final errorDetails = callbackParams['error_description'] ?? callbackParams['error'] ?? callbackUri.toString();
-      final sessionAlreadyExists = errorDetails.contains('user_session_already_exists') || errorDetails.contains('session is active');
+      final errorDetails =
+          callbackParams['error_description'] ??
+          callbackParams['error'] ??
+          callbackUri.toString();
+      final sessionAlreadyExists =
+          errorDetails.contains('user_session_already_exists') ||
+          errorDetails.contains('session is active');
       if (sessionAlreadyExists) {
         final currentUser = await tryGetCurrentUser();
         if (currentUser != null) {
@@ -197,7 +222,8 @@ class AppwriteClientService {
     try {
       await _account.createSession(userId: userId, secret: secret);
     } on AppwriteException catch (e) {
-      final sessionAlreadyExists = e.type == 'user_session_already_exists' || e.code == 409;
+      final sessionAlreadyExists =
+          e.type == 'user_session_already_exists' || e.code == 409;
       if (sessionAlreadyExists) {
         final currentUser = await tryGetCurrentUser();
         if (currentUser != null) {
