@@ -6,7 +6,9 @@ FROM --platform=$BUILDPLATFORM ghcr.io/cirruslabs/flutter:3.38.9 AS build
 
 WORKDIR /app
 
-COPY pubspec.yaml pubspec.lock ./
+# pubspec.lock is committed for reproducible application builds. The wildcard
+# still lets Docker calculate the context if a branch temporarily lacks it.
+COPY pubspec.* ./
 RUN flutter pub get
 
 COPY . .

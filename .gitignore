@@ -43,7 +43,6 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
-pubspec.lock
 ios/Podfile.lock
 
 # Don't publish keys
