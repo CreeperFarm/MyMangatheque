@@ -14,6 +14,7 @@ All notable changes to this project are documented in reverse chronological orde
 ## Summary
 
 - [Unreleased](#unreleased)
+- [0.0.2+1](#0021---saturday-august-8-2026)
 - [0.0.1+10](#0020---friday-january-30-2026)
 - [0.0.1+9](#0019---wednesday-january-28-2026)
 - [0.0.1+8](#0018---sunday-november-9-2025)
@@ -33,13 +34,42 @@ All notable changes to this project are documented in reverse chronological orde
 
 ### Added
 
-- Added `appwrite` dependency for authentication/session/storage integration.
-- Added `flutter_web_auth_2` dependency for mobile OAuth callback flow.
-- Added `flutter_secure_storage` dependency for secure API/admin key persistence.
+- Added a weighted project roadmap ordered by descending importance, covering
+  product, persistent caching, platform, recommendation, social, local AI, and
+  public API priorities.
+
+## [0.0.2+1] - Saturday, August 8, 2026
+
+### Added
+
+- Added Appwrite authentication, account, storage, guest session, and OAuth
+  integration.
+- Added a unified REST API client with temporary mobile API keys, automatic
+  rotation, and retry after key expiration.
+- Added REST-based administration tools for catalog creation, statistics, and
+  volume quality control.
+- Added push and in-app notification services with a polling fallback.
+- Added automated Flutter Web/WASM container builds, private GHCR publishing,
+  and Portainer redeployment on pushes to `main`.
 
 ### Changed
 
 - Replaced direct PocketBase runtime usage with Appwrite + API service architecture.
+- Changed Google authentication on the Web to a same-tab OAuth redirect so it
+  works reliably when browsers block popups.
+- Updated secure storage and JavaScript interoperability dependencies for Dart
+  WebAssembly compatibility.
+- Improved catalog parsing, collection synchronization, search, EAN scanning,
+  and administration workflows.
+
+### Fixed
+
+- Fixed the WebAssembly build failure caused by the former Web secure-storage
+  implementation.
+- Fixed mobile API-key registration by generating the secret locally and
+  sending its SHA-256 hash to the API.
+- Fixed Docker builds when resolving `pubspec.lock` and made application
+  dependency resolution reproducible.
 
 ### Removed
 
@@ -142,6 +172,7 @@ Toutes les modifications notables de ce projet sont documentées par ordre chron
 ## Sommaire
 
 - [Non publié](#non-publié)
+- [0.0.2+1](#0021---samedi-8-août-2026)
 - [0.0.1+10](#0020---vendredi-30-janvier-2026)
 - [0.0.1+9](#0019---mercredi-28-janvier-2026)
 - [0.0.1+8](#0018---dimanche-9-novembre-2025)
@@ -161,13 +192,42 @@ Toutes les modifications notables de ce projet sont documentées par ordre chron
 
 ### Ajouts
 
-- Ajout de la dépendance `appwrite` pour l'intégration authentification/session/stockage.
-- Ajout de la dépendance `flutter_web_auth_2` pour le flux OAuth mobile avec callback.
-- Ajout de la dépendance `flutter_secure_storage` pour le stockage sécurisé des clés API/admin.
+- Ajout d'une roadmap pondérée et classée par importance décroissante couvrant
+  les priorités produit, cache persistant, plateformes, recommandations,
+  fonctions sociales, IA locale et API publique.
+
+## [0.0.2+1] - Samedi, 8 août 2026
+
+### Ajouts
+
+- Ajout de l'authentification, des comptes, du stockage, des sessions invitées et
+  de l'OAuth avec Appwrite.
+- Ajout d'un client API REST unifié avec clés mobiles temporaires, rotation
+  automatique et nouvelle tentative après expiration.
+- Ajout des outils d'administration REST pour la création du catalogue, les
+  statistiques et le contrôle qualité des volumes.
+- Ajout des notifications push et internes avec un fallback par polling.
+- Ajout du build automatisé du conteneur Flutter Web/WASM, de sa publication
+  privée sur GHCR et du redéploiement Portainer après un push sur `main`.
 
 ### Modifications
 
 - Remplacement de l'usage runtime direct de PocketBase par une architecture Appwrite + API.
+- Passage de l'authentification Google Web à une redirection OAuth dans l'onglet
+  courant afin de fonctionner lorsque les navigateurs bloquent les popups.
+- Mise à jour du stockage sécurisé et des dépendances d'interopérabilité
+  JavaScript pour assurer la compatibilité avec Dart WebAssembly.
+- Amélioration du parsing du catalogue, de la synchronisation des collections,
+  de la recherche, du scan EAN et des parcours d'administration.
+
+### Corrections
+
+- Correction de l'échec de compilation WebAssembly provoqué par l'ancienne
+  implémentation du stockage sécurisé Web.
+- Correction de l'enregistrement des clés API mobiles grâce à la génération
+  locale du secret et à l'envoi de son hash SHA-256 à l'API.
+- Correction du build Docker lors de la résolution de `pubspec.lock` et
+  verrouillage reproductible des dépendances de l'application.
 
 ### Suppressions
 
