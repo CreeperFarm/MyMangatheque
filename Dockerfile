@@ -2,7 +2,7 @@
 
 # The Flutter build is platform-independent. Running it on BUILDPLATFORM avoids
 # emulating the Flutter SDK when Buildx creates amd64 and arm64 images.
-FROM --platform=$BUILDPLATFORM ghcr.io/cirruslabs/flutter:3.38.9 AS build
+FROM --platform=$BUILDPLATFORM ghcr.io/cirruslabs/flutter:3.44.0 AS build
 
 WORKDIR /app
 
