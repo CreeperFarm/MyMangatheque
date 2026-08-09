@@ -1,0 +1,3 @@
+"NSCameraUsageDescription" = "Scanner le code-barres d’un livre pour retrouver son tome.";
+"NSPhotoLibraryAddUsageDescription" = "Enregistrer la photo de profil sélectionnée.";
+"NSPhotoLibraryUsageDescription" = "Sélectionner une photo de profil.";

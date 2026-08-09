@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mymangatheque/src/back/language/runtime_localization.dart';
 import 'package:mymangatheque/src/back/services/admin_service.dart';
 import 'package:mymangatheque/src/front/page/admin_pages/admin_components.dart';
 
@@ -29,7 +30,10 @@ class _AdminCreateAuthorPageState extends State<AdminCreateAuthorPage> {
   Future<void> _submit() async {
     if (_nameController.text.trim().isEmpty) {
       setState(() {
-        _message = 'Le nom est obligatoire.';
+        _message = context.localized(
+          en: 'Name is required.',
+          fr: 'Le nom est obligatoire.',
+        );
         _messageIsError = true;
       });
       return;
@@ -56,7 +60,10 @@ class _AdminCreateAuthorPageState extends State<AdminCreateAuthorPage> {
       if (!mounted) return;
       setState(() {
         _loading = false;
-        _message = 'Auteur créé avec succès.';
+        _message = context.localized(
+          en: 'Author created successfully.',
+          fr: 'Auteur créé avec succès.',
+        );
         _messageIsError = false;
       });
       _nameController.clear();
@@ -76,27 +83,33 @@ class _AdminCreateAuthorPageState extends State<AdminCreateAuthorPage> {
   Widget build(BuildContext context) {
     return AdminFormView(
       children: [
-        const AdminPageHeader(
+        AdminPageHeader(
           icon: Icons.person_add_alt_1_outlined,
-          title: 'Nouvel auteur',
-          description: 'Ajoutez une personne et ses métiers dans le catalogue.',
+          title: context.localized(en: 'New author', fr: 'Nouvel auteur'),
+          description: context.localized(
+            en: 'Add a person and their roles to the catalogue.',
+            fr: 'Ajoutez une personne et ses métiers dans le catalogue.',
+          ),
         ),
         const SizedBox(height: 20),
         TextField(
           controller: _nameController,
           maxLength: 200,
-          decoration: const InputDecoration(
+          decoration: InputDecoration(
             border: OutlineInputBorder(),
-            labelText: 'Nom *',
+            labelText: context.localized(en: 'Name *', fr: 'Nom *'),
             prefixIcon: Icon(Icons.person_outline_rounded),
           ),
         ),
         const SizedBox(height: 12),
         TextField(
           controller: _jobsController,
-          decoration: const InputDecoration(
+          decoration: InputDecoration(
             border: OutlineInputBorder(),
-            labelText: 'Métiers (séparés par des virgules)',
+            labelText: context.localized(
+              en: 'Roles (comma separated)',
+              fr: 'Métiers (séparés par des virgules)',
+            ),
             prefixIcon: Icon(Icons.work_outline_rounded),
           ),
         ),
@@ -104,9 +117,12 @@ class _AdminCreateAuthorPageState extends State<AdminCreateAuthorPage> {
         TextField(
           controller: _coverController,
           keyboardType: TextInputType.url,
-          decoration: const InputDecoration(
+          decoration: InputDecoration(
             border: OutlineInputBorder(),
-            labelText: 'URL HTTPS de l’image',
+            labelText: context.localized(
+              en: 'HTTPS image URL',
+              fr: 'URL HTTPS de l’image',
+            ),
             prefixIcon: Icon(Icons.image_outlined),
           ),
         ),
@@ -114,7 +130,9 @@ class _AdminCreateAuthorPageState extends State<AdminCreateAuthorPage> {
         FilledButton.icon(
           onPressed: _loading ? null : _submit,
           icon: const Icon(Icons.add_rounded),
-          label: const Text('Créer l’auteur'),
+          label: Text(
+            context.localized(en: 'Create author', fr: 'Créer l’auteur'),
+          ),
         ),
         if (_loading) ...[
           const SizedBox(height: 14),

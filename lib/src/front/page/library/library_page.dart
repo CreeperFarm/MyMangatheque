@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mymangatheque/l10n/app_localizations.dart';
+import 'package:mymangatheque/src/back/language/runtime_localization.dart';
 import 'package:mymangatheque/src/back/provider/manga_owned_provider.dart';
 import 'package:mymangatheque/src/back/provider/search_order_provider.dart';
 import 'package:mymangatheque/src/back/services/appwrite.dart';
@@ -33,18 +34,35 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
   String? _lastUserId;
   bool _authResolved = false;
   bool _loadingOwned = false;
+  int _ownedLoadGeneration = 0;
+  String _searchQuery = '';
+  Timer? _searchDebounce;
+  Timer? _realtimeRefreshDebounce;
 
   void changeOrder(String filter) {
     ref.read(searchOrderProvider.notifier).changeSearchOrder(filter);
   }
 
   void _onSearchChanged() {
-    setState(() {});
+    final nextQuery = _searchController.text;
+    _searchDebounce?.cancel();
+    if (nextQuery.isEmpty) {
+      if (_searchQuery.isNotEmpty) {
+        setState(() => _searchQuery = '');
+      }
+      return;
+    }
+
+    _searchDebounce = Timer(const Duration(milliseconds: 120), () {
+      if (!mounted || _searchQuery == nextQuery) return;
+      setState(() => _searchQuery = nextQuery);
+    });
   }
 
   Future<void> initData({User? user, bool forceRefresh = false}) async {
     final resolvedUser = user ?? _currentUser ?? connector.getConnectedUser();
     if (resolvedUser == null) return;
+    final loadGeneration = ++_ownedLoadGeneration;
 
     try {
       if (mounted) {
@@ -57,7 +75,7 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
           .read(mangaOwnedProvider.notifier)
           .initData(resolvedUser, forceRefresh: forceRefresh);
 
-      if (!mounted) return;
+      if (!mounted || loadGeneration != _ownedLoadGeneration) return;
       if (!value) {
         showMessage(
           AppLocalizations.of(
@@ -67,11 +85,14 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
         );
       }
     } catch (e) {
-      if (!mounted) return;
-      debugPrint(e.toString());
+      if (!mounted || loadGeneration != _ownedLoadGeneration) return;
+      RuntimeLocalization.debug(
+        en: 'Unable to initialize the library: $e',
+        fr: 'Impossible d’initialiser la bibliothèque : $e',
+      );
       showMessage(AppLocalizations.of(context)!.errorOccurred, context);
     } finally {
-      if (mounted) {
+      if (mounted && loadGeneration == _ownedLoadGeneration) {
         setState(() {
           _loadingOwned = false;
         });
@@ -85,15 +106,27 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
       _ownedSubscription = connector.connector().collection('owned').subscribe(
         '*',
         (_) {
-          unawaited(initData(forceRefresh: true));
+          _realtimeRefreshDebounce?.cancel();
+          _realtimeRefreshDebounce = Timer(
+            const Duration(milliseconds: 350),
+            () {
+              if (mounted) {
+                unawaited(initData(forceRefresh: true));
+              }
+            },
+          );
         },
       );
     } catch (e) {
-      debugPrint('Owned realtime subscription failed: $e');
+      RuntimeLocalization.debug(
+        en: 'Owned collection realtime subscription failed: $e',
+        fr: 'L’abonnement temps réel de la collection possédée a échoué : $e',
+      );
     }
   }
 
   void _cancelOwnedRealtime() {
+    _realtimeRefreshDebounce?.cancel();
     try {
       _ownedSubscription?.unsubscribe();
     } catch (_) {
@@ -109,9 +142,18 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
     final userChanged = userId != _lastUserId;
     _lastUserId = userId;
 
+    if (userChanged) {
+      _ownedLoadGeneration += 1;
+      _cancelOwnedRealtime();
+    }
+    ref.read(mangaOwnedProvider.notifier).handleUserChanged(userId);
+
     setState(() {
       _currentUser = user;
       _authResolved = true;
+      if (user == null) {
+        _loadingOwned = false;
+      }
     });
 
     if (user == null) {
@@ -125,6 +167,8 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
 
   @override
   void dispose() {
+    _searchDebounce?.cancel();
+    _realtimeRefreshDebounce?.cancel();
     _userSubscription?.cancel();
     _cancelOwnedRealtime();
     _searchController.removeListener(_onSearchChanged);
@@ -181,7 +225,7 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
       return const SignInPage();
     }
     final selectedOrder = ref.watch(searchOrderProvider);
-    final searchQuery = _searchController.text;
+    final searchQuery = _searchQuery;
 
     return DefaultTabController(
       initialIndex: 1,
@@ -210,9 +254,7 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
                     iconSrc: Assets.icons.filterRight,
                   ),
                   onSelected: (String result) {
-                    setState(() {
-                      changeOrder(result);
-                    });
+                    changeOrder(result);
                   },
                   offset: const Offset(0, 50),
                   shape: RoundedRectangleBorder(

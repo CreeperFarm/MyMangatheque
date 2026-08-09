@@ -1,0 +1,3 @@
+"NSCameraUsageDescription" = "Scan a book barcode to find its volume.";
+"NSPhotoLibraryAddUsageDescription" = "Save your selected profile picture.";
+"NSPhotoLibraryUsageDescription" = "Select a profile picture.";

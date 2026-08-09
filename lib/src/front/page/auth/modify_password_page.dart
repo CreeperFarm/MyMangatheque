@@ -37,43 +37,7 @@ class _ModifyPasswordPageState extends State<ModifyPasswordPage> {
     super.dispose();
   }
 
-  Future<void> signIn() async {
-    /*try {
-      await FirebaseAuth.instance.setLanguageCode("fr");
-      await FirebaseAuth.instance.signInWithEmailAndPassword(email: user.email.toString(), password: oldPasswordController.text);
-      passwordModify();
-    } on FirebaseAuthException catch (e) {
-      if (e.code == "user-not-found") {
-        Navigator.pop(context);
-        showMessage("Aucun utilisateur trouvé pour cette adresse email!");
-      } else if (e.code == "wrong-password") {
-        Navigator.pop(context);
-        showMessage("Mot de passe incorrect.");
-      } else {
-        Navigator.pop(context);
-        showMessage(e.code);
-      }
-    }*/
-  }
-
   Future passwordModify() async {
-    //TODO: Make the password reset
-    /*try {
-      await user.updatePassword(oldPasswordController.text);
-      Navigator.pop(context);
-      showMessage("Réinitialisation du mot de passe envoyé, vérifier votre boite mail.");
-      GoRouter.of(context).go('/profile');
-    } on FirebaseAuthException catch (e) {
-      if (e.code == "weak-password") {
-        Navigator.pop(context);
-        errorText = "Veuillez inséré un mot de passe plus fort!";
-        showMessage(errorText);
-      } else {
-        Navigator.pop(context);
-        errorText = e.code;
-        showMessage(errorText);
-      }
-    }*/
     try {
       await connector.modifyPassword(
         connector.getConnectedUser()!.email,
@@ -84,7 +48,7 @@ class _ModifyPasswordPageState extends State<ModifyPasswordPage> {
       Navigator.pop(context);
     } catch (e) {
       Navigator.pop(context);
-      errorText = e.toString();
+      errorText = AppLocalizations.of(context)!.errorOccurred;
       showMessage(errorText, context);
     }
   }

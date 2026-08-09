@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:mymangatheque/src/back/language/runtime_localization.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
@@ -9,6 +10,7 @@ import 'package:mymangatheque/l10n/app_localizations.dart';
 import 'package:mymangatheque/src/back/provider/last_ean.dart';
 import 'package:mymangatheque/src/back/provider/manga_owned_provider.dart';
 import 'package:mymangatheque/src/back/services/appwrite.dart';
+import 'package:mymangatheque/src/back/services/security/security_utils.dart';
 import 'package:mymangatheque/src/const/layout.dart';
 import 'package:mymangatheque/src/front/components/safe_network_image.dart';
 import 'package:mymangatheque/src/function/auto_push_or_go.dart';
@@ -61,7 +63,7 @@ class _ScanEanPageState extends ConsumerState<ScanEanPage> {
     } catch (error) {
       if (mounted) {
         showMessage(
-          localizations.errorOccurredMessage(error.toString()),
+          localizations.errorOccurredMessage(redactSensitiveText(error)),
           context,
         );
       }
@@ -107,7 +109,10 @@ class _ScanEanPageState extends ConsumerState<ScanEanPage> {
           );
           if (hydratedVolumes.isNotEmpty) volume = hydratedVolumes.first;
         } catch (error) {
-          debugPrint('Unable to hydrate scanned volume $volumeId: $error');
+          RuntimeLocalization.debug(
+            en: 'Unable to load complete data for a scanned volume: $error',
+            fr: 'Impossible de charger les données complètes d’un volume scanné : $error',
+          );
         }
       }
       if (!mounted) return null;
@@ -209,7 +214,10 @@ class _ScanEanPageState extends ConsumerState<ScanEanPage> {
           }
         } catch (error) {
           addErrors.add(error);
-          debugPrint('Unable to add scanned volume ${volume.id}: $error');
+          RuntimeLocalization.debug(
+            en: 'Unable to add a scanned volume: $error',
+            fr: 'Impossible d’ajouter un volume scanné : $error',
+          );
         }
       }
 
@@ -223,8 +231,9 @@ class _ScanEanPageState extends ConsumerState<ScanEanPage> {
           followErrors.remove(subSeriesId);
         } catch (error) {
           followErrors[subSeriesId] = error;
-          debugPrint(
-            'Unable to follow scanned sub-series $subSeriesId: $error',
+          RuntimeLocalization.debug(
+            en: 'Unable to follow a scanned sub-series: $error',
+            fr: 'Impossible de suivre une sous-série scannée : $error',
           );
         }
       }
@@ -249,7 +258,9 @@ class _ScanEanPageState extends ConsumerState<ScanEanPage> {
       }
       if (addErrors.isNotEmpty) {
         showMessage(
-          localizations.errorOccurredMessage(addErrors.first.toString()),
+          localizations.errorOccurredMessage(
+            redactSensitiveText(addErrors.first),
+          ),
           context,
         );
       } else if (followErrors.isNotEmpty) {
@@ -262,7 +273,10 @@ class _ScanEanPageState extends ConsumerState<ScanEanPage> {
       }
     } catch (e) {
       if (!mounted) return;
-      showMessage(localizations.errorOccurredMessage(e.toString()), context);
+      showMessage(
+        localizations.errorOccurredMessage(redactSensitiveText(e)),
+        context,
+      );
     } finally {
       if (mounted) {
         setState(() {
@@ -333,8 +347,9 @@ class _ScanEanPageState extends ConsumerState<ScanEanPage> {
           sourceVolume: triggerVolume,
         );
       } catch (error) {
-        debugPrint(
-          'Unable to load previous volumes for sub-series $subSeriesId: $error',
+        RuntimeLocalization.debug(
+          en: 'Unable to load previous volumes for a sub-series: $error',
+          fr: 'Impossible de charger les volumes précédents d’une sous-série : $error',
         );
         continue;
       }
@@ -617,10 +632,15 @@ class _ScanEanPageState extends ConsumerState<ScanEanPage> {
 
     /*return Scaffold(
       appBar: AppBar(
-        title: const Text('Scan EAN'),
+        title: Text(context.localized(en: 'EAN scan', fr: 'Scan EAN')),
       ),
       body: Center(
-        child: Text("Malheureusement, le scan EAN n'est pas disponible pour le moment."),
+        child: Text(
+          context.localized(
+            en: 'Unfortunately, EAN scanning is not available at the moment.',
+            fr: 'Malheureusement, le scan EAN n’est pas disponible pour le moment.',
+          ),
+        ),
       ),
     );*/
     if (!_connector.isLoggedIn()) {
@@ -778,10 +798,17 @@ class _ScanEanPageState extends ConsumerState<ScanEanPage> {
       } else {
         return Scaffold(
           appBar: AppBar(
-            title: const Text("Scan EAN"),
+            title: Text(context.localized(en: 'EAN scan', fr: 'Scan EAN')),
             backgroundColor: Colors.transparent,
           ),
-          body: const Center(child: Text("Platform not supported")),
+          body: Center(
+            child: Text(
+              context.localized(
+                en: 'This platform is not supported.',
+                fr: 'Cette plateforme n’est pas prise en charge.',
+              ),
+            ),
+          ),
         );
       }
     }
@@ -871,7 +898,7 @@ class _ContinuousEanScannerPageState extends State<_ContinuousEanScannerPage> {
       if (!mounted) return;
       setState(() {
         _lastError = widget.localizations.errorOccurredMessage(
-          error.toString(),
+          redactSensitiveText(error),
         );
       });
     } finally {
@@ -994,7 +1021,10 @@ class _ContinuousEanScannerPageState extends State<_ContinuousEanScannerPage> {
                               onPressed: scannerState.isInitialized
                                   ? _scannerController.toggleTorch
                                   : null,
-                              tooltip: 'Flash',
+                              tooltip: context.localized(
+                                en: 'Flash',
+                                fr: 'Flash',
+                              ),
                               icon: Icon(
                                 torchIsOn
                                     ? Icons.flash_on_rounded

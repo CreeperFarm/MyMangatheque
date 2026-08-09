@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mymangatheque/l10n/app_localizations.dart';
+import 'package:mymangatheque/src/back/language/runtime_localization.dart';
 import 'package:mymangatheque/src/back/services/appwrite.dart';
 import 'package:mymangatheque/src/front/components/my_line.dart';
 import 'package:mymangatheque/src/front/components/my_scroll_column.dart';
@@ -46,18 +47,29 @@ class _EditorPageState extends State<EditorPage> {
           return Center(child: Text(localizations.noConnection));
         }
         if (snapshot.hasError) {
-          debugPrint("Error: ${snapshot.error}");
+          RuntimeLocalization.debug(
+            en: 'Unable to load the publisher page: ${snapshot.error}',
+            fr: 'Impossible de charger la page de l’éditeur : ${snapshot.error}',
+          );
           return Center(child: Text(localizations.errorOccurred));
         }
         if (snapshot.hasData && snapshot.data != null) {
           // ? Define variables
-          final data = snapshot.data!.isNotEmpty ? Map<String, dynamic>.from(snapshot.data!.first.data) : <String, dynamic>{};
-          final expand = data['expand'] is Map<String, dynamic> ? data['expand'] as Map<String, dynamic> : <String, dynamic>{};
+          final data = snapshot.data!.isNotEmpty
+              ? Map<String, dynamic>.from(snapshot.data!.first.data)
+              : <String, dynamic>{};
+          final expand = data['expand'] is Map<String, dynamic>
+              ? data['expand'] as Map<String, dynamic>
+              : <String, dynamic>{};
           final subSeries = List<Map<String, dynamic>>.from(
-            (expand['subSeries'] as List<dynamic>? ?? const <dynamic>[]).whereType<Map<String, dynamic>>(),
+            (expand['subSeries'] as List<dynamic>? ?? const <dynamic>[])
+                .whereType<Map<String, dynamic>>(),
           );
           final editorName = data['name']?.toString() ?? '';
-          final logoUrl = data['logo']?.toString() ?? data['image']?.toString() ?? data['coverUrl']?.toString();
+          final logoUrl =
+              data['logo']?.toString() ??
+              data['image']?.toString() ??
+              data['coverUrl']?.toString();
 
           // ? Building the widget
           return Scaffold(

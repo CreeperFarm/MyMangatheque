@@ -3,11 +3,16 @@ import 'package:go_router/go_router.dart';
 import 'package:mymangatheque/src/back/app_router/main_wrapper.dart';
 // REMOVE THIS IMPORT: import 'package:mymangatheque/src/back/app_router/redirect_to_page.dart';
 import 'package:mymangatheque/src/back/services/appwrite.dart'; // Import AppwriteConnector
+import 'package:mymangatheque/src/back/services/analytics/product_analytics_service.dart';
 import 'package:mymangatheque/src/front/dev_page/component_show_page.dart';
 import 'package:mymangatheque/src/front/page/admin_pages/admin_create_page.dart';
 import 'package:mymangatheque/src/front/page/admin_pages/admin_home.dart';
 import 'package:mymangatheque/src/front/page/admin_pages/admin_login_page.dart';
+import 'package:mymangatheque/src/front/page/admin_pages/admin_management_page.dart';
+import 'package:mymangatheque/src/front/page/admin_pages/admin_notification_analytics_page.dart';
+import 'package:mymangatheque/src/front/page/admin_pages/admin_product_analytics_page.dart';
 import 'package:mymangatheque/src/front/page/admin_pages/admin_statistics.dart';
+import 'package:mymangatheque/src/front/page/admin_pages/admin_users_page.dart';
 import 'package:mymangatheque/src/front/page/admin_pages/admin_volume_quality_page.dart';
 import 'package:mymangatheque/src/front/page/auth/auth_callback_page.dart';
 import 'package:mymangatheque/src/front/page/auth/delete_account_page.dart'; // Import DeleteAccountPage
@@ -25,7 +30,11 @@ import 'package:mymangatheque/src/front/page/info_page/sub_serie_page.dart';
 import 'package:mymangatheque/src/front/page/info_page/volume_page.dart';
 import 'package:mymangatheque/src/front/page/library/library_page.dart';
 import 'package:mymangatheque/src/front/page/mentions_legales_page.dart';
+import 'package:mymangatheque/src/front/page/planning/planning_page.dart';
 import 'package:mymangatheque/src/front/page/profile/profile_page.dart'; // Import ProfilePage
+import 'package:mymangatheque/src/front/page/profile/collection_import_page.dart';
+import 'package:mymangatheque/src/front/page/profile/notification_inbox_page.dart';
+import 'package:mymangatheque/src/front/page/profile/recommendation_preferences_page.dart';
 import 'package:mymangatheque/src/front/page/scan_ean_page.dart';
 import 'package:mymangatheque/src/front/page/search/search_page.dart';
 
@@ -38,6 +47,7 @@ class AppNavigation {
   static const String subSerieRoute = 'sub_serie/:id';
   static const String volumeRoute = 'volume/:id';
   static const String libraryPath = '/library';
+  static const String planningPath = '/planning';
   static const String searchPath = '/search';
 
   static String initR = '/';
@@ -50,6 +60,9 @@ class AppNavigation {
   static final _rootNavigatorLibrary = GlobalKey<NavigatorState>(
     debugLabel: 'shellLibrary',
   );
+  static final _rootNavigatorPlanning = GlobalKey<NavigatorState>(
+    debugLabel: 'shellPlanning',
+  );
   static final _rootNavigatorProfile = GlobalKey<NavigatorState>(
     debugLabel: 'shellProfile',
   );
@@ -58,6 +71,7 @@ class AppNavigation {
   static final GoRouter router = GoRouter(
     navigatorKey: _rootNavigatorKey,
     initialLocation: initR,
+    observers: [ProductAnalyticsNavigationObserver()],
     routes: <RouteBase>[
       GoRoute(
         path: '/auth/callback',
@@ -216,10 +230,38 @@ class AppNavigation {
                         },
                       ),
                       GoRoute(
-                        path: 'static_page',
-                        name: 'Admin Static Page',
+                        path: 'statistics',
+                        name: 'Admin Statistics',
                         builder: (context, state) {
                           return StatisticsPage(key: state.pageKey);
+                        },
+                      ),
+                      GoRoute(
+                        path: 'analytics/product',
+                        name: 'Admin Product Analytics',
+                        builder: (context, state) {
+                          return AdminProductAnalyticsPage(key: state.pageKey);
+                        },
+                      ),
+                      GoRoute(
+                        path: 'analytics/notifications',
+                        name: 'Admin Notification Analytics',
+                        builder: (context, state) {
+                          return AdminNotificationAnalyticsPage(
+                            key: state.pageKey,
+                          );
+                        },
+                      ),
+                      GoRoute(
+                        path: 'static_page',
+                        name: 'Admin Static Page',
+                        redirect: (context, state) => '/admin/statistics',
+                      ),
+                      GoRoute(
+                        path: 'users',
+                        name: 'Admin Users',
+                        builder: (context, state) {
+                          return AdminUsersPage(key: state.pageKey);
                         },
                       ),
                       GoRoute(
@@ -229,6 +271,17 @@ class AppNavigation {
                           return AdminVolumeQualityPage(key: state.pageKey);
                         },
                       ),
+                      for (final section in AdminManagementSection.values)
+                        GoRoute(
+                          path: 'management/${section.slug}',
+                          name: 'Admin ${section.title}',
+                          builder: (context, state) {
+                            return AdminManagementPage(
+                              section: section,
+                              key: state.pageKey,
+                            );
+                          },
+                        ),
                     ],
                   ),
                 ],
@@ -305,6 +358,31 @@ class AppNavigation {
                     name: 'Scan',
                     builder: (context, state) {
                       return ScanEanPage(key: state.pageKey);
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            navigatorKey: _rootNavigatorPlanning,
+            routes: [
+              GoRoute(
+                path: planningPath,
+                name: 'Planning',
+                builder: (context, state) {
+                  return PlanningPage(key: state.pageKey);
+                },
+                routes: [
+                  GoRoute(
+                    path: volumeRoute,
+                    name: 'Volume Planning',
+                    builder: (context, state) {
+                      return VolumePage(
+                        volumeId: state.pathParameters['id']!,
+                        initRoute: planningPath,
+                        key: state.pageKey,
+                      );
                     },
                   ),
                 ],
@@ -393,6 +471,27 @@ class AppNavigation {
                   }
                 },
                 routes: [
+                  GoRoute(
+                    path: 'notifications',
+                    name: 'Notifications',
+                    builder: (context, state) {
+                      return NotificationInboxPage(key: state.pageKey);
+                    },
+                  ),
+                  GoRoute(
+                    path: 'import-collection',
+                    name: 'Import Collection',
+                    builder: (context, state) {
+                      return CollectionImportPage(key: state.pageKey);
+                    },
+                  ),
+                  GoRoute(
+                    path: 'recommendations',
+                    name: 'Recommendation Preferences',
+                    builder: (context, state) {
+                      return RecommendationPreferencesPage(key: state.pageKey);
+                    },
+                  ),
                   GoRoute(
                     path: 'modify_password',
                     name: 'ModifyPassword',

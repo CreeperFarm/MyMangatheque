@@ -7,6 +7,7 @@ import 'package:glass_kit/glass_kit.dart';
 import 'package:go_router/go_router.dart';
 import 'package:keyboard_detection/keyboard_detection.dart';
 import 'package:mymangatheque/l10n/app_localizations.dart';
+import 'package:mymangatheque/src/back/language/runtime_localization.dart';
 import 'package:mymangatheque/src/back/services/appwrite.dart';
 import 'package:mymangatheque/src/const/assets.dart';
 import 'package:mymangatheque/src/const/layout.dart';
@@ -15,6 +16,7 @@ import 'package:mymangatheque/src/front/components/my_drawer.dart';
 import 'package:mymangatheque/src/front/components/my_drawer_tile.dart';
 import 'package:mymangatheque/src/function/auto_push_or_go.dart';
 import 'package:mymangatheque/src/models/get_user_information.dart';
+import 'package:mymangatheque/src/models/local_storage/local_storage.dart';
 import 'package:url_launcher/link.dart';
 
 class MainWrapper extends ConsumerStatefulWidget {
@@ -27,8 +29,6 @@ class MainWrapper extends ConsumerStatefulWidget {
 }
 
 class _MainWrapperState extends ConsumerState<MainWrapper> {
-  int selectedIndex = 0;
-
   void _goBranch(int index) {
     widget.navigationShell.goBranch(
       index,
@@ -63,7 +63,10 @@ class _MainWrapperState extends ConsumerState<MainWrapper> {
     // Looped with future callback
     keyboardDetectionController.registerCallback((state) async {
       await Future.delayed(const Duration(milliseconds: 100));
-      debugPrint('Listen to onChanged with looped future Callback: $state');
+      RuntimeLocalization.debug(
+        en: 'Keyboard visibility state changed.',
+        fr: 'L’état de visibilité du clavier a changé.',
+      );
 
       // This callback will be looped
       return true;
@@ -80,26 +83,34 @@ class _MainWrapperState extends ConsumerState<MainWrapper> {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
-    // TODO : restore the planning page.
     final List<String> navIconsSrc = [
       Assets.icons.home,
       Assets.icons.collection,
+      Assets.icons.calendar,
       Assets.icons.search,
       Assets.icons.user,
     ];
     final List<String> navIconsActive = [
       Assets.icons.homeActive,
       Assets.icons.collectionActive,
+      Assets.icons.calendarActive,
       Assets.icons.searchActive,
       Assets.icons.userActive,
     ];
     final List<String> navTitle = [
       localizations.home,
       localizations.collection,
+      context.localized(en: 'Releases', fr: 'Sorties'),
       localizations.search,
       localizations.profile,
     ];
-    const List<String> navRoute = ["/", "/library", "/search", "/profile"];
+    const List<String> navRoute = [
+      '/',
+      '/library',
+      '/planning',
+      '/search',
+      '/profile',
+    ];
 
     return KeyboardDetection(
       controller: keyboardDetectionController,
@@ -119,7 +130,15 @@ class _MainWrapperState extends ConsumerState<MainWrapper> {
           if (keyboardActive) {
             return Scaffold(body: Stack(children: [widget.navigationShell]));
           }
-          return _buildPhoneLayout(navIconsSrc, navIconsActive, navTitle);
+          return ValueListenableBuilder<AppNavigationLabelMode>(
+            valueListenable: LocalStorage.navigationLabelModeNotifier,
+            builder: (context, labelMode, _) => _buildPhoneLayout(
+              navIconsSrc,
+              navIconsActive,
+              navTitle,
+              labelMode,
+            ),
+          );
         },
       ),
     );
@@ -317,6 +336,7 @@ class _MainWrapperState extends ConsumerState<MainWrapper> {
     List<String> navIconsSrc,
     List<String> navIconsActive,
     List<String> navTitle,
+    AppNavigationLabelMode labelMode,
   ) {
     return Scaffold(
       body: Stack(
@@ -347,47 +367,62 @@ class _MainWrapperState extends ConsumerState<MainWrapper> {
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: navIconsSrc.map((iconName) {
                   final int index = navIconsSrc.indexOf(iconName);
-                  final bool isSelected = selectedIndex == index;
-                  return Material(
-                    color: Colors.transparent,
-                    child: GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          selectedIndex = index;
+                  final bool isSelected =
+                      widget.navigationShell.currentIndex == index;
+                  return Semantics(
+                    button: true,
+                    selected: isSelected,
+                    label: navTitle[index],
+                    child: Material(
+                      color: Colors.transparent,
+                      child: GestureDetector(
+                        onTap: () {
                           _goBranch(index);
-                        });
-                      },
-                      child: Column(
-                        children: [
-                          Container(
-                            alignment: Alignment.center,
-                            margin: const EdgeInsets.only(
-                              top: 10,
-                              bottom: 0,
-                              right: 22,
-                              left: 22,
-                            ),
-                            child: OwnIcon(
-                              iconSrc: _iconPath(
-                                iconName,
-                                navIconsSrc,
-                                navIconsActive,
-                                active: isSelected,
+                        },
+                        child: Column(
+                          children: [
+                            Container(
+                              alignment: Alignment.center,
+                              margin: const EdgeInsets.only(
+                                top: 10,
+                                bottom: 0,
+                                right: 12,
+                                left: 12,
                               ),
-                              iconColor: Theme.of(context).colorScheme.primary,
+                              child: OwnIcon(
+                                iconSrc: _iconPath(
+                                  iconName,
+                                  navIconsSrc,
+                                  navIconsActive,
+                                  active: isSelected,
+                                ),
+                                iconColor: Theme.of(
+                                  context,
+                                ).colorScheme.primary,
+                              ),
                             ),
-                          ),
-                          Text(
-                            navTitle[index],
-                            style: TextStyle(
-                              color: Theme.of(context).colorScheme.primary,
-                              fontWeight: isSelected
-                                  ? FontWeight.bold
-                                  : FontWeight.normal,
-                              fontSize: 12,
+                            SizedBox(
+                              height: 16,
+                              child: ExcludeSemantics(
+                                child: Text(
+                                  labelMode == AppNavigationLabelMode.always ||
+                                          isSelected
+                                      ? navTitle[index]
+                                      : '',
+                                  style: TextStyle(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.primary,
+                                    fontWeight: isSelected
+                                        ? FontWeight.bold
+                                        : FontWeight.normal,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   );

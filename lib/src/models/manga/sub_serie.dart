@@ -20,7 +20,8 @@ class SubSerie {
   final String editor; // * Get the ID of the editor of the sub serie
   final String image; // * Get the image link of the sub serie
   List<String> genres; // * Get the list of genres of the sub serie
-  final DateTime firstPublication; // * Get the first publication date of the sub serie
+  final DateTime
+  firstPublication; // * Get the first publication date of the sub serie
   DateTime lastTimeChecked; // * Get the last time the sub serie was checked
 
   static String _resolveImage(Map<String, dynamic> json) {

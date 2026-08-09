@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mymangatheque/src/back/language/runtime_localization.dart';
 import 'package:mymangatheque/l10n/app_localizations.dart';
 import 'package:mymangatheque/src/back/services/appwrite.dart';
 import 'package:mymangatheque/src/const/routes.dart';
@@ -82,6 +83,7 @@ class _AuthCallbackPageState extends State<AuthCallbackPage> {
   }
 
   Future<void> _submitRecovery() async {
+    if (_isLoading) return;
     final localizations = AppLocalizations.of(context);
     if (localizations == null) return;
 
@@ -127,7 +129,14 @@ class _AuthCallbackPageState extends State<AuthCallbackPage> {
 
     if (widget.hasError && !_isRecoveryFlow) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Auth Callback')),
+        appBar: AppBar(
+          title: Text(
+            context.localized(
+              en: 'Authentication confirmation',
+              fr: 'Confirmation de l’authentification',
+            ),
+          ),
+        ),
         body: Center(
           child: Padding(
             padding: const EdgeInsets.all(24),
@@ -152,7 +161,14 @@ class _AuthCallbackPageState extends State<AuthCallbackPage> {
 
     if (!_isRecoveryFlow) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Auth Callback')),
+        appBar: AppBar(
+          title: Text(
+            context.localized(
+              en: 'Authentication confirmation',
+              fr: 'Confirmation de l’authentification',
+            ),
+          ),
+        ),
         body: Center(
           child: _isLoading
               ? const CircularProgressIndicator()

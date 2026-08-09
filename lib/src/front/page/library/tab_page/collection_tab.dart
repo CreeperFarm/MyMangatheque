@@ -7,10 +7,11 @@ import 'package:mymangatheque/src/back/provider/manga_owned_provider.dart';
 import 'package:mymangatheque/src/const/assets.dart';
 import 'package:mymangatheque/src/const/own_icon.dart';
 import 'package:mymangatheque/src/front/components/my_line.dart';
-import 'package:mymangatheque/src/front/components/my_scroll_column.dart';
 import 'package:mymangatheque/src/front/components/my_tome_number_show.dart';
 import 'package:mymangatheque/src/front/components/safe_network_image.dart';
+import 'package:mymangatheque/src/front/page/library/library_tab_data.dart';
 import 'package:mymangatheque/src/function/auto_push_or_go.dart';
+import 'package:mymangatheque/src/models/local_storage/local_storage.dart';
 import 'package:mymangatheque/src/models/manga/sub_serie_for_collection.dart';
 
 class CollectionTab extends ConsumerStatefulWidget {
@@ -24,70 +25,14 @@ class CollectionTab extends ConsumerStatefulWidget {
 }
 
 class _CollectionTabState extends ConsumerState<CollectionTab> {
-  int getNumberVolume(Iterable<SubSerieForCollection> subSeries) {
-    int number = 0;
-    for (var subSerie in subSeries) {
-      number += subSerie.numberOwnedVolumes;
-    }
-    return number;
-  }
-
   List<SubSerieForCollection> _visibleSubSeries(
     Iterable<SubSerieForCollection> subSeries,
   ) {
-    final query = widget.searchQuery.trim().toLowerCase();
-    final visible = subSeries.where((subSerie) {
-      if (query.isEmpty) return true;
-      final title = subSerie.title.toLowerCase();
-      final volumeTitles = subSerie.volumes.map(
-        (volume) => volume.title.toLowerCase(),
-      );
-      return title.contains(query) ||
-          volumeTitles.any((title) => title.contains(query));
-    }).toList();
-
-    visible.sort((a, b) {
-      if (widget.order == 'releaseDate') {
-        final aDate = a.volumes.isEmpty
-            ? DateTime.fromMillisecondsSinceEpoch(0)
-            : a.volumes
-                  .map(
-                    (volume) =>
-                        volume.release ??
-                        DateTime.fromMillisecondsSinceEpoch(0),
-                  )
-                  .reduce(
-                    (value, element) =>
-                        value.isAfter(element) ? value : element,
-                  );
-        final bDate = b.volumes.isEmpty
-            ? DateTime.fromMillisecondsSinceEpoch(0)
-            : b.volumes
-                  .map(
-                    (volume) =>
-                        volume.release ??
-                        DateTime.fromMillisecondsSinceEpoch(0),
-                  )
-                  .reduce(
-                    (value, element) =>
-                        value.isAfter(element) ? value : element,
-                  );
-        return bDate.compareTo(aDate);
-      }
-      return a.title.toLowerCase().compareTo(b.title.toLowerCase());
-    });
-
-    return visible;
-  }
-
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
+    return filterLibrarySubSeries(
+      subSeries,
+      searchQuery: widget.searchQuery,
+      order: widget.order,
+    );
   }
 
   @override
@@ -101,142 +46,178 @@ class _CollectionTabState extends ConsumerState<CollectionTab> {
     final subSeries = ref.watch(mangaOwnedProvider);
     final visibleSubSeries = _visibleSubSeries(subSeries);
 
-    return Padding(
-      padding: const EdgeInsets.all(10),
-      child: MyScrollColumn(
-        children: [
-          MyTomeNumberShow(
-            tomeTotal: getNumberVolume(subSeries).toString(),
-            editionTotal: subSeries.length.toString(),
-            localizations: localizations,
+    return ValueListenableBuilder<AppDisplayDensity>(
+      valueListenable: LocalStorage.displayDensityNotifier,
+      builder: (context, density, _) => CustomScrollView(
+        key: const PageStorageKey<String>('owned-collection'),
+        cacheExtent: density == AppDisplayDensity.compact ? 500 : 700,
+        slivers: [
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
+            sliver: SliverToBoxAdapter(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  MyTomeNumberShow(
+                    tomeTotal: ownedLibraryVolumeCount(subSeries).toString(),
+                    editionTotal: subSeries.length.toString(),
+                    localizations: localizations,
+                  ),
+                  if (subSeries.isEmpty)
+                    Text(localizations.noVolumeOwned)
+                  else if (visibleSubSeries.isEmpty)
+                    Text(localizations.noResults),
+                ],
+              ),
+            ),
           ),
+          SliverPadding(
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            sliver: SliverList.builder(
+              itemCount: visibleSubSeries.length,
+              itemBuilder: (context, index) {
+                final subSerie = visibleSubSeries[index];
+                return RepaintBoundary(
+                  key: ValueKey<String>('collection-${subSerie.id}'),
+                  child: _CollectionSubSeriesRow(
+                    subSerie: subSerie,
+                    localizations: localizations,
+                    density: density,
+                  ),
+                );
+              },
+            ),
+          ),
+          const SliverToBoxAdapter(child: SizedBox(height: 92)),
+        ],
+      ),
+    );
+  }
+}
 
-          ...visibleSubSeries.map((subSerie) {
-            return Column(
-              children: [
-                InkWell(
-                  onTap: () {
-                    pushOrGo(context, '/library/sub_serie/${subSerie.id}');
-                  },
-                  child: Container(
-                    constraints: BoxConstraints(
-                      maxWidth: MediaQuery.of(context).size.width,
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 10),
-                          child: SizedBox(
-                            width: MediaQuery.of(context).size.width - 65,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  subSerie.title.replaceAll(
-                                    ' - Edition Standard',
-                                    '',
-                                  ),
-                                  style: const TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                  softWrap: true,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                Text(
-                                  localizations.volumeOwnedOverX(
-                                    subSerie.numberOwnedVolumes,
-                                    subSerie.numberOfVolumes,
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.only(top: 5),
-                                  child: SizedBox(
-                                    width:
-                                        MediaQuery.of(context).size.width - 65,
-                                    child: Stack(
-                                      children: [
-                                        for (
-                                          var i = 0;
-                                          i < min(9, subSerie.volumes.length);
-                                          i++
-                                        )
-                                          (i == 0)
-                                              ? ClipRRect(
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                        10.0,
-                                                      ),
-                                                  child: SafeNetworkImage(
-                                                    imageUrl: subSerie
-                                                        .volumes[i]
-                                                        .image,
-                                                    width: 65,
-                                                  ),
-                                                )
-                                              : Positioned(
-                                                  left: i * 45.0,
-                                                  child: Container(
-                                                    decoration: BoxDecoration(
-                                                      boxShadow: [
-                                                        BoxShadow(
-                                                          color:
-                                                              Theme.of(context)
-                                                                  .colorScheme
-                                                                  .onPrimary
-                                                                  .withValues(
-                                                                    alpha: 0.9,
-                                                                  ),
-                                                          spreadRadius: 1,
-                                                          blurRadius: 2,
-                                                          offset: const Offset(
-                                                            0,
-                                                            1,
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                    child: ClipRRect(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                            10.0,
-                                                          ),
-                                                      child: SafeNetworkImage(
-                                                        imageUrl: subSerie
-                                                            .volumes[i]
-                                                            .image,
-                                                        width: 65,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ),
-                                      ],
+class _CollectionSubSeriesRow extends StatelessWidget {
+  const _CollectionSubSeriesRow({
+    required this.subSerie,
+    required this.localizations,
+    required this.density,
+  });
+
+  final SubSerieForCollection subSerie;
+  final AppLocalizations localizations;
+  final AppDisplayDensity density;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        InkWell(
+          onTap: () {
+            pushOrGo(context, '/library/sub_serie/${subSerie.id}');
+          },
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        subSerie.title.replaceAll(
+                          ' - Edition Standard',
+                          '',
+                        ),
+                        maxLines: 2,
+                        style: TextStyle(
+                          fontSize: density == AppDisplayDensity.compact
+                              ? 16
+                              : 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(
+                        localizations.volumeOwnedOverX(
+                          subSerie.numberOwnedVolumes,
+                          subSerie.numberOfVolumes,
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 5),
+                        child: SizedBox(
+                          width: double.infinity,
+                          height: subSerie.volumes.isEmpty
+                              ? 0
+                              : density == AppDisplayDensity.compact
+                              ? 82
+                              : 100,
+                          child: Stack(
+                            children: [
+                              for (
+                                var i = 0;
+                                i < min(9, subSerie.volumes.length);
+                                i++
+                              )
+                                Positioned(
+                                  left:
+                                      i *
+                                      (density == AppDisplayDensity.compact
+                                          ? 38.0
+                                          : 45.0),
+                                  child: DecoratedBox(
+                                    decoration: i == 0
+                                        ? const BoxDecoration()
+                                        : BoxDecoration(
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .onPrimary
+                                                    .withValues(alpha: 0.9),
+                                                spreadRadius: 1,
+                                                blurRadius: 2,
+                                                offset: const Offset(0, 1),
+                                              ),
+                                            ],
+                                          ),
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(10),
+                                      child: SafeNetworkImage(
+                                        imageUrl: subSerie.volumes[i].image,
+                                        width:
+                                            density == AppDisplayDensity.compact
+                                            ? 54
+                                            : 65,
+                                        height:
+                                            density == AppDisplayDensity.compact
+                                            ? 82
+                                            : 100,
+                                      ),
                                     ),
                                   ),
                                 ),
-                              ],
-                            ),
+                            ],
                           ),
                         ),
-                        OwnIcon(
-                          iconColor: Theme.of(context).colorScheme.primary,
-                          iconSrc: Assets.icons.arrowRight,
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
-                MyLine(
-                  width: MediaQuery.of(context).size.width,
-                  vertical: 10,
-                  horizontal: 0,
-                ),
-              ],
-            );
-          }),
-        ],
-      ),
+              ),
+              OwnIcon(
+                iconColor: Theme.of(context).colorScheme.primary,
+                iconSrc: Assets.icons.arrowRight,
+              ),
+            ],
+          ),
+        ),
+        MyLine(
+          width: MediaQuery.sizeOf(context).width,
+          vertical: 10,
+          horizontal: 0,
+        ),
+      ],
     );
   }
 }

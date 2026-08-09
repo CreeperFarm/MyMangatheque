@@ -2,8 +2,8 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:crypto/crypto.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:mymangatheque/src/back/language/runtime_localization.dart';
 
 class MobileApiKey {
   const MobileApiKey({required this.value, required this.expiresAt});
@@ -94,7 +94,10 @@ class MobileApiKeyManager {
     try {
       return await _secureStorage.read(key: key);
     } catch (e) {
-      debugPrint('Secure storage read failed for $key: $e');
+      RuntimeLocalization.debug(
+        en: 'Secure storage read failed for $key: $e',
+        fr: 'La lecture du stockage sécurisé a échoué pour $key : $e',
+      );
       return null;
     }
   }
@@ -104,8 +107,16 @@ class MobileApiKeyManager {
       await _secureStorage.write(key: key, value: value);
       return;
     } catch (e) {
-      debugPrint('Secure storage write failed for $key: $e');
-      throw StateError('Secure storage is unavailable for the mobile API key.');
+      RuntimeLocalization.debug(
+        en: 'Secure storage write failed for $key: $e',
+        fr: 'L’écriture dans le stockage sécurisé a échoué pour $key : $e',
+      );
+      throw StateError(
+        RuntimeLocalization.text(
+          en: 'Secure storage is unavailable for the mobile API key.',
+          fr: 'Le stockage sécurisé est indisponible pour la clé API mobile.',
+        ),
+      );
     }
   }
 
@@ -114,7 +125,10 @@ class MobileApiKeyManager {
       await _secureStorage.delete(key: key);
       return;
     } catch (e) {
-      debugPrint('Secure storage delete failed for $key: $e');
+      RuntimeLocalization.debug(
+        en: 'Secure storage deletion failed for $key: $e',
+        fr: 'La suppression dans le stockage sécurisé a échoué pour $key : $e',
+      );
     }
   }
 
@@ -151,7 +165,12 @@ class MobileApiKeyManager {
     }
 
     if (key == null || key.isEmpty) {
-      throw StateError('No API key returned by /api/auth/keys/mobile');
+      throw StateError(
+        RuntimeLocalization.text(
+          en: 'No API key was returned by /api/auth/keys/mobile.',
+          fr: 'Aucune clé API n’a été renvoyée par /api/auth/keys/mobile.',
+        ),
+      );
     }
 
     final expiresAt =

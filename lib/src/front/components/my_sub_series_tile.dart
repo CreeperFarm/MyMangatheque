@@ -11,7 +11,11 @@ class MySubSeriesTile extends StatelessWidget {
   final Map<String, dynamic> data;
   final String initRoute;
 
-  const MySubSeriesTile({required this.data, required this.initRoute, super.key});
+  const MySubSeriesTile({
+    required this.data,
+    required this.initRoute,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -24,8 +28,11 @@ class MySubSeriesTile extends StatelessWidget {
 
     final editor = data["expand"][0]["editors"][0];
 
-    final title = data['title']?.toString() ?? data['titleFr']?.toString() ?? '';
-    final subtitle = editor["name"] == null ? title : '$title • ${editor["name"]}';
+    final title =
+        data['title']?.toString() ?? data['titleFr']?.toString() ?? '';
+    final subtitle = editor["name"] == null
+        ? title
+        : '$title • ${editor["name"]}';
 
     final routePrefix = initRoute == "/" ? "" : initRoute;
     final id = data['id']?.toString() ?? '';
@@ -42,7 +49,11 @@ class MySubSeriesTile extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               SizedBox(
-                width: MediaQuery.of(context).size.width - (MediaQuery.of(context).padding.left + MediaQuery.of(context).padding.right + 44),
+                width:
+                    MediaQuery.of(context).size.width -
+                    (MediaQuery.of(context).padding.left +
+                        MediaQuery.of(context).padding.right +
+                        44),
                 child: Padding(
                   padding: const EdgeInsets.only(
                     top: 5,
@@ -72,7 +83,8 @@ class MySubSeriesTile extends StatelessWidget {
                               ? ClipRRect(
                                   borderRadius: BorderRadius.circular(10.0),
                                   child: SafeNetworkImage(
-                                    imageUrl: volumes[i]['coverUrl']?.toString(),
+                                    imageUrl: volumes[i]['coverUrl']
+                                        ?.toString(),
                                     height: 90,
                                   ),
                                 )
@@ -82,7 +94,10 @@ class MySubSeriesTile extends StatelessWidget {
                                     decoration: BoxDecoration(
                                       boxShadow: [
                                         BoxShadow(
-                                          color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.9),
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onPrimary
+                                              .withValues(alpha: 0.9),
                                           spreadRadius: 1,
                                           blurRadius: 2,
                                           offset: const Offset(0, 1),
@@ -92,7 +107,8 @@ class MySubSeriesTile extends StatelessWidget {
                                     child: ClipRRect(
                                       borderRadius: BorderRadius.circular(12),
                                       child: SafeNetworkImage(
-                                        imageUrl: volumes[i]['coverUrl']?.toString(),
+                                        imageUrl: volumes[i]['coverUrl']
+                                            ?.toString(),
                                         height: 90,
                                       ),
                                     ),
@@ -105,7 +121,10 @@ class MySubSeriesTile extends StatelessWidget {
               ),
             ],
           ),
-          OwnIcon(iconColor: Theme.of(context).colorScheme.primary, iconSrc: Assets.icons.arrowRight),
+          OwnIcon(
+            iconColor: Theme.of(context).colorScheme.primary,
+            iconSrc: Assets.icons.arrowRight,
+          ),
         ],
       ),
     );

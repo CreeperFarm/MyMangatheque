@@ -20,7 +20,9 @@ class AppwriteFile {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is AppwriteFile && runtimeType == other.runtimeType && url == other.url;
+      other is AppwriteFile &&
+          runtimeType == other.runtimeType &&
+          url == other.url;
 
   @override
   int get hashCode => url.hashCode;

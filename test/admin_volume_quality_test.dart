@@ -73,4 +73,57 @@ void main() {
       expect(zero.resolutionNote, 'Numéro corrigé.');
     });
   });
+
+  group('AdminUserPage', () {
+    test('parses users and pagination', () {
+      final page = AdminUserPage.fromJson(<String, dynamic>{
+        'data': <String, dynamic>{
+          'users': <Map<String, dynamic>>[
+            <String, dynamic>{
+              r'$id': 'user-1',
+              'pseudo': 'MangaFan',
+              'mail': 'fan@example.com',
+              'role': 'admin',
+              'coverURL': 'https://example.com/avatar.webp',
+              r'$createdAt': '2026-08-08T08:00:00.000Z',
+            },
+          ],
+          'pagination': <String, dynamic>{
+            'page': 1,
+            'totalPages': 4,
+            'totalItems': 151,
+          },
+        },
+      });
+
+      expect(page.totalItems, 151);
+      expect(page.totalPages, 4);
+      expect(page.users.single.id, 'user-1');
+      expect(page.users.single.pseudo, 'MangaFan');
+      expect(page.users.single.email, 'fan@example.com');
+      expect(page.users.single.role, 'admin');
+      expect(page.users.single.createdAt, isNotNull);
+    });
+  });
+
+  group('AdminRelationOption', () {
+    test('describes a volume with tome, sub-series and resume', () {
+      final option = AdminRelationOption.fromJson(
+        AdminRelationResource.volumes,
+        <String, dynamic>{
+          'id': 'volume-42',
+          'titleFr': 'Exemple',
+          'tomeNumber': 4.5,
+          'resume': 'Résumé du volume',
+          'subSeries': <String, dynamic>{'titleFr': 'Édition principale'},
+        },
+      );
+
+      expect(option.id, 'volume-42');
+      expect(option.label, 'Exemple');
+      expect(option.detail, contains('Tome 4.5'));
+      expect(option.detail, contains('Édition principale'));
+      expect(option.detail, contains('Résumé du volume'));
+    });
+  });
 }

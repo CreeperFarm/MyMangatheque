@@ -1,18 +1,29 @@
-name: Build
+name: Code Quality
+
 on:
     push:
         branches:
             - main
     pull_request:
         types: [opened, synchronize, reopened]
+
+permissions:
+    contents: read
+
+concurrency:
+    group: code-quality-${{ github.ref }}
+    cancel-in-progress: true
+
 jobs:
     sonarqube:
         name: SonarQube
         runs-on: ubuntu-latest
+        timeout-minutes: 30
         steps:
             - uses: actions/checkout@v4
               with:
                   fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
+                  persist-credentials: false
 
             # The analysis requires to retrieve dependencies and build successfully
             - name: Install Flutter
@@ -23,24 +34,19 @@ jobs:
             - name: Flutter pub get
               run: flutter pub get
 
-            - name: Create Keystore and Env file
-              env:
-                  DECRYPT_PASS: ${{ secrets.KEYSTORE_DECRYPTION_PASSWORD }}
-                  STORE_PASS: ${{ secrets.STORE_PASSWORD }}
-                  KEY_PASS: ${{ secrets.KEY_PASSWORD }}
-                  KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-              run: |
-                  openssl aes-256-cbc -d -in android/app/keystore.enc -out android/upload-keystore.jks -k "$DECRYPT_PASS" -pbkdf2
-                  echo "Verifying keystore integrity..."
-                  keytool -list -v -keystore android/upload-keystore.jks -storepass "$STORE_PASS" -alias "$KEY_ALIAS"
-                  touch .env
-                  echo "storePassword=$STORE_PASS" >> .env
-                  echo "keyPassword=$KEY_PASS" >> .env
-                  echo "keyAlias=$KEY_ALIAS" >> .env
-                  echo "storeFile=../upload-keystore.jks" >> .env
+            - name: Analyze
+              run: flutter analyze
 
-            - name: Build
-              run: flutter build appbundle --obfuscate --split-debug-info out/android --release
+            - name: Run tests with coverage
+              run: flutter test --coverage
+
+            - name: Upload coverage report
+              uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+              with:
+                  name: flutter-coverage-${{ github.run_id }}
+                  path: coverage/lcov.info
+                  if-no-files-found: error
+                  retention-days: 14
 
             - name: Add SonarQube config to ignore C/C++/ObjC
               run: |

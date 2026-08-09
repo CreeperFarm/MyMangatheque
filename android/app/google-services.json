@@ -1,0 +1,59 @@
+{
+  "project_info": {
+    "project_number": "390944577899",
+    "firebase_url": "https://mymangatheque-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "mymangatheque",
+    "storage_bucket": "mymangatheque.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:390944577899:android:876fc7a86c7d83ebf7142e",
+        "android_client_info": {
+          "package_name": "com.mymangatheque"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAq4h5rJN8kUk7vKu5YvkCaISHBQjMiz98"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "390944577899-jphahlpt7urvs7gs4kodo6o01497msu9.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:390944577899:android:76650421eaae60d2f7142e",
+        "android_client_info": {
+          "package_name": "fr.creeperfarm.mymangatheque"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAq4h5rJN8kUk7vKu5YvkCaISHBQjMiz98"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "390944577899-jphahlpt7urvs7gs4kodo6o01497msu9.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

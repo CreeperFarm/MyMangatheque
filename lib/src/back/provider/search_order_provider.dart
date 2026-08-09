@@ -4,7 +4,7 @@ class SearchOrderNotifier extends Notifier<String> {
   @override
   String build() => 'manga';
 
-  void changeSearchOrder(newSearchOrder) {
+  void changeSearchOrder(String newSearchOrder) {
     state = newSearchOrder;
   }
 }

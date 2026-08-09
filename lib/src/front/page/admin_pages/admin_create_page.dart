@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mymangatheque/src/back/language/runtime_localization.dart';
 import 'package:mymangatheque/src/back/services/admin_service.dart';
 import 'package:mymangatheque/src/front/page/admin_pages/admin_components.dart';
 import 'package:mymangatheque/src/front/page/admin_pages/create_page/admin_create_author.dart';
@@ -48,31 +49,57 @@ class _AdminCreatePageState extends State<AdminCreatePage>
 
     if (!_admin.isLoggedIn()) {
       return AdminPageScaffold(
-        title: 'Création de données',
+        title: context.localized(
+          en: 'Data creation',
+          fr: 'Création de données',
+        ),
         child: Center(
           child: FilledButton.icon(
             onPressed: () => pushOrGo(context, '/admin/admin_login'),
             icon: const Icon(Icons.login_rounded),
-            label: const Text('Se connecter en admin'),
+            label: Text(
+              context.localized(
+                en: 'Sign in as admin',
+                fr: 'Se connecter en admin',
+              ),
+            ),
           ),
         ),
       );
     }
 
     return AdminPageScaffold(
-      title: 'Création de données',
+      title: context.localized(en: 'Data creation', fr: 'Création de données'),
       scrollable: false,
       maxWidth: 1080,
       appBarBottom: TabBar(
         controller: _tabController,
         isScrollable: true,
-        tabs: const [
-          Tab(icon: Icon(Icons.person_add_alt_1_outlined), text: 'Auteur'),
-          Tab(icon: Icon(Icons.sell_outlined), text: 'Genre'),
-          Tab(icon: Icon(Icons.business_outlined), text: 'Éditeur'),
-          Tab(icon: Icon(Icons.collections_bookmark_outlined), text: 'Série'),
-          Tab(icon: Icon(Icons.account_tree_outlined), text: 'Sous-série'),
-          Tab(icon: Icon(Icons.menu_book_outlined), text: 'Volume'),
+        tabs: [
+          Tab(
+            icon: const Icon(Icons.person_add_alt_1_outlined),
+            text: context.localized(en: 'Author', fr: 'Auteur'),
+          ),
+          Tab(
+            icon: const Icon(Icons.sell_outlined),
+            text: context.localized(en: 'Genre', fr: 'Genre'),
+          ),
+          Tab(
+            icon: const Icon(Icons.business_outlined),
+            text: context.localized(en: 'Publisher', fr: 'Éditeur'),
+          ),
+          Tab(
+            icon: const Icon(Icons.collections_bookmark_outlined),
+            text: context.localized(en: 'Series', fr: 'Série'),
+          ),
+          Tab(
+            icon: const Icon(Icons.account_tree_outlined),
+            text: context.localized(en: 'Sub-series', fr: 'Sous-série'),
+          ),
+          Tab(
+            icon: const Icon(Icons.menu_book_outlined),
+            text: context.localized(en: 'Volume', fr: 'Volume'),
+          ),
         ],
       ),
       child: TabBarView(

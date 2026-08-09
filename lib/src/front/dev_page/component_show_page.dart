@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mymangatheque/src/back/language/runtime_localization.dart';
 import 'package:mymangatheque/l10n/app_localizations.dart';
 import 'package:mymangatheque/src/const/assets.dart';
 import 'package:mymangatheque/src/front/components/my_button.dart';
@@ -24,11 +25,23 @@ class ComponentShowPage extends StatelessWidget {
 
     var controller = TextEditingController();
     return Scaffold(
-      appBar: AppBar(title: const Text('Component Show Page')),
+      appBar: AppBar(
+        title: Text(
+          context.localized(
+            en: 'Component showcase',
+            fr: 'Présentation des composants',
+          ),
+        ),
+      ),
       body: MyScrollColumn(
         scrollPadding: const EdgeInsets.symmetric(horizontal: 8),
         children: [
-          const Text('My Button : (text: "text", onTap: () {})'),
+          Text(
+            context.localized(
+              en: 'Button example: (text: "text", onTap: () {})',
+              fr: 'Exemple de bouton : (text: "text", onTap: () {})',
+            ),
+          ),
           Padding(
             padding: const EdgeInsets.all(10),
             child: MyButton(text: 'text', onTap: () {}),
@@ -68,13 +81,19 @@ class ComponentShowPage extends StatelessWidget {
               children: [
                 MyTextField(
                   controller: controller,
-                  labelText: "labelText obscure text false",
+                  labelText: context.localized(
+                    en: 'Visible text field',
+                    fr: 'Champ de texte visible',
+                  ),
                   obscureText: false,
                   errorMessage: 'errorMessage',
                 ),
                 MyTextField(
                   controller: controller,
-                  labelText: "labelText obscure text true",
+                  labelText: context.localized(
+                    en: 'Hidden text field',
+                    fr: 'Champ de texte masqué',
+                  ),
                   obscureText: true,
                   errorMessage: 'errorMessage',
                 ),

@@ -3,6 +3,9 @@ import 'package:appwrite/models.dart' as models;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
 import 'package:mymangatheque/environment.dart';
+import 'package:mymangatheque/src/back/language/runtime_localization.dart';
+import 'package:mymangatheque/src/back/services/oauth_flow.dart';
+import 'package:mymangatheque/src/back/services/security/security_utils.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class AppwriteClientService {
@@ -25,13 +28,29 @@ class AppwriteClientService {
   Future<void> init() async {
     if (_initialized) return;
 
+    final endpointUri = Uri.tryParse(Environment.appwritePublicEndpoint);
+    final localDebugEndpoint =
+        !kReleaseMode &&
+        endpointUri != null &&
+        <String>{'localhost', '127.0.0.1', '::1'}.contains(endpointUri.host);
+    if (endpointUri == null ||
+        endpointUri.host.isEmpty ||
+        endpointUri.userInfo.isNotEmpty ||
+        (!localDebugEndpoint && endpointUri.scheme.toLowerCase() != 'https')) {
+      throw StateError(
+        RuntimeLocalization.text(
+          en: 'The Appwrite endpoint configuration is invalid.',
+          fr: 'La configuration du point d’accès Appwrite est invalide.',
+        ),
+      );
+    }
+
     _client = Client()
       ..setEndpoint(Environment.appwritePublicEndpoint)
       ..setProject(Environment.appwriteProjectId);
 
     // Keep self-signed only in local debug environments.
-    if (!kReleaseMode &&
-        Environment.appwritePublicEndpoint.contains('localhost')) {
+    if (localDebugEndpoint) {
       _client.setSelfSigned(status: true);
     }
 
@@ -70,16 +89,23 @@ class AppwriteClientService {
       if (e.type == 'user_auth_method_unsupported' || e.code == 501) {
         _anonymousSessionUnavailable = true;
         if (!_anonymousUnsupportedAlreadyLogged) {
-          debugPrint(
-            'Anonymous auth disabled on Appwrite project. Guest session fallback will be used.',
+          RuntimeLocalization.debug(
+            en: 'Anonymous authentication is disabled in Appwrite. The guest fallback will be used.',
+            fr: 'L’authentification anonyme est désactivée dans Appwrite. Le mode invité de secours sera utilisé.',
           );
           _anonymousUnsupportedAlreadyLogged = true;
         }
         return;
       }
-      debugPrint('Anonymous session creation skipped: $e');
+      RuntimeLocalization.debug(
+        en: 'Anonymous session creation skipped: $e',
+        fr: 'Création de la session anonyme ignorée : $e',
+      );
     } catch (e) {
-      debugPrint('Anonymous session creation skipped: $e');
+      RuntimeLocalization.debug(
+        en: 'Anonymous session creation skipped: $e',
+        fr: 'Création de la session anonyme ignorée : $e',
+      );
     }
   }
 
@@ -129,20 +155,22 @@ class AppwriteClientService {
     if (kIsWeb) {
       const successUrl = 'https://mymangatheque.com/auth/callback';
       const failureUrl = 'https://mymangatheque.com/auth/callback?error=true';
-      final oauthUrl =
-          Uri.parse(
-            '${Environment.appwritePublicEndpoint}/account/sessions/oauth2/google',
-          ).replace(
-            queryParameters: <String, String>{
-              'project': Environment.appwriteProjectId,
-              'success': successUrl,
-              'failure': failureUrl,
-            },
-          );
+      final oauthUrl = OAuthFlow.webEntrypoint(
+        endpoint: Environment.appwritePublicEndpoint,
+        projectId: Environment.appwriteProjectId,
+        successUrl: successUrl,
+        failureUrl: failureUrl,
+      );
 
       final launched = await launchUrl(oauthUrl, webOnlyWindowName: '_self');
       if (!launched) {
-        throw AppwriteException('Unable to open the Google OAuth page.', 500);
+        throw AppwriteException(
+          RuntimeLocalization.text(
+            en: 'Unable to open the Google OAuth page.',
+            fr: 'Impossible d’ouvrir la page OAuth Google.',
+          ),
+          500,
+        );
       }
       return true;
     }
@@ -152,59 +180,74 @@ class AppwriteClientService {
   }
 
   Future<void> _loginWithGoogleMobile() async {
-    final callbackScheme = 'appwrite-callback-${Environment.appwriteProjectId}';
-    final mobileSuccessUrl = '$callbackScheme://oauth2success';
-    final mobileFailureUrl = '$callbackScheme://oauth2failure';
-    final oauthEntrypoint =
-        Uri.parse(
-          '${Environment.appwritePublicEndpoint}/account/tokens/oauth2/google',
-        ).replace(
-          queryParameters: <String, String>{
-            'project': Environment.appwriteProjectId,
-            'success': mobileSuccessUrl,
-            'failure': mobileFailureUrl,
-          },
-        );
+    final callbackScheme = OAuthFlow.mobileCallbackScheme(
+      Environment.appwriteProjectId,
+    );
+    final oauthEntrypoint = OAuthFlow.mobileEntrypoint(
+      endpoint: Environment.appwritePublicEndpoint,
+      projectId: Environment.appwriteProjectId,
+    );
 
-    debugPrint('Google OAuth Appwrite mobile entrypoint: $oauthEntrypoint');
+    RuntimeLocalization.debug(
+      en: 'Opening the Google OAuth mobile flow.',
+      fr: 'Ouverture du parcours OAuth Google mobile.',
+    );
     final callback = await FlutterWebAuth2.authenticate(
       url: oauthEntrypoint.toString(),
       callbackUrlScheme: callbackScheme,
       options: const FlutterWebAuth2Options(useWebview: false),
     );
 
-    final callbackUri = Uri.parse(callback);
-    final callbackParams = _queryAndFragmentParams(callbackUri);
+    late final OAuthCallbackPayload callbackPayload;
+    try {
+      callbackPayload = OAuthFlow.parseMobileCallback(
+        callback: callback,
+        expectedScheme: callbackScheme,
+      );
+    } on FormatException {
+      throw AppwriteException(
+        RuntimeLocalization.text(
+          en: 'The OAuth callback origin is invalid.',
+          fr: 'L’origine du callback OAuth est invalide.',
+        ),
+        400,
+      );
+    }
+    final callbackUri = callbackPayload.uri;
+    final callbackParams = callbackPayload.parameters;
 
-    final callbackHost = callbackUri.host.toLowerCase();
-    final hasOAuthError =
-        callbackHost == 'oauth2failure' ||
-        callbackParams.containsKey('error') ||
-        callbackParams.containsKey('error_description');
-    if (hasOAuthError) {
+    if (callbackPayload.isFailure) {
       final errorDetails =
           callbackParams['error_description'] ??
           callbackParams['error'] ??
-          callbackUri.toString();
-      final sessionAlreadyExists =
-          errorDetails.contains('user_session_already_exists') ||
-          errorDetails.contains('session is active');
+          RuntimeLocalization.text(
+            en: 'The identity provider returned an OAuth error.',
+            fr: 'Le fournisseur d’identité a renvoyé une erreur OAuth.',
+          );
+      final sessionAlreadyExists = callbackPayload.describesExistingSession;
       if (sessionAlreadyExists) {
         final currentUser = await tryGetCurrentUser();
         if (currentUser != null) {
-          debugPrint(
-            'Google OAuth returned "session already exists". Reusing current session.',
+          RuntimeLocalization.debug(
+            en: 'Google OAuth returned an existing session. Reusing it.',
+            fr: 'OAuth Google a renvoyé une session existante. Réutilisation de celle-ci.',
           );
           return;
         }
       }
-      throw AppwriteException('Google OAuth failed: $errorDetails', 401);
+      throw AppwriteException(
+        RuntimeLocalization.text(
+          en: 'Google OAuth failed: $errorDetails',
+          fr: 'OAuth Google a échoué : $errorDetails',
+        ),
+        401,
+      );
     }
 
-    final userId = callbackParams['userId'] ?? callbackParams['user_id'];
-    final secret = callbackParams['secret'];
+    final userId = callbackPayload.userId;
+    final secret = callbackPayload.secret;
     if (userId == null || userId.isEmpty || secret == null || secret.isEmpty) {
-      final sessionKey = callbackParams['key'];
+      final sessionKey = callbackPayload.sessionKey;
       if (sessionKey != null && sessionKey.isNotEmpty && secret != null) {
         _client.setSession(secret);
         final currentUser = await tryGetCurrentUser();
@@ -212,9 +255,19 @@ class AppwriteClientService {
           return;
         }
       }
-      debugPrint('Unexpected OAuth callback payload: $callbackUri');
+      RuntimeLocalization.debug(
+        en:
+            'Unexpected OAuth callback payload (sensitive values redacted): '
+            '${redactSensitiveText(callbackUri)}',
+        fr:
+            'Réponse OAuth inattendue (valeurs sensibles masquées) : '
+            '${redactSensitiveText(callbackUri)}',
+      );
       throw AppwriteException(
-        'Invalid OAuth2 callback payload. userId/secret missing.',
+        RuntimeLocalization.text(
+          en: 'Invalid OAuth2 callback payload. Required identifiers are missing.',
+          fr: 'Réponse OAuth2 invalide. Des identifiants requis sont absents.',
+        ),
         500,
       );
     }
@@ -227,8 +280,9 @@ class AppwriteClientService {
       if (sessionAlreadyExists) {
         final currentUser = await tryGetCurrentUser();
         if (currentUser != null) {
-          debugPrint(
-            'Google OAuth finished with an existing active session. Reusing current session.',
+          RuntimeLocalization.debug(
+            en: 'Google OAuth finished with an existing active session. Reusing it.',
+            fr: 'OAuth Google s’est terminé avec une session active existante. Réutilisation de celle-ci.',
           );
           return;
         }
@@ -237,28 +291,15 @@ class AppwriteClientService {
     }
   }
 
-  Map<String, String> _queryAndFragmentParams(Uri uri) {
-    final params = <String, String>{...uri.queryParameters};
-    final fragment = uri.fragment;
-    if (fragment.isEmpty || !fragment.contains('=')) {
-      return params;
-    }
-
-    try {
-      params.addAll(Uri.splitQueryString(fragment));
-    } catch (_) {
-      // Ignore malformed fragment payloads.
-    }
-
-    return params;
-  }
-
   Future<void> logoutCurrentSession() async {
     await init();
     try {
       await _account.deleteSession(sessionId: 'current');
     } catch (e) {
-      debugPrint('deleteSession(current) failed: $e');
+      RuntimeLocalization.debug(
+        en: 'Deleting the current session failed: $e',
+        fr: 'La suppression de la session courante a échoué : $e',
+      );
     }
   }
 
@@ -267,7 +308,10 @@ class AppwriteClientService {
     try {
       await _account.deleteSessions();
     } catch (e) {
-      debugPrint('deleteSessions failed: $e');
+      RuntimeLocalization.debug(
+        en: 'Deleting all sessions failed: $e',
+        fr: 'La suppression de toutes les sessions a échoué : $e',
+      );
     }
   }
 
@@ -330,6 +374,23 @@ class AppwriteClientService {
     required String identifier,
   }) async {
     await init();
-    await _account.createPushTarget(targetId: targetId, identifier: identifier);
+    try {
+      await _account.createPushTarget(
+        targetId: targetId,
+        identifier: identifier,
+        providerId: Environment.appwriteFcmProviderId,
+      );
+    } on AppwriteException catch (error) {
+      if (error.code != 409) rethrow;
+      await _account.updatePushTarget(
+        targetId: targetId,
+        identifier: identifier,
+      );
+    }
+  }
+
+  Future<void> deletePushTarget({required String targetId}) async {
+    await init();
+    await _account.deletePushTarget(targetId: targetId);
   }
 }

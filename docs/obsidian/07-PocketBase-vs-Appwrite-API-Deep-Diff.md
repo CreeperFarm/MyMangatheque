@@ -40,7 +40,9 @@ Scope:
   - **MyMangatheque API**: business/catalog endpoints (`/api/series`, `/api/volumes`, `/api/users/me/*`, recommendations, analytics)
 - App no longer depends on PocketBase runtime services.
 - A compatibility layer in `AppwriteConnector` emulates old `RecordModel` usage and rebuilds legacy-like `expand` structures.
-- Realtime for collections is now a polling-compatible stream (15s timer), not native DB subscription.
+- Les collections utilisent Appwrite Realtime avec une connexion partagée par
+  collection, invalidation du cache, reconnexion et polling adaptatif uniquement
+  en secours.
 
 ---
 
@@ -309,13 +311,15 @@ Common breakpoints:
 - PocketBase native realtime subscriptions.
 
 ## Now
-- Collection change listener in connector emits polling events every 15s.
+- Le listener de collection relaie les événements Appwrite natifs et n’émet des
+  événements de polling qu’en cas d’indisponibilité de la connexion temps réel.
 - Notifications service:
   - can register push target via Appwrite account
   - includes fallback polling heartbeat (`/api/analytics/health`) every 5 minutes
   - creates in-app notification entries from fallback responses
 
-This is not equivalent to real realtime data sync.
+Le client conserve un repli contrôlé afin qu’une interruption WebSocket ne
+bloque jamais la synchronisation des écrans essentiels.
 
 ---
 
@@ -485,4 +489,3 @@ Most persistent bugs are not “UI-only”; they are often caused by one of:
 - relation inference gaps
 - pagination metadata inconsistencies
 - Appwrite permission/proxy configuration mismatch
-

@@ -5,10 +5,14 @@ import 'package:appwrite/appwrite.dart';
 import 'package:flutter/material.dart';
 import 'package:mymangatheque/environment.dart';
 import 'package:mymangatheque/l10n/app_localizations.dart';
+import 'package:mymangatheque/src/back/language/runtime_localization.dart';
 import 'package:mymangatheque/src/back/services/api/mobile_api_client.dart';
+import 'package:mymangatheque/src/back/services/analytics/promotion_tracking_service.dart';
 import 'package:mymangatheque/src/back/services/appwrite_client.dart';
+import 'package:mymangatheque/src/back/services/cache/persistent_cache_store.dart';
 import 'package:mymangatheque/src/back/services/models/api_record_model.dart';
 import 'package:mymangatheque/src/back/services/notifications/notification_service.dart';
+import 'package:mymangatheque/src/back/services/sync/realtime_sync_service.dart';
 import 'package:mymangatheque/src/function/auto_push_or_go.dart';
 import 'package:mymangatheque/src/function/show_message_function.dart';
 import 'package:mymangatheque/src/models/local_storage/local_storage.dart';
@@ -22,6 +26,10 @@ export 'package:mymangatheque/src/models/user.dart';
 // Compatibility aliases for legacy record usages in the UI.
 typedef RecordModel = ApiRecordModel;
 typedef RecordSubscriptionEvent = ApiRecordSubscriptionEvent;
+
+void _appLog({required String en, required String fr}) {
+  RuntimeLocalization.debug(en: en, fr: fr);
+}
 
 class RecordPage {
   const RecordPage({
@@ -91,6 +99,7 @@ class AppwriteConnector {
   static const String _reviewsCollectionId = 'reviews';
   static const Duration _fullListCacheTtl = Duration(seconds: 25);
   static const Duration _recordCacheTtl = Duration(minutes: 2);
+  static const Duration _homePersistentCacheTtl = Duration(minutes: 30);
 
   AppwriteConnector._internal();
 
@@ -101,6 +110,8 @@ class AppwriteConnector {
   final AppwriteClientService _appwrite = AppwriteClientService();
   final MobileApiClient _api = MobileApiClient();
   final NotificationService _notifications = NotificationService();
+  final PersistentCacheStore _persistentCache = PersistentCacheStore();
+  final RealtimeSyncService _realtimeSync = RealtimeSyncService();
 
   final BehaviorSubject<User?> _connectedUser = BehaviorSubject<User?>();
   final Map<String, _RecordListCacheEntry> _fullListCache =
@@ -134,7 +145,10 @@ class AppwriteConnector {
     try {
       await _api.ensureApiKey();
     } catch (e) {
-      debugPrint('Mobile API key bootstrap failed: $e');
+      _appLog(
+        en: 'Mobile API key initialization failed: $e',
+        fr: 'L’initialisation de la clé API mobile a échoué : $e',
+      );
     }
 
     await _syncConnectedUser();
@@ -150,6 +164,7 @@ class AppwriteConnector {
     await _api.invalidateApiKey();
     await _api.ensureApiKey();
     await _syncConnectedUser();
+    await _notifications.synchronizePushTargetIfEnabled();
   }
 
   bool isLoggedIn() {
@@ -162,6 +177,22 @@ class AppwriteConnector {
 
   Stream<List<InAppNotification>> listenToNotifications() {
     return _notifications.stream;
+  }
+
+  List<InAppNotification> get notifications => _notifications.notifications;
+
+  int get unreadNotificationCount => _notifications.unreadCount;
+
+  void markAllNotificationsOpened() => _notifications.markAllOpened();
+
+  void clearNotifications() => _notifications.clearInApp();
+
+  void openNotification(String notificationId) {
+    _notifications.openNotification(notificationId);
+  }
+
+  void markNotificationOpened(String notificationId) {
+    _notifications.markOpened(notificationId);
   }
 
   Future<void> _syncConnectedUser() async {
@@ -222,24 +253,34 @@ class AppwriteConnector {
       try {
         response = await _getOwnedResponse(requestedExpand);
       } catch (e) {
-        debugPrint('getOwned network error: $e');
+        _appLog(
+          en: 'Unable to load the owned collection: $e',
+          fr: 'Impossible de charger la collection possédée : $e',
+        );
         return <RecordModel>[];
       }
 
       if (response.statusCode < 200 || response.statusCode >= 300) {
-        debugPrint('getOwned HTTP ${response.statusCode}: ${response.body}');
+        _appLog(
+          en: 'Owned collection request failed with HTTP ${response.statusCode}.',
+          fr: 'La requête de collection possédée a échoué avec le statut HTTP ${response.statusCode}.',
+        );
         if (requestedExpand.isEmpty) return <RecordModel>[];
 
         try {
           response = await _getOwnedResponse('');
         } catch (e) {
-          debugPrint('getOwned retry without expand failed: $e');
+          _appLog(
+            en: 'Owned collection retry without relationships failed: $e',
+            fr: 'La nouvelle tentative sans relations de la collection possédée a échoué : $e',
+          );
           return <RecordModel>[];
         }
 
         if (response.statusCode < 200 || response.statusCode >= 300) {
-          debugPrint(
-            'getOwned retry HTTP ${response.statusCode}: ${response.body}',
+          _appLog(
+            en: 'Owned collection retry failed with HTTP ${response.statusCode}.',
+            fr: 'La nouvelle tentative de collection possédée a échoué avec le statut HTTP ${response.statusCode}.',
           );
           return <RecordModel>[];
         }
@@ -249,7 +290,10 @@ class AppwriteConnector {
       final list = _extractUserCollectionList(decoded, 'ownedVolumes');
 
       if (list.isEmpty) {
-        debugPrint('getOwned: no items found in response. Decoded: $decoded');
+        _appLog(
+          en: 'The owned collection response contains no items.',
+          fr: 'La réponse de collection possédée ne contient aucun élément.',
+        );
         return <RecordModel>[];
       }
 
@@ -331,7 +375,10 @@ class AppwriteConnector {
 
       return User.fromApiJson(user);
     } catch (e) {
-      debugPrint('Unable to fetch current user profile: $e');
+      _appLog(
+        en: 'Unable to fetch the current user profile: $e',
+        fr: 'Impossible de récupérer le profil utilisateur actuel : $e',
+      );
       return null;
     }
   }
@@ -354,7 +401,10 @@ class AppwriteConnector {
         updated: DateTime.tryParse(accountUser.$updatedAt)?.toUtc() ?? now,
       );
     } catch (e) {
-      debugPrint('Unable to fetch fallback Appwrite account profile: $e');
+      _appLog(
+        en: 'Unable to fetch the fallback account profile: $e',
+        fr: 'Impossible de récupérer le profil de compte de secours : $e',
+      );
       return null;
     }
   }
@@ -372,19 +422,26 @@ class AppwriteConnector {
       await _api.invalidateApiKey();
       await _syncConnectedUser();
       await _api.ensureApiKey();
+      await _notifications.synchronizePushTargetIfEnabled();
       if (context.mounted) {
         pushOrGo(context, '/profile');
       }
     } catch (e) {
       final cancelled = e.toString().contains('PlatformException(CANCELED');
       if (cancelled) {
-        debugPrint('Google sign-in cancelled by user/session: $e');
+        _appLog(
+          en: 'Google sign-in was cancelled.',
+          fr: 'La connexion Google a été annulée.',
+        );
         return;
       }
       if (context.mounted) {
         showMessage(AppLocalizations.of(context)!.errorOccurred, context);
       }
-      debugPrint('Google sign-in failed: $e');
+      _appLog(
+        en: 'Google sign-in failed: $e',
+        fr: 'La connexion Google a échoué : $e',
+      );
     } finally {
       alreadyClick = 0;
     }
@@ -404,6 +461,7 @@ class AppwriteConnector {
       await _api.invalidateApiKey();
       await _syncConnectedUser();
       await _api.ensureApiKey();
+      await _notifications.synchronizePushTargetIfEnabled();
 
       if (context.mounted) {
         showMessage(AppLocalizations.of(context)!.userLoginSuccess, context);
@@ -413,7 +471,10 @@ class AppwriteConnector {
       if (context.mounted) {
         showMessage(AppLocalizations.of(context)!.errorOccurred, context);
       }
-      debugPrint('Email login failed: $e');
+      _appLog(
+        en: 'Email sign-in failed: $e',
+        fr: 'La connexion par e-mail a échoué : $e',
+      );
       return null;
     }
   }
@@ -441,7 +502,12 @@ class AppwriteConnector {
     assert(birthday.isNotEmpty);
 
     if (password != passwordVerifier) {
-      throw Exception('Password and confirmation do not match');
+      throw Exception(
+        RuntimeLocalization.text(
+          en: 'Password and confirmation do not match.',
+          fr: 'Le mot de passe et sa confirmation ne correspondent pas.',
+        ),
+      );
     }
 
     final created = await _appwrite.createAccount(
@@ -453,7 +519,15 @@ class AppwriteConnector {
     if (!context.mounted) {
       return created.$id;
     }
-    await loginWithEmail(email, password, context);
+    final loggedInUser = await loginWithEmail(email, password, context);
+    if (loggedInUser == null) {
+      throw StateError(
+        RuntimeLocalization.text(
+          en: 'The account was created but sign-in did not complete.',
+          fr: 'Le compte a été créé, mais la connexion n’a pas abouti.',
+        ),
+      );
+    }
 
     try {
       await _api.patch(
@@ -468,7 +542,10 @@ class AppwriteConnector {
       );
       await _syncConnectedUser();
     } catch (e) {
-      debugPrint('Unable to enrich profile after signup: $e');
+      _appLog(
+        en: 'Unable to complete the profile after sign-up: $e',
+        fr: 'Impossible de compléter le profil après l’inscription : $e',
+      );
     }
 
     await sendVerification(email);
@@ -480,7 +557,10 @@ class AppwriteConnector {
     try {
       await _appwrite.sendEmailVerification();
     } catch (e) {
-      debugPrint('Email verification request failed: $e');
+      _appLog(
+        en: 'Email verification request failed: $e',
+        fr: 'La demande de vérification de l’e-mail a échoué : $e',
+      );
     }
   }
 
@@ -553,21 +633,31 @@ class AppwriteConnector {
 
   Future<void> deleteUser(String recordId) async {
     await _appwrite.blockCurrentAccount();
-    logOut();
+    await logOut();
   }
 
-  void logOut() {
+  Future<void> logOut() async {
+    final signedOutUserId = _connectedUser.valueOrNull?.id;
     _connectedUser.add(null);
     _clearCollectionCaches();
-    _api.invalidateApiKey();
-    _appwrite.logoutCurrentSession();
+    if (signedOutUserId != null) {
+      unawaited(_persistentCache.clear(scope: signedOutUserId));
+    }
+    unawaited(_persistentCache.clear(scope: 'authenticated'));
+    await _api.invalidateApiKey();
+    await _notifications.unregisterPushTarget();
+    await _appwrite.logoutCurrentSession();
 
-    LocalStorage().deleteToken();
-    LocalStorage().deleteOwnedSubSerie();
+    final localStorage = LocalStorage();
+    await localStorage.deleteToken();
+    await localStorage.deleteOwnedSubSerie(userId: signedOutUserId);
+    // Remove the former unscoped cache left by older application versions.
+    await localStorage.deleteOwnedSubSerie();
   }
 
   void _invalidateCollectionCache(String collectionId) {
     final normalized = _normalizeCollectionId(collectionId);
+    unawaited(_persistentCache.clearNamespace('catalogue.$normalized'));
     _fullListCache.removeWhere(
       (key, _) => key == normalized || key.startsWith('$normalized|'),
     );
@@ -684,7 +774,10 @@ class AppwriteConnector {
     final hasAuthenticatedSession = await _appwrite
         .hasAuthenticatedUserSession();
     if (!hasAuthenticatedSession) {
-      debugPrint('Avatar upload skipped: no authenticated Appwrite session.');
+      _appLog(
+        en: 'Avatar upload skipped: no authenticated session.',
+        fr: 'Envoi de l’avatar ignoré : aucune session authentifiée.',
+      );
       if (context.mounted) {
         showMessage(AppLocalizations.of(context)!.errorOccurred, context);
       }
@@ -701,9 +794,9 @@ class AppwriteConnector {
       );
       uploadSucceeded = true;
     } on AppwriteException catch (e) {
-      debugPrint('Avatar update failed: $e');
-      debugPrint(
-        'Verify Appwrite storage permissions for bucket "user-bucket" (create/write for authenticated users).',
+      _appLog(
+        en: 'Avatar update failed: $e. Verify authenticated create/write storage permissions.',
+        fr: 'La mise à jour de l’avatar a échoué : $e. Vérifiez les permissions de création/écriture du stockage pour les utilisateurs authentifiés.',
       );
       if (context.mounted) {
         showMessage(AppLocalizations.of(context)!.errorOccurred, context);
@@ -717,11 +810,15 @@ class AppwriteConnector {
         // Appwrite Dart SDK may fail to parse `File.encryption` when null.
         // Upload can still be successful because the request already completed.
         uploadSucceeded = true;
-        debugPrint(
-          'Avatar file upload response parsing failed; continuing with known fileId: $fileId',
+        _appLog(
+          en: 'Avatar upload response parsing failed; continuing with the generated file identifier.',
+          fr: 'L’analyse de la réponse d’envoi de l’avatar a échoué ; poursuite avec l’identifiant de fichier généré.',
         );
       } else {
-        debugPrint('Avatar update failed: $e');
+        _appLog(
+          en: 'Avatar update failed: $e',
+          fr: 'La mise à jour de l’avatar a échoué : $e',
+        );
         if (context.mounted) {
           showMessage(AppLocalizations.of(context)!.errorOccurred, context);
         }
@@ -747,7 +844,10 @@ class AppwriteConnector {
       await _syncConnectedUser();
       return true;
     } catch (e) {
-      debugPrint('Avatar profile patch failed after upload: $e');
+      _appLog(
+        en: 'The avatar was uploaded but the profile update failed: $e',
+        fr: 'L’avatar a été envoyé, mais la mise à jour du profil a échoué : $e',
+      );
       if (context.mounted) {
         showMessage(AppLocalizations.of(context)!.errorOccurred, context);
       }
@@ -879,70 +979,124 @@ class AppwriteConnector {
     int page = 1,
     int limit = 30,
     int untilDays = 7,
+    bool forceRefresh = false,
   }) async {
     final normalizedUntilDays = untilDays.clamp(0, 365);
     final safePage = page < 1 ? 1 : page;
     final safeLimit = limit < 1 ? 30 : limit;
     final hasAuthenticatedSession = await _appwrite
         .hasAuthenticatedUserSession();
+    final authenticatedUserId = getConnectedUser()?.id.trim();
+    final canPersist =
+        !hasAuthenticatedSession || authenticatedUserId?.isNotEmpty == true;
     final userKey = hasAuthenticatedSession
-        ? (getConnectedUser()?.id ?? 'authenticated')
+        ? (authenticatedUserId?.isNotEmpty == true
+              ? authenticatedUserId!
+              : 'session-uncached')
         : 'public';
     final cacheKey =
         'home:$userKey:page:$safePage:limit:$safeLimit:days:$normalizedUntilDays';
+    final persistentNamespace =
+        'recommendations.home.page.$safePage.limit.$safeLimit.days.$normalizedUntilDays';
+    final persistentEntry = canPersist
+        ? await _persistentCache.read(
+            persistentNamespace,
+            scope: userKey,
+          )
+        : null;
 
     final cached = _recordPageCache[cacheKey];
-    if (_isRecordPageCacheEntryFresh(cached)) {
+    if (!forceRefresh && _isRecordPageCacheEntryFresh(cached)) {
       return _cloneRecordPage(cached!.page);
+    }
+    if (!forceRefresh && persistentEntry?.isFresh == true) {
+      final restored = _recordPageFromCache(persistentEntry!.data);
+      if (restored != null) {
+        _recordPageCache[cacheKey] = _RecordPageCacheEntry(
+          _cloneRecordPage(restored),
+          DateTime.now(),
+        );
+        return restored;
+      }
     }
 
     final inFlight = _recordPageInFlight[cacheKey];
-    if (inFlight != null) {
+    if (!forceRefresh && inFlight != null) {
       return _cloneRecordPage(await inFlight);
     }
 
     final future = () async {
-      RecordPage result;
-      if (hasAuthenticatedSession) {
-        try {
-          result = await _fetchRecordPage(
-            path: '/api/recommendations/me',
-            listKey: 'volumes',
-            collectionId: 'volumes',
-            normalize: _normalizeVolume,
-            page: safePage,
-            limit: safeLimit,
-            query: <String, dynamic>{'untilDays': normalizedUntilDays},
-            requiresApiKey: true,
-            requiresBearer: true,
-          );
-          _recordPageCache[cacheKey] = _RecordPageCacheEntry(
-            _cloneRecordPage(result),
-            DateTime.now(),
-          );
-          return result;
-        } catch (e) {
-          debugPrint(
-            'Personalized recommendations unavailable, fallback to public home recommendations: $e',
-          );
+      try {
+        RecordPage result;
+        if (hasAuthenticatedSession) {
+          try {
+            result = await _fetchRecordPage(
+              path: '/api/recommendations/me',
+              listKey: 'volumes',
+              collectionId: 'volumes',
+              normalize: _normalizeVolume,
+              page: safePage,
+              limit: safeLimit,
+              query: <String, dynamic>{
+                'untilDays': normalizedUntilDays,
+                'includeExplanations': true,
+                'includePlacements': true,
+              },
+              requiresApiKey: true,
+              requiresBearer: true,
+              forceRefresh: forceRefresh,
+              usePersistentCache: false,
+            );
+            await _saveHomeRecommendations(
+              cacheKey,
+              persistentNamespace,
+              userKey,
+              result,
+              persist: canPersist,
+            );
+            return result;
+          } catch (e) {
+            _appLog(
+              en: 'Personalized recommendations are unavailable; using public recommendations: $e',
+              fr: 'Les recommandations personnalisées sont indisponibles ; utilisation des recommandations publiques : $e',
+            );
+          }
         }
-      }
 
-      result = await _fetchRecordPage(
-        path: '/api/recommendations/home',
-        listKey: 'volumes',
-        collectionId: 'volumes',
-        normalize: _normalizeVolume,
-        page: safePage,
-        limit: safeLimit,
-        query: <String, dynamic>{'untilDays': normalizedUntilDays},
-        requiresApiKey: true,
-      );
-      _recordPageCache[cacheKey] = _RecordPageCacheEntry(
-        _cloneRecordPage(result),
-        DateTime.now(),
-      );
-      return result;
+        result = await _fetchRecordPage(
+          path: '/api/recommendations/home',
+          listKey: 'volumes',
+          collectionId: 'volumes',
+          normalize: _normalizeVolume,
+          page: safePage,
+          limit: safeLimit,
+          query: <String, dynamic>{
+            'untilDays': normalizedUntilDays,
+            'includePlacements': true,
+          },
+          requiresApiKey: true,
+          forceRefresh: forceRefresh,
+          usePersistentCache: false,
+        );
+        await _saveHomeRecommendations(
+          cacheKey,
+          persistentNamespace,
+          userKey,
+          result,
+          persist: canPersist,
+        );
+        return result;
+      } catch (error) {
+        final restored = _recordPageFromCache(persistentEntry?.data);
+        if (restored != null) {
+          _appLog(
+            en: 'The recommendation API is unavailable; using the persistent cache.',
+            fr: 'L’API de recommandations est indisponible ; utilisation du cache persistant.',
+          );
+          return restored;
+        }
+        rethrow;
+      }
     }();
 
     _recordPageInFlight[cacheKey] = future;
@@ -950,6 +1104,127 @@ class AppwriteConnector {
       return _cloneRecordPage(await future);
     } finally {
       _recordPageInFlight.remove(cacheKey);
+    }
+  }
+
+  Future<RecordPage?> getCachedHomeRecommendationsPage({
+    int page = 1,
+    int limit = 30,
+    int untilDays = 7,
+  }) async {
+    final safePage = page < 1 ? 1 : page;
+    final safeLimit = limit < 1 ? 30 : limit;
+    final normalizedUntilDays = untilDays.clamp(0, 365);
+    final authenticated = await _appwrite.hasAuthenticatedUserSession();
+    final authenticatedUserId = getConnectedUser()?.id.trim();
+    if (authenticated && authenticatedUserId?.isNotEmpty != true) return null;
+    final scope = authenticated ? authenticatedUserId! : 'public';
+    final namespace =
+        'recommendations.home.page.$safePage.limit.$safeLimit.days.$normalizedUntilDays';
+    final entry = await _persistentCache.read(namespace, scope: scope);
+    return _recordPageFromCache(entry?.data);
+  }
+
+  Future<void> _saveHomeRecommendations(
+    String memoryKey,
+    String persistentNamespace,
+    String scope,
+    RecordPage page, {
+    bool persist = true,
+  }) async {
+    _recordPageCache[memoryKey] = _RecordPageCacheEntry(
+      _cloneRecordPage(page),
+      DateTime.now(),
+    );
+    if (persist) {
+      await _persistentCache.write(
+        persistentNamespace,
+        _recordPageToCache(page),
+        scope: scope,
+        ttl: _homePersistentCacheTtl,
+      );
+    }
+  }
+
+  Map<String, dynamic> _recordPageToCache(RecordPage page) {
+    return <String, dynamic>{
+      'page': page.page,
+      'totalPages': page.totalPages,
+      'totalItems': page.totalItems,
+      'items': page.items
+          .map(
+            (item) => <String, dynamic>{
+              'id': item.id,
+              'collectionId': item.collectionId,
+              'data': item.data,
+            },
+          )
+          .toList(),
+    };
+  }
+
+  List<Map<String, dynamic>> _recordListToCache(
+    Iterable<RecordModel> records,
+  ) {
+    return records
+        .map(
+          (record) => <String, dynamic>{
+            'id': record.id,
+            'collectionId': record.collectionId,
+            'data': record.data,
+          },
+        )
+        .toList();
+  }
+
+  List<RecordModel> _recordListFromCache(Object? raw) {
+    if (raw is! List) return <RecordModel>[];
+    try {
+      return raw
+          .whereType<Map>()
+          .map((item) {
+            final record = Map<String, dynamic>.from(item);
+            return RecordModel(
+              id: record['id'].toString(),
+              collectionId: record['collectionId']?.toString() ?? '',
+              data: Map<String, dynamic>.from(record['data'] as Map),
+            );
+          })
+          .where((record) {
+            return record.id.isNotEmpty && record.collectionId.isNotEmpty;
+          })
+          .toList();
+    } on Object {
+      return <RecordModel>[];
+    }
+  }
+
+  RecordPage? _recordPageFromCache(Object? raw) {
+    if (raw is! Map) return null;
+    try {
+      final data = Map<String, dynamic>.from(raw);
+      final itemsRaw = data['items'];
+      if (itemsRaw is! List) return null;
+      final items = itemsRaw.whereType<Map>().map((item) {
+        final record = Map<String, dynamic>.from(item);
+        return RecordModel(
+          id: record['id'].toString(),
+          collectionId: record['collectionId']?.toString() ?? 'volumes',
+          data: Map<String, dynamic>.from(record['data'] as Map),
+        );
+      }).toList();
+      return RecordPage(
+        items: items,
+        page: _toIntOrDefault(data['page'], 1),
+        totalPages: _toIntOrDefault(data['totalPages'], 1),
+        totalItems: _toIntOrDefault(data['totalItems'], items.length),
+      );
+    } on Object catch (error) {
+      _appLog(
+        en: 'Unable to restore cached recommendations: $error',
+        fr: 'Impossible de restaurer les recommandations en cache : $error',
+      );
+      return null;
     }
   }
 
@@ -1076,42 +1351,75 @@ class AppwriteConnector {
     if (normalizedEan.length != 13) {
       throw const FormatException('EAN must contain exactly 13 digits');
     }
-
-    final response = await _api.get(
-      '/api/volumes/search/ean',
-      query: <String, dynamic>{
-        'ean': normalizedEan,
-        if (expand != null && expand.trim().isNotEmpty) 'expand': expand.trim(),
-      },
-      requiresApiKey: true,
+    final expandValue = expand?.trim() ?? '';
+    final signature = base64Url
+        .encode(utf8.encode('$normalizedEan|$expandValue'))
+        .replaceAll('=', '');
+    final namespace = 'catalogue.volumes.ean.$signature';
+    final cachedEntry = await _persistentCache.read(
+      namespace,
+      maxStale: const Duration(days: 30),
     );
+    final cachedVolume = _asRecordMap(cachedEntry?.data);
 
-    if (response.statusCode == 404) return null;
-    if (response.statusCode < 200 || response.statusCode >= 300) {
-      throw Exception(
-        'EAN lookup failed (status ${response.statusCode}): ${response.body}',
+    try {
+      final response = await _api.get(
+        '/api/volumes/search/ean',
+        query: <String, dynamic>{
+          'ean': normalizedEan,
+          if (expandValue.isNotEmpty) 'expand': expandValue,
+        },
+        requiresApiKey: true,
       );
-    }
 
-    final decoded = _api.decodeBody(response);
-    final root = _asRecordMap(decoded);
-    final data = _asRecordMap(root?['data']);
-    final volumeMap = _asRecordMap(data?['volume']);
-    if (volumeMap == null) {
-      throw const FormatException('Invalid EAN lookup response');
-    }
+      if (response.statusCode == 404) {
+        await _persistentCache.remove(namespace);
+        return null;
+      }
+      if (response.statusCode < 200 || response.statusCode >= 300) {
+        throw Exception(
+          'EAN lookup failed (status ${response.statusCode}): ${response.body}',
+        );
+      }
 
-    final normalized = _normalizeVolume(volumeMap);
-    final id = normalized['id']?.toString() ?? '';
-    if (id.isEmpty) {
-      throw const FormatException('Volume returned without an id');
-    }
+      final decoded = _api.decodeBody(response);
+      final root = _asRecordMap(decoded);
+      final data = _asRecordMap(root?['data']);
+      final volumeMap = _asRecordMap(data?['volume']);
+      if (volumeMap == null) {
+        throw const FormatException('Invalid EAN lookup response');
+      }
 
-    return RecordModel(
-      id: id,
-      collectionId: 'volumes',
-      data: normalized,
-    );
+      final normalized = _normalizeVolume(volumeMap);
+      final id = normalized['id']?.toString() ?? '';
+      if (id.isEmpty) {
+        throw const FormatException('Volume returned without an id');
+      }
+      await _persistentCache.write(
+        namespace,
+        normalized,
+        ttl: const Duration(days: 1),
+      );
+      return RecordModel(
+        id: id,
+        collectionId: 'volumes',
+        data: normalized,
+      );
+    } on Object catch (error, stackTrace) {
+      final cachedId = cachedVolume?['id']?.toString() ?? '';
+      if (cachedVolume != null && cachedId.isNotEmpty) {
+        _appLog(
+          en: 'The EAN service is unavailable; using persistent cached data.',
+          fr: 'Le service EAN est indisponible ; utilisation des données persistantes en cache.',
+        );
+        return RecordModel(
+          id: cachedId,
+          collectionId: 'volumes',
+          data: cachedVolume,
+        );
+      }
+      Error.throwWithStackTrace(error, stackTrace);
+    }
   }
 
   String _normalizeEanValue(dynamic value) {
@@ -1140,6 +1448,8 @@ class AppwriteConnector {
     Map<String, dynamic>? query,
     bool requiresApiKey = true,
     bool requiresBearer = false,
+    bool forceRefresh = false,
+    bool usePersistentCache = true,
   }) async {
     final safePage = page < 1 ? 1 : page;
     final safeLimit = limit < 1 ? 30 : limit;
@@ -1148,70 +1458,133 @@ class AppwriteConnector {
       'limit': safeLimit,
       ...?query,
     };
-
-    final response = await _api.get(
-      path,
-      query: requestQuery,
-      requiresApiKey: requiresApiKey,
-      requiresBearer: requiresBearer,
-    );
-
-    final decoded = _api.decodeBody(response);
-    if (decoded is! Map<String, dynamic>) {
-      throw Exception('Unexpected payload for $path: $decoded');
-    }
-
-    final data = decoded['data'];
-    final dataMap = data is Map<String, dynamic> ? data : <String, dynamic>{};
-    final rows =
-        dataMap[listKey] ??
-        decoded[listKey] ??
-        (dataMap.length == 1 ? dataMap.values.first : null);
-    final rawList = rows is List<dynamic> ? rows : const <dynamic>[];
-
-    final records = rawList
-        .whereType<Map<String, dynamic>>()
-        .map(normalize)
-        .map(
-          (item) => RecordModel(
-            id: item['id'].toString(),
-            collectionId: collectionId,
-            data: item,
+    final sortedQueryEntries = requestQuery.entries.toList()
+      ..sort((a, b) => a.key.compareTo(b.key));
+    final signature = base64Url
+        .encode(
+          utf8.encode(
+            '$path|${jsonEncode(Map<String, dynamic>.fromEntries(sortedQueryEntries))}',
           ),
         )
-        .toList();
+        .replaceAll('=', '');
+    final persistentNamespace =
+        'catalogue.${_normalizeCollectionId(collectionId)}.pages.$signature';
+    final authenticatedUserId = getConnectedUser()?.id.trim();
+    final canUsePersistentCache =
+        usePersistentCache &&
+        (!requiresBearer || authenticatedUserId?.isNotEmpty == true);
+    final persistentScope = requiresBearer
+        ? (authenticatedUserId ?? 'uncached')
+        : 'public';
+    final persistentEntry = canUsePersistentCache
+        ? await _persistentCache.read(
+            persistentNamespace,
+            scope: persistentScope,
+            maxStale: const Duration(days: 30),
+          )
+        : null;
+    final persistentPage = _recordPageFromCache(persistentEntry?.data);
+    if (!forceRefresh &&
+        persistentEntry?.isFresh == true &&
+        persistentPage != null) {
+      return persistentPage;
+    }
 
-    final paginationRaw = decoded['pagination'];
-    final pagination = paginationRaw is Map<String, dynamic>
-        ? paginationRaw
-        : <String, dynamic>{};
+    try {
+      final response = await _api.get(
+        path,
+        query: requestQuery,
+        requiresApiKey: requiresApiKey,
+        requiresBearer: requiresBearer,
+      );
+      if (response.statusCode < 200 || response.statusCode >= 300) {
+        throw Exception(
+          'HTTP ${response.statusCode} while loading $collectionId',
+        );
+      }
 
-    final totalItemsFromPagination = _toIntOrDefault(
-      pagination['totalItems'] ??
-          pagination['total'] ??
-          pagination['count'] ??
-          pagination['totalCount'],
-      0,
-    );
-    final currentPage = _toIntOrDefault(
-      pagination['currentPage'] ?? pagination['page'],
-      safePage,
-    );
-    final inferredTotalPages = totalItemsFromPagination > 0
-        ? (totalItemsFromPagination / safeLimit).ceil()
-        : (rawList.length >= safeLimit ? currentPage + 1 : currentPage);
-    final totalPages = _toIntOrDefault(
-      pagination['totalPages'] ?? pagination['pages'],
-      inferredTotalPages,
-    );
-    final totalItems = totalItemsFromPagination;
+      final decoded = _api.decodeBody(response);
+      if (decoded is! Map<String, dynamic>) {
+        throw Exception(
+          RuntimeLocalization.text(
+            en: 'The API returned an unexpected response.',
+            fr: 'L’API a renvoyé une réponse inattendue.',
+          ),
+        );
+      }
 
-    return RecordPage(
-      items: records,
-      page: currentPage,
-      totalPages: totalPages < 1 ? 1 : totalPages,
-      totalItems: totalItems,
-    );
+      final data = decoded['data'];
+      final dataMap = data is Map<String, dynamic> ? data : <String, dynamic>{};
+      final rows =
+          dataMap[listKey] ??
+          decoded[listKey] ??
+          (dataMap.length == 1 ? dataMap.values.first : null);
+      final rawList = rows is List<dynamic> ? rows : const <dynamic>[];
+
+      final records = rawList
+          .whereType<Map<String, dynamic>>()
+          .map(normalize)
+          .map(
+            (item) => RecordModel(
+              id: item['id'].toString(),
+              collectionId: collectionId,
+              data: item,
+            ),
+          )
+          .toList();
+
+      final paginationRaw = decoded['pagination'];
+      final pagination = paginationRaw is Map<String, dynamic>
+          ? paginationRaw
+          : <String, dynamic>{};
+
+      final totalItemsFromPagination = _toIntOrDefault(
+        pagination['totalItems'] ??
+            pagination['total'] ??
+            pagination['count'] ??
+            pagination['totalCount'],
+        0,
+      );
+      final currentPage = _toIntOrDefault(
+        pagination['currentPage'] ?? pagination['page'],
+        safePage,
+      );
+      final inferredTotalPages = totalItemsFromPagination > 0
+          ? (totalItemsFromPagination / safeLimit).ceil()
+          : (rawList.length >= safeLimit ? currentPage + 1 : currentPage);
+      final totalPages = _toIntOrDefault(
+        pagination['totalPages'] ?? pagination['pages'],
+        inferredTotalPages,
+      );
+      final result = RecordPage(
+        items: records,
+        page: currentPage,
+        totalPages: totalPages < 1 ? 1 : totalPages,
+        totalItems: totalItemsFromPagination,
+      );
+      if (canUsePersistentCache) {
+        await _persistentCache.write(
+          persistentNamespace,
+          _recordPageToCache(result),
+          scope: persistentScope,
+          ttl: requiresBearer
+              ? const Duration(minutes: 15)
+              : path.contains('/search')
+              ? const Duration(minutes: 15)
+              : const Duration(hours: 6),
+        );
+      }
+      return result;
+    } on Object catch (error, stackTrace) {
+      if (persistentPage != null) {
+        _appLog(
+          en: 'The catalogue page is unavailable; using persistent cached data.',
+          fr: 'La page du catalogue est indisponible ; utilisation des données persistantes en cache.',
+        );
+        return persistentPage;
+      }
+      Error.throwWithStackTrace(error, stackTrace);
+    }
   }
 
   Future<List<RecordModel>> getCollectionFullList(
@@ -1232,32 +1605,77 @@ class AppwriteConnector {
       return _cloneRecords(await inFlight);
     }
 
-    final future = () async {
-      final list = await _fetchCollectionNormalized(
-        normalized,
-        fullList: true,
-        expand: requestedExpand.isEmpty ? null : requestedExpand,
-      );
-      final records = list
-          .map(
-            (item) => RecordModel(
-              id: item['id'].toString(),
-              collectionId: normalized,
-              data: item,
-            ),
+    final privateCollection = normalized == 'owned' || normalized == 'followed';
+    final authenticatedUserId = getConnectedUser()?.id.trim();
+    final canUsePersistentCache =
+        !privateCollection || authenticatedUserId?.isNotEmpty == true;
+    final persistentScope = privateCollection
+        ? (authenticatedUserId ?? 'uncached')
+        : 'public';
+    final expandKey = base64Url
+        .encode(utf8.encode(requestedExpand))
+        .replaceAll('=', '');
+    final persistentNamespace =
+        'catalogue.$normalized.full.${expandKey.isEmpty ? 'default' : expandKey}';
+    final persistentEntry = canUsePersistentCache
+        ? await _persistentCache.read(
+            persistentNamespace,
+            scope: persistentScope,
+            maxStale: const Duration(days: 30),
           )
-          .toList();
-      final shouldCacheEmpty =
-          normalized == 'owned' || normalized == 'followed';
-      if (records.isNotEmpty || shouldCacheEmpty) {
-        _fullListCache[cacheKey] = _RecordListCacheEntry(
-          _cloneRecords(records),
-          DateTime.now(),
+        : null;
+    final persistentRecords = _recordListFromCache(persistentEntry?.data);
+
+    final future = () async {
+      try {
+        final list = await _fetchCollectionNormalized(
+          normalized,
+          fullList: true,
+          expand: requestedExpand.isEmpty ? null : requestedExpand,
         );
-      } else {
-        _fullListCache.remove(cacheKey);
+        final records = list
+            .map(
+              (item) => RecordModel(
+                id: item['id'].toString(),
+                collectionId: normalized,
+                data: item,
+              ),
+            )
+            .toList();
+        final shouldCacheEmpty = privateCollection;
+        if (records.isNotEmpty || shouldCacheEmpty) {
+          _fullListCache[cacheKey] = _RecordListCacheEntry(
+            _cloneRecords(records),
+            DateTime.now(),
+          );
+          if (canUsePersistentCache) {
+            await _persistentCache.write(
+              persistentNamespace,
+              _recordListToCache(records),
+              scope: persistentScope,
+              ttl: privateCollection
+                  ? const Duration(minutes: 15)
+                  : const Duration(hours: 6),
+            );
+          }
+        } else {
+          _fullListCache.remove(cacheKey);
+        }
+        return records;
+      } on Object catch (_) {
+        if (persistentRecords.isNotEmpty) {
+          _appLog(
+            en: 'The catalogue API is unavailable; using persistent cached data.',
+            fr: 'L’API du catalogue est indisponible ; utilisation des données persistantes en cache.',
+          );
+          _fullListCache[cacheKey] = _RecordListCacheEntry(
+            _cloneRecords(persistentRecords),
+            DateTime.now(),
+          );
+          return persistentRecords;
+        }
+        rethrow;
       }
-      return records;
     }();
 
     _fullListInFlight[cacheKey] = future;
@@ -1385,6 +1803,7 @@ class AppwriteConnector {
     final subscription = listenToCollectionEvents(collectionId).listen((
       _,
     ) async {
+      _invalidateCollectionCache(collectionId);
       subject.add(await getCollectionData(collectionId));
     });
 
@@ -1400,23 +1819,11 @@ class AppwriteConnector {
   Stream<RecordSubscriptionEvent> listenToCollectionEvents(
     String collectionId,
   ) {
-    final controller = StreamController<RecordSubscriptionEvent>();
-    Timer? timer;
-
-    timer = Timer.periodic(const Duration(seconds: 15), (_) {
-      controller.add(
-        RecordSubscriptionEvent(
-          collectionId: _normalizeCollectionId(collectionId),
-          action: 'poll',
-        ),
-      );
+    final normalized = _normalizeCollectionId(collectionId);
+    return _realtimeSync.watch(normalized).map((event) {
+      _invalidateCollectionCache(normalized);
+      return event;
     });
-
-    controller.onCancel = () {
-      timer?.cancel();
-    };
-
-    return controller.stream;
   }
 
   Future<int> getNewRegisterLast24h() async {
@@ -1438,7 +1845,10 @@ class AppwriteConnector {
       final value = data['users_last_24h'] ?? data['users24h'] ?? data['users'];
       return int.tryParse(value.toString()) ?? 0;
     } catch (e) {
-      debugPrint('Unable to load analytics summary: $e');
+      _appLog(
+        en: 'Unable to load the analytics summary: $e',
+        fr: 'Impossible de charger le résumé des statistiques : $e',
+      );
       return 0;
     }
   }
@@ -1454,7 +1864,10 @@ class AppwriteConnector {
       }
       return response.body;
     } catch (e) {
-      debugPrint('Unable to load monthly analytics: $e');
+      _appLog(
+        en: 'Unable to load monthly analytics: $e',
+        fr: 'Impossible de charger les statistiques mensuelles : $e',
+      );
       return '{}';
     }
   }
@@ -1535,7 +1948,10 @@ class AppwriteConnector {
         collectVolumes(expand?['volumes'] ?? data['volumes']);
       }
     } catch (error) {
-      debugPrint('Unable to expand volumes for sub-series $id: $error');
+      _appLog(
+        en: 'Unable to load related volumes for a sub-series: $error',
+        fr: 'Impossible de charger les volumes liés à une sous-série : $error',
+      );
     }
 
     final missingVolumeIds = volumeIds.where(
@@ -1546,7 +1962,10 @@ class AppwriteConnector {
         try {
           return await _fetchOneNormalized('volumes', volumeId);
         } catch (error) {
-          debugPrint('Unable to load volume $volumeId: $error');
+          _appLog(
+            en: 'Unable to load a related volume: $error',
+            fr: 'Impossible de charger un volume associé : $error',
+          );
           return null;
         }
       }),
@@ -1670,6 +2089,10 @@ class AppwriteConnector {
     return _followedEntrySubSeriesId(data);
   }
 
+  String followedEntrySubSeriesId(Map<String, dynamic> data) {
+    return _followedEntrySubSeriesId(data);
+  }
+
   Future<AddVolumeToOwnedResult> addVolumeToOwned(
     String userId,
     String volumeId,
@@ -1694,6 +2117,11 @@ class AppwriteConnector {
       );
     }
     _invalidateCollectionCache('owned');
+    if (!wasAlreadyOwned) {
+      unawaited(
+        PromotionTrackingService().trackConversionForVolume(volumeId),
+      );
+    }
 
     var normalizedSubSeriesId = subSeriesId?.trim() ?? '';
     if (normalizedSubSeriesId.isEmpty) {
@@ -1708,8 +2136,9 @@ class AppwriteConnector {
             ) ??
             '';
       } catch (error) {
-        debugPrint(
-          'Unable to resolve the sub-series for added volume $volumeId: $error',
+        _appLog(
+          en: 'Unable to resolve the sub-series for an added volume: $error',
+          fr: 'Impossible de déterminer la sous-série d’un volume ajouté : $error',
         );
       }
     }
@@ -1733,9 +2162,9 @@ class AppwriteConnector {
         subSeriesFollowed: true,
       );
     } catch (error) {
-      debugPrint(
-        'Volume $volumeId was added but sub-series '
-        '$normalizedSubSeriesId could not be followed: $error',
+      _appLog(
+        en: 'The volume was added, but its sub-series could not be followed: $error',
+        fr: 'Le volume a été ajouté, mais sa sous-série n’a pas pu être suivie : $error',
       );
       return AddVolumeToOwnedResult(
         wasAlreadyOwned: wasAlreadyOwned,
@@ -1809,8 +2238,9 @@ class AppwriteConnector {
       if (response.rows.isEmpty) return null;
       return _normalizeReviewDocument(response.rows.first);
     } catch (e) {
-      debugPrint(
-        'Unable to fetch current user review for volume $volumeId: $e',
+      _appLog(
+        en: 'Unable to fetch the current user review: $e',
+        fr: 'Impossible de récupérer l’avis de l’utilisateur actuel : $e',
       );
       return null;
     }
@@ -1847,7 +2277,10 @@ class AppwriteConnector {
 
       return reviews;
     } catch (e) {
-      debugPrint('Unable to fetch volume reviews for $volumeId: $e');
+      _appLog(
+        en: 'Unable to fetch volume reviews: $e',
+        fr: 'Impossible de récupérer les avis du volume : $e',
+      );
       return <Map<String, dynamic>>[];
     }
   }
@@ -1861,7 +2294,12 @@ class AppwriteConnector {
     await init();
     final userId = getConnectedUser()?.id;
     if (userId == null || userId.isEmpty) {
-      throw Exception('User must be logged in to submit a review');
+      throw Exception(
+        RuntimeLocalization.text(
+          en: 'You must be signed in to submit a review.',
+          fr: 'Vous devez être connecté pour publier un avis.',
+        ),
+      );
     }
 
     final normalizedStars = stars.clamp(1, 5);
@@ -1957,7 +2395,10 @@ class AppwriteConnector {
 
   String get serverUrl => 'https://api.mymangatheque.com';
 
-  AppwriteCompatClient connector() => AppwriteCompatClient();
+  AppwriteCompatClient connector() => AppwriteCompatClient(this);
+
+  ValueNotifier<RealtimeSyncMetrics> get realtimeSyncMetrics =>
+      _realtimeSync.metrics;
 
   Future<void> registerPushTarget({
     required String deviceToken,
@@ -1968,6 +2409,21 @@ class AppwriteConnector {
       targetId: targetId,
     );
   }
+
+  ValueNotifier<PushNotificationState> get pushNotificationState =>
+      _notifications.state;
+
+  Stream<String> listenToNotificationOpenRoutes() =>
+      _notifications.openedRoutes;
+
+  String? takePendingNotificationOpenRoute() =>
+      _notifications.takePendingOpenRoute();
+
+  Future<bool> enablePushNotifications() =>
+      _notifications.requestPermissionAndEnable();
+
+  Future<void> disablePushNotifications() =>
+      _notifications.disablePushNotifications();
 
   // ----- Internal mapping and compatibility helpers -----
 
@@ -2102,7 +2558,12 @@ class AppwriteConnector {
         normalize: _normalizeFollowedEntry,
         expand: expand,
       ),
-      _ => throw UnsupportedError('Unsupported collection: $collectionId'),
+      _ => throw UnsupportedError(
+        RuntimeLocalization.text(
+          en: 'Unsupported collection.',
+          fr: 'Collection non prise en charge.',
+        ),
+      ),
     };
 
     final requestedExpand = expand?.trim() ?? '';
@@ -2129,12 +2590,68 @@ class AppwriteConnector {
       return _cloneRecordData(cached!.data);
     }
 
+    final privateCollection = normalized == 'owned' || normalized == 'followed';
+    final authenticatedUserId = getConnectedUser()?.id.trim();
+    final canUsePersistentCache =
+        !privateCollection || authenticatedUserId?.isNotEmpty == true;
+    final persistentScope = privateCollection
+        ? (authenticatedUserId ?? 'uncached')
+        : 'public';
+    final persistentSignature = base64Url
+        .encode(utf8.encode('$id|${expand?.trim() ?? ''}'))
+        .replaceAll('=', '');
+    final persistentNamespace =
+        'catalogue.$normalized.details.$persistentSignature';
+    final persistentEntry = canUsePersistentCache
+        ? await _persistentCache.read(
+            persistentNamespace,
+            scope: persistentScope,
+            maxStale: const Duration(days: 30),
+          )
+        : null;
+    final persistentRecord = _asRecordMap(persistentEntry?.data);
+    if (persistentEntry?.isFresh == true && persistentRecord != null) {
+      _recordCache[cacheKey] = _RecordCacheEntry(
+        _cloneRecordData(persistentRecord),
+        DateTime.now(),
+      );
+      return _cloneRecordData(persistentRecord);
+    }
+
     final inFlight = _recordInFlight[cacheKey];
     if (inFlight != null) {
       return _cloneRecordData(await inFlight);
     }
 
-    final future = _fetchOneNormalizedUncached(normalized, id, expand: expand);
+    final future = () async {
+      try {
+        final record = await _fetchOneNormalizedUncached(
+          normalized,
+          id,
+          expand: expand,
+        );
+        if (record.isNotEmpty && canUsePersistentCache) {
+          await _persistentCache.write(
+            persistentNamespace,
+            record,
+            scope: persistentScope,
+            ttl: privateCollection
+                ? const Duration(minutes: 15)
+                : const Duration(hours: 24),
+          );
+        }
+        return record;
+      } on Object catch (error, stackTrace) {
+        if (persistentRecord != null && persistentRecord.isNotEmpty) {
+          _appLog(
+            en: 'The catalogue item is unavailable; using persistent cached data.',
+            fr: 'La fiche du catalogue est indisponible ; utilisation des données persistantes en cache.',
+          );
+          return persistentRecord;
+        }
+        Error.throwWithStackTrace(error, stackTrace);
+      }
+    }();
     _recordInFlight[cacheKey] = future;
     try {
       final record = await future;
@@ -2214,7 +2731,12 @@ class AppwriteConnector {
               entry['id']?.toString() == id,
           orElse: () => <String, dynamic>{'id': id},
         ),
-      _ => throw UnsupportedError('Unsupported collection: $collectionId'),
+      _ => throw UnsupportedError(
+        RuntimeLocalization.text(
+          en: 'Unsupported collection.',
+          fr: 'Collection non prise en charge.',
+        ),
+      ),
     };
 
     final requestedExpand = expand?.trim() ?? '';
@@ -2241,7 +2763,12 @@ class AppwriteConnector {
 
     final decoded = _api.decodeBody(response);
     if (decoded is! Map<String, dynamic>) {
-      throw Exception('Unexpected payload for $path: $decoded');
+      throw Exception(
+        RuntimeLocalization.text(
+          en: 'The API returned an unexpected response.',
+          fr: 'L’API a renvoyé une réponse inattendue.',
+        ),
+      );
     }
 
     final payload = _extractSingleRecordPayload(decoded, path);
@@ -2355,7 +2882,12 @@ class AppwriteConnector {
       return topLevelRecord;
     }
 
-    throw Exception('Unexpected single-item payload for $path: $decoded');
+    throw Exception(
+      RuntimeLocalization.text(
+        en: 'The API returned an unexpected item response.',
+        fr: 'L’API a renvoyé une réponse d’élément inattendue.',
+      ),
+    );
   }
 
   Map<String, dynamic>? _pickNestedRecord(
@@ -2449,8 +2981,10 @@ class AppwriteConnector {
           ) ||
           message.contains('general_rate_limit_exceeded');
       if (isMissingApiKey) {
-        debugPrint('Skipping $path while mobile API key is unavailable.');
-        return <Map<String, dynamic>>[];
+        _appLog(
+          en: 'The mobile API key is unavailable; attempting an offline fallback.',
+          fr: 'La clé API mobile est indisponible ; tentative de repli hors ligne.',
+        );
       }
       rethrow;
     }
@@ -2479,12 +3013,19 @@ class AppwriteConnector {
         requiresBearer: true,
       );
     } catch (e) {
-      debugPrint('Skipping user collection $path: $e');
-      return <Map<String, dynamic>>[];
+      _appLog(
+        en: 'Unable to load a user collection: $e',
+        fr: 'Impossible de charger une collection utilisateur : $e',
+      );
+      rethrow;
     }
 
     if (response.statusCode < 200 || response.statusCode >= 300) {
-      if (requestedExpand.isEmpty) return <Map<String, dynamic>>[];
+      if (requestedExpand.isEmpty) {
+        throw Exception(
+          'User collection request failed with HTTP ${response.statusCode}.',
+        );
+      }
 
       try {
         response = await _api.get(
@@ -2493,12 +3034,17 @@ class AppwriteConnector {
           requiresBearer: true,
         );
       } catch (e) {
-        debugPrint('Retrying user collection $path without expand failed: $e');
-        return <Map<String, dynamic>>[];
+        _appLog(
+          en: 'User collection retry without relationships failed: $e',
+          fr: 'La nouvelle tentative de collection utilisateur sans relations a échoué : $e',
+        );
+        rethrow;
       }
 
       if (response.statusCode < 200 || response.statusCode >= 300) {
-        return <Map<String, dynamic>>[];
+        throw Exception(
+          'User collection request failed with HTTP ${response.statusCode}.',
+        );
       }
     }
 
@@ -2725,7 +3271,10 @@ class AppwriteConnector {
         try {
           return await _fetchOneNormalized(spec.collectionId, id);
         } catch (e) {
-          debugPrint('Unable to expand ${spec.collectionId}/$id: $e');
+          _appLog(
+            en: 'Unable to expand a related catalogue record: $e',
+            fr: 'Impossible de développer une relation du catalogue : $e',
+          );
           return null;
         }
       }),
@@ -3097,6 +3646,12 @@ class AppwriteConnector {
       'genre_jap': raw['genderJp'] ?? raw['genre_jap'],
       'created': raw[r'$createdAt'] ?? raw['created'],
       'updated': raw[r'$updatedAt'] ?? raw['updated'],
+      if (raw['recommendationMeta'] != null)
+        'recommendationMeta': raw['recommendationMeta'],
+      if (raw['sponsorshipMeta'] != null)
+        'sponsorshipMeta': raw['sponsorshipMeta'],
+      if (raw['editorialMeta'] != null) 'editorialMeta': raw['editorialMeta'],
+      if (raw['source'] != null) 'source': raw['source'],
     };
   }
 
@@ -3448,29 +4003,30 @@ class AppwriteConnector {
 }
 
 class AppwriteCompatClient {
-  AppwriteCompatClient();
+  AppwriteCompatClient(this._connector);
+
+  final AppwriteConnector _connector;
 
   AppwriteCompatCollection collection(String collectionId) {
-    return AppwriteCompatCollection(collectionId);
+    return AppwriteCompatCollection(_connector, collectionId);
   }
 }
 
 class AppwriteCompatCollection {
-  AppwriteCompatCollection(this._collectionId);
+  AppwriteCompatCollection(this._connector, this._collectionId);
 
+  final AppwriteConnector _connector;
   final String _collectionId;
 
   CompatSubscription subscribe(String topic, Function(dynamic) callback) {
-    Timer? timer;
-
-    timer = Timer.periodic(const Duration(seconds: 15), (_) async {
-      callback(
-        RecordSubscriptionEvent(collectionId: _collectionId, action: 'poll'),
-      );
-    });
-
+    final subscription = _connector
+        .listenToCollectionEvents(_collectionId)
+        .listen(callback);
+    var cancelled = false;
     return CompatSubscription(() {
-      timer?.cancel();
+      if (cancelled) return;
+      cancelled = true;
+      unawaited(subscription.cancel());
     });
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mymangatheque/src/back/language/runtime_localization.dart';
 import 'package:mymangatheque/src/back/services/admin_service.dart';
 import 'package:mymangatheque/src/front/page/admin_pages/admin_components.dart';
 import 'package:mymangatheque/src/front/page/admin_pages/create_page/admin_create_form_helpers.dart';
@@ -21,10 +22,11 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
   final TextEditingController _eanController = TextEditingController();
   final TextEditingController _coverController = TextEditingController();
   final TextEditingController _resumeController = TextEditingController();
-  final TextEditingController _subSeriesController = TextEditingController();
   final TextEditingController _bookLinksController = TextEditingController();
-  final TextEditingController _containsController = TextEditingController();
   final TextEditingController _infoController = TextEditingController();
+
+  AdminRelationOption? _subSeries;
+  List<AdminRelationOption> _containedVolumes = const <AdminRelationOption>[];
 
   DateTime? _publicationDate;
   bool _over18 = false;
@@ -66,9 +68,7 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
     _eanController.dispose();
     _coverController.dispose();
     _resumeController.dispose();
-    _subSeriesController.dispose();
     _bookLinksController.dispose();
-    _containsController.dispose();
     _infoController.dispose();
     super.dispose();
   }
@@ -83,7 +83,10 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
         price == null ||
         ean == null) {
       setState(() {
-        _message = 'Champs obligatoires invalides (titre, tome, prix, ean).';
+        _message = context.localized(
+          en: 'Invalid required fields (title, volume number, price, EAN).',
+          fr: 'Champs obligatoires invalides (titre, tome, prix, EAN).',
+        );
         _messageIsError = true;
       });
       return;
@@ -108,10 +111,10 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
         coverUrl: _coverController.text.trim(),
         resume: _resumeController.text.trim(),
         publicationDate: _publicationDate,
-        subSeriesId: _subSeriesController.text.trim(),
+        subSeriesId: _subSeries?.id,
         genderJp: _genderJp,
         bookLinks: parseAdminList(_bookLinksController.text),
-        containsIds: parseAdminList(_containsController.text),
+        containsIds: _containedVolumes.map((item) => item.id).toList(),
         info: parseAdminMetadata(_infoController.text),
         over18: _over18,
       );
@@ -119,7 +122,10 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
       if (!mounted) return;
       setState(() {
         _loading = false;
-        _message = 'Volume créé avec succès.';
+        _message = context.localized(
+          en: 'Volume created successfully.',
+          fr: 'Volume créé avec succès.',
+        );
         _messageIsError = false;
       });
       _titleFrController.clear();
@@ -130,15 +136,15 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
       _eanController.clear();
       _coverController.clear();
       _resumeController.clear();
-      _subSeriesController.clear();
       _bookLinksController.clear();
-      _containsController.clear();
       _infoController.clear();
       _publicationDate = null;
       _over18 = false;
       _language = 'french';
       _support = 'manga';
       _genderJp = '';
+      _subSeries = null;
+      _containedVolumes = const <AdminRelationOption>[];
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -153,11 +159,13 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
   Widget build(BuildContext context) {
     return AdminFormView(
       children: [
-        const AdminPageHeader(
+        AdminPageHeader(
           icon: Icons.menu_book_outlined,
-          title: 'Nouveau volume',
-          description:
-              'Renseignez les informations éditoriales et le rattachement au catalogue.',
+          title: context.localized(en: 'New volume', fr: 'Nouveau volume'),
+          description: context.localized(
+            en: 'Enter publishing information and catalogue relationships.',
+            fr: 'Renseignez les informations éditoriales et le rattachement au catalogue.',
+          ),
         ),
         const SizedBox(height: 20),
         AdminResponsiveFields(
@@ -166,9 +174,12 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
               controller: _titleFrController,
               maxLength: 200,
               textInputAction: TextInputAction.next,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 border: OutlineInputBorder(),
-                labelText: 'Titre français *',
+                labelText: context.localized(
+                  en: 'French title *',
+                  fr: 'Titre français *',
+                ),
                 prefixIcon: Icon(Icons.title_rounded),
               ),
             ),
@@ -176,9 +187,12 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
               controller: _titleEnController,
               maxLength: 200,
               textInputAction: TextInputAction.next,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 border: OutlineInputBorder(),
-                labelText: 'Titre anglais',
+                labelText: context.localized(
+                  en: 'English title',
+                  fr: 'Titre anglais',
+                ),
                 prefixIcon: Icon(Icons.translate_rounded),
               ),
             ),
@@ -186,9 +200,12 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
               controller: _titleJpController,
               maxLength: 200,
               textInputAction: TextInputAction.next,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 border: OutlineInputBorder(),
-                labelText: 'Titre japonais',
+                labelText: context.localized(
+                  en: 'Japanese title',
+                  fr: 'Titre japonais',
+                ),
                 prefixIcon: Icon(Icons.translate_rounded),
               ),
             ),
@@ -203,9 +220,12 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
                 decimal: true,
               ),
               textInputAction: TextInputAction.next,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 border: OutlineInputBorder(),
-                labelText: 'Numéro de tome *',
+                labelText: context.localized(
+                  en: 'Volume number *',
+                  fr: 'Numéro de tome *',
+                ),
                 prefixIcon: Icon(Icons.numbers_rounded),
               ),
             ),
@@ -215,9 +235,9 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
                 decimal: true,
               ),
               textInputAction: TextInputAction.next,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 border: OutlineInputBorder(),
-                labelText: 'Prix *',
+                labelText: context.localized(en: 'Price *', fr: 'Prix *'),
                 suffixText: '€',
                 prefixIcon: Icon(Icons.payments_outlined),
               ),
@@ -227,9 +247,9 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
               keyboardType: TextInputType.number,
               textInputAction: TextInputAction.next,
               maxLength: 13,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 border: OutlineInputBorder(),
-                labelText: 'EAN-13 *',
+                labelText: context.localized(en: 'EAN-13 *', fr: 'EAN-13 *'),
                 prefixIcon: Icon(Icons.qr_code_2_rounded),
                 counterText: '',
               ),
@@ -246,7 +266,7 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
                   .map(
                     (item) => DropdownMenuItem(
                       value: item,
-                      child: Text(item),
+                      child: Text(_localizedLanguage(context, item)),
                     ),
                   )
                   .toList(),
@@ -256,10 +276,10 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
                   _language = value;
                 });
               },
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: 'Langue *',
-                prefixIcon: Icon(Icons.language_rounded),
+              decoration: InputDecoration(
+                border: const OutlineInputBorder(),
+                labelText: context.localized(en: 'Language *', fr: 'Langue *'),
+                prefixIcon: const Icon(Icons.language_rounded),
               ),
             ),
             DropdownButtonFormField<String>(
@@ -269,7 +289,7 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
                   .map(
                     (item) => DropdownMenuItem(
                       value: item,
-                      child: Text(item),
+                      child: Text(_localizedSupport(context, item)),
                     ),
                   )
                   .toList(),
@@ -279,10 +299,10 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
                   _support = value;
                 });
               },
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: 'Support *',
-                prefixIcon: Icon(Icons.category_outlined),
+              decoration: InputDecoration(
+                border: const OutlineInputBorder(),
+                labelText: context.localized(en: 'Format *', fr: 'Support *'),
+                prefixIcon: const Icon(Icons.category_outlined),
               ),
             ),
           ],
@@ -290,30 +310,39 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
         const SizedBox(height: 12),
         AdminResponsiveFields(
           children: [
-            TextField(
-              controller: _subSeriesController,
-              textInputAction: TextInputAction.next,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: 'ID de sous-série',
-                prefixIcon: Icon(Icons.account_tree_outlined),
+            AdminRelationPickerField(
+              label: context.localized(en: 'Sub-series', fr: 'Sous-série'),
+              resource: AdminRelationResource.subSeries,
+              selected: <AdminRelationOption>[
+                if (_subSeries != null) _subSeries!,
+              ],
+              onChanged: (value) => setState(
+                () => _subSeries = value.isEmpty ? null : value.first,
               ),
             ),
             DropdownButtonFormField<String>(
               key: ValueKey<String>(_genderJp),
               initialValue: _genderJp,
-              items: const <DropdownMenuItem<String>>[
-                DropdownMenuItem(value: '', child: Text('Non renseigné')),
-                DropdownMenuItem(value: 'shonen', child: Text('Shōnen')),
-                DropdownMenuItem(value: 'seinen', child: Text('Seinen')),
-                DropdownMenuItem(value: 'shojo', child: Text('Shōjo')),
-                DropdownMenuItem(value: 'josei', child: Text('Josei')),
+              items: <DropdownMenuItem<String>>[
+                DropdownMenuItem(
+                  value: '',
+                  child: Text(
+                    context.localized(en: 'Not specified', fr: 'Non renseigné'),
+                  ),
+                ),
+                const DropdownMenuItem(value: 'shonen', child: Text('Shōnen')),
+                const DropdownMenuItem(value: 'seinen', child: Text('Seinen')),
+                const DropdownMenuItem(value: 'shojo', child: Text('Shōjo')),
+                const DropdownMenuItem(value: 'josei', child: Text('Josei')),
               ],
               onChanged: (value) => setState(() => _genderJp = value ?? ''),
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: 'Public japonais',
-                prefixIcon: Icon(Icons.groups_outlined),
+              decoration: InputDecoration(
+                border: const OutlineInputBorder(),
+                labelText: context.localized(
+                  en: 'Japanese demographic',
+                  fr: 'Public japonais',
+                ),
+                prefixIcon: const Icon(Icons.groups_outlined),
               ),
             ),
           ],
@@ -323,15 +352,21 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
           controller: _coverController,
           keyboardType: TextInputType.url,
           textInputAction: TextInputAction.next,
-          decoration: const InputDecoration(
+          decoration: InputDecoration(
             border: OutlineInputBorder(),
-            labelText: 'URL HTTPS de la couverture',
+            labelText: context.localized(
+              en: 'HTTPS cover URL',
+              fr: 'URL HTTPS de la couverture',
+            ),
             prefixIcon: Icon(Icons.image_outlined),
           ),
         ),
         const SizedBox(height: 12),
         AdminDateField(
-          label: 'Date de publication',
+          label: context.localized(
+            en: 'Publication date',
+            fr: 'Date de publication',
+          ),
           value: _publicationDate,
           onChanged: (value) => setState(() => _publicationDate = value),
         ),
@@ -339,9 +374,9 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
         TextField(
           controller: _resumeController,
           maxLines: 4,
-          decoration: const InputDecoration(
+          decoration: InputDecoration(
             border: OutlineInputBorder(),
-            labelText: 'Résumé',
+            labelText: context.localized(en: 'Summary', fr: 'Résumé'),
             alignLabelWithHint: true,
           ),
         ),
@@ -352,22 +387,32 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
               controller: _bookLinksController,
               maxLines: 3,
               keyboardType: TextInputType.url,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 border: OutlineInputBorder(),
-                labelText: 'Liens d’achat HTTPS',
-                helperText: 'Une URL par ligne ou séparées par des virgules.',
+                labelText: context.localized(
+                  en: 'HTTPS purchase links',
+                  fr: 'Liens d’achat HTTPS',
+                ),
+                helperText: context.localized(
+                  en: 'One URL per line or comma separated.',
+                  fr: 'Une URL par ligne ou séparées par des virgules.',
+                ),
                 prefixIcon: Icon(Icons.link_rounded),
               ),
             ),
-            TextField(
-              controller: _containsController,
-              maxLines: 3,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: 'IDs des volumes inclus',
-                helperText: 'Pour un coffret ou une intégrale.',
-                prefixIcon: Icon(Icons.inventory_2_outlined),
+            AdminRelationPickerField(
+              label: context.localized(
+                en: 'Included volumes',
+                fr: 'Volumes inclus',
               ),
+              resource: AdminRelationResource.volumes,
+              selected: _containedVolumes,
+              allowMultiple: true,
+              helperText: context.localized(
+                en: 'For a box set or omnibus.',
+                fr: 'Pour un coffret ou une intégrale.',
+              ),
+              onChanged: (value) => setState(() => _containedVolumes = value),
             ),
           ],
         ),
@@ -375,11 +420,17 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
         TextField(
           controller: _infoController,
           maxLines: 4,
-          decoration: const InputDecoration(
+          decoration: InputDecoration(
             border: OutlineInputBorder(),
-            labelText: 'Informations complémentaires',
+            labelText: context.localized(
+              en: 'Additional information',
+              fr: 'Informations complémentaires',
+            ),
             hintText: 'pages=192\nformat=Tankōbon',
-            helperText: 'Une paire clé=valeur par ligne, 50 maximum.',
+            helperText: context.localized(
+              en: 'One key=value pair per line, maximum 50.',
+              fr: 'Une paire clé=valeur par ligne, 50 maximum.',
+            ),
             prefixIcon: Icon(Icons.info_outline_rounded),
           ),
         ),
@@ -392,7 +443,9 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
         FilledButton.icon(
           onPressed: _loading ? null : _submit,
           icon: const Icon(Icons.add_rounded),
-          label: const Text('Créer le volume'),
+          label: Text(
+            context.localized(en: 'Create volume', fr: 'Créer le volume'),
+          ),
         ),
         if (_loading) ...[
           const SizedBox(height: 14),
@@ -404,4 +457,56 @@ class _AdminCreateVolumePageState extends State<AdminCreateVolumePage> {
       ],
     );
   }
+}
+
+String _localizedLanguage(BuildContext context, String value) {
+  const english = <String, String>{
+    'french': 'French',
+    'english': 'English',
+    'italian': 'Italian',
+    'spanish': 'Spanish',
+    'german': 'German',
+    'chinese': 'Chinese',
+    'japanese': 'Japanese',
+    'portugese': 'Portuguese',
+  };
+  const french = <String, String>{
+    'french': 'Français',
+    'english': 'Anglais',
+    'italian': 'Italien',
+    'spanish': 'Espagnol',
+    'german': 'Allemand',
+    'chinese': 'Chinois',
+    'japanese': 'Japonais',
+    'portugese': 'Portugais',
+  };
+  return context.localized(
+    en: english[value] ?? value,
+    fr: french[value] ?? value,
+  );
+}
+
+String _localizedSupport(BuildContext context, String value) {
+  const english = <String, String>{
+    'manga': 'Manga',
+    'artbook': 'Art book',
+    'roman': 'Book',
+    'lightNovel': 'Light novel',
+    'novel': 'Novel',
+    'boxSet': 'Box set',
+    'other': 'Other',
+  };
+  const french = <String, String>{
+    'manga': 'Manga',
+    'artbook': 'Artbook',
+    'roman': 'Roman',
+    'lightNovel': 'Light novel',
+    'novel': 'Nouvelle',
+    'boxSet': 'Coffret',
+    'other': 'Autre',
+  };
+  return context.localized(
+    en: english[value] ?? value,
+    fr: french[value] ?? value,
+  );
 }
