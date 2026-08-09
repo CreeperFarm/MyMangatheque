@@ -20,7 +20,7 @@ jobs:
         runs-on: ubuntu-latest
         timeout-minutes: 30
         steps:
-            - uses: actions/checkout@v4
+            - uses: actions/checkout@v7
               with:
                   fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
                   persist-credentials: false
@@ -41,7 +41,7 @@ jobs:
               run: flutter test --coverage
 
             - name: Upload coverage report
-              uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+              uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
               with:
                   name: flutter-coverage-${{ github.run_id }}
                   path: coverage/lcov.info
@@ -53,6 +53,6 @@ jobs:
                   echo "sonar.cpp.file.suffixes=-" >> sonar-project.properties
                   echo "sonar.objc.file.suffixes=-" >> sonar-project.properties
             - name: SonarQube Scan
-              uses: SonarSource/sonarqube-scan-action@fd88b7d7ccbaefd23d8f36f73b59db7a3d246602
+              uses: SonarSource/sonarqube-scan-action@22918119ff8e1ca75a623e15c8296b6ea4fbe28f
               env:
                   SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
