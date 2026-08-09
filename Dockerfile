@@ -12,7 +12,9 @@ COPY pubspec.* ./
 RUN flutter pub get
 
 COPY . .
-RUN flutter build web --release --wasm
+ARG FIREBASE_WEB_VAPID_KEY=""
+RUN flutter build web --release --wasm \
+  --dart-define=FIREBASE_WEB_VAPID_KEY=${FIREBASE_WEB_VAPID_KEY}
 
 FROM nginx:alpine
 

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:mymangatheque/src/back/services/appwrite.dart';
+import 'package:mymangatheque/src/back/services/security/security_utils.dart';
 import 'package:mymangatheque/src/const/assets.dart';
-import 'package:mymangatheque/src/models/file.dart';
+import 'package:mymangatheque/src/front/components/safe_network_image.dart';
 
 class GetUserProfilePicture extends StatelessWidget {
   final AppwriteFile file;
@@ -25,7 +25,9 @@ class GetUserProfilePicture extends StatelessWidget {
       future: _fetchUserProfilePicture(user),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
-          if (snapshot.hasError || snapshot.data == null || snapshot.data!.isEmpty) {
+          if (snapshot.hasError ||
+              snapshot.data == null ||
+              snapshot.data!.isEmpty) {
             return _buildLocalImage();
           }
           return _buildNetworkImage(snapshot.data!);
@@ -40,17 +42,10 @@ class GetUserProfilePicture extends StatelessWidget {
     if (avatarUrl == null || avatarUrl.isEmpty) {
       return null;
     }
+    final safeUri = parseSafeHttpsUri(avatarUrl);
+    if (safeUri == null) return null;
 
-    try {
-      final response = await http.get(Uri.parse(avatarUrl));
-      if (response.statusCode == 200) {
-        return avatarUrl;
-      }
-    } catch (_) {
-      return null;
-    }
-
-    return null;
+    return safeUri.toString();
   }
 
   Widget _buildLocalImage() {
@@ -71,8 +66,8 @@ class GetUserProfilePicture extends StatelessWidget {
     return Center(
       child: ClipRRect(
         borderRadius: BorderRadius.circular(150.0),
-        child: Image.network(
-          url,
+        child: SafeNetworkImage(
+          imageUrl: url,
           height: height ?? 175,
           width: width ?? 175,
           fit: BoxFit.cover,

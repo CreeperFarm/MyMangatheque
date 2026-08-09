@@ -2,10 +2,12 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:appwrite/appwrite.dart';
-import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import 'package:mymangatheque/src/back/language/runtime_localization.dart';
+import 'package:mymangatheque/src/back/services/analytics/reliability_monitor.dart';
 import 'package:mymangatheque/src/back/services/api/mobile_api_key_manager.dart';
 import 'package:mymangatheque/src/back/services/appwrite_client.dart';
+import 'package:mymangatheque/src/back/services/security/security_utils.dart';
 
 class MobileApiClient {
   MobileApiClient._internal();
@@ -15,6 +17,7 @@ class MobileApiClient {
   factory MobileApiClient() => _singleton;
 
   static const String _apiBaseUrl = 'https://api.mymangatheque.com';
+  static const Duration _requestTimeout = Duration(seconds: 20);
 
   final MobileApiKeyManager _keyManager = MobileApiKeyManager();
   final AppwriteClientService _appwriteClient = AppwriteClientService();
@@ -71,7 +74,10 @@ class MobileApiClient {
 
     if (response.statusCode < 200 || response.statusCode >= 300) {
       throw Exception(
-        'Unable to obtain mobile API key (status ${response.statusCode}): ${response.body}',
+        RuntimeLocalization.text(
+          en: 'Unable to obtain the mobile API key (status ${response.statusCode}): ${redactSensitiveText(response.body)}',
+          fr: 'Impossible d’obtenir la clé API mobile (statut ${response.statusCode}) : ${redactSensitiveText(response.body)}',
+        ),
       );
     }
 
@@ -91,15 +97,17 @@ class MobileApiClient {
     required String keyHash,
     String? authorizationBearer,
   }) {
-    return http.post(
-      Uri.parse('$_apiBaseUrl/api/auth/keys/mobile'),
-      headers: <String, String>{
-        if (authorizationBearer != null && authorizationBearer.isNotEmpty)
-          'Authorization': 'Bearer $authorizationBearer',
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode(<String, dynamic>{'keyHash': keyHash}),
-    );
+    return http
+        .post(
+          Uri.parse('$_apiBaseUrl/api/auth/keys/mobile'),
+          headers: <String, String>{
+            if (authorizationBearer != null && authorizationBearer.isNotEmpty)
+              'Authorization': 'Bearer $authorizationBearer',
+            'Content-Type': 'application/json',
+          },
+          body: jsonEncode(<String, dynamic>{'keyHash': keyHash}),
+        )
+        .timeout(_requestTimeout);
   }
 
   bool _hasValidCachedJwt() {
@@ -160,7 +168,10 @@ class MobileApiClient {
           e.code == 401 || e.type == 'general_unauthorized_scope';
       if (unauthorized) {
         if (!silentUnauthorized) {
-          debugPrint('JWT generation failed (unauthorized): $e');
+          RuntimeLocalization.debug(
+            en: 'JWT generation failed because the session is unauthorized: $e',
+            fr: 'La génération du JWT a échoué car la session n’est pas autorisée : $e',
+          );
         }
         _clearJwtCache();
         return null;
@@ -172,16 +183,23 @@ class MobileApiClient {
         _jwtRateLimitedUntilUtc = DateTime.now().toUtc().add(
           const Duration(seconds: 45),
         );
-        debugPrint(
-          'JWT generation rate-limited. Reusing cached JWT if available.',
+        RuntimeLocalization.debug(
+          en: 'JWT generation is rate-limited. Reusing the cached JWT when available.',
+          fr: 'La génération du JWT est limitée. Réutilisation du JWT en cache si disponible.',
         );
         return _cachedJwt;
       }
 
-      debugPrint('JWT generation failed: $e');
+      RuntimeLocalization.debug(
+        en: 'JWT generation failed: $e',
+        fr: 'La génération du JWT a échoué : $e',
+      );
       return _cachedJwt;
     } catch (e) {
-      debugPrint('JWT generation failed: $e');
+      RuntimeLocalization.debug(
+        en: 'JWT generation failed: $e',
+        fr: 'La génération du JWT a échoué : $e',
+      );
       return _cachedJwt;
     }
   }
@@ -263,6 +281,15 @@ class MobileApiClient {
   }) async {
     await init();
 
+    if (!isSafeApiPath(path)) {
+      throw ArgumentError(
+        RuntimeLocalization.text(
+          en: 'Invalid API path.',
+          fr: 'Chemin API invalide.',
+        ),
+      );
+    }
+
     final uri = Uri.parse('$_apiBaseUrl$path').replace(
       queryParameters: query?.map(
         (key, value) => MapEntry(key, value?.toString()),
@@ -282,13 +309,17 @@ class MobileApiClient {
       final hasAuthenticatedSession = await _appwriteClient
           .hasAuthenticatedUserSession();
       if (!hasAuthenticatedSession) {
-        debugPrint(
-          'Bearer JWT requested for $path but no authenticated session is active.',
+        RuntimeLocalization.debug(
+          en: 'A Bearer JWT was requested for $path without an authenticated session.',
+          fr: 'Un JWT Bearer a été demandé pour $path sans session authentifiée.',
         );
         return http.Response(
           jsonEncode(<String, dynamic>{
             'status': 'fail',
-            'message': 'Missing authenticated user session for Bearer request',
+            'message': RuntimeLocalization.text(
+              en: 'Missing authenticated user session for Bearer request',
+              fr: 'Session utilisateur authentifiée absente pour la requête Bearer',
+            ),
           }),
           401,
           headers: const <String, String>{'content-type': 'application/json'},
@@ -297,11 +328,17 @@ class MobileApiClient {
 
       final jwt = await _currentJwtOrNull();
       if (jwt == null || jwt.isEmpty) {
-        debugPrint('Bearer JWT unavailable for $path. Returning 401.');
+        RuntimeLocalization.debug(
+          en: 'Bearer JWT unavailable for $path. Returning 401.',
+          fr: 'JWT Bearer indisponible pour $path. Retour du statut 401.',
+        );
         return http.Response(
           jsonEncode(<String, dynamic>{
             'status': 'fail',
-            'message': 'Missing authenticated user session for Bearer request',
+            'message': RuntimeLocalization.text(
+              en: 'Missing authenticated user session for Bearer request',
+              fr: 'Session utilisateur authentifiée absente pour la requête Bearer',
+            ),
           }),
           401,
           headers: const <String, String>{'content-type': 'application/json'},
@@ -313,22 +350,53 @@ class MobileApiClient {
     final payload = body == null ? null : jsonEncode(body);
 
     late final http.Response response;
-
-    switch (method) {
-      case 'GET':
-        response = await http.get(uri, headers: headers);
-        break;
-      case 'POST':
-        response = await http.post(uri, headers: headers, body: payload);
-        break;
-      case 'PATCH':
-        response = await http.patch(uri, headers: headers, body: payload);
-        break;
-      case 'DELETE':
-        response = await http.delete(uri, headers: headers, body: payload);
-        break;
-      default:
-        throw UnsupportedError('HTTP method not supported: $method');
+    final stopwatch = Stopwatch()..start();
+    try {
+      switch (method) {
+        case 'GET':
+          response = await http
+              .get(uri, headers: headers)
+              .timeout(_requestTimeout);
+          break;
+        case 'POST':
+          response = await http
+              .post(uri, headers: headers, body: payload)
+              .timeout(_requestTimeout);
+          break;
+        case 'PATCH':
+          response = await http
+              .patch(uri, headers: headers, body: payload)
+              .timeout(_requestTimeout);
+          break;
+        case 'DELETE':
+          response = await http
+              .delete(uri, headers: headers, body: payload)
+              .timeout(_requestTimeout);
+          break;
+        default:
+          throw UnsupportedError(
+            RuntimeLocalization.text(
+              en: 'HTTP method not supported: $method',
+              fr: 'Méthode HTTP non prise en charge : $method',
+            ),
+          );
+      }
+      stopwatch.stop();
+      ReliabilityMonitor.instance.record(
+        method: method,
+        path: path,
+        duration: stopwatch.elapsed,
+        statusCode: response.statusCode,
+      );
+    } on Object catch (error) {
+      stopwatch.stop();
+      ReliabilityMonitor.instance.record(
+        method: method,
+        path: path,
+        duration: stopwatch.elapsed,
+        failureType: error is TimeoutException ? 'timeout' : 'network',
+      );
+      rethrow;
     }
 
     if (requiresApiKey &&

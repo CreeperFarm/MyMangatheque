@@ -623,6 +623,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get provideConfirmNewPassword => 'Please confirm your new password';
 
   @override
+  String get confirmPassword => 'Confirm password';
+
+  @override
   String get passwordsDoNotMatch =>
       'The new password and confirmation do not match.';
 

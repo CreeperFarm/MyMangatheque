@@ -281,6 +281,7 @@
   "provideNewPassword": "Please provide your new password",
   "confirmNewPassword": "Confirm New Password",
   "provideConfirmNewPassword": "Please confirm your new password",
+  "confirmPassword": "Confirm password",
   "passwordsDoNotMatch": "The new password and confirmation do not match.",
   "signInPage": "Sign In Page",
   "signIn": "Sign In",

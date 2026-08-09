@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mymangatheque/src/back/language/runtime_localization.dart';
 import 'package:mymangatheque/src/back/services/admin_service.dart';
 import 'package:mymangatheque/src/front/page/admin_pages/admin_components.dart';
 
@@ -25,7 +26,10 @@ class _AdminCreateGenrePageState extends State<AdminCreateGenrePage> {
   Future<void> _submit() async {
     if (_nameController.text.trim().isEmpty) {
       setState(() {
-        _message = 'Le nom est obligatoire.';
+        _message = context.localized(
+          en: 'Name is required.',
+          fr: 'Le nom est obligatoire.',
+        );
         _messageIsError = true;
       });
       return;
@@ -42,7 +46,10 @@ class _AdminCreateGenrePageState extends State<AdminCreateGenrePage> {
       if (!mounted) return;
       setState(() {
         _loading = false;
-        _message = 'Genre créé avec succès.';
+        _message = context.localized(
+          en: 'Genre created successfully.',
+          fr: 'Genre créé avec succès.',
+        );
         _messageIsError = false;
       });
       _nameController.clear();
@@ -60,18 +67,21 @@ class _AdminCreateGenrePageState extends State<AdminCreateGenrePage> {
   Widget build(BuildContext context) {
     return AdminFormView(
       children: [
-        const AdminPageHeader(
+        AdminPageHeader(
           icon: Icons.sell_outlined,
-          title: 'Nouveau genre',
-          description: 'Ajoutez un genre utilisable dans le catalogue.',
+          title: context.localized(en: 'New genre', fr: 'Nouveau genre'),
+          description: context.localized(
+            en: 'Add a genre that can be used in the catalogue.',
+            fr: 'Ajoutez un genre utilisable dans le catalogue.',
+          ),
         ),
         const SizedBox(height: 20),
         TextField(
           controller: _nameController,
           maxLength: 200,
-          decoration: const InputDecoration(
+          decoration: InputDecoration(
             border: OutlineInputBorder(),
-            labelText: 'Nom *',
+            labelText: context.localized(en: 'Name *', fr: 'Nom *'),
             prefixIcon: Icon(Icons.label_outline_rounded),
           ),
         ),
@@ -79,7 +89,9 @@ class _AdminCreateGenrePageState extends State<AdminCreateGenrePage> {
         FilledButton.icon(
           onPressed: _loading ? null : _submit,
           icon: const Icon(Icons.add_rounded),
-          label: const Text('Créer le genre'),
+          label: Text(
+            context.localized(en: 'Create genre', fr: 'Créer le genre'),
+          ),
         ),
         if (_loading) ...[
           const SizedBox(height: 14),

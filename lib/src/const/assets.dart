@@ -12,7 +12,11 @@ class Assets {
 
   // Expose `Assets.images.<name>`
   static const images = _Images(
-    _Theme('assets/images/theme/auto-icon.png', 'assets/images/theme/dark-icon.png', 'assets/images/theme/light-icon.png'),
+    _Theme(
+      'assets/images/theme/auto-icon.png',
+      'assets/images/theme/dark-icon.png',
+      'assets/images/theme/light-icon.png',
+    ),
     'assets/images/splash_bg.png',
     'assets/images/google.png',
     'assets/images/apple.png',
@@ -81,7 +85,15 @@ class _Images {
   final String fr;
   final String us;
 
-  const _Images(this.theme, this.splashBg, this.google, this.apple, this.unknown, this.fr, this.us);
+  const _Images(
+    this.theme,
+    this.splashBg,
+    this.google,
+    this.apple,
+    this.unknown,
+    this.fr,
+    this.us,
+  );
 }
 
 class _Theme {

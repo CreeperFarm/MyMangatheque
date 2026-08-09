@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:mymangatheque/src/back/language/runtime_localization.dart';
 import 'package:mymangatheque/src/back/services/admin_service.dart';
+import 'package:mymangatheque/src/back/services/security/security_utils.dart';
 import 'package:mymangatheque/src/front/page/admin_pages/admin_components.dart';
 import 'package:mymangatheque/src/function/auto_push_or_go.dart';
 
@@ -36,7 +38,10 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
   Future<void> _loginWithManualKey() async {
     if (_apiKeyController.text.trim().isEmpty) {
       setState(() {
-        _message = 'Saisis une clé API admin.';
+        _message = context.localized(
+          en: 'Enter an administrator API key.',
+          fr: 'Saisis une clé API admin.',
+        );
         _messageIsError = true;
       });
       return;
@@ -55,8 +60,14 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
         _loading = false;
         _messageIsError = !ok;
         _message = ok
-            ? 'Connexion admin réussie.'
-            : 'Clé API invalide ou non admin.';
+            ? context.localized(
+                en: 'Administrator sign-in successful.',
+                fr: 'Connexion admin réussie.',
+              )
+            : context.localized(
+                en: 'Invalid API key or insufficient permissions.',
+                fr: 'Clé API invalide ou non admin.',
+              );
       });
       if (ok) {
         _apiKeyController.clear();
@@ -67,7 +78,7 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
       setState(() {
         _loading = false;
         _messageIsError = true;
-        _message = error.toString();
+        _message = redactSensitiveText(error);
       });
     }
   }
@@ -86,8 +97,14 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
         _loading = false;
         _messageIsError = !ok;
         _message = ok
-            ? 'Connexion admin via session réussie.'
-            : 'La session courante n’a pas les droits admin.';
+            ? context.localized(
+                en: 'Administrator sign-in through the current session succeeded.',
+                fr: 'Connexion admin via session réussie.',
+              )
+            : context.localized(
+                en: 'The current session does not have administrator permissions.',
+                fr: 'La session courante n’a pas les droits admin.',
+              );
       });
 
       if (ok) {
@@ -98,7 +115,10 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
       setState(() {
         _loading = false;
         _messageIsError = true;
-        _message = 'Impossible d’utiliser la session courante: $e';
+        _message = context.localized(
+          en: 'Unable to use the current session: ${redactSensitiveText(e)}',
+          fr: 'Impossible d’utiliser la session courante : ${redactSensitiveText(e)}',
+        );
       });
     }
   }
@@ -107,26 +127,42 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
   Widget build(BuildContext context) {
     final isLoggedIn = _admin.isLoggedIn();
     return AdminPageScaffold(
-      title: 'Connexion administration',
+      title: context.localized(
+        en: 'Administrator sign-in',
+        fr: 'Connexion administration',
+      ),
       maxWidth: 680,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const AdminPageHeader(
+          AdminPageHeader(
             icon: Icons.shield_outlined,
-            title: 'Accès sécurisé',
-            description:
-                'Utilisez une clé disposant des permissions nécessaires aux outils de gestion.',
+            title: context.localized(en: 'Secure access', fr: 'Accès sécurisé'),
+            description: context.localized(
+              en: 'Use a key with the permissions required by the management tools.',
+              fr: 'Utilisez une clé disposant des permissions nécessaires aux outils de gestion.',
+            ),
           ),
           const SizedBox(height: 20),
           AdminStatusBanner(
             icon: isLoggedIn
                 ? Icons.verified_user_outlined
                 : Icons.key_off_outlined,
-            title: isLoggedIn ? 'Déjà connecté' : 'Aucune clé active',
+            title: isLoggedIn
+                ? context.localized(
+                    en: 'Already signed in',
+                    fr: 'Déjà connecté',
+                  )
+                : context.localized(
+                    en: 'No active key',
+                    fr: 'Aucune clé active',
+                  ),
             message: isLoggedIn
                 ? _admin.maskedKey
-                : 'La clé est conservée dans le stockage sécurisé de l’appareil.',
+                : context.localized(
+                    en: 'The key is kept in the device secure storage.',
+                    fr: 'La clé est conservée dans le stockage sécurisé de l’appareil.',
+                  ),
             tone: isLoggedIn ? AdminBannerTone.success : AdminBannerTone.info,
           ),
           const SizedBox(height: 16),
@@ -144,7 +180,7 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Text(
-                    'Clé API',
+                    context.localized(en: 'API key', fr: 'Clé API'),
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                   const SizedBox(height: 14),
@@ -157,7 +193,10 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
                     onSubmitted: (_) => _loading ? null : _loginWithManualKey(),
                     decoration: InputDecoration(
                       border: const OutlineInputBorder(),
-                      labelText: 'Clé administrateur ou modérateur',
+                      labelText: context.localized(
+                        en: 'Administrator or moderator key',
+                        fr: 'Clé administrateur ou modérateur',
+                      ),
                       hintText: 'mmt_xxx...',
                       prefixIcon: const Icon(Icons.key_rounded),
                       suffixIcon: IconButton(
@@ -167,8 +206,14 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
                           });
                         },
                         tooltip: _obscureKey
-                            ? 'Afficher la clé'
-                            : 'Masquer la clé',
+                            ? context.localized(
+                                en: 'Show key',
+                                fr: 'Afficher la clé',
+                              )
+                            : context.localized(
+                                en: 'Hide key',
+                                fr: 'Masquer la clé',
+                              ),
                         icon: Icon(
                           _obscureKey
                               ? Icons.visibility_outlined
@@ -181,13 +226,23 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
                   FilledButton.icon(
                     onPressed: _loading ? null : _loginWithManualKey,
                     icon: const Icon(Icons.login_rounded),
-                    label: const Text('Se connecter avec cette clé'),
+                    label: Text(
+                      context.localized(
+                        en: 'Sign in with this key',
+                        fr: 'Se connecter avec cette clé',
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 10),
                   OutlinedButton.icon(
                     onPressed: _loading ? null : _loginWithSessionKey,
                     icon: const Icon(Icons.person_outline_rounded),
-                    label: const Text('Utiliser la session courante'),
+                    label: Text(
+                      context.localized(
+                        en: 'Use current session',
+                        fr: 'Utiliser la session courante',
+                      ),
+                    ),
                   ),
                 ],
               ),

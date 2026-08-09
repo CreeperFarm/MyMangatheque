@@ -5,7 +5,7 @@ import 'package:mymangatheque/l10n/app_localizations.dart';
 class MentionsLegalesPage extends StatelessWidget {
   const MentionsLegalesPage({super.key});
 
-  Column header(text) {
+  Column header(String text) {
     return Column(
       children: [
         const Padding(padding: EdgeInsets.only(top: 10)),
@@ -23,7 +23,7 @@ class MentionsLegalesPage extends StatelessWidget {
     );
   }
 
-  Column part(text) {
+  Column part(String text) {
     return Column(
       children: [
         const Padding(padding: EdgeInsets.only(top: 10)),
@@ -39,7 +39,7 @@ class MentionsLegalesPage extends StatelessWidget {
     );
   }
 
-  Column subPart(text) {
+  Column subPart(String text) {
     return Column(
       children: [
         const Padding(padding: EdgeInsets.only(top: 10)),
@@ -55,7 +55,7 @@ class MentionsLegalesPage extends StatelessWidget {
     );
   }
 
-  Column paragraph(text) {
+  Column paragraph(String text) {
     return Column(
       children: [
         const Padding(padding: EdgeInsets.only(top: 10)),

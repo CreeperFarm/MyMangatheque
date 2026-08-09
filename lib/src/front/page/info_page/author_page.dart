@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:mymangatheque/l10n/app_localizations.dart';
+import 'package:mymangatheque/src/back/language/runtime_localization.dart';
 import 'package:mymangatheque/src/back/services/appwrite.dart';
 import 'package:mymangatheque/src/front/components/my_line.dart';
 import 'package:mymangatheque/src/front/components/safe_network_image.dart';
@@ -53,7 +54,10 @@ class _AuthorPageState extends State<AuthorPage> {
           );
         }
         if (snapshot.hasError) {
-          debugPrint(snapshot.error.toString());
+          RuntimeLocalization.debug(
+            en: 'Unable to load the author page: ${snapshot.error}',
+            fr: 'Impossible de charger la page de l’auteur : ${snapshot.error}',
+          );
           return Scaffold(
             appBar: AppBar(title: Text(localizations.errorOccurred)),
             body: Center(child: Text(localizations.errorOccurred)),
@@ -61,16 +65,22 @@ class _AuthorPageState extends State<AuthorPage> {
         }
         if (snapshot.hasData && snapshot.data != null) {
           // ? Declaring variables
-          final data = snapshot.data!.isNotEmpty ? Map<String, dynamic>.from(snapshot.data!.first.data) : <String, dynamic>{};
-          final expand = data['expand'] is Map<String, dynamic> ? data['expand'] as Map<String, dynamic> : <String, dynamic>{};
+          final data = snapshot.data!.isNotEmpty
+              ? Map<String, dynamic>.from(snapshot.data!.first.data)
+              : <String, dynamic>{};
+          final expand = data['expand'] is Map<String, dynamic>
+              ? data['expand'] as Map<String, dynamic>
+              : <String, dynamic>{};
           final height = (MediaQuery.of(context).size.width > 500)
               ? 500.0
               : (MediaQuery.of(context).size.width < 275)
               ? 275.0
               : MediaQuery.of(context).size.width;
-          final pictureUrl = data['image']?.toString() ?? data['coverUrl']?.toString();
+          final pictureUrl =
+              data['image']?.toString() ?? data['coverUrl']?.toString();
           final series = List<Map<String, dynamic>>.from(
-            (expand['series'] as List<dynamic>? ?? const <dynamic>[]).whereType<Map<String, dynamic>>(),
+            (expand['series'] as List<dynamic>? ?? const <dynamic>[])
+                .whereType<Map<String, dynamic>>(),
           );
           final jobsRaw = data['job']?.toString() ?? '';
           final jobs = jobsRaw.isEmpty ? const <String>[] : jobsRaw.split(', ');
@@ -152,7 +162,8 @@ class _AuthorPageState extends State<AuthorPage> {
                           children: [
                             for (var i = 0; i < jobs.length; i++)
                               Text(
-                                localizations.jobsName(jobs[i]) + (i != jobs.length - 1 ? ", " : ""),
+                                localizations.jobsName(jobs[i]) +
+                                    (i != jobs.length - 1 ? ", " : ""),
                                 textAlign: TextAlign.left,
                                 style: const TextStyle(
                                   fontSize: 15,

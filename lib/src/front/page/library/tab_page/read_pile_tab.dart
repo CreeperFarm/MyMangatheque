@@ -11,9 +11,8 @@ import 'package:mymangatheque/src/front/components/my_line.dart';
 import 'package:mymangatheque/src/front/components/my_loader_display.dart';
 import 'package:mymangatheque/src/front/components/my_scroll_column.dart';
 import 'package:mymangatheque/src/front/components/safe_network_image.dart';
+import 'package:mymangatheque/src/front/page/library/library_tab_data.dart';
 import 'package:mymangatheque/src/function/auto_push_or_go.dart';
-import 'package:mymangatheque/src/models/manga/sub_serie_for_collection.dart';
-import 'package:mymangatheque/src/models/manga/volume.dart';
 
 class ReadPileTab extends ConsumerStatefulWidget {
   const ReadPileTab({this.searchQuery = '', this.order = 'manga', super.key});
@@ -26,88 +25,6 @@ class ReadPileTab extends ConsumerStatefulWidget {
 }
 
 class _ReadPileTabState extends ConsumerState<ReadPileTab> {
-  int numberVolumeReaded(List<Volume> volumes) {
-    int volumeReaded = 0;
-    for (var volume in volumes) {
-      if (volume.readed) {
-        volumeReaded++;
-      }
-    }
-    return volumeReaded;
-  }
-
-  int _numberVolumeOwned(Iterable<SubSerieForCollection> subSeries) {
-    return subSeries.fold<int>(
-      0,
-      (total, subSerie) => total + subSerie.numberOwnedVolumes,
-    );
-  }
-
-  int _numberVolumeReaded(Iterable<SubSerieForCollection> subSeries) {
-    return subSeries.fold<int>(
-      0,
-      (total, subSerie) => total + numberVolumeReaded(subSerie.volumes),
-    );
-  }
-
-  List<SubSerieForCollection> _pendingSubSeries(
-    Iterable<SubSerieForCollection> subSeries,
-  ) {
-    final query = widget.searchQuery.trim().toLowerCase();
-    final pending = <SubSerieForCollection>[];
-
-    for (final subSerie in subSeries) {
-      final unreadVolumes =
-          subSerie.volumes.where((volume) => !volume.readed).toList()
-            ..sort((a, b) => (a.tomeNumber ?? 0).compareTo(b.tomeNumber ?? 0));
-      if (unreadVolumes.isEmpty) continue;
-
-      final matchesQuery =
-          query.isEmpty ||
-          subSerie.title.toLowerCase().contains(query) ||
-          unreadVolumes.any(
-            (volume) => volume.title.toLowerCase().contains(query),
-          );
-      if (!matchesQuery) continue;
-
-      pending.add(
-        SubSerieForCollection(
-          id: subSerie.id,
-          title: subSerie.title,
-          numberOfVolumes: subSerie.numberOfVolumes,
-          numberOwnedVolumes: subSerie.numberOwnedVolumes,
-          volumes: unreadVolumes,
-          cover: subSerie.cover,
-        ),
-      );
-    }
-
-    pending.sort((a, b) {
-      if (widget.order == 'releaseDate') {
-        final aDate = a.volumes
-            .map(
-              (volume) =>
-                  volume.release ?? DateTime.fromMillisecondsSinceEpoch(0),
-            )
-            .reduce(
-              (value, element) => value.isAfter(element) ? value : element,
-            );
-        final bDate = b.volumes
-            .map(
-              (volume) =>
-                  volume.release ?? DateTime.fromMillisecondsSinceEpoch(0),
-            )
-            .reduce(
-              (value, element) => value.isAfter(element) ? value : element,
-            );
-        return bDate.compareTo(aDate);
-      }
-      return a.title.toLowerCase().compareTo(b.title.toLowerCase());
-    });
-
-    return pending;
-  }
-
   @override
   Widget build(BuildContext context) {
     var localizations = AppLocalizations.of(context);
@@ -116,9 +33,13 @@ class _ReadPileTabState extends ConsumerState<ReadPileTab> {
     }
 
     final subSeries = ref.watch(mangaOwnedProvider);
-    final volumeOwned = _numberVolumeOwned(subSeries);
-    final volumeReaded = _numberVolumeReaded(subSeries);
-    final pendingSubSeries = _pendingSubSeries(subSeries);
+    final volumeOwned = ownedLibraryVolumeCount(subSeries);
+    final volumeReaded = readLibraryVolumeCount(subSeries);
+    final pendingSubSeries = buildReadPileSubSeries(
+      subSeries,
+      searchQuery: widget.searchQuery,
+      order: widget.order,
+    );
 
     return Padding(
       padding: const EdgeInsets.all(10),
@@ -161,6 +82,10 @@ class _ReadPileTabState extends ConsumerState<ReadPileTab> {
             vertical: 10,
             horizontal: 0,
           ),
+          if (pendingSubSeries.isEmpty &&
+              volumeOwned > volumeReaded &&
+              widget.searchQuery.trim().isNotEmpty)
+            Text(localizations.noResults),
           for (final subSerie in pendingSubSeries)
             InkWell(
               onTap: () {

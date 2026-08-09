@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:mymangatheque/src/back/language/runtime_localization.dart';
 import 'package:mymangatheque/src/back/services/admin_service.dart';
+import 'package:mymangatheque/src/back/services/security/security_utils.dart';
 import 'package:mymangatheque/src/front/page/admin_pages/admin_components.dart';
 import 'package:mymangatheque/src/function/auto_push_or_go.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+
+String _statsT(String en, String fr) =>
+    RuntimeLocalization.text(en: en, fr: fr);
 
 class StatisticsPage extends StatefulWidget {
   const StatisticsPage({super.key});
@@ -35,14 +41,30 @@ class _StatisticsPageState extends State<StatisticsPage> {
 
   Future<_StatisticsData> _loadData() async {
     final results = await Future.wait<_StatisticsSection>([
+      _capture(_admin.getAnalyticsHealth()),
       _capture(_admin.getSummary(days: _periodDays)),
       _capture(_admin.getMostAddedVolumes(days: _periodDays, limit: 10)),
+      _capture(_admin.getMostWishlistedMangas(days: _periodDays, limit: 10)),
+      _capture(_loadAppInformation()),
     ]);
     return _StatisticsData(
-      summary: results[0],
-      volumes: results[1],
+      health: results[0],
+      summary: results[1],
+      volumes: results[2],
+      wishlist: results[3],
+      appInformation: results[4],
       loadedAt: DateTime.now(),
     );
+  }
+
+  Future<Map<String, dynamic>> _loadAppInformation() async {
+    final info = await PackageInfo.fromPlatform();
+    return <String, dynamic>{
+      'name': info.appName,
+      'packageName': info.packageName,
+      'version': info.version,
+      'buildNumber': info.buildNumber,
+    };
   }
 
   Future<_StatisticsSection> _capture(
@@ -73,22 +95,27 @@ class _StatisticsPageState extends State<StatisticsPage> {
 
     if (!_admin.isLoggedIn()) {
       return AdminPageScaffold(
-        title: 'Statistiques',
+        title: _statsT('Analytics', 'Statistiques'),
         maxWidth: 680,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const AdminPageHeader(
+            AdminPageHeader(
               icon: Icons.query_stats_rounded,
-              title: 'Statistiques du catalogue',
-              description:
-                  'Une clé autorisée est nécessaire pour consulter ces données.',
+              title: _statsT(
+                'Catalogue analytics',
+                'Statistiques du catalogue',
+              ),
+              description: _statsT(
+                'An authorized key is required to view this data.',
+                'Une clé autorisée est nécessaire pour consulter ces données.',
+              ),
             ),
             const SizedBox(height: 20),
             FilledButton.icon(
               onPressed: () => pushOrGo(context, '/admin/admin_login'),
               icon: const Icon(Icons.login_rounded),
-              label: const Text('Se connecter en admin'),
+              label: Text(_statsT('Sign in as admin', 'Se connecter en admin')),
             ),
           ],
         ),
@@ -96,11 +123,12 @@ class _StatisticsPageState extends State<StatisticsPage> {
     }
 
     return AdminPageScaffold(
-      title: 'Statistiques',
+      title: _statsT('Overview', 'Vue générale'),
       actions: [
+        const AdminExportButton(resource: 'analytics-summary'),
         IconButton(
           onPressed: _refresh,
-          tooltip: 'Actualiser',
+          tooltip: _statsT('Refresh', 'Actualiser'),
           icon: const Icon(Icons.refresh_rounded),
         ),
       ],
@@ -115,7 +143,9 @@ class _StatisticsPageState extends State<StatisticsPage> {
           }
           if (snapshot.hasError || !snapshot.hasData) {
             return _FatalStatisticsError(
-              message: snapshot.error?.toString() ?? 'Réponse vide.',
+              message: snapshot.error == null
+                  ? _statsT('Empty response.', 'Réponse vide.')
+                  : redactSensitiveText(snapshot.error),
               onRetry: _refresh,
             );
           }
@@ -133,13 +163,19 @@ class _StatisticsPageState extends State<StatisticsPage> {
 
 class _StatisticsData {
   const _StatisticsData({
+    required this.health,
     required this.summary,
     required this.volumes,
+    required this.wishlist,
+    required this.appInformation,
     required this.loadedAt,
   });
 
+  final _StatisticsSection health;
   final _StatisticsSection summary;
   final _StatisticsSection volumes;
+  final _StatisticsSection wishlist;
+  final _StatisticsSection appInformation;
   final DateTime loadedAt;
 }
 
@@ -163,20 +199,23 @@ class _FatalStatisticsError extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const AdminPageHeader(
+        AdminPageHeader(
           icon: Icons.query_stats_rounded,
-          title: 'Statistiques du catalogue',
-          description: 'Les indicateurs n’ont pas pu être chargés.',
+          title: _statsT('Catalogue analytics', 'Statistiques du catalogue'),
+          description: _statsT(
+            'Metrics could not be loaded.',
+            'Les indicateurs n’ont pas pu être chargés.',
+          ),
         ),
         const SizedBox(height: 20),
         AdminStatusBanner(
           icon: Icons.cloud_off_outlined,
-          title: 'Chargement impossible',
+          title: _statsT('Unable to load', 'Chargement impossible'),
           message: message,
           tone: AdminBannerTone.error,
           trailing: IconButton(
             onPressed: onRetry,
-            tooltip: 'Réessayer',
+            tooltip: _statsT('Retry', 'Réessayer'),
             icon: const Icon(Icons.refresh_rounded),
           ),
         ),
@@ -211,6 +250,12 @@ class _StatisticsContent extends StatelessWidget {
     final topVolumes = rawVolumes is List
         ? rawVolumes.map(_asMap).whereType<Map<String, dynamic>>().toList()
         : <Map<String, dynamic>>[];
+    final wishlistResponse =
+        _asMap(data.wishlist.data['data']) ?? data.wishlist.data;
+    final rawWishlist = wishlistResponse['mangas'] ?? wishlistResponse['items'];
+    final topWishlist = rawWishlist is List
+        ? rawWishlist.map(_asMap).whereType<Map<String, dynamic>>().toList()
+        : <Map<String, dynamic>>[];
     final insights = _buildInsights(metrics, topVolumes);
 
     return Column(
@@ -218,61 +263,230 @@ class _StatisticsContent extends StatelessWidget {
       children: [
         AdminPageHeader(
           icon: Icons.query_stats_rounded,
-          title: 'Statistiques du catalogue',
-          description:
-              'Vue détaillée du catalogue et de l’activité. Actualisé à '
-              '${DateFormat('HH:mm').format(data.loadedAt)}.',
+          title: _statsT('General dashboard', 'Tableau de bord général'),
+          description: _statsT(
+            'Consolidated catalogue, activity and service view. Updated at ${DateFormat('HH:mm').format(data.loadedAt)}.',
+            'Vue consolidée du catalogue, de l’activité et des services. Actualisé à ${DateFormat('HH:mm').format(data.loadedAt)}.',
+          ),
+        ),
+        const SizedBox(height: 16),
+        _ServiceStatusCard(data: data),
+        const SizedBox(height: 12),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            OutlinedButton.icon(
+              onPressed: () => pushOrGo(context, '/admin/analytics/product'),
+              icon: const Icon(Icons.insights_outlined),
+              label: Text(_statsT('Product usage', 'Usage produit')),
+            ),
+            OutlinedButton.icon(
+              onPressed: () => pushOrGo(
+                context,
+                '/admin/analytics/notifications',
+              ),
+              icon: const Icon(Icons.notifications_active_outlined),
+              label: Text(_statsT('Notifications', 'Notifications')),
+            ),
+          ],
         ),
         const SizedBox(height: 24),
         _PeriodSelector(value: periodDays, onChanged: onPeriodChanged),
         const SizedBox(height: 28),
-        const AdminSectionTitle(title: 'Vue d’ensemble'),
+        AdminSectionTitle(title: _statsT('Overview', 'Vue d’ensemble')),
         const SizedBox(height: 12),
         if (data.summary.hasError)
           _SectionError(
-            title: 'Résumé indisponible',
+            title: _statsT('Summary unavailable', 'Résumé indisponible'),
             error: data.summary.error!,
             onRetry: onRetry,
           )
         else if (metrics.isEmpty)
-          const AdminStatusBanner(
+          AdminStatusBanner(
             icon: Icons.info_outline_rounded,
-            title: 'Aucun indicateur disponible',
-            message: 'Le résumé analytics ne contient aucune valeur numérique.',
+            title: _statsT(
+              'No metrics available',
+              'Aucun indicateur disponible',
+            ),
+            message: _statsT(
+              'The analytics summary contains no numeric values.',
+              'Le résumé analytics ne contient aucune valeur numérique.',
+            ),
           )
         else
           _MetricGrid(metrics: metrics),
         if (insights.isNotEmpty) ...[
           const SizedBox(height: 28),
-          const AdminSectionTitle(title: 'Indicateurs utiles'),
+          AdminSectionTitle(
+            title: _statsT('Useful metrics', 'Indicateurs utiles'),
+          ),
           const SizedBox(height: 12),
           _InsightGrid(insights: insights),
         ],
         const SizedBox(height: 28),
         AdminSectionTitle(
-          title: 'Volumes les plus ajoutés',
+          title: _statsT('Most added volumes', 'Volumes les plus ajoutés'),
           trailing: Text(
-            '$periodDays derniers jours',
+            _statsT('Last $periodDays days', '$periodDays derniers jours'),
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ),
         const SizedBox(height: 12),
         if (data.volumes.hasError)
           _SectionError(
-            title: 'Classement indisponible',
+            title: _statsT('Ranking unavailable', 'Classement indisponible'),
             error: data.volumes.error!,
             onRetry: onRetry,
           )
         else if (topVolumes.isEmpty)
-          const AdminStatusBanner(
+          AdminStatusBanner(
             icon: Icons.inbox_outlined,
-            title: 'Aucune donnée',
-            message:
-                'Aucun ajout de volume n’est disponible pour cette période.',
+            title: _statsT('No data', 'Aucune donnée'),
+            message: _statsT(
+              'No volume additions are available for this period.',
+              'Aucun ajout de volume n’est disponible pour cette période.',
+            ),
           )
         else
           _TopVolumesCard(volumes: topVolumes),
+        const SizedBox(height: 28),
+        AdminSectionTitle(
+          title: _statsT(
+            'Most wishlisted manga',
+            'Mangas les plus ajoutés aux envies',
+          ),
+          trailing: Text(
+            _statsT('Last $periodDays days', '$periodDays derniers jours'),
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+        ),
+        const SizedBox(height: 12),
+        if (data.wishlist.hasError)
+          _SectionError(
+            title: _statsT(
+              'Wish-list ranking unavailable',
+              'Classement des envies indisponible',
+            ),
+            error: data.wishlist.error!,
+            onRetry: onRetry,
+          )
+        else if (topWishlist.isEmpty)
+          AdminStatusBanner(
+            icon: Icons.bookmark_border_rounded,
+            title: _statsT('No data', 'Aucune donnée'),
+            message: _statsT(
+              'No wish-list additions are available for this period.',
+              'Aucun ajout à une liste d’envies n’est disponible pour cette période.',
+            ),
+          )
+        else
+          _TopWishlistCard(items: topWishlist),
       ],
+    );
+  }
+}
+
+class _ServiceStatusCard extends StatelessWidget {
+  const _ServiceStatusCard({required this.data});
+
+  final _StatisticsData data;
+
+  @override
+  Widget build(BuildContext context) {
+    final healthData = _asMap(data.health.data['data']);
+    final analytics = _asMap(healthData?['analytics']);
+    final serviceHealthy = !data.health.hasError && analytics?['ok'] == true;
+    final summaryError = data.summary.error;
+    final permissionError =
+        summaryError is AdminApiException &&
+        (summaryError.statusCode == 401 || summaryError.statusCode == 403);
+    final app = data.appInformation.data;
+    final version = app['version']?.toString() ?? '';
+    final build = app['buildNumber']?.toString() ?? '';
+
+    return Card(
+      margin: EdgeInsets.zero,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Wrap(
+          spacing: 20,
+          runSpacing: 12,
+          children: [
+            _StatusItem(
+              icon: serviceHealthy
+                  ? Icons.cloud_done_outlined
+                  : Icons.cloud_off_outlined,
+              label: _statsT('Analytics service', 'Service analytics'),
+              value: serviceHealthy
+                  ? _statsT('Operational', 'Opérationnel')
+                  : _statsT('Unavailable', 'Indisponible'),
+              isError: !serviceHealthy,
+            ),
+            _StatusItem(
+              icon: permissionError
+                  ? Icons.lock_outline_rounded
+                  : Icons.verified_user_outlined,
+              label: _statsT('Data access', 'Accès aux données'),
+              value: permissionError
+                  ? _statsT(
+                      'analytics.read permission required',
+                      'Permission analytics.read requise',
+                    )
+                  : data.summary.hasError
+                  ? _statsT('Read error', 'Erreur de lecture')
+                  : _statsT('Authorized', 'Autorisé'),
+              isError: data.summary.hasError,
+            ),
+            _StatusItem(
+              icon: Icons.info_outline_rounded,
+              label: _statsT('Displayed version', 'Version affichée'),
+              value: version.isEmpty
+                  ? _statsT('Unknown', 'Inconnue')
+                  : '$version${build.isEmpty ? '' : ' ($build)'}',
+              isError: data.appInformation.hasError,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _StatusItem extends StatelessWidget {
+  const _StatusItem({
+    required this.icon,
+    required this.label,
+    required this.value,
+    required this.isError,
+  });
+
+  final IconData icon;
+  final String label;
+  final String value;
+  final bool isError;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minWidth: 210),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: isError ? colors.error : colors.primary),
+          const SizedBox(width: 10),
+          Flexible(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(label, style: Theme.of(context).textTheme.labelMedium),
+                Text(value, style: Theme.of(context).textTheme.bodyMedium),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -291,12 +505,12 @@ class _PeriodSelector extends StatelessWidget {
       runSpacing: 8,
       children: [
         Text(
-          'Période d’analyse',
+          _statsT('Analysis period', 'Période d’analyse'),
           style: Theme.of(context).textTheme.titleSmall,
         ),
         for (final days in const <int>[7, 30, 90])
           ChoiceChip(
-            label: Text('$days jours'),
+            label: Text(_statsT('$days days', '$days jours')),
             selected: value == days,
             onSelected: (_) => onChanged(days),
           ),
@@ -318,16 +532,36 @@ class _SectionError extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final apiError = error is AdminApiException
+        ? error as AdminApiException
+        : null;
+    final requiresAuthentication =
+        apiError?.statusCode == 401 || apiError?.statusCode == 403;
     return AdminStatusBanner(
-      icon: Icons.warning_amber_rounded,
+      icon: requiresAuthentication
+          ? Icons.lock_outline_rounded
+          : Icons.warning_amber_rounded,
       title: title,
-      message:
-          '${error.toString()} Les autres indicateurs restent utilisables.',
+      message: requiresAuthentication
+          ? _statsT(
+              '${redactSensitiveText(error)} Use a key explicitly containing the analytics.read permission.',
+              '${redactSensitiveText(error)} Utilisez une clé contenant explicitement la permission analytics.read.',
+            )
+          : _statsT(
+              '${redactSensitiveText(error)} Other metrics remain available.',
+              '${redactSensitiveText(error)} Les autres indicateurs restent utilisables.',
+            ),
       tone: AdminBannerTone.warning,
       trailing: IconButton(
-        onPressed: onRetry,
-        tooltip: 'Réessayer',
-        icon: const Icon(Icons.refresh_rounded),
+        onPressed: requiresAuthentication
+            ? () => pushOrGo(context, '/admin/admin_login')
+            : onRetry,
+        tooltip: requiresAuthentication
+            ? _statsT('Change key', 'Changer de clé')
+            : _statsT('Retry', 'Réessayer'),
+        icon: Icon(
+          requiresAuthentication ? Icons.key_rounded : Icons.refresh_rounded,
+        ),
       ),
     );
   }
@@ -487,6 +721,50 @@ class _TopVolumesCard extends StatelessWidget {
   }
 }
 
+class _TopWishlistCard extends StatelessWidget {
+  const _TopWishlistCard({required this.items});
+
+  final List<Map<String, dynamic>> items;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: EdgeInsets.zero,
+      child: Column(
+        children: [
+          for (var index = 0; index < items.length; index++) ...[
+            ListTile(
+              leading: CircleAvatar(child: Text('${index + 1}')),
+              title: Text(
+                (items[index]['mangaTitle'] ??
+                        items[index]['title'] ??
+                        items[index]['mangaId'] ??
+                        _statsT('Manga', 'Manga'))
+                    .toString(),
+              ),
+              subtitle: items[index]['mangaId'] == null
+                  ? null
+                  : Text(
+                      _statsT(
+                        'ID: ${items[index]['mangaId']}',
+                        'ID : ${items[index]['mangaId']}',
+                      ),
+                    ),
+              trailing: Text(
+                _statsT(
+                  '${_formatMetric(_volumeAdditions(items[index]) ?? 0)} addition(s)',
+                  '${_formatMetric(_volumeAdditions(items[index]) ?? 0)} ajout(s)',
+                ),
+              ),
+            ),
+            if (index < items.length - 1) const Divider(height: 1),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
 class _TopVolumeTile extends StatelessWidget {
   const _TopVolumeTile({required this.rank, required this.data});
 
@@ -500,11 +778,18 @@ class _TopVolumeTile extends StatelessWidget {
         (volume['titleFr'] ?? volume['title'] ?? data['title'] ?? 'Volume')
             .toString();
     final tomeNumber =
-        volume['tomeNumber'] ?? volume['tome_number'] ?? data['tomeNumber'];
+        volume['tomeNumber'] ??
+        volume['tome_number'] ??
+        data['tomeNumber'] ??
+        data['tome'];
     final additions = _volumeAdditions(data);
     final details = <String>[
-      if (tomeNumber != null) 'Tome $tomeNumber',
-      if (additions != null) '${_formatMetric(additions)} ajout(s)',
+      if (tomeNumber != null) _statsT('Volume $tomeNumber', 'Tome $tomeNumber'),
+      if (additions != null)
+        _statsT(
+          '${_formatMetric(additions)} addition(s)',
+          '${_formatMetric(additions)} ajout(s)',
+        ),
     ];
     return ListTile(
       leading: Container(
@@ -553,9 +838,9 @@ List<_Insight> _buildInsights(
   if (totalVolumes != null && totalSubSeries != null && totalSubSeries > 0) {
     insights.add(
       _Insight(
-        'volumes par sous-série',
+        _statsT('volumes per sub-series', 'volumes par sous-série'),
         (totalVolumes / totalSubSeries).toStringAsFixed(1),
-        'Densité moyenne du catalogue.',
+        _statsT('Average catalogue density.', 'Densité moyenne du catalogue.'),
         Icons.auto_stories_outlined,
       ),
     );
@@ -563,9 +848,9 @@ List<_Insight> _buildInsights(
   if (totalSubSeries != null && totalSeries != null && totalSeries > 0) {
     insights.add(
       _Insight(
-        'sous-séries par série',
+        _statsT('sub-series per series', 'sous-séries par série'),
         (totalSubSeries / totalSeries).toStringAsFixed(1),
-        'Profondeur éditoriale moyenne.',
+        _statsT('Average editorial depth.', 'Profondeur éditoriale moyenne.'),
         Icons.account_tree_outlined,
       ),
     );
@@ -576,9 +861,15 @@ List<_Insight> _buildInsights(
     final leaderShare = total > 0 ? additions.first / total * 100 : 0;
     insights.add(
       _Insight(
-        'ajouts dans le top ${additions.length}',
+        _statsT(
+          'additions in the top ${additions.length}',
+          'ajouts dans le top ${additions.length}',
+        ),
         _formatMetric(total),
-        'Le premier représente ${leaderShare.toStringAsFixed(1)} % du top.',
+        _statsT(
+          'The leader represents ${leaderShare.toStringAsFixed(1)}% of the top.',
+          'Le premier représente ${leaderShare.toStringAsFixed(1)} % du top.',
+        ),
         Icons.trending_up_rounded,
       ),
     );
@@ -615,33 +906,39 @@ String _formatMetric(num value) {
 }
 
 String _metricLabel(String key) {
-  const labels = <String, String>{
-    'users': 'Utilisateurs',
-    'totalUsers': 'Utilisateurs',
-    'activeUsers': 'Utilisateurs actifs',
-    'newUsers': 'Nouveaux utilisateurs',
-    'volumes': 'Volumes',
-    'totalVolumes': 'Volumes',
-    'series': 'Séries',
-    'totalSeries': 'Séries',
-    'subSeries': 'Sous-séries',
-    'totalSubSeries': 'Sous-séries',
-    'authors': 'Auteurs',
-    'totalAuthors': 'Auteurs',
-    'editors': 'Éditeurs',
-    'totalEditors': 'Éditeurs',
-    'genres': 'Genres',
-    'totalGenres': 'Genres',
-    'ownedVolumes': 'Volumes possédés',
-    'newOwnedVolumes': 'Nouveaux volumes possédés',
-    'reviews': 'Avis',
-    'totalReviews': 'Avis',
-    'orphanVolumes': 'Volumes orphelins',
-    'missingCovers': 'Couvertures manquantes',
-    'missingRelations': 'Relations manquantes',
-    'invalidEans': 'EAN invalides',
-    'duplicateEans': 'EAN en doublon',
-    'openVolumeIssues': 'Anomalies ouvertes',
+  final labels = <String, String>{
+    'users': _statsT('Users', 'Utilisateurs'),
+    'totalUsers': _statsT('Users', 'Utilisateurs'),
+    'activeUsers': _statsT('Active users', 'Utilisateurs actifs'),
+    'newUsers': _statsT('New users', 'Nouveaux utilisateurs'),
+    'volumes': _statsT('Volumes', 'Volumes'),
+    'totalVolumes': _statsT('Volumes', 'Volumes'),
+    'series': _statsT('Series', 'Séries'),
+    'totalSeries': _statsT('Series', 'Séries'),
+    'subSeries': _statsT('Sub-series', 'Sous-séries'),
+    'totalSubSeries': _statsT('Sub-series', 'Sous-séries'),
+    'authors': _statsT('Authors', 'Auteurs'),
+    'totalAuthors': _statsT('Authors', 'Auteurs'),
+    'editors': _statsT('Publishers', 'Éditeurs'),
+    'totalEditors': _statsT('Publishers', 'Éditeurs'),
+    'genres': _statsT('Genres', 'Genres'),
+    'totalGenres': _statsT('Genres', 'Genres'),
+    'ownedVolumes': _statsT('Owned volumes', 'Volumes possédés'),
+    'newOwnedVolumes': _statsT(
+      'New owned volumes',
+      'Nouveaux volumes possédés',
+    ),
+    'reviews': _statsT('Reviews', 'Avis'),
+    'totalReviews': _statsT('Reviews', 'Avis'),
+    'orphanVolumes': _statsT('Orphan volumes', 'Volumes orphelins'),
+    'missingCovers': _statsT('Missing covers', 'Couvertures manquantes'),
+    'missingRelations': _statsT(
+      'Missing relationships',
+      'Relations manquantes',
+    ),
+    'invalidEans': _statsT('Invalid EANs', 'EAN invalides'),
+    'duplicateEans': _statsT('Duplicate EANs', 'EAN en doublon'),
+    'openVolumeIssues': _statsT('Open issues', 'Anomalies ouvertes'),
   };
   final leaf = key.split('.').last;
   final base = labels[leaf] ?? _humanize(leaf);

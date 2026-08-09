@@ -14,7 +14,45 @@ class DeleteAccountPage extends StatefulWidget {
 }
 
 class _DeleteAccountPageState extends State<DeleteAccountPage> {
-  AppwriteConnector connector = AppwriteConnector();
+  final AppwriteConnector connector = AppwriteConnector();
+  bool _isDeleting = false;
+  bool _redirectScheduled = false;
+
+  void _returnToProfile() {
+    if (!mounted) return;
+    if (!kIsWeb && Navigator.of(context).canPop()) {
+      Navigator.of(context).pop();
+    } else {
+      pushOrGo(context, Routes.profile.base);
+    }
+  }
+
+  Future<void> _deleteAccount(AppLocalizations localizations) async {
+    if (_isDeleting) return;
+    final user = connector.getConnectedUser();
+    if (user == null) {
+      showMessage(localizations.errorOccurred, context);
+      _returnToProfile();
+      return;
+    }
+
+    setState(() => _isDeleting = true);
+    try {
+      await connector.deleteUser(user.id);
+      if (!mounted) return;
+      showMessage(localizations.deleteAccountSuccess, context);
+      _returnToProfile();
+    } catch (_) {
+      if (!mounted) return;
+      // A failed deletion must keep the session available so the user can
+      // retry or contact support instead of being silently logged out.
+      showMessage(localizations.deleteAccountFailed, context);
+    } finally {
+      if (mounted) {
+        setState(() => _isDeleting = false);
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +63,12 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
     }
 
     if (!connector.isLoggedIn()) {
-      pushOrGo(context, Routes.profile.base);
+      if (!_redirectScheduled) {
+        _redirectScheduled = true;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) pushOrGo(context, Routes.profile.base);
+        });
+      }
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
@@ -69,53 +112,16 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                     const SizedBox(width: 20),
                     Expanded(
                       child: ElevatedButton(
-                        onPressed: () async {
-                          // Close the confirmation dialog first
-                          Navigator.of(context, rootNavigator: true).pop();
-
-                          // Safety check
-                          final user = connector.getConnectedUser();
-                          if (user == null) {
-                            showMessage(localizations.errorOccurred, context);
-                            if (!kIsWeb) {
-                              Navigator.of(context).pop();
-                            } else {
-                              pushOrGo(context, Routes.profile.base);
-                            }
-                            return;
-                          }
-
-                          try {
-                            await connector.deleteUser(user.id);
-                            if (!mounted) return;
-                            // After successful deletion, log out locally and notify the user
-                            connector.logOut();
-                            showMessage(
-                              localizations.deleteAccountSuccess,
-                              context,
-                            );
-
-                            if (!kIsWeb) {
-                              Navigator.of(context).pop();
-                            } else {
-                              pushOrGo(context, Routes.profile.base);
-                            }
-                          } catch (e) {
-                            if (!mounted) return;
-                            // If deletion failed, still log out and inform the user
-                            connector.logOut();
-                            showMessage(
-                              localizations.deleteAccountFailed,
-                              context,
-                            );
-
-                            if (!kIsWeb) {
-                              Navigator.of(context).pop();
-                            } else {
-                              pushOrGo(context, Routes.profile.base);
-                            }
-                          }
-                        },
+                        onPressed: _isDeleting
+                            ? null
+                            : () {
+                                // Close the confirmation dialog first
+                                Navigator.of(
+                                  context,
+                                  rootNavigator: true,
+                                ).pop();
+                                _deleteAccount(localizations);
+                              },
                         style: ButtonStyle(
                           backgroundColor: WidgetStateProperty.all<Color>(
                             Colors.red,
@@ -158,12 +164,14 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
               ),
               const SizedBox(height: 40),
               ElevatedButton(
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) => dialog,
-                  );
-                },
+                onPressed: _isDeleting
+                    ? null
+                    : () {
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) => dialog,
+                        );
+                      },
                 style: ButtonStyle(
                   backgroundColor: WidgetStateProperty.all<Color>(Colors.red),
                 ),
@@ -172,6 +180,10 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                   style: const TextStyle(color: Colors.white),
                 ),
               ),
+              if (_isDeleting) ...[
+                const SizedBox(height: 16),
+                const CircularProgressIndicator(),
+              ],
             ],
           ),
         ),

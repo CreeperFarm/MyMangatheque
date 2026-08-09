@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mymangatheque/src/back/language/runtime_localization.dart';
 import 'package:mymangatheque/src/back/services/appwrite.dart';
 import 'package:mymangatheque/src/models/local_storage/local_storage.dart';
 import 'package:mymangatheque/src/models/local_storage/service_locator.dart';
@@ -10,11 +11,38 @@ class MangaOwnedNotifier extends Notifier<Set<SubSerieForCollection>> {
   static const Duration _freshDataDuration = Duration(seconds: 20);
 
   Future<bool>? _initDataInFlight;
+  String? _initDataInFlightUserId;
+  String? _activeUserId;
   String? _lastLoadedUserId;
   DateTime? _lastLoadedAt;
+  int _loadGeneration = 0;
 
   @override
   Set<SubSerieForCollection> build() => <SubSerieForCollection>{};
+
+  /// Immediately isolates in-memory private data when the authenticated user
+  /// changes. Network requests already in flight are allowed to finish, but
+  /// their results can no longer update the provider.
+  void handleUserChanged(String? userId) {
+    final normalizedUserId = userId?.trim();
+    final nextUserId = normalizedUserId == null || normalizedUserId.isEmpty
+        ? null
+        : normalizedUserId;
+    if (_activeUserId == nextUserId) return;
+
+    _activeUserId = nextUserId;
+    _lastLoadedUserId = null;
+    _lastLoadedAt = null;
+    _loadGeneration += 1;
+    state = <SubSerieForCollection>{};
+  }
+
+  SubSerieForCollection? _findSubSeriesById(String id) {
+    for (final item in state) {
+      if (item.id == id) return item;
+    }
+    return null;
+  }
 
   Map<String, dynamic> _asMap(dynamic value) {
     if (value is Map<String, dynamic>) return value;
@@ -94,11 +122,9 @@ class MangaOwnedNotifier extends Notifier<Set<SubSerieForCollection>> {
       over18: data['over18'] == true,
       resume: data['resume']?.toString() ?? '',
       bookLink: _asList(data['book_link'] ?? data['bookLink']),
-      release:
-          DateTime.tryParse(
-            (data['release'] ?? data['publicationDate'])?.toString() ?? '',
-          ) ??
-          DateTime.now(),
+      release: DateTime.tryParse(
+        (data['release'] ?? data['publicationDate'])?.toString() ?? '',
+      ),
       ean: num.tryParse(data['ean']?.toString() ?? '') ?? 0,
       language: data['language']?.toString(),
       subSeries: (data['sub_series'] ?? data['subSeries'])?.toString() ?? '',
@@ -178,8 +204,9 @@ class MangaOwnedNotifier extends Notifier<Set<SubSerieForCollection>> {
     }
 
     if (volume.isEmpty) {
-      debugPrint(
-        '_mergeOwnedEntry: could not resolve volume from entry: $entryData',
+      RuntimeLocalization.debug(
+        en: 'Unable to resolve a volume from an owned collection entry.',
+        fr: 'Impossible de déterminer le volume d’une entrée de la collection possédée.',
       );
       return;
     }
@@ -187,8 +214,9 @@ class MangaOwnedNotifier extends Notifier<Set<SubSerieForCollection>> {
     final readed = entryData['readed'] == true;
     final built = _buildSubSeriesFromExpandedData(volume, readed);
     if (built == null) {
-      debugPrint(
-        '_mergeOwnedEntry: _buildSubSeriesFromExpandedData returned null for volume: $volume',
+      RuntimeLocalization.debug(
+        en: 'Unable to build the sub-series for an owned volume.',
+        fr: 'Impossible de construire la sous-série d’un volume possédé.',
       );
       return;
     }
@@ -226,6 +254,8 @@ class MangaOwnedNotifier extends Notifier<Set<SubSerieForCollection>> {
   }
 
   Future<bool> initData(User user, {bool forceRefresh = false}) {
+    handleUserChanged(user.id);
+
     final lastLoadedAt = _lastLoadedAt;
     final isFresh =
         _lastLoadedUserId == user.id &&
@@ -237,23 +267,48 @@ class MangaOwnedNotifier extends Notifier<Set<SubSerieForCollection>> {
     }
 
     final inFlight = _initDataInFlight;
-    if (!forceRefresh && inFlight != null) {
+    if (!forceRefresh &&
+        inFlight != null &&
+        _initDataInFlightUserId == user.id) {
       return inFlight;
     }
 
-    final future = _loadOwnedData(user, forceRefresh: forceRefresh);
+    final generation = ++_loadGeneration;
+    final future = _loadOwnedData(
+      user,
+      forceRefresh: forceRefresh,
+      generation: generation,
+    );
     _initDataInFlight = future;
+    _initDataInFlightUserId = user.id;
     return future.whenComplete(() {
       if (identical(_initDataInFlight, future)) {
         _initDataInFlight = null;
+        _initDataInFlightUserId = null;
       }
     });
   }
 
   // Init the data
-  Future<bool> _loadOwnedData(User user, {required bool forceRefresh}) async {
+  Future<bool> _loadOwnedData(
+    User user, {
+    required bool forceRefresh,
+    required int generation,
+  }) async {
     final storage = getIt<LocalStorage>();
     final nextState = <SubSerieForCollection>{};
+    var apiRequestSucceeded = false;
+    final cachedBeforeRequest = await storage.getOwnedSubSerie(userId: user.id);
+    if (_isCurrentLoad(user.id, generation) &&
+        state.isEmpty &&
+        cachedBeforeRequest != null &&
+        cachedBeforeRequest.isNotEmpty) {
+      state = cachedBeforeRequest;
+      RuntimeLocalization.debug(
+        en: 'Displayed the cached collection while refreshing it in the background.',
+        fr: 'Affichage de la collection en cache pendant son actualisation en arrière-plan.',
+      );
+    }
 
     try {
       final result = await AppwriteConnector().getOwned(
@@ -261,17 +316,33 @@ class MangaOwnedNotifier extends Notifier<Set<SubSerieForCollection>> {
         'volumes.subSeries.editors',
         forceRefresh: forceRefresh,
       );
+      apiRequestSucceeded = true;
 
-      debugPrint('getOwned returned ${result.length} entries.');
+      RuntimeLocalization.debug(
+        en: 'Owned collection loaded (${result.length} entries).',
+        fr: 'Collection possédée chargée (${result.length} entrées).',
+      );
 
       for (final entry in result) {
         _mergeOwnedEntry(nextState, entry.data);
       }
+      if (result.isNotEmpty && nextState.isEmpty) {
+        apiRequestSucceeded = false;
+        RuntimeLocalization.debug(
+          en: 'Owned collection entries could not be parsed; preserving the user cache.',
+          fr: 'Les entrées de la collection possédée sont illisibles ; conservation du cache utilisateur.',
+        );
+      }
     } catch (e) {
-      debugPrint('Unable to load owned sub series from API: $e');
+      RuntimeLocalization.debug(
+        en: 'Unable to load owned sub-series from the API: $e',
+        fr: 'Impossible de charger les sous-séries possédées depuis l’API : $e',
+      );
     }
 
-    if (nextState.isNotEmpty) {
+    if (!_isCurrentLoad(user.id, generation)) return true;
+
+    if (apiRequestSucceeded) {
       for (final subSeries in nextState) {
         subSeries.volumes.sort(
           (a, b) => (a.tomeNumber ?? 0).compareTo(b.tomeNumber ?? 0),
@@ -280,26 +351,19 @@ class MangaOwnedNotifier extends Notifier<Set<SubSerieForCollection>> {
       state = nextState;
       _lastLoadedUserId = user.id;
       _lastLoadedAt = DateTime.now();
-      await storage.saveOwnedSubSerie(state);
+      await storage.saveOwnedSubSerie(nextState, userId: user.id);
       return true;
     }
 
-    // Do NOT overwrite with empty if we already have local state
-    final existing = state;
-    if (existing.isNotEmpty) {
-      debugPrint(
-        'getOwned returned empty but local state exists - keeping local state.',
-      );
-      return true;
-    }
-
-    final cached = await storage.getOwnedSubSerie();
+    final cached = cachedBeforeRequest;
+    if (!_isCurrentLoad(user.id, generation)) return true;
     if (cached != null && cached.isNotEmpty) {
       state = cached;
       _lastLoadedUserId = user.id;
       _lastLoadedAt = DateTime.now();
-      debugPrint(
-        'getOwned returned empty - restored owned sub series from local cache.',
+      RuntimeLocalization.debug(
+        en: 'The API is unavailable; restored the owned collection from the user cache.',
+        fr: 'L’API est indisponible ; restauration de la collection possédée depuis le cache utilisateur.',
       );
       return true;
     }
@@ -307,25 +371,37 @@ class MangaOwnedNotifier extends Notifier<Set<SubSerieForCollection>> {
     state = <SubSerieForCollection>{};
     _lastLoadedUserId = user.id;
     _lastLoadedAt = DateTime.now();
-    return true;
+    return false;
+  }
+
+  bool _isCurrentLoad(String userId, int generation) {
+    return _activeUserId == userId && _loadGeneration == generation;
+  }
+
+  String? _prepareMutationUser() {
+    final connectedUserId = AppwriteConnector().getConnectedUser()?.id;
+    if (connectedUserId != null && connectedUserId != _activeUserId) {
+      handleUserChanged(connectedUserId);
+    }
+    return _activeUserId;
   }
 
   // Add a sub series to the owned list
   Future<void> addSubSeriesToOwned(SubSerieForCollection subSeries) async {
     final storage = getIt<LocalStorage>();
-    if (!state.contains(subSeries)) {
+    final userId = _prepareMutationUser();
+    if (!state.any((item) => item.id == subSeries.id)) {
       state = {...state, subSeries};
     }
-    await storage.saveOwnedSubSerie(state);
+    await storage.saveOwnedSubSerie(state, userId: userId);
   }
 
   // Remove a sub series from the owned list
   Future<void> removeSubSeriesFromOwned(SubSerieForCollection subSeries) async {
     final storage = getIt<LocalStorage>();
-    if (state.contains(subSeries)) {
-      state = state.where((item) => item != subSeries).toSet();
-    }
-    await storage.saveOwnedSubSerie(state);
+    final userId = _prepareMutationUser();
+    state = state.where((item) => item.id != subSeries.id).toSet();
+    await storage.saveOwnedSubSerie(state, userId: userId);
   }
 
   // Add a volume to a sub series
@@ -334,14 +410,19 @@ class MangaOwnedNotifier extends Notifier<Set<SubSerieForCollection>> {
     Volume volume,
   ) async {
     final storage = getIt<LocalStorage>();
-    if (state.contains(subSerie)) {
-      final current = state.firstWhere((item) => item == subSerie);
-      if (!current.volumes.contains(volume)) {
+    final userId = _prepareMutationUser();
+    final current = _findSubSeriesById(subSerie.id);
+    if (current != null) {
+      if (!current.volumes.any((item) => item.id == volume.id)) {
         current.volumes.add(volume);
-        current.numberOwnedVolumes += 1;
+        current.volumes.sort(
+          (a, b) => (a.tomeNumber ?? 0).compareTo(b.tomeNumber ?? 0),
+        );
+        current.numberOwnedVolumes = current.volumes.length;
+        state = {...state};
       }
     }
-    await storage.saveOwnedSubSerie(state);
+    await storage.saveOwnedSubSerie(state, userId: userId);
   }
 
   // Remove a volume from a sub series
@@ -350,24 +431,28 @@ class MangaOwnedNotifier extends Notifier<Set<SubSerieForCollection>> {
     Volume volume,
   ) async {
     final storage = getIt<LocalStorage>();
-    if (state.contains(subSerie)) {
-      final current = state.firstWhere((item) => item == subSerie);
-      if (current.volumes.contains(volume)) {
-        current.volumes.remove(volume);
-        current.numberOwnedVolumes -= 1;
-      }
+    final userId = _prepareMutationUser();
+    final current = _findSubSeriesById(subSerie.id);
+    if (current != null) {
+      current.volumes.removeWhere((item) => item.id == volume.id);
+      current.numberOwnedVolumes = current.volumes.length;
+      state = current.volumes.isEmpty
+          ? state.where((item) => item.id != current.id).toSet()
+          : {...state};
     }
-    await storage.saveOwnedSubSerie(state);
+    await storage.saveOwnedSubSerie(state, userId: userId);
   }
 
   // Check if a sub series is owned
   bool isSubSeriesOwned(SubSerieForCollection subSeries) {
-    return state.contains(subSeries);
+    return state.any((item) => item.id == subSeries.id);
   }
 
   // Check if a volume is owned
   bool isVolumeOwned(SubSerieForCollection subSeries, Volume volume) {
-    return subSeries.volumes.contains(volume);
+    return state
+        .where((item) => item.id == subSeries.id)
+        .any((item) => item.volumes.any((owned) => owned.id == volume.id));
   }
 
   // Find a sub series index from it's title and it's id
@@ -393,7 +478,10 @@ class MangaOwnedNotifier extends Notifier<Set<SubSerieForCollection>> {
   Future<void> clear() async {
     final storage = getIt<LocalStorage>();
     state = <SubSerieForCollection>{};
-    await storage.saveOwnedSubSerie(state);
+    final userId = _activeUserId;
+    if (userId != null) {
+      await storage.saveOwnedSubSerie(state, userId: userId);
+    }
   }
 }
 

@@ -1,9 +1,13 @@
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
+import 'package:mymangatheque/src/back/language/runtime_localization.dart';
 import 'package:mymangatheque/src/back/services/api/mobile_api_client.dart';
+import 'package:mymangatheque/src/back/services/security/security_utils.dart';
+
+String _adminT(String en, String fr) =>
+    RuntimeLocalization.text(en: en, fr: fr);
 
 class AdminInputException implements Exception {
   const AdminInputException(this.message);
@@ -26,15 +30,25 @@ class AdminInputValidator {
   }) {
     final normalized = value.trim();
     if (normalized.isEmpty) {
-      throw AdminInputException('$label est obligatoire.');
+      throw AdminInputException(
+        _adminT('$label is required.', '$label est obligatoire.'),
+      );
     }
     if (normalized.length > maxLength) {
       throw AdminInputException(
-        '$label ne peut pas dépasser $maxLength caractères.',
+        _adminT(
+          '$label cannot exceed $maxLength characters.',
+          '$label ne peut pas dépasser $maxLength caractères.',
+        ),
       );
     }
     if (_hasControlCharacters(normalized)) {
-      throw AdminInputException('$label contient des caractères interdits.');
+      throw AdminInputException(
+        _adminT(
+          '$label contains forbidden characters.',
+          '$label contient des caractères interdits.',
+        ),
+      );
     }
     return normalized;
   }
@@ -62,7 +76,10 @@ class AdminInputValidator {
         uri.host.isEmpty ||
         uri.userInfo.isNotEmpty) {
       throw AdminInputException(
-        '$label doit être une URL HTTPS valide, sans identifiants intégrés.',
+        _adminT(
+          '$label must be a valid HTTPS URL without embedded credentials.',
+          '$label doit être une URL HTTPS valide, sans identifiants intégrés.',
+        ),
       );
     }
     return uri.toString();
@@ -75,7 +92,12 @@ class AdminInputValidator {
       maxLength: 128,
     );
     if (!RegExp(r'^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$').hasMatch(normalized)) {
-      throw AdminInputException('$label n’est pas un identifiant valide.');
+      throw AdminInputException(
+        _adminT(
+          '$label is not a valid identifier.',
+          '$label n’est pas un identifiant valide.',
+        ),
+      );
     }
     return normalized;
   }
@@ -98,7 +120,10 @@ class AdminInputValidator {
     }
     if (normalized.length > maxItems) {
       throw AdminInputException(
-        '$label ne peut pas contenir plus de $maxItems éléments.',
+        _adminT(
+          '$label cannot contain more than $maxItems items.',
+          '$label ne peut pas contenir plus de $maxItems éléments.',
+        ),
       );
     }
     return normalized;
@@ -118,7 +143,10 @@ class AdminInputValidator {
     }
     if (normalized.length > maxItems) {
       throw AdminInputException(
-        '$label ne peut pas contenir plus de $maxItems éléments.',
+        _adminT(
+          '$label cannot contain more than $maxItems items.',
+          '$label ne peut pas contenir plus de $maxItems éléments.',
+        ),
       );
     }
     return normalized;
@@ -126,27 +154,33 @@ class AdminInputValidator {
 
   static Map<String, String> metadata(Map<String, String> values) {
     if (values.length > 50) {
-      throw const AdminInputException(
-        'Les informations complémentaires sont limitées à 50 entrées.',
+      throw AdminInputException(
+        _adminT(
+          'Additional information is limited to 50 entries.',
+          'Les informations complémentaires sont limitées à 50 entrées.',
+        ),
       );
     }
     final normalized = <String, String>{};
     for (final entry in values.entries) {
       final key = requiredText(
         entry.key,
-        label: 'La clé d’information',
+        label: _adminT('The information key', 'La clé d’information'),
         maxLength: 80,
       );
       if (!RegExp(
         r'^[A-Za-z0-9À-ÖØ-öø-ÿ][A-Za-z0-9À-ÖØ-öø-ÿ _.-]*$',
       ).hasMatch(key)) {
-        throw const AdminInputException(
-          'Une clé d’information contient des caractères interdits.',
+        throw AdminInputException(
+          _adminT(
+            'An information key contains forbidden characters.',
+            'Une clé d’information contient des caractères interdits.',
+          ),
         );
       }
       normalized[key] = requiredText(
         entry.value,
-        label: 'La valeur d’information',
+        label: _adminT('The information value', 'La valeur d’information'),
         maxLength: 500,
       );
     }
@@ -155,16 +189,38 @@ class AdminInputValidator {
 
   static num nonNegativeNumber(num value, {required String label}) {
     if (!value.isFinite || value < 0) {
-      throw AdminInputException('$label doit être un nombre positif ou nul.');
+      throw AdminInputException(
+        _adminT(
+          '$label must be a non-negative number.',
+          '$label doit être un nombre positif ou nul.',
+        ),
+      );
     }
     return value;
+  }
+
+  static int moneyInMinorUnits(num value, {required String label}) {
+    final normalized = nonNegativeNumber(value, label: label);
+    final minorUnits = (normalized * 100).round();
+    if ((minorUnits / 100 - normalized).abs() > 0.000001) {
+      throw AdminInputException(
+        _adminT(
+          '$label cannot contain more than two decimal places.',
+          '$label ne peut pas contenir plus de deux décimales.',
+        ),
+      );
+    }
+    return minorUnits;
   }
 
   static int ean13(int value) {
     final ean = value.toString().padLeft(13, '0');
     if (!RegExp(r'^\d{13}$').hasMatch(ean)) {
-      throw const AdminInputException(
-        'L’EAN doit contenir exactement 13 chiffres.',
+      throw AdminInputException(
+        _adminT(
+          'The EAN must contain exactly 13 digits.',
+          'L’EAN doit contenir exactement 13 chiffres.',
+        ),
       );
     }
     var sum = 0;
@@ -174,8 +230,11 @@ class AdminInputValidator {
     }
     final expectedCheckDigit = (10 - (sum % 10)) % 10;
     if (expectedCheckDigit != int.parse(ean[12])) {
-      throw const AdminInputException(
-        'La clé de contrôle EAN-13 est invalide.',
+      throw AdminInputException(
+        _adminT(
+          'The EAN-13 check digit is invalid.',
+          'La clé de contrôle EAN-13 est invalide.',
+        ),
       );
     }
     return value;
@@ -186,6 +245,230 @@ class AdminInputValidator {
       (codePoint) => codePoint < 32 && codePoint != 9 && codePoint != 10,
     );
   }
+}
+
+enum AdminRelationResource {
+  volumes('/api/volumes/search', 'volumes'),
+  subSeries('/api/sub-series/search', 'subSeries'),
+  series('/api/series/search', 'series'),
+  authors('/api/authors/search', 'authors'),
+  editors('/api/editors/search', 'editors'),
+  genres('/api/genres/search', 'genres')
+  ;
+
+  const AdminRelationResource(this.searchPath, this.responseKey);
+
+  final String searchPath;
+  final String responseKey;
+  String get label => localizedLabel(RuntimeLocalization.languageCode);
+
+  String localizedLabel(String languageCode) {
+    final french =
+        RuntimeLocalization.normalizeLanguageCode(languageCode) == 'fr';
+    return switch (this) {
+      volumes => french ? 'Volume' : 'Volume',
+      subSeries => french ? 'Sous-série' : 'Sub-series',
+      series => french ? 'Série' : 'Series',
+      authors => french ? 'Auteur' : 'Author',
+      editors => french ? 'Éditeur' : 'Publisher',
+      genres => french ? 'Genre' : 'Genre',
+    };
+  }
+}
+
+class AdminRelationOption {
+  const AdminRelationOption({
+    required this.id,
+    required this.label,
+    required this.detail,
+    required this.resource,
+  });
+
+  factory AdminRelationOption.fromJson(
+    AdminRelationResource resource,
+    Map<String, dynamic> json,
+  ) {
+    final id = (json['id'] ?? json[r'$id'] ?? '').toString();
+    final label = switch (resource) {
+      AdminRelationResource.authors ||
+      AdminRelationResource.editors ||
+      AdminRelationResource.genres => _adminFirstText(<dynamic>[
+        json['name'],
+        json['titleFr'],
+        id,
+      ]),
+      _ => _adminFirstText(<dynamic>[
+        json['titleFr'],
+        json['title'],
+        json['titleEn'],
+        json['titleJp'],
+        id,
+      ]),
+    };
+
+    final detailParts = <String>[];
+    if (resource == AdminRelationResource.volumes) {
+      final tomeNumber = _adminNum(
+        json['tomeNumber'] ?? json['tome_number'],
+      );
+      if (tomeNumber != null) {
+        detailParts.add('Tome ${_adminFormatNumber(tomeNumber)}');
+      }
+      final subSeries = _adminMap(json['subSeries'] ?? json['sub_series']);
+      final subSeriesLabel = _adminFirstText(<dynamic>[
+        json['subSeriesTitle'],
+        subSeries?['titleFr'],
+        subSeries?['title'],
+      ]);
+      if (subSeriesLabel.isNotEmpty) detailParts.add(subSeriesLabel);
+      final resume = _adminFirstText(<dynamic>[
+        json['resume'],
+        json['summary'],
+      ]);
+      if (resume.isNotEmpty) {
+        detailParts.add(
+          resume.length > 90 ? '${resume.substring(0, 90)}…' : resume,
+        );
+      }
+    } else if (resource == AdminRelationResource.subSeries) {
+      final series = _adminMap(json['series']);
+      final seriesLabel = _adminFirstText(<dynamic>[
+        json['seriesTitle'],
+        series?['titleFr'],
+        series?['title'],
+      ]);
+      if (seriesLabel.isNotEmpty) detailParts.add(seriesLabel);
+    }
+
+    return AdminRelationOption(
+      id: id,
+      label: label,
+      detail: detailParts.join(' · '),
+      resource: resource,
+    );
+  }
+
+  final String id;
+  final String label;
+  final String detail;
+  final AdminRelationResource resource;
+}
+
+enum AdminUserOrderBy {
+  createdAt(r'$createdAt', 'Creation date', 'Date de création'),
+  updatedAt(r'$updatedAt', 'Last update', 'Dernière modification'),
+  pseudo('pseudo', 'Username', 'Pseudo'),
+  mail('mail', 'Email address', 'Adresse e-mail'),
+  role('role', 'Role', 'Rôle')
+  ;
+
+  const AdminUserOrderBy(this.apiValue, this.englishLabel, this.frenchLabel);
+
+  final String apiValue;
+  final String englishLabel;
+  final String frenchLabel;
+
+  String get label => _adminT(englishLabel, frenchLabel);
+}
+
+enum AdminSortDirection {
+  ascending('asc', 'Ascending', 'Croissant'),
+  descending('desc', 'Descending', 'Décroissant')
+  ;
+
+  const AdminSortDirection(this.apiValue, this.englishLabel, this.frenchLabel);
+
+  final String apiValue;
+  final String englishLabel;
+  final String frenchLabel;
+
+  String get label => _adminT(englishLabel, frenchLabel);
+}
+
+class AdminUser {
+  const AdminUser({
+    required this.id,
+    required this.pseudo,
+    required this.email,
+    required this.role,
+    required this.coverUrl,
+    required this.suspended,
+    this.createdAt,
+    this.updatedAt,
+  });
+
+  factory AdminUser.fromJson(Map<String, dynamic> json) {
+    return AdminUser(
+      id: (json['id'] ?? json[r'$id'] ?? '').toString(),
+      pseudo: _adminFirstText(<dynamic>[
+        json['pseudo'],
+        json['name'],
+        'Utilisateur',
+      ]),
+      email: _adminFirstText(<dynamic>[json['mail'], json['email']]),
+      role: _adminFirstText(<dynamic>[json['role'], 'user']),
+      coverUrl: _adminFirstText(<dynamic>[
+        json['coverURL'],
+        json['coverUrl'],
+        json['avatarUrl'],
+      ]),
+      suspended: _adminBool(
+        json['suspended'] ?? json['isSuspended'] ?? json['disabled'],
+        fallback: false,
+      ),
+      createdAt: _adminDate(json[r'$createdAt'] ?? json['createdAt']),
+      updatedAt: _adminDate(json[r'$updatedAt'] ?? json['updatedAt']),
+    );
+  }
+
+  final String id;
+  final String pseudo;
+  final String email;
+  final String role;
+  final String coverUrl;
+  final bool suspended;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
+}
+
+class AdminUserPage {
+  const AdminUserPage({
+    required this.users,
+    required this.page,
+    required this.totalPages,
+    required this.totalItems,
+  });
+
+  factory AdminUserPage.fromJson(Map<String, dynamic> json) {
+    final data = _adminMap(json['data']) ?? json;
+    final rawUsers = data['users'] ?? json['users'];
+    final users = rawUsers is List
+        ? rawUsers
+              .map(_adminMap)
+              .whereType<Map<String, dynamic>>()
+              .map(AdminUser.fromJson)
+              .toList()
+        : <AdminUser>[];
+    final pagination =
+        _adminMap(data['pagination']) ??
+        _adminMap(json['pagination']) ??
+        const <String, dynamic>{};
+
+    return AdminUserPage(
+      users: users,
+      page: _adminInt(pagination['page'] ?? pagination['currentPage'], 1),
+      totalPages: _adminInt(pagination['totalPages'], 1),
+      totalItems: _adminInt(
+        pagination['totalItems'] ?? pagination['total'] ?? json['results'],
+        users.length,
+      ),
+    );
+  }
+
+  final List<AdminUser> users;
+  final int page;
+  final int totalPages;
+  final int totalItems;
 }
 
 enum AdminVolumeIssueType {
@@ -421,6 +704,20 @@ DateTime? _adminDate(dynamic value) {
   return DateTime.tryParse(value.toString());
 }
 
+String _adminFirstText(Iterable<dynamic> values) {
+  for (final value in values) {
+    final normalized = value?.toString().trim() ?? '';
+    if (normalized.isNotEmpty) return normalized;
+  }
+  return '';
+}
+
+String _adminFormatNumber(num value) {
+  return value == value.roundToDouble()
+      ? value.toInt().toString()
+      : value.toString();
+}
+
 class AdminConnector {
   AdminConnector._internal();
 
@@ -447,10 +744,10 @@ class AdminConnector {
   bool isLoggedIn() => _adminApiKey != null && _adminApiKey!.isNotEmpty;
 
   String get maskedKey {
-    if (!isLoggedIn()) return 'Aucune clé admin';
+    if (!isLoggedIn()) return _adminT('No admin key', 'Aucune clé admin');
     final key = _adminApiKey!;
-    if (key.length <= 8) return key;
-    return '${key.substring(0, 4)}••••${key.substring(key.length - 4)}';
+    if (key.length <= 8) return '••••••••';
+    return '••••••••${key.substring(key.length - 4)}';
   }
 
   Future<bool> loginAsAdmin(String apiKey) async {
@@ -482,13 +779,32 @@ class AdminConnector {
     await _deleteSecure(_storageKey);
   }
 
-  Future<Map<String, dynamic>> getSummary({int days = 30}) async {
+  Future<Map<String, dynamic>> getSummary({
+    int days = 30,
+    bool comparePrevious = true,
+  }) async {
     await init();
     final response = await _request(
       'GET',
       '/api/analytics/summary',
-      query: <String, dynamic>{'days': days},
+      query: <String, dynamic>{
+        'days': days.clamp(1, 365),
+        'comparePrevious': comparePrevious,
+      },
     );
+    return _decodeMap(response.body);
+  }
+
+  Future<Map<String, dynamic>> getAnalyticsHealth() async {
+    final response = await http
+        .get(Uri.parse('$_apiBaseUrl/api/analytics/health'))
+        .timeout(_requestTimeout);
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw AdminApiException(
+        response.statusCode,
+        _extractApiError(response),
+      );
+    }
     return _decodeMap(response.body);
   }
 
@@ -503,6 +819,603 @@ class AdminConnector {
       query: <String, dynamic>{'days': days, 'limit': limit},
     );
     return _decodeMap(response.body);
+  }
+
+  Future<Map<String, dynamic>> getMostWishlistedMangas({
+    int days = 30,
+    int limit = 10,
+  }) async {
+    await init();
+    final response = await _request(
+      'GET',
+      '/api/analytics/most-added-mangas-wishlist',
+      query: <String, dynamic>{'days': days, 'limit': limit},
+    );
+    return _decodeMap(response.body);
+  }
+
+  Future<Map<String, dynamic>> getProductAnalytics({
+    int days = 30,
+    bool comparePrevious = true,
+  }) async {
+    await init();
+    final response = await _request(
+      'GET',
+      '/api/analytics/product',
+      query: <String, dynamic>{
+        'days': days.clamp(1, 365),
+        'comparePrevious': comparePrevious,
+      },
+    );
+    return _decodeMap(response.body);
+  }
+
+  Future<Map<String, dynamic>> getNotificationAnalytics({
+    int days = 30,
+    bool comparePrevious = true,
+  }) async {
+    await init();
+    final response = await _request(
+      'GET',
+      '/api/analytics/notifications',
+      query: <String, dynamic>{
+        'days': days.clamp(1, 365),
+        'comparePrevious': comparePrevious,
+      },
+    );
+    return _decodeMap(response.body);
+  }
+
+  Future<Map<String, dynamic>> getSponsorshipDashboard({
+    int days = 30,
+    bool comparePrevious = true,
+  }) async {
+    await init();
+    final response = await _request(
+      'GET',
+      '/api/admin/sponsorship',
+      query: <String, dynamic>{
+        'days': days.clamp(1, 365),
+        'comparePrevious': comparePrevious,
+      },
+    );
+    return _decodeMap(response.body);
+  }
+
+  Future<void> createSponsorshipCampaign({
+    required String name,
+    required String mangaId,
+    required num budget,
+    required DateTime startsAt,
+    required DateTime endsAt,
+    required String placement,
+    required int frequencyCap,
+    List<String> platforms = const <String>[],
+    List<String> countries = const <String>[],
+    List<String> languages = const <String>[],
+    String currency = 'EUR',
+  }) async {
+    await init();
+    final safeName = AdminInputValidator.requiredText(
+      name,
+      label: _adminT('Campaign name', 'Le nom de campagne'),
+      maxLength: 120,
+    );
+    final safeMangaId = AdminInputValidator.relationId(
+      mangaId,
+      label: _adminT('Sponsored manga', 'Le manga sponsorisé'),
+    );
+    final safeBudget = AdminInputValidator.nonNegativeNumber(
+      budget,
+      label: _adminT('Budget', 'Le budget'),
+    );
+    if (safeBudget <= 0) {
+      throw AdminInputException(
+        _adminT(
+          'The budget must be greater than zero.',
+          'Le budget doit être supérieur à zéro.',
+        ),
+      );
+    }
+    if (!endsAt.isAfter(startsAt)) {
+      throw AdminInputException(
+        _adminT(
+          'The campaign end must be after its start.',
+          'La fin de campagne doit être postérieure à son début.',
+        ),
+      );
+    }
+    if (frequencyCap < 1 || frequencyCap > 10000) {
+      throw AdminInputException(
+        _adminT(
+          'The frequency cap must be between 1 and 10,000 impressions.',
+          'Le plafonnement doit être compris entre 1 et 10 000 impressions.',
+        ),
+      );
+    }
+    const allowedPlacements = <String>{'home', 'search', 'catalog', 'details'};
+    if (!allowedPlacements.contains(placement)) {
+      throw AdminInputException(
+        _adminT(
+          'Invalid campaign placement.',
+          'Emplacement de campagne invalide.',
+        ),
+      );
+    }
+    final budgetInMinorUnits = AdminInputValidator.moneyInMinorUnits(
+      safeBudget,
+      label: _adminT('Budget', 'Le budget'),
+    );
+    await _request(
+      'POST',
+      '/api/admin/sponsorship/campaigns',
+      body: <String, dynamic>{
+        'name': safeName,
+        'mangaId': safeMangaId,
+        'budget': budgetInMinorUnits,
+        'currency': AdminInputValidator.requiredText(
+          currency,
+          label: _adminT('Currency', 'La devise'),
+          maxLength: 3,
+        ).toUpperCase(),
+        'startsAt': startsAt.toUtc().toIso8601String(),
+        'endsAt': endsAt.toUtc().toIso8601String(),
+        'placement': AdminInputValidator.requiredText(
+          placement,
+          label: _adminT('Placement', 'L’emplacement'),
+          maxLength: 80,
+        ),
+        'targeting': <String, dynamic>{
+          'platforms': AdminInputValidator.textList(
+            platforms,
+            label: _adminT('Target platforms', 'Les plateformes ciblées'),
+            maxItems: 4,
+            maxItemLength: 20,
+          ),
+          'countries': AdminInputValidator.textList(
+            countries,
+            label: _adminT('Target countries', 'Les pays ciblés'),
+            maxItems: 50,
+            maxItemLength: 2,
+          ).map((value) => value.toUpperCase()).toList(),
+          'languages': AdminInputValidator.textList(
+            languages,
+            label: _adminT('Target languages', 'Les langues ciblées'),
+            maxItems: 50,
+            maxItemLength: 16,
+          ),
+        },
+        'frequencyCap': frequencyCap,
+      },
+    );
+  }
+
+  Future<void> updateSponsorshipCampaignStatus(
+    String campaignId,
+    String status,
+  ) async {
+    await init();
+    final safeId = AdminInputValidator.relationId(
+      campaignId,
+      label: _adminT('Campaign', 'La campagne'),
+    );
+    const allowed = <String>{'draft', 'active', 'paused', 'completed'};
+    if (!allowed.contains(status)) {
+      throw AdminInputException(
+        _adminT('Invalid campaign status.', 'Statut de campagne invalide.'),
+      );
+    }
+    await _request(
+      'PATCH',
+      '/api/admin/sponsorship/campaigns/$safeId',
+      body: <String, dynamic>{'status': status},
+    );
+  }
+
+  Future<Map<String, dynamic>> getEditorialRecommendations() async {
+    await init();
+    final response = await _request(
+      'GET',
+      '/api/admin/editorial-recommendations',
+    );
+    return _decodeMap(response.body);
+  }
+
+  Future<void> createEditorialRecommendation({
+    required String mangaId,
+    required String placement,
+    required int priority,
+    required DateTime startsAt,
+    required DateTime endsAt,
+    String? note,
+  }) async {
+    await init();
+    if (!endsAt.isAfter(startsAt)) {
+      throw AdminInputException(
+        _adminT(
+          'The feature end must be after its start.',
+          'La fin de mise en avant doit être postérieure à son début.',
+        ),
+      );
+    }
+    if (priority < 0 || priority > 100) {
+      throw AdminInputException(
+        _adminT(
+          'Priority must be between 0 and 100.',
+          'La priorité doit être comprise entre 0 et 100.',
+        ),
+      );
+    }
+    const allowedPlacements = <String>{'home', 'search', 'catalog', 'details'};
+    if (!allowedPlacements.contains(placement)) {
+      throw AdminInputException(
+        _adminT(
+          'Invalid editorial placement.',
+          'Emplacement éditorial invalide.',
+        ),
+      );
+    }
+    await _request(
+      'POST',
+      '/api/admin/editorial-recommendations',
+      body: <String, dynamic>{
+        'mangaId': AdminInputValidator.relationId(
+          mangaId,
+          label: _adminT('Manga', 'Le manga'),
+        ),
+        'placement': AdminInputValidator.requiredText(
+          placement,
+          label: _adminT('Placement', 'L’emplacement'),
+          maxLength: 80,
+        ),
+        'priority': priority,
+        'startsAt': startsAt.toUtc().toIso8601String(),
+        'endsAt': endsAt.toUtc().toIso8601String(),
+        if (AdminInputValidator.optionalText(
+              note,
+              label: _adminT('Editorial note', 'La note éditoriale'),
+              maxLength: 500,
+            )
+            case final safeNote?)
+          'justification': safeNote,
+      },
+    );
+  }
+
+  Future<void> deleteEditorialRecommendation(String recommendationId) async {
+    await init();
+    final safeId = AdminInputValidator.relationId(
+      recommendationId,
+      label: _adminT('Recommendation', 'La recommandation'),
+    );
+    await _request('DELETE', '/api/admin/editorial-recommendations/$safeId');
+  }
+
+  Future<Map<String, dynamic>> getRevenueDashboard({
+    int days = 30,
+    bool comparePrevious = true,
+  }) async {
+    await init();
+    final response = await _request(
+      'GET',
+      '/api/admin/revenue',
+      query: <String, dynamic>{
+        'days': days.clamp(1, 365),
+        'comparePrevious': comparePrevious,
+      },
+    );
+    return _decodeMap(response.body);
+  }
+
+  Future<void> updateSponsorInvoicePayment(
+    String invoiceId, {
+    required String status,
+    String? reference,
+  }) async {
+    await init();
+    final safeId = AdminInputValidator.relationId(
+      invoiceId,
+      label: _adminT('Invoice', 'La facture'),
+    );
+    const allowed = <String>{'pending', 'paid', 'overdue', 'cancelled'};
+    if (!allowed.contains(status)) {
+      throw AdminInputException(
+        _adminT('Invalid payment status.', 'Statut de paiement invalide.'),
+      );
+    }
+    await _request(
+      'PATCH',
+      '/api/admin/revenue/invoices/$safeId',
+      body: <String, dynamic>{
+        'status': status,
+        if (AdminInputValidator.optionalText(
+              reference,
+              label: _adminT('Payment reference', 'La référence de paiement'),
+              maxLength: 120,
+            )
+            case final safeReference?)
+          'paymentReference': safeReference,
+      },
+    );
+  }
+
+  Future<Map<String, dynamic>> getCatalogQualityDashboard() async {
+    await init();
+    final response = await _request('GET', '/api/admin/catalog-quality');
+    return _decodeMap(response.body);
+  }
+
+  Future<void> scanCatalogQuality() async {
+    await init();
+    await _request('POST', '/api/admin/catalog-quality/scan');
+  }
+
+  Future<void> resolveCatalogQualityIssue(
+    String issueId, {
+    String? note,
+  }) async {
+    await init();
+    final safeId = AdminInputValidator.relationId(
+      issueId,
+      label: _adminT('Issue', 'L’anomalie'),
+    );
+    await _request(
+      'POST',
+      '/api/admin/catalog-quality/issues/$safeId/resolve',
+      body: <String, dynamic>{
+        if (AdminInputValidator.optionalText(
+              note,
+              label: _adminT('Note', 'La note'),
+              maxLength: 1000,
+            )
+            case final safeNote?)
+          'note': safeNote,
+      },
+    );
+  }
+
+  Future<Map<String, dynamic>> getModerationDashboard() async {
+    await init();
+    final response = await _request('GET', '/api/admin/moderation');
+    return _decodeMap(response.body);
+  }
+
+  Future<void> updateUserRole(String userId, String role) async {
+    await init();
+    final safeId = AdminInputValidator.relationId(
+      userId,
+      label: _adminT('Account', 'Le compte'),
+    );
+    const allowed = <String>{'user', 'moderator', 'admin'};
+    if (!allowed.contains(role)) {
+      throw AdminInputException(
+        _adminT('Invalid user role.', 'Rôle utilisateur invalide.'),
+      );
+    }
+    await _request(
+      'PATCH',
+      '/api/admin/users/$safeId/role',
+      body: <String, dynamic>{'role': role},
+    );
+  }
+
+  Future<void> suspendUser(
+    String userId, {
+    required bool suspended,
+    String? reason,
+  }) async {
+    await init();
+    final safeId = AdminInputValidator.relationId(
+      userId,
+      label: _adminT('Account', 'Le compte'),
+    );
+    await _request(
+      'PATCH',
+      '/api/admin/users/$safeId/suspension',
+      body: <String, dynamic>{
+        'suspended': suspended,
+        if (AdminInputValidator.optionalText(
+              reason,
+              label: _adminT('Reason', 'Le motif'),
+              maxLength: 500,
+            )
+            case final safeReason?)
+          'reason': safeReason,
+      },
+    );
+  }
+
+  Future<void> resolveModerationCase(
+    String caseId, {
+    required String resolution,
+    String? note,
+  }) async {
+    await init();
+    final safeId = AdminInputValidator.relationId(
+      caseId,
+      label: _adminT(
+        'Report or GDPR request',
+        'Le signalement ou la demande RGPD',
+      ),
+    );
+    await _request(
+      'POST',
+      '/api/admin/moderation/cases/$safeId/resolve',
+      body: <String, dynamic>{
+        'resolution': AdminInputValidator.requiredText(
+          resolution,
+          label: _adminT('Resolution', 'La résolution'),
+          maxLength: 80,
+        ),
+        if (AdminInputValidator.optionalText(
+              note,
+              label: _adminT('Note', 'La note'),
+              maxLength: 1000,
+            )
+            case final safeNote?)
+          'note': safeNote,
+      },
+    );
+  }
+
+  Future<Map<String, dynamic>> getOperationsDashboard() async {
+    await init();
+    final response = await _request('GET', '/api/admin/operations');
+    return _decodeMap(response.body);
+  }
+
+  Future<void> updateFeatureFlag(String flagId, bool enabled) async {
+    await init();
+    final safeId = AdminInputValidator.relationId(
+      flagId,
+      label: _adminT('Feature flag', 'Le feature flag'),
+    );
+    await _request(
+      'PATCH',
+      '/api/admin/operations/feature-flags/$safeId',
+      body: <String, dynamic>{'enabled': enabled},
+    );
+  }
+
+  Future<void> retryQueueJob(String jobId) async {
+    await init();
+    final safeId = AdminInputValidator.relationId(
+      jobId,
+      label: _adminT('Job', 'La tâche'),
+    );
+    await _request('POST', '/api/admin/operations/jobs/$safeId/retry');
+  }
+
+  Future<void> invalidateCache(String namespace) async {
+    await init();
+    final safeNamespace = AdminInputValidator.relationId(
+      namespace,
+      label: _adminT('Cache', 'Le cache'),
+    );
+    await _request(
+      'POST',
+      '/api/admin/operations/cache/invalidate',
+      body: <String, dynamic>{'namespace': safeNamespace},
+    );
+  }
+
+  Future<Map<String, dynamic>> getAuditEvents({
+    int page = 1,
+    int limit = 50,
+    String? action,
+  }) async {
+    await init();
+    final response = await _request(
+      'GET',
+      '/api/admin/audit',
+      query: <String, dynamic>{
+        'page': page.clamp(1, 1000000),
+        'limit': limit.clamp(1, 100),
+        if (AdminInputValidator.optionalText(
+              action,
+              label: _adminT('Action filter', 'Le filtre d’action'),
+              maxLength: 80,
+            )
+            case final safeAction?)
+          'action': safeAction,
+      },
+    );
+    return _decodeMap(response.body);
+  }
+
+  Future<Map<String, dynamic>> requestAdminExport({
+    required String resource,
+    String format = 'csv',
+  }) async {
+    await init();
+    const allowedResources = <String>{
+      'sponsorship',
+      'revenue',
+      'catalog-quality',
+      'moderation',
+      'operations',
+      'audit',
+      'editorial',
+      'analytics-summary',
+      'analytics-product',
+      'analytics-notifications',
+    };
+    if (!allowedResources.contains(resource)) {
+      throw AdminInputException(
+        _adminT('Invalid export resource.', 'Ressource d’export invalide.'),
+      );
+    }
+    if (!const <String>{'csv', 'json'}.contains(format)) {
+      throw AdminInputException(
+        _adminT('Invalid export format.', 'Format d’export invalide.'),
+      );
+    }
+    final response = await _request(
+      'POST',
+      '/api/admin/exports',
+      body: <String, dynamic>{'resource': resource, 'format': format},
+    );
+    return _decodeMap(response.body);
+  }
+
+  Future<AdminUserPage> getUsers({
+    AdminUserOrderBy orderBy = AdminUserOrderBy.createdAt,
+    AdminSortDirection direction = AdminSortDirection.descending,
+    int page = 1,
+    int limit = 50,
+    String? query,
+  }) async {
+    await init();
+    final response = await _request(
+      'GET',
+      '/api/admin/users',
+      query: <String, dynamic>{
+        'orderBy': orderBy.apiValue,
+        'orderDirection': direction.apiValue,
+        'page': page.clamp(1, 1000000),
+        'limit': limit.clamp(1, 100),
+        if (AdminInputValidator.optionalText(
+              query,
+              label: _adminT('User search', 'La recherche utilisateur'),
+              maxLength: 200,
+            )
+            case final safeQuery?)
+          'q': safeQuery,
+      },
+    );
+    return AdminUserPage.fromJson(_decodeMap(response.body));
+  }
+
+  Future<List<AdminRelationOption>> searchRelations(
+    AdminRelationResource resource,
+    String query, {
+    int limit = 20,
+  }) async {
+    await init();
+    final safeQuery = AdminInputValidator.requiredText(
+      query,
+      label: _adminT('Search', 'La recherche'),
+      maxLength: 200,
+    );
+    final response = await _request(
+      'GET',
+      resource.searchPath,
+      query: <String, dynamic>{
+        'q': safeQuery,
+        'query': safeQuery,
+        'limit': limit.clamp(1, 50),
+      },
+    );
+    final decoded = _decodeMap(response.body);
+    final data = _adminMap(decoded['data']) ?? decoded;
+    final rawItems = data[resource.responseKey];
+    if (rawItems is! List) return const <AdminRelationOption>[];
+    return rawItems
+        .map(_adminMap)
+        .whereType<Map<String, dynamic>>()
+        .map((item) => AdminRelationOption.fromJson(resource, item))
+        .where((item) => item.id.isNotEmpty)
+        .toList();
   }
 
   Future<AdminVolumeIssuePage> getVolumeQualityIssues({
@@ -530,7 +1443,7 @@ class AdminConnector {
     await init();
     final response = await _request(
       'POST',
-      '/api/admin/volume-quality/issues/scan',
+      '/api/admin/volume-quality/scan',
     );
     final decoded = _decodeMap(response.body);
     final data = _adminMap(decoded['data']) ?? decoded;
@@ -547,18 +1460,18 @@ class AdminConnector {
     await init();
     final safeIssueId = AdminInputValidator.relationId(
       issueId,
-      label: 'L’anomalie',
+      label: _adminT('Issue', 'L’anomalie'),
     );
     final safeNote = AdminInputValidator.optionalText(
       note,
-      label: 'La note de résolution',
+      label: _adminT('Resolution note', 'La note de résolution'),
       maxLength: 1000,
     );
     await _request(
-      'POST',
+      'PATCH',
       '/api/admin/volume-quality/issues/$safeIssueId/resolve',
       body: <String, dynamic>{
-        if (safeNote != null) 'note': safeNote,
+        if (safeNote != null) 'resolutionNote': safeNote,
       },
     );
   }
@@ -567,12 +1480,45 @@ class AdminConnector {
     await init();
     final safeIssueId = AdminInputValidator.relationId(
       issueId,
-      label: 'L’anomalie',
+      label: _adminT('Issue', 'L’anomalie'),
     );
     await _request(
       'POST',
       '/api/admin/volume-quality/issues/$safeIssueId/reopen',
     );
+  }
+
+  Future<void> updateVolumeQualityData(
+    String volumeId, {
+    num? tomeNumber,
+    String? subSeriesId,
+  }) async {
+    await init();
+    final safeVolumeId = AdminInputValidator.relationId(
+      volumeId,
+      label: _adminT('Volume', 'Le volume'),
+    );
+    final body = <String, dynamic>{
+      if (tomeNumber != null)
+        'tomeNumber': AdminInputValidator.nonNegativeNumber(
+          tomeNumber,
+          label: _adminT('Volume number', 'Le numéro de tome'),
+        ),
+      if ((subSeriesId ?? '').trim().isNotEmpty)
+        'subSeries': AdminInputValidator.relationId(
+          subSeriesId!,
+          label: _adminT('Sub-series', 'La sous-série'),
+        ),
+    };
+    if (body.isEmpty) {
+      throw AdminInputException(
+        _adminT(
+          'Change the volume number or the sub-series.',
+          'Modifiez le numéro de tome ou la sous-série.',
+        ),
+      );
+    }
+    await _request('PATCH', '/api/volumes/$safeVolumeId', body: body);
   }
 
   Future<void> createAuthor({
@@ -582,16 +1528,19 @@ class AdminConnector {
   }) async {
     await init();
 
-    final safeName = AdminInputValidator.requiredText(name, label: 'Le nom');
+    final safeName = AdminInputValidator.requiredText(
+      name,
+      label: _adminT('Name', 'Le nom'),
+    );
     final safeJobs = AdminInputValidator.textList(
       jobs,
-      label: 'Les métiers',
+      label: _adminT('Jobs', 'Les métiers'),
       maxItems: 20,
       maxItemLength: 80,
     );
     final safeCoverUrl = AdminInputValidator.httpsUrl(
       coverUrl,
-      label: 'L’image',
+      label: _adminT('Image', 'L’image'),
     );
     final body = <String, dynamic>{
       'name': safeName,
@@ -608,7 +1557,10 @@ class AdminConnector {
       'POST',
       '/api/genres',
       body: <String, dynamic>{
-        'name': AdminInputValidator.requiredText(name, label: 'Le nom'),
+        'name': AdminInputValidator.requiredText(
+          name,
+          label: _adminT('Name', 'Le nom'),
+        ),
       },
     );
   }
@@ -617,13 +1569,16 @@ class AdminConnector {
     await init();
     final safeCoverUrl = AdminInputValidator.httpsUrl(
       coverUrl,
-      label: 'Le logo',
+      label: _adminT('Logo', 'Le logo'),
     );
     await _request(
       'POST',
       '/api/editors',
       body: <String, dynamic>{
-        'name': AdminInputValidator.requiredText(name, label: 'Le nom'),
+        'name': AdminInputValidator.requiredText(
+          name,
+          label: _adminT('Name', 'Le nom'),
+        ),
         if (safeCoverUrl != null) 'coverUrl': safeCoverUrl,
       },
     );
@@ -652,15 +1607,24 @@ class AdminConnector {
           if (altTitles.isNotEmpty)
             'altTitles': AdminInputValidator.textList(
               altTitles,
-              label: 'Les titres alternatifs',
+              label: _adminT('Alternative titles', 'Les titres alternatifs'),
               maxItems: 30,
             ),
           if (authorIds.isNotEmpty)
-            'authors': _safeRelationIds(authorIds, 'Les auteurs'),
+            'authors': _safeRelationIds(
+              authorIds,
+              _adminT('Authors', 'Les auteurs'),
+            ),
           if (editorIds.isNotEmpty)
-            'editors': _safeRelationIds(editorIds, 'Les éditeurs'),
+            'editors': _safeRelationIds(
+              editorIds,
+              _adminT('Publishers', 'Les éditeurs'),
+            ),
           if (genreIds.isNotEmpty)
-            'genres': _safeRelationIds(genreIds, 'Les genres'),
+            'genres': _safeRelationIds(
+              genreIds,
+              _adminT('Genres', 'Les genres'),
+            ),
           if (firstPublicationDate != null)
             'firstPublicationDate': firstPublicationDate
                 .toUtc()
@@ -694,25 +1658,31 @@ class AdminConnector {
         )..addAll(<String, dynamic>{
           'series': AdminInputValidator.relationId(
             seriesId,
-            label: 'La série parente',
+            label: _adminT('Parent series', 'La série parente'),
           ),
           if (authorIds.isNotEmpty)
-            'authors': _safeRelationIds(authorIds, 'Les auteurs'),
+            'authors': _safeRelationIds(
+              authorIds,
+              _adminT('Authors', 'Les auteurs'),
+            ),
           if ((editorId ?? '').trim().isNotEmpty)
             'editors': AdminInputValidator.relationId(
               editorId!,
-              label: 'L’éditeur',
+              label: _adminT('Publisher', 'L’éditeur'),
             ),
           if (genreIds.isNotEmpty)
-            'genres': _safeRelationIds(genreIds, 'Les genres'),
+            'genres': _safeRelationIds(
+              genreIds,
+              _adminT('Genres', 'Les genres'),
+            ),
           'type': AdminInputValidator.requiredText(
             support,
-            label: 'Le support',
+            label: _adminT('Format', 'Le support'),
             maxLength: 40,
           ),
           'status': AdminInputValidator.requiredText(
             status,
-            label: 'Le statut',
+            label: _adminT('Status', 'Le statut'),
             maxLength: 40,
           ),
           if (firstPublicationDate != null)
@@ -746,28 +1716,28 @@ class AdminConnector {
     await init();
     final safeTitleFr = AdminInputValidator.requiredText(
       titleFr,
-      label: 'Le titre français',
+      label: _adminT('French title', 'Le titre français'),
     );
     final safeTitleJp = AdminInputValidator.optionalText(
       titleJp,
-      label: 'Le titre japonais',
+      label: _adminT('Japanese title', 'Le titre japonais'),
     );
     final safeTitleEn = AdminInputValidator.optionalText(
       titleEn,
-      label: 'Le titre anglais',
+      label: _adminT('English title', 'Le titre anglais'),
     );
     final safeCoverUrl = AdminInputValidator.httpsUrl(
       coverUrl,
-      label: 'La couverture',
+      label: _adminT('Cover', 'La couverture'),
     );
     final safeResume = AdminInputValidator.optionalText(
       resume,
-      label: 'Le résumé',
+      label: _adminT('Summary', 'Le résumé'),
       maxLength: 10000,
     );
     final safeGenderJp = AdminInputValidator.optionalText(
       genderJp,
-      label: 'Le public japonais',
+      label: _adminT('Japanese demographic', 'Le public japonais'),
       maxLength: 80,
     );
     final body = <String, dynamic>{
@@ -776,9 +1746,12 @@ class AdminConnector {
       if (safeTitleEn != null) 'titleEn': safeTitleEn,
       'tomeNumber': AdminInputValidator.nonNegativeNumber(
         tomeNumber,
-        label: 'Le numéro de tome',
+        label: _adminT('Volume number', 'Le numéro de tome'),
       ),
-      'price': AdminInputValidator.nonNegativeNumber(price, label: 'Le prix'),
+      'price': AdminInputValidator.nonNegativeNumber(
+        price,
+        label: _adminT('Price', 'Le prix'),
+      ),
       if (safeCoverUrl != null) 'coverUrl': safeCoverUrl,
       if (safeResume != null) 'resume': safeResume,
       if (publicationDate != null)
@@ -786,27 +1759,30 @@ class AdminConnector {
       'ean': AdminInputValidator.ean13(ean),
       'language': AdminInputValidator.requiredText(
         language,
-        label: 'La langue',
+        label: _adminT('Language', 'La langue'),
         maxLength: 40,
       ),
       'support': AdminInputValidator.requiredText(
         support,
-        label: 'Le support',
+        label: _adminT('Format', 'Le support'),
         maxLength: 40,
       ),
       if (safeGenderJp != null) 'genderJp': safeGenderJp,
       if ((subSeriesId ?? '').trim().isNotEmpty)
         'subSeries': AdminInputValidator.relationId(
           subSeriesId!,
-          label: 'La sous-série',
+          label: _adminT('Sub-series', 'La sous-série'),
         ),
       if (bookLinks.isNotEmpty)
         'bookLink': AdminInputValidator.httpsUrlList(
           bookLinks,
-          label: 'Les liens d’achat',
+          label: _adminT('Purchase links', 'Les liens d’achat'),
         ),
       if (containsIds.isNotEmpty)
-        'contain': _safeRelationIds(containsIds, 'Les contenus inclus'),
+        'contain': _safeRelationIds(
+          containsIds,
+          _adminT('Included content', 'Les contenus inclus'),
+        ),
       if (info.isNotEmpty) 'infoVolume': AdminInputValidator.metadata(info),
       'over18': over18,
     };
@@ -822,20 +1798,20 @@ class AdminConnector {
   }) {
     final safeTitleJp = AdminInputValidator.optionalText(
       titleJp,
-      label: 'Le titre japonais',
+      label: _adminT('Japanese title', 'Le titre japonais'),
     );
     final safeTitleEn = AdminInputValidator.optionalText(
       titleEn,
-      label: 'Le titre anglais',
+      label: _adminT('English title', 'Le titre anglais'),
     );
     final safeCoverUrl = AdminInputValidator.httpsUrl(
       coverUrl,
-      label: 'La couverture',
+      label: _adminT('Cover', 'La couverture'),
     );
     return <String, dynamic>{
       'titleFr': AdminInputValidator.requiredText(
         titleFr,
-        label: 'Le titre français',
+        label: _adminT('French title', 'Le titre français'),
       ),
       if (safeTitleJp != null) 'titleJp': safeTitleJp,
       if (safeTitleEn != null) 'titleEn': safeTitleEn,
@@ -884,7 +1860,10 @@ class AdminConnector {
   }) async {
     if (!isLoggedIn()) {
       throw StateError(
-        'Admin non connecté. Veuillez saisir une clé API admin.',
+        _adminT(
+          'Administrator not signed in. Enter an administrator API key.',
+          'Admin non connecté. Veuillez saisir une clé API admin.',
+        ),
       );
     }
     return _rawRequest(
@@ -903,6 +1882,13 @@ class AdminConnector {
     Map<String, dynamic>? query,
     Object? body,
   }) async {
+    if (!isSafeApiPath(path)) {
+      throw ArgumentError.value(
+        path,
+        'path',
+        _adminT('Invalid API path.', 'Chemin API invalide.'),
+      );
+    }
     final uri = Uri.parse('$_apiBaseUrl$path').replace(
       queryParameters: query?.map(
         (key, value) => MapEntry(key, value?.toString()),
@@ -940,7 +1926,12 @@ class AdminConnector {
             .timeout(_requestTimeout);
         break;
       default:
-        throw UnsupportedError('Méthode HTTP non supportée: $method');
+        throw UnsupportedError(
+          _adminT(
+            'Unsupported HTTP method: $method',
+            'Méthode HTTP non supportée : $method',
+          ),
+        );
     }
 
     if (response.statusCode < 200 || response.statusCode >= 300) {
@@ -954,25 +1945,32 @@ class AdminConnector {
 
   String _extractApiError(http.Response response) {
     if (response.statusCode >= 500) {
-      return 'Erreur API (${response.statusCode}): service temporairement indisponible.';
+      return _adminT(
+        'API error (${response.statusCode}): service temporarily unavailable.',
+        'Erreur API (${response.statusCode}) : service temporairement indisponible.',
+      );
     }
     try {
       final decoded = jsonDecode(response.body);
       if (decoded is Map<String, dynamic>) {
         final message = decoded['message']?.toString();
         if (message != null && message.isNotEmpty) {
-          final safeMessage = message
-              .replaceAll(RegExp(r'[\x00-\x1F\x7F]'), ' ')
-              .trim();
-          final truncated = safeMessage.length > 300
-              ? safeMessage.substring(0, 300)
-              : safeMessage;
-          return 'Erreur API (${response.statusCode}): $truncated';
+          final safeMessage = redactSensitiveText(
+            message,
+            maxLength: 300,
+          ).trim();
+          return _adminT(
+            'API error (${response.statusCode}): $safeMessage',
+            'Erreur API (${response.statusCode}) : $safeMessage',
+          );
         }
       }
     } catch (_) {}
 
-    return 'Erreur API (${response.statusCode}): requête refusée.';
+    return _adminT(
+      'API error (${response.statusCode}): request rejected.',
+      'Erreur API (${response.statusCode}) : requête refusée.',
+    );
   }
 
   Map<String, dynamic> _decodeMap(String body) {
@@ -985,7 +1983,10 @@ class AdminConnector {
     try {
       return await _secureStorage.read(key: key);
     } catch (e) {
-      debugPrint('Secure storage read failed for $key: $e');
+      RuntimeLocalization.debug(
+        en: 'Secure storage read failed.',
+        fr: 'La lecture du stockage sécurisé a échoué.',
+      );
       return null;
     }
   }
@@ -994,9 +1995,15 @@ class AdminConnector {
     try {
       await _secureStorage.write(key: key, value: value);
     } catch (e) {
-      debugPrint('Secure storage write failed for $key: $e');
+      RuntimeLocalization.debug(
+        en: 'Secure storage write failed.',
+        fr: 'L’écriture dans le stockage sécurisé a échoué.',
+      );
       throw StateError(
-        'Le stockage sécurisé est indisponible. La clé admin n’a pas été conservée.',
+        _adminT(
+          'Secure storage is unavailable. The administrator key was not saved.',
+          'Le stockage sécurisé est indisponible. La clé admin n’a pas été conservée.',
+        ),
       );
     }
   }
@@ -1005,7 +2012,10 @@ class AdminConnector {
     try {
       await _secureStorage.delete(key: key);
     } catch (e) {
-      debugPrint('Secure storage delete failed for $key: $e');
+      RuntimeLocalization.debug(
+        en: 'Secure storage deletion failed.',
+        fr: 'La suppression dans le stockage sécurisé a échoué.',
+      );
     }
   }
 }

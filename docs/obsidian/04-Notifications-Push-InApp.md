@@ -21,13 +21,12 @@ Fournir une base notifications compatible mobile:
 - Stream broadcast pour UI:
   - `NotificationService.stream`
   - exposé via `AppwriteConnector.listenToNotifications()`.
+- Boîte persistante bornée à 100 entrées, accessible depuis le profil.
+- États lu/non lu, marquage global, effacement local et deep links validés.
+- Événements reçu/ouvert dédupliqués et conservés pour reprise hors ligne.
 
 ## Fallback polling
-- Intervalle par défaut: 5 min.
+- Intervalle adaptatif de 5 à 30 min afin de limiter réseau et batterie.
 - Endpoint heartbeat actuel: `/api/analytics/health`.
-- Si succès: insertion d’un événement in-app.
-
-## Intégration UI (phase suivante recommandée)
-- Brancher un `StreamBuilder` sur `listenToNotifications()`.
-- Afficher un badge + liste in-app.
-- Marquer lu/non-lu côté client (ou via endpoint backend dédié si ajouté).
+- Les notifications applicatives restent transportées par FCM/Appwrite ; le
+  heartbeat surveille uniquement la disponibilité du mécanisme de secours.

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mymangatheque/l10n/app_localizations.dart';
+import 'package:mymangatheque/src/back/language/runtime_localization.dart';
 import 'package:mymangatheque/src/back/services/appwrite.dart';
 import 'package:mymangatheque/src/const/assets.dart';
 import 'package:mymangatheque/src/front/components/my_button.dart';
@@ -12,8 +13,17 @@ import 'package:mymangatheque/src/function/auto_push_or_go.dart';
 import 'package:mymangatheque/src/function/show_message_function.dart';
 import 'package:mymangatheque/src/const/routes.dart';
 
+typedef EmailSignInHandler =
+    Future<User?> Function(
+      String email,
+      String password,
+      BuildContext context,
+    );
+
 class SignInPage extends StatefulWidget {
-  const SignInPage({super.key});
+  const SignInPage({this.signInHandler, super.key});
+
+  final EmailSignInHandler? signInHandler;
 
   @override
   State<SignInPage> createState() => _SignInPageState();
@@ -23,29 +33,50 @@ class _SignInPageState extends State<SignInPage> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final connector = AppwriteConnector();
+  bool _isSubmitting = false;
 
-  Future<User?> signIn(BuildContext context) async {
+  Future<User?> signIn() async {
+    if (_isSubmitting) return null;
+    final localizations = AppLocalizations.of(context);
+    if (localizations == null) return null;
+    if (emailController.text.trim().isEmpty) {
+      showMessage(localizations.provideYourEmail, context);
+      return null;
+    }
+    if (passwordController.text.isEmpty) {
+      showMessage(localizations.provideYourPassword, context);
+      return null;
+    }
+
+    setState(() => _isSubmitting = true);
     try {
-      final userData = await connector.loginWithEmail(
-        emailController.text,
-        passwordController.text,
-        context,
-      );
-      debugPrint(userData.toString());
+      final handler = widget.signInHandler;
+      final Future<User?> request;
+      if (handler != null) {
+        request = handler(
+          emailController.text.trim(),
+          passwordController.text,
+          context,
+        );
+      } else {
+        request = connector.loginWithEmail(
+          emailController.text.trim(),
+          passwordController.text,
+          context,
+        );
+      }
+      final userData = await request;
 
-      debugPrint('connector id ${connector.getConnectedUser()!.id}');
-
-      if (!mounted) return null;
+      if (!mounted || userData == null) return null;
       pushOrGo(context, Routes.profile.base);
       return userData;
-    } catch (e) {
+    } catch (_) {
       if (!mounted) return null;
-      //var error = json.decode(e.toString().replaceAll('ClientException: ', ''));
-      //print(error);
-      //print(error['response']['message']);
-      //showMessage(error['response']['message'], context);
-      var error = e.toString();
-      showMessage(error, context);
+      showMessage(localizations.userLoginFailed, context);
+    } finally {
+      if (mounted) {
+        setState(() => _isSubmitting = false);
+      }
     }
     return null;
   }
@@ -147,22 +178,10 @@ class _SignInPageState extends State<SignInPage> {
 
                 // Display sign in button
                 MyButton(
-                  text: localizations.logIn,
-                  onTap: () async {
-                    try {
-                      await connector.loginWithEmail(
-                        emailController.text,
-                        passwordController.text,
-                        context,
-                      );
-                      if (!mounted) return;
-                      setState(() {});
-                      pushOrGo(context, Routes.profile.base);
-                    } catch (e) {
-                      if (!mounted) return;
-                      showMessage(e.toString(), context);
-                    }
-                  },
+                  text: _isSubmitting
+                      ? localizations.pleaseWait
+                      : localizations.logIn,
+                  onTap: _isSubmitting ? null : signIn,
                 ),
                 const SizedBox(height: 35),
 
@@ -203,7 +222,10 @@ class _SignInPageState extends State<SignInPage> {
                     SquareTile(
                       imagePath: Assets.images.google,
                       onTap: () => {
-                        debugPrint("Google Sign In got clicked"),
+                        RuntimeLocalization.debug(
+                          en: 'Google sign-in selected.',
+                          fr: 'Connexion Google sélectionnée.',
+                        ),
                         connector.signInWithGoogle(context),
                       },
                     ),

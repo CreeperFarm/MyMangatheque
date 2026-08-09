@@ -42,4 +42,5 @@
 
 ## Exclusions (phase 2)
 - Refonte complète du back-office admin (CRUD admin avancé, stats admin dédiées).
-- Optimisation fine realtime métier (actuellement polling contrôlé pour compat).
+- Extension éventuelle du temps réel aux futures ressources métier qui ne sont
+  pas encore exposées par les collections Appwrite actuelles.

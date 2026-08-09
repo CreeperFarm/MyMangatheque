@@ -10,6 +10,9 @@
 include: package:flutter_lints/flutter.yaml
 
 analyzer:
+  exclude:
+    - lib/generated/**
+    - lib/l10n/app_localizations*.dart
   plugins:
     - custom_lint
 

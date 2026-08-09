@@ -13,9 +13,9 @@ class DiscoverPage extends ConsumerStatefulWidget {
 }
 
 class _DiscoverPageState extends ConsumerState<DiscoverPage> {
-  String textLength(text, length) {
+  String textLength(String text, int length) {
     if (text.length > length) {
-      return text.substring(0, length) + "...";
+      return '${text.substring(0, length)}...';
     } else {
       return text;
     }

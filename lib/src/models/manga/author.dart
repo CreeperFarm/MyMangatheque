@@ -11,7 +11,8 @@ class Author {
   final String id; // * Get the ID of the author
   final String name; // * Get the name of the author
   final String image; // * Get the image link of the author
-  List<String> series; // * Get the list of IDs of serie where the author worked on
+  List<String>
+  series; // * Get the list of IDs of serie where the author worked on
   final String job; // * Get the job of the author
   DateTime lastTimeChecked; // * Get the last time checked of the author
 

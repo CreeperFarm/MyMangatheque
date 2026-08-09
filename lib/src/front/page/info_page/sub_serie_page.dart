@@ -170,8 +170,6 @@ class _SubSeriePageState extends State<SubSeriePage> {
               : <dynamic>[];
           final title =
               data['title']?.toString() ?? data['titleFr']?.toString() ?? '';
-          final titleEn = data['titleEn']?.toString() ?? '';
-          final titleJp = data['titleJp']?.toString() ?? '';
           final cover =
               data['image']?.toString() ?? data['coverUrl']?.toString();
 

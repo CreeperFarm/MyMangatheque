@@ -29,10 +29,11 @@ class MyTomeNumberShow extends StatelessWidget {
             textStyle: const TextStyle(fontSize: 30),
           ),
         ),
-        Row(
-          children: [
-            SizedBox(
-              width: MediaQuery.of(context).size.width / 2 - 20,
+        LayoutBuilder(
+          builder: (context, constraints) => Align(
+            alignment: Alignment.centerLeft,
+            child: SizedBox(
+              width: constraints.maxWidth / 2,
               height: 32 * 5 / 6 + 10,
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(100),
@@ -44,6 +45,9 @@ class MyTomeNumberShow extends StatelessWidget {
                     padding: const EdgeInsets.all(2.5),
                     child: ElevatedButton(
                       style: ButtonStyle(
+                        padding: WidgetStateProperty.all<EdgeInsetsGeometry>(
+                          const EdgeInsets.symmetric(horizontal: 8),
+                        ),
                         backgroundColor: WidgetStateProperty.all<Color>(
                           Theme.of(context).colorScheme.surface,
                         ),
@@ -62,11 +66,14 @@ class MyTomeNumberShow extends StatelessWidget {
                             iconSrc: Assets.icons.barcode,
                           ),
                           const SizedBox(width: 5),
-                          Text(
-                            localizations.scanner,
-                            style: TextStyle(
-                              fontSize: 15,
-                              color: Theme.of(context).colorScheme.primary,
+                          Flexible(
+                            child: Text(
+                              localizations.scanner,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 15,
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
                             ),
                           ),
                         ],
@@ -76,10 +83,10 @@ class MyTomeNumberShow extends StatelessWidget {
                 ),
               ),
             ),
-          ],
+          ),
         ),
         MyLine(
-          width: MediaQuery.of(context).size.width,
+          width: double.infinity,
           vertical: 10,
           horizontal: 0,
         ),

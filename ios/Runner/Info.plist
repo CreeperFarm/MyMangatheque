@@ -16,6 +16,7 @@
 		<string>6.0</string>
 		<key>CFBundleLocalizations</key>
 		<array>
+			<string>en</string>
 			<string>fr</string>
 		</array>
 		<key>CFBundleName</key>
@@ -42,20 +43,23 @@
 		<key>LSApplicationQueriesSchemes</key>
 		<array>
 			<string>https</string>
-			<string>http</string>
 		</array>
 		<key>LSRequiresIPhoneOS</key>
 		<true/>
 		<key>NSAppTransportSecurity</key>
 		<dict/>
 		<key>NSCameraUsageDescription</key>
-		<string>Used for the scan of barcode of the book</string>
+		<string>Scan a book barcode to find its volume.</string>
 		<key>NSPhotoLibraryAddUsageDescription</key>
-		<string>Used to get the Profile Picture</string>
+		<string>Save your selected profile picture.</string>
 		<key>NSPhotoLibraryUsageDescription</key>
-		<string>Used to get the Profile Picture</string>
+		<string>Select a profile picture.</string>
 		<key>UIApplicationSupportsIndirectInputEvents</key>
 		<true/>
+		<key>UIBackgroundModes</key>
+		<array>
+			<string>remote-notification</string>
+		</array>
 		<key>UILaunchStoryboardName</key>
 		<string>LaunchScreen</string>
 		<key>UIMainStoryboardFile</key>

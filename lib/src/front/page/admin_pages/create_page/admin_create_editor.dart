@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:mymangatheque/src/back/language/runtime_localization.dart';
 import 'package:mymangatheque/src/back/services/admin_service.dart';
+import 'package:mymangatheque/src/back/services/security/security_utils.dart';
 import 'package:mymangatheque/src/front/page/admin_pages/admin_components.dart';
 
 class AdminCreateEditorPage extends StatefulWidget {
@@ -40,14 +42,17 @@ class _AdminCreateEditorPageState extends State<AdminCreateEditorPage> {
       setState(() {
         _loading = false;
         _messageIsError = false;
-        _message = 'Éditeur créé avec succès.';
+        _message = context.localized(
+          en: 'Publisher created successfully.',
+          fr: 'Éditeur créé avec succès.',
+        );
       });
     } catch (error) {
       if (!mounted) return;
       setState(() {
         _loading = false;
         _messageIsError = true;
-        _message = error.toString();
+        _message = redactSensitiveText(error);
       });
     }
   }
@@ -56,19 +61,22 @@ class _AdminCreateEditorPageState extends State<AdminCreateEditorPage> {
   Widget build(BuildContext context) {
     return AdminFormView(
       children: [
-        const AdminPageHeader(
+        AdminPageHeader(
           icon: Icons.business_outlined,
-          title: 'Nouvel éditeur',
-          description: 'Ajoutez une maison d’édition et son identité visuelle.',
+          title: context.localized(en: 'New publisher', fr: 'Nouvel éditeur'),
+          description: context.localized(
+            en: 'Add a publisher and its visual identity.',
+            fr: 'Ajoutez une maison d’édition et son identité visuelle.',
+          ),
         ),
         const SizedBox(height: 20),
         TextField(
           controller: _nameController,
           maxLength: 200,
           textInputAction: TextInputAction.next,
-          decoration: const InputDecoration(
+          decoration: InputDecoration(
             border: OutlineInputBorder(),
-            labelText: 'Nom *',
+            labelText: context.localized(en: 'Name *', fr: 'Nom *'),
             prefixIcon: Icon(Icons.business_outlined),
           ),
         ),
@@ -76,9 +84,12 @@ class _AdminCreateEditorPageState extends State<AdminCreateEditorPage> {
         TextField(
           controller: _coverController,
           keyboardType: TextInputType.url,
-          decoration: const InputDecoration(
+          decoration: InputDecoration(
             border: OutlineInputBorder(),
-            labelText: 'URL HTTPS du logo',
+            labelText: context.localized(
+              en: 'HTTPS logo URL',
+              fr: 'URL HTTPS du logo',
+            ),
             prefixIcon: Icon(Icons.image_outlined),
           ),
         ),
@@ -86,7 +97,9 @@ class _AdminCreateEditorPageState extends State<AdminCreateEditorPage> {
         FilledButton.icon(
           onPressed: _loading ? null : _submit,
           icon: const Icon(Icons.add_rounded),
-          label: const Text('Créer l’éditeur'),
+          label: Text(
+            context.localized(en: 'Create publisher', fr: 'Créer l’éditeur'),
+          ),
         ),
         if (_loading) ...[
           const SizedBox(height: 14),

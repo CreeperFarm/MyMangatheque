@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mymangatheque/l10n/app_localizations.dart';
+import 'package:mymangatheque/src/back/language/runtime_localization.dart';
 import 'package:mymangatheque/src/back/provider/manga_owned_provider.dart';
 import 'package:mymangatheque/src/back/services/appwrite.dart';
 import 'package:mymangatheque/src/const/assets.dart';
@@ -10,16 +11,25 @@ import 'package:mymangatheque/src/front/components/my_line.dart';
 import 'package:mymangatheque/src/front/components/my_scroll_column.dart';
 import 'package:mymangatheque/src/front/components/my_tome_number_show.dart';
 import 'package:mymangatheque/src/front/components/safe_network_image.dart';
+import 'package:mymangatheque/src/front/page/library/library_tab_data.dart';
 import 'package:mymangatheque/src/function/auto_push_or_go.dart';
 import 'package:mymangatheque/src/function/safe_expand_reader.dart';
 import 'package:mymangatheque/src/models/manga/sub_serie_for_collection.dart';
 import 'package:mymangatheque/src/models/manga/volume.dart';
 
+typedef FollowedSubSeriesLoader = Future<List<RecordModel>> Function();
+
 class EnvyTab extends ConsumerStatefulWidget {
-  const EnvyTab({this.searchQuery = '', this.order = 'manga', super.key});
+  const EnvyTab({
+    this.searchQuery = '',
+    this.order = 'manga',
+    this.followedLoader,
+    super.key,
+  });
 
   final String searchQuery;
   final String order;
+  final FollowedSubSeriesLoader? followedLoader;
 
   @override
   ConsumerState createState() => _EnvyTabState();
@@ -32,8 +42,9 @@ class _EnvyTabState extends ConsumerState<EnvyTab> {
   List<SubSerieForCollection> followedSubSeriesList = [];
   Map<String, String> authorNamesBySubSeriesId = <String, String>{};
   dynamic _followedSubscription;
-  String _lastOwnedSignature = '';
+  String? _lastOwnedSignature;
   bool _isFetching = false;
+  bool _loadFailed = false;
 
   Map<String, dynamic> _asMap(dynamic value) {
     if (value is Map<String, dynamic>) return value;
@@ -97,24 +108,32 @@ class _EnvyTabState extends ConsumerState<EnvyTab> {
 
   String _authorNamesFromSubSeries(Map<String, dynamic> subSeries) {
     final expand = SafeExpandReader.asMap(subSeries['expand']);
-    final authors = _asMapList(expand['authors'] ?? subSeries['authors']);
-    final names = authors
-        .map((author) => author['name']?.toString() ?? '')
-        .where((name) => name.isNotEmpty)
-        .toList();
+    final rawAuthors = expand['authors'] ?? subSeries['authors'];
+    final names = rawAuthors is List
+        ? rawAuthors
+              .map((author) {
+                if (author is Map) return author['name']?.toString() ?? '';
+                return author.toString();
+              })
+              .where((name) => name.trim().isNotEmpty)
+              .toList()
+        : _asMapList(rawAuthors)
+              .map((author) => author['name']?.toString() ?? '')
+              .where((name) => name.trim().isNotEmpty)
+              .toList();
     return names.join(', ');
   }
 
   Future<String> getAuthorNameOfSubSeries(String id) async {
     final res = await connector.getOneExpand("sub_series", id, "authors");
-    if (res.isEmpty) return "error";
+    if (res.isEmpty) return '';
     final data = Map<String, dynamic>.from(res.first.data);
     final authorName = _authorNamesFromSubSeries(data);
-    return authorName.isEmpty ? "error" : authorName;
+    return authorName;
   }
 
   String displayAuthorWithSubSeriesId(String id) {
-    return authorNamesBySubSeriesId[id] ?? "error";
+    return authorNamesBySubSeriesId[id] ?? '';
   }
 
   String _ownedSignature(Iterable<SubSerieForCollection> subSeries) {
@@ -140,134 +159,145 @@ class _EnvyTabState extends ConsumerState<EnvyTab> {
     Set<SubSerieForCollection> ownedSubSeries,
     String signature,
   ) async {
+    if (!mounted) return;
     setState(() {
       _isFetching = true;
+      _loadFailed = false;
     });
+    try {
+      final res =
+          await (widget.followedLoader?.call() ??
+              connector.getCollectionFullDataWithFilterExpand(
+                "followed",
+                '',
+                'subSeries.authors',
+              ));
+      final ownedSubSeriesIds = ownedSubSeries
+          .map((subSeries) => subSeries.id)
+          .toSet();
 
-    final res = await connector.getCollectionFullDataWithFilterExpand(
-      "followed",
-      '',
-      'subSeries.authors',
-    );
-    final ownedSubSeriesIds = ownedSubSeries
-        .map((subSeries) => subSeries.id)
-        .toSet();
+      final loadedEntries =
+          await Future.wait<MapEntry<SubSerieForCollection, String>?>(
+            res.map((followedRecord) async {
+              final followed = Map<String, dynamic>.from(followedRecord.data);
+              final expand = SafeExpandReader.asMap(followed['expand']);
 
-    final loadedEntries =
-        await Future.wait<MapEntry<SubSerieForCollection, String>?>(
-          res.map((followedRecord) async {
-            final followed = Map<String, dynamic>.from(followedRecord.data);
-            final expand = SafeExpandReader.asMap(followed['expand']);
+              // Helper to get the subSeries map from multiple possible locations
+              Map<String, dynamic> extractSubSeriesMap() {
+                // Try expanded forms first
+                final candidates = [
+                  expand['sub_serie'],
+                  expand['sub_series'],
+                  expand['subSeries'],
+                  expand['sub_serie'] is List
+                      ? (expand['sub_serie'] as List).firstWhere(
+                          (_) => true,
+                          orElse: () => null,
+                        )
+                      : null,
+                ];
+                for (final c in candidates) {
+                  final m = _firstMap(c);
+                  if (m.isNotEmpty) return m;
+                }
 
-            // Helper to get the subSeries map from multiple possible locations
-            Map<String, dynamic> extractSubSeriesMap() {
-              // Try expanded forms first
-              final candidates = [
-                expand['sub_serie'],
-                expand['sub_series'],
-                expand['subSeries'],
-                expand['sub_serie'] is List
-                    ? (expand['sub_serie'] as List).firstWhere(
-                        (_) => true,
-                        orElse: () => null,
-                      )
-                    : null,
-              ];
-              for (final c in candidates) {
-                final m = _firstMap(c);
-                if (m.isNotEmpty) return m;
+                // Try top-level keys on followed
+                final top = _firstMap(
+                  followed['sub_serie'] ??
+                      followed['subSeries'] ??
+                      followed['sub_series'] ??
+                      followed['subSerie'],
+                );
+                if (top.isNotEmpty) return top;
+
+                return <String, dynamic>{};
               }
 
-              // Try top-level keys on followed
-              final top = _firstMap(
+              final subSerie = extractSubSeriesMap();
+              final subSerieId = libraryRelationId(
                 followed['sub_serie'] ??
                     followed['subSeries'] ??
                     followed['sub_series'] ??
-                    followed['subSerie'],
+                    subSerie,
               );
-              if (top.isNotEmpty) return top;
 
-              return <String, dynamic>{};
-            }
+              if (subSerieId.isEmpty ||
+                  ownedSubSeriesIds.contains(subSerieId)) {
+                return null;
+              }
 
-            final subSerie = extractSubSeriesMap();
-            final subSerieId =
-                (followed['sub_serie'] ??
-                        followed['subSeries'] ??
-                        followed['sub_series'] ??
-                        subSerie['id'])
-                    ?.toString() ??
-                '';
+              final numberOfVolumes = _volumeCount(subSerie);
+              final subSeries = SubSerieForCollection(
+                id: subSerieId,
+                title:
+                    subSerie['title']?.toString() ??
+                    subSerie['titleFr']?.toString() ??
+                    '',
+                numberOfVolumes: numberOfVolumes,
+                volumes: const <Volume>[],
+                numberOwnedVolumes: 0,
+                cover:
+                    subSerie['coverUrl']?.toString() ??
+                    subSerie['image']?.toString() ??
+                    '',
+              );
 
-            if (subSerieId.isEmpty || ownedSubSeriesIds.contains(subSerieId)) {
-              return null;
-            }
+              var author = _authorNamesFromSubSeries(subSerie);
+              if (author.isEmpty) {
+                author = await getAuthorNameOfSubSeries(subSerieId);
+              }
+              return MapEntry(subSeries, author);
+            }),
+          );
 
-            final numberOfVolumes = _volumeCount(subSerie);
-            final subSeries = SubSerieForCollection(
-              id: subSerieId,
-              title:
-                  subSerie['title']?.toString() ??
-                  subSerie['titleFr']?.toString() ??
-                  '',
-              numberOfVolumes: numberOfVolumes,
-              volumes: const <Volume>[],
-              numberOwnedVolumes: 0,
-              cover:
-                  subSerie['coverUrl']?.toString() ??
-                  subSerie['image']?.toString() ??
-                  '',
-            );
+      final nextFollowed = <SubSerieForCollection>[];
+      final nextAuthors = <String, String>{};
+      var nextVolumeNumber = 0;
 
-            var author = _authorNamesFromSubSeries(subSerie);
-            if (author.isEmpty) {
-              author = await getAuthorNameOfSubSeries(subSerieId);
-            }
-            return MapEntry(subSeries, author);
-          }),
-        );
+      for (final entry
+          in loadedEntries
+              .whereType<MapEntry<SubSerieForCollection, String>>()) {
+        final subSeries = entry.key;
+        nextFollowed.add(subSeries);
+        nextAuthors[subSeries.id] = entry.value;
+        nextVolumeNumber += subSeries.numberOfVolumes;
+      }
 
-    final nextFollowed = <SubSerieForCollection>[];
-    final nextAuthors = <String, String>{};
-    var nextVolumeNumber = 0;
-
-    for (final entry
-        in loadedEntries.whereType<MapEntry<SubSerieForCollection, String>>()) {
-      final subSeries = entry.key;
-      nextFollowed.add(subSeries);
-      nextAuthors[subSeries.id] = entry.value;
-      nextVolumeNumber += subSeries.numberOfVolumes;
+      if (!mounted) return;
+      setState(() {
+        followedSubSeriesList = nextFollowed;
+        followedVolumeNumber = nextVolumeNumber;
+        followedSubSeriesNumber = nextFollowed.length;
+        authorNamesBySubSeriesId = nextAuthors;
+        _lastOwnedSignature = signature;
+      });
+    } catch (error) {
+      RuntimeLocalization.debug(
+        en: 'Unable to load the wishlist: $error',
+        fr: 'Impossible de charger la liste d’envies : $error',
+      );
+      if (!mounted) return;
+      setState(() {
+        _loadFailed = true;
+        _lastOwnedSignature = signature;
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isFetching = false;
+        });
+      }
     }
-
-    if (!mounted) return;
-    setState(() {
-      followedSubSeriesList = nextFollowed;
-      followedVolumeNumber = nextVolumeNumber;
-      followedSubSeriesNumber = nextFollowed.length;
-      authorNamesBySubSeriesId = nextAuthors;
-      _lastOwnedSignature = signature;
-      _isFetching = false;
-    });
   }
 
   List<SubSerieForCollection> _visibleSubSeries() {
-    final query = widget.searchQuery.trim().toLowerCase();
-    final visible = followedSubSeriesList.where((subSerie) {
-      if (query.isEmpty) return true;
-      return subSerie.title.toLowerCase().contains(query) ||
-          displayAuthorWithSubSeriesId(
-            subSerie.id,
-          ).toLowerCase().contains(query);
-    }).toList();
-
-    visible.sort((a, b) {
-      if (widget.order == 'releaseDate') {
-        return b.numberOfVolumes.compareTo(a.numberOfVolumes);
-      }
-      return a.title.toLowerCase().compareTo(b.title.toLowerCase());
-    });
-
-    return visible;
+    return filterLibrarySubSeries(
+      followedSubSeriesList,
+      searchQuery: widget.searchQuery,
+      order: widget.order,
+      additionalSearchText: (subSerie) =>
+          displayAuthorWithSubSeriesId(subSerie.id),
+    );
   }
 
   void _cancelRealtime() {
@@ -288,17 +318,26 @@ class _EnvyTabState extends ConsumerState<EnvyTab> {
           .connector()
           .collection('followed')
           .subscribe('*', (event) async {
-            debugPrint("Got an event");
-            _lastOwnedSignature = '';
+            RuntimeLocalization.debug(
+              en: 'Wishlist realtime update received.',
+              fr: 'Mise à jour temps réel de la liste d’envies reçue.',
+            );
+            _lastOwnedSignature = null;
             final ownedSubSeries = ref.read(mangaOwnedProvider);
             if (mounted) {
               _fetchData(ownedSubSeries, _ownedSignature(ownedSubSeries));
             }
           });
 
-      debugPrint('Realtime subscriptions established.');
+      RuntimeLocalization.debug(
+        en: 'Realtime subscriptions established.',
+        fr: 'Abonnements temps réel établis.',
+      );
     } catch (e) {
-      debugPrint('Realtime subscription failed: $e');
+      RuntimeLocalization.debug(
+        en: 'Realtime subscription failed: $e',
+        fr: 'L’abonnement temps réel a échoué : $e',
+      );
     }
   }
 
@@ -336,7 +375,24 @@ class _EnvyTabState extends ConsumerState<EnvyTab> {
             editionTotal: "$followedSubSeriesNumber",
             localizations: localizations,
           ),
-          (followedVolumeNumber == 0 && !_isFetching)
+          if (_isFetching && followedSubSeriesList.isEmpty)
+            const Center(child: CircularProgressIndicator()),
+          if (_loadFailed)
+            Center(
+              child: Column(
+                children: [
+                  Text(localizations.errorOccurred),
+                  TextButton(
+                    onPressed: () => _fetchData(
+                      ownedSubSeries,
+                      _ownedSignature(ownedSubSeries),
+                    ),
+                    child: Text(localizations.tryAgain),
+                  ),
+                ],
+              ),
+            ),
+          (followedVolumeNumber == 0 && !_isFetching && !_loadFailed)
               ? Center(
                   child: Text(
                     localizations.noFollowedSubSerie,
@@ -347,6 +403,11 @@ class _EnvyTabState extends ConsumerState<EnvyTab> {
                   ),
                 )
               : const SizedBox(),
+          if (!_isFetching &&
+              !_loadFailed &&
+              followedSubSeriesList.isNotEmpty &&
+              visibleSubSeries.isEmpty)
+            Text(localizations.noResults),
           for (var subSerie in visibleSubSeries)
             Column(
               children: [
@@ -391,7 +452,13 @@ class _EnvyTabState extends ConsumerState<EnvyTab> {
                               ),
                               Text(
                                 localizations.subSerieFromAuthor(
-                                  displayAuthorWithSubSeriesId(subSerie.id),
+                                  displayAuthorWithSubSeriesId(
+                                        subSerie.id,
+                                      ).isEmpty
+                                      ? localizations.notAvailable
+                                      : displayAuthorWithSubSeriesId(
+                                          subSerie.id,
+                                        ),
                                 ),
                               ),
                             ],

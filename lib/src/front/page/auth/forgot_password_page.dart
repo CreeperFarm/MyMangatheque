@@ -8,8 +8,6 @@ import 'package:mymangatheque/src/front/components/my_button.dart';
 import 'package:mymangatheque/src/front/components/my_textfield.dart';
 import 'package:mymangatheque/src/function/show_message_function.dart';
 
-// ignore_for_file: use_build_context_synchronously
-
 class ForgotPasswordPage extends StatefulWidget {
   const ForgotPasswordPage({super.key});
 
@@ -20,7 +18,8 @@ class ForgotPasswordPage extends StatefulWidget {
 class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   // Define variable
   final emailController = TextEditingController();
-  String errorText = "";
+  bool _isSubmitting = false;
+  final AppwriteConnector _connector = AppwriteConnector();
 
   // Dispose Variable
   @override
@@ -29,14 +28,27 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     super.dispose();
   }
 
-  Future passwordReset(email) async {
+  Future<void> _submit(AppLocalizations localizations) async {
+    if (_isSubmitting) return;
+    final email = emailController.text.trim();
+    if (email.isEmpty) {
+      showMessage(localizations.provideAccountEmail, context);
+      return;
+    }
+    if (!email.contains('@') || !email.contains('.')) {
+      showMessage(localizations.provideValidAccountEmail, context);
+      return;
+    }
+
+    setState(() => _isSubmitting = true);
     try {
-      await AppwriteConnector().resetPassword(email, context);
-      Navigator.pop(context);
-    } catch (e) {
-      Navigator.pop(context);
-      errorText = e.toString();
-      showMessage(errorText, context);
+      await _connector.resetPassword(email, context);
+    } catch (_) {
+      // The connector already displays a localized recoverable error.
+    } finally {
+      if (mounted) {
+        setState(() => _isSubmitting = false);
+      }
     }
   }
 
@@ -81,23 +93,10 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                 ),
                 const SizedBox(height: 11),
                 MyButton(
-                  text: localizations.passwordReset,
-                  onTap: () {
-                    if (emailController.text.isEmpty) {
-                      showMessage(localizations.provideAccountEmail, context);
-                    } else if (!emailController.text.contains('@') ||
-                        !emailController.text.contains('.')) {
-                      showMessage(
-                        localizations.provideValidAccountEmail,
-                        context,
-                      );
-                    } else {
-                      AppwriteConnector().resetPassword(
-                        emailController.text,
-                        context,
-                      );
-                    }
-                  },
+                  text: _isSubmitting
+                      ? localizations.pleaseWait
+                      : localizations.passwordReset,
+                  onTap: _isSubmitting ? null : () => _submit(localizations),
                 ),
               ],
             ),

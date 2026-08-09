@@ -37,12 +37,17 @@ class _SignUpPageState extends State<SignUpPage> {
   );
   final selectedGender = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  bool _isSubmitting = false;
 
-  
   String errorText = "";
 
-  void signingUpProcess() async {
-    AppwriteConnector connector = AppwriteConnector();
+  Future<void> signingUpProcess() async {
+    final connector = AppwriteConnector();
+    final birthday = DateTime.utc(
+      selectedBDayDate.year,
+      selectedBDayDate.month,
+      selectedBDayDate.day,
+    );
 
     await connector.createUser(
       usernameController.text,
@@ -50,32 +55,40 @@ class _SignUpPageState extends State<SignUpPage> {
       passwordController.text,
       passwordVerifierController.text,
       selectedGender.text,
-      selectedBDayDate.add(const Duration(hours: 1)).toUtc().toString(),
+      birthday.toIso8601String(),
       context,
     );
-    connector.sendVerification(emailController.text);
-    connector.findUser(emailController.text);
-    await connector.updateUserData(emailController.text);
     if (!mounted) return;
     pushOrGo(context, '/profile');
   }
 
-  void signUp(AppLocalizations localizations) async {
+  Future<void> signUp(AppLocalizations localizations) async {
+    if (_isSubmitting || !_formKey.currentState!.validate()) return;
     if (passwordController.text.length < 8) {
-      debugPrint('Password must be at least 8 characters');
       errorText = localizations.passwordMinLength;
-      return showMessage(errorText, context);
-    } else if (!emailController.text.contains('@')) {
-      debugPrint('Invalid email');
-      errorText = localizations.invalidEmail;
-      return showMessage(errorText, context);
-    } else if (usernameController.text.length < 3) {
-      debugPrint('Username must be at least 3 characters');
-      errorText = localizations.usernameMinLength;
-      return showMessage(errorText, context);
-    } else {
-      signingUpProcess();
+      showMessage(errorText, context);
       return;
+    } else if (!emailController.text.contains('@')) {
+      errorText = localizations.invalidEmail;
+      showMessage(errorText, context);
+      return;
+    } else if (usernameController.text.length < 3) {
+      errorText = localizations.usernameMinLength;
+      showMessage(errorText, context);
+      return;
+    }
+
+    setState(() => _isSubmitting = true);
+    try {
+      await signingUpProcess();
+    } catch (_) {
+      if (mounted) {
+        showMessage(localizations.errorOccurred, context);
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isSubmitting = false);
+      }
     }
   }
 
@@ -88,6 +101,7 @@ class _SignUpPageState extends State<SignUpPage> {
     passwordController.dispose();
     passwordVerifierController.dispose();
     usernameController.dispose();
+    selectedGender.dispose();
     super.dispose();
   }
 
@@ -261,8 +275,9 @@ class _SignUpPageState extends State<SignUpPage> {
                             return null;
                           },
                           onChanged: (DateTime? value) {
+                            if (value == null) return;
                             setState(() {
-                              selectedBDayDate = value!;
+                              selectedBDayDate = value;
                             });
                           },
                         ),
@@ -349,18 +364,10 @@ class _SignUpPageState extends State<SignUpPage> {
 
                 // Button who create the account
                 MyButton(
-                  text: localizations.createAccount,
-                  onTap: () async {
-                    // Verify if all field is complete
-                    if (_formKey.currentState!.validate()) {
-                      if (passwordController.text !=
-                          passwordVerifierController.text) {
-                        errorText = localizations.passwordsDoNotMatch;
-                      } else {
-                        signUp(localizations);
-                      }
-                    }
-                  },
+                  text: _isSubmitting
+                      ? localizations.pleaseWait
+                      : localizations.createAccount,
+                  onTap: _isSubmitting ? null : () => signUp(localizations),
                 ),
 
                 const SizedBox(height: 15),

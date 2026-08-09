@@ -57,13 +57,17 @@ class Volume {
       over18: json['over18'],
       resume: json['resume'],
       bookLink: json['bookLink'],
-      release: DateTime.parse(json['release']),
+      release: json['release'] == null || json['release'].toString().isEmpty
+          ? null
+          : DateTime.parse(json['release'].toString()),
       ean: json['ean'],
       language: json['language'],
       subSeries: json['subSeries'],
       series: json['series'],
       authors: List<String>.from(json['authors']),
-      contains: json['contains'] != null ? List<String>.from(json['contains']) : null,
+      contains: json['contains'] != null
+          ? List<String>.from(json['contains'])
+          : null,
       info: json['info'],
       support: json['support'],
       japGenre: json['japGenre'],
@@ -83,7 +87,7 @@ class Volume {
       'over18': over18,
       'resume': resume,
       'bookLink': bookLink,
-      'release': release!.toIso8601String(),
+      'release': release?.toIso8601String(),
       'ean': ean,
       'language': language,
       'subSeries': subSeries,

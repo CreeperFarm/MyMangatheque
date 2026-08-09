@@ -1,0 +1,317 @@
+name: Build Web and Publish Android
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: production-application-deployment
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  IMAGE_NAME: ${{ vars.CONTAINER_IMAGE || 'ghcr.io/creeperfarm/mymangatheque-web' }}
+
+jobs:
+  test:
+    name: Test Flutter application
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Install Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: "3.38.9"
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Analyze
+        run: flutter analyze
+
+      - name: Run tests with coverage
+        run: flutter test --coverage
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: flutter-coverage
+          path: coverage/lcov.info
+          if-no-files-found: error
+          retention-days: 14
+
+  build-web:
+    name: Build and push Docker image
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      digest: ${{ steps.build.outputs.digest }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Resolve version
+        id: version
+        shell: bash
+        run: |
+          version="$(awk '/^version:/ { print $2; exit }' pubspec.yaml)"
+          if [[ -z "${version}" ]]; then
+            echo "Unable to read the version from pubspec.yaml." >&2
+            exit 1
+          fi
+          # A Flutter build number uses '+', which is not valid in a Docker tag.
+          echo "version=${version//+/-}" >> "${GITHUB_OUTPUT}"
+
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push image
+        id: build
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            ${{ env.IMAGE_NAME }}:latest
+            ${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}
+            ${{ env.IMAGE_NAME }}:sha-${{ github.sha }}
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.version=${{ steps.version.outputs.version }}
+          build-args: |
+            FIREBASE_WEB_VAPID_KEY=${{ vars.FIREBASE_WEB_VAPID_KEY }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  build-android:
+    name: Build obfuscated AAB and publish to Google Play
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Install Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: gradle
+
+      - name: Install Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
+        with:
+          flutter-version: "3.38.9"
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Resolve Android version
+        id: android-version
+        shell: bash
+        run: |
+          version="$(awk '/^version:/ { print $2; exit }' pubspec.yaml)"
+          if [[ -z "${version}" ]]; then
+            echo "Unable to read the version from pubspec.yaml." >&2
+            exit 1
+          fi
+          if [[ ! "${version}" =~ ^(.+)\+([0-9]+)$ ]]; then
+            echo "The pubspec version must contain a numeric build number, for example 0.0.2+1." >&2
+            exit 1
+          fi
+          version_name="${BASH_REMATCH[1]}"
+          version_code="${BASH_REMATCH[2]}"
+          if (( version_code < 1 || version_code > 2100000000 )); then
+            echo "The pubspec build number must be between 1 and 2100000000." >&2
+            exit 1
+          fi
+          echo "name=${version_name}" >> "${GITHUB_OUTPUT}"
+          echo "code=${version_code}" >> "${GITHUB_OUTPUT}"
+
+      - name: Restore Android signing key
+        env:
+          DECRYPT_PASS: ${{ secrets.KEYSTORE_DECRYPTION_PASSWORD }}
+          STORE_PASS: ${{ secrets.STORE_PASSWORD }}
+          KEY_PASS: ${{ secrets.KEY_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+        shell: bash
+        run: |
+          for value in DECRYPT_PASS STORE_PASS KEY_PASS KEY_ALIAS; do
+            if [[ -z "${!value}" ]]; then
+              echo "Missing required Android signing secret: ${value}." >&2
+              exit 1
+            fi
+          done
+          openssl aes-256-cbc -d \
+            -in android/app/keystore.enc \
+            -out android/upload-keystore.jks \
+            -k "${DECRYPT_PASS}" \
+            -pbkdf2
+          keytool -list \
+            -keystore android/upload-keystore.jks \
+            -storepass "${STORE_PASS}" \
+            -alias "${KEY_ALIAS}" \
+            >/dev/null
+          {
+            echo "storePassword=${STORE_PASS}"
+            echo "keyPassword=${KEY_PASS}"
+            echo "keyAlias=${KEY_ALIAS}"
+            echo "storeFile=../upload-keystore.jks"
+          } > .env
+          chmod 600 .env android/upload-keystore.jks
+
+      - name: Build obfuscated Android App Bundle
+        run: |
+          flutter build appbundle \
+            --release \
+            --obfuscate \
+            --split-debug-info=out/android/symbols \
+            --build-name="${{ steps.android-version.outputs.name }}" \
+            --build-number="${{ steps.android-version.outputs.code }}"
+
+      - name: Upload AAB and deobfuscation symbols
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: android-${{ steps.android-version.outputs.name }}-${{ steps.android-version.outputs.code }}
+          path: |
+            build/app/outputs/bundle/release/app-release.aab
+            out/android/symbols
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Validate Google Play credentials
+        env:
+          GOOGLE_PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+        shell: bash
+        run: |
+          if [[ -z "${GOOGLE_PLAY_SERVICE_ACCOUNT_JSON}" ]]; then
+            echo "Missing GOOGLE_PLAY_SERVICE_ACCOUNT_JSON GitHub secret." >&2
+            exit 1
+          fi
+          if ! jq -e \
+            '.type == "service_account" and (.client_email | type == "string")' \
+            <<<"${GOOGLE_PLAY_SERVICE_ACCOUNT_JSON}" \
+            >/dev/null; then
+            echo "GOOGLE_PLAY_SERVICE_ACCOUNT_JSON is not a valid service-account document." >&2
+            exit 1
+          fi
+
+      - name: Validate localized release notes
+        shell: bash
+        run: |
+          for note in distribution/whatsnew/whatsnew-fr-FR distribution/whatsnew/whatsnew-en-US; do
+            if [[ ! -s "${note}" ]]; then
+              echo "Missing or empty release note: ${note}." >&2
+              exit 1
+            fi
+            size="$(wc -m < "${note}")"
+            if (( size > 500 )); then
+              echo "Google Play release note exceeds 500 characters: ${note}." >&2
+              exit 1
+            fi
+          done
+
+      - name: Publish AAB to Google Play internal track
+        uses: r0adkll/upload-google-play@v1.1.3
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: com.mymangatheque
+          releaseFiles: build/app/outputs/bundle/release/app-release.aab
+          releaseName: ${{ steps.android-version.outputs.name }} (${{ steps.android-version.outputs.code }})
+          track: ${{ vars.GOOGLE_PLAY_TRACK || 'internal' }}
+          status: completed
+          whatsNewDirectory: distribution/whatsnew
+
+      - name: Remove temporary signing material
+        if: always()
+        shell: bash
+        run: rm -f .env android/upload-keystore.jks
+
+  deploy:
+    name: Redeploy Portainer service
+    needs: build-web
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: production
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Trigger Portainer webhook
+        env:
+          PORTAINER_WEBHOOK_URL: ${{ secrets.PORTAINER_WEBHOOK_URL }}
+        shell: bash
+        run: |
+          if [[ -z "${PORTAINER_WEBHOOK_URL}" ]]; then
+            echo "Missing PORTAINER_WEBHOOK_URL GitHub secret." >&2
+            exit 1
+          fi
+          curl --fail-with-body --silent --show-error \
+            --request POST \
+            "${PORTAINER_WEBHOOK_URL}" \
+            --output /dev/null
+          echo "Portainer redeployment requested for version ${{ needs.build-web.outputs.version }}."
+
+      - name: Verify production health after redeployment
+        env:
+          HEALTHCHECK_URL: ${{ vars.PRODUCTION_HEALTHCHECK_URL || 'https://mymangatheque.com/healthz' }}
+        shell: bash
+        run: |
+          for attempt in {1..18}; do
+            if response="$(curl --fail-with-body --silent --show-error \
+              --max-time 10 \
+              "${HEALTHCHECK_URL}")" && [[ "${response}" == "ok" ]]; then
+              echo "Production is healthy after deployment."
+              exit 0
+            fi
+            echo "Health check attempt ${attempt}/18 failed; waiting 10 seconds."
+            sleep 10
+          done
+          echo "Production did not become healthy after the Portainer deployment." >&2
+          exit 1
+
+      - name: Validate production Web, Wasm, API, security headers, and CORS
+        env:
+          WEB_BASE_URL: ${{ vars.PRODUCTION_WEB_BASE_URL || 'https://mymangatheque.com' }}
+          API_BASE_URL: ${{ vars.PRODUCTION_API_BASE_URL || 'https://api.mymangatheque.com' }}
+          EXPECTED_ORIGIN: ${{ vars.PRODUCTION_WEB_BASE_URL || 'https://mymangatheque.com' }}
+        run: bash tool/production_smoke_check.sh

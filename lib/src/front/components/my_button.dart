@@ -16,24 +16,33 @@ class MyButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: verticalPadding ?? 0),
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          margin: EdgeInsets.symmetric(horizontal: horizontalPadding ?? 5),
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.primary,
-            borderRadius: BorderRadius.circular(25),
-          ),
-          child: Center(
-            child: Text(
-              text,
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.surface,
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
+    final enabled = onTap != null;
+    return Semantics(
+      button: true,
+      enabled: enabled,
+      child: Opacity(
+        opacity: enabled ? 1 : 0.55,
+        child: Padding(
+          padding: EdgeInsets.symmetric(vertical: verticalPadding ?? 0),
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: onTap,
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              margin: EdgeInsets.symmetric(horizontal: horizontalPadding ?? 5),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primary,
+                borderRadius: BorderRadius.circular(25),
+              ),
+              child: Center(
+                child: Text(
+                  text,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.surface,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
               ),
             ),
           ),

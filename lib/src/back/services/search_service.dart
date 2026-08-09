@@ -2,8 +2,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import 'package:mymangatheque/src/back/language/runtime_localization.dart';
 import 'package:mymangatheque/src/back/services/api/mobile_api_client.dart';
 import 'package:mymangatheque/src/back/services/appwrite.dart';
 import 'package:mymangatheque/src/back/services/appwrite_client.dart';
@@ -22,8 +22,8 @@ class SearchService {
   final AppwriteConnector _connector = AppwriteConnector();
   final MobileApiClient _mobileApi = MobileApiClient();
 
-  int _requestCounter = 0;
-  http.Client? _currentClient;
+  final Map<String, int> _requestCounters = <String, int>{};
+  final Map<String, http.Client> _clients = <String, http.Client>{};
   final Map<String, DateTime> _rateLimitRetryUntil = <String, DateTime>{};
 
   Future<void> _ensureInitialized() async {
@@ -67,7 +67,8 @@ class SearchService {
     }
   }
 
-  String _resourcePath(String resource) => '/api/${_normalizeResource(resource)}';
+  String _resourcePath(String resource) =>
+      '/api/${_normalizeResource(resource)}';
 
   String _normalizeText(String input) {
     const accentMap = <String, String>{
@@ -116,7 +117,10 @@ class SearchService {
       final jwt = await _appwrite.createJwt();
       return jwt.jwt;
     } catch (e) {
-      debugPrint('SearchService JWT creation failed: $e');
+      RuntimeLocalization.debug(
+        en: 'Search authentication token creation failed: $e',
+        fr: 'La création du jeton d’authentification de recherche a échoué : $e',
+      );
       return null;
     }
   }
@@ -125,7 +129,10 @@ class SearchService {
     try {
       return await _mobileApi.ensureApiKey();
     } catch (e) {
-      debugPrint('SearchService API key bootstrap failed: $e');
+      RuntimeLocalization.debug(
+        en: 'Search API key initialization failed: $e',
+        fr: 'L’initialisation de la clé API de recherche a échoué : $e',
+      );
       return null;
     }
   }
@@ -134,10 +141,8 @@ class SearchService {
     Uri uri, {
     required String resource,
     required int attempt,
+    required http.Client client,
   }) async {
-    final client = _currentClient ?? http.Client();
-    _currentClient = client;
-
     final headers = <String, String>{'Accept': 'application/json'};
     if (resource == 'users') {
       final jwt = await _tryCreateJwt();
@@ -153,18 +158,32 @@ class SearchService {
 
     late final http.Response response;
     try {
-      response = await client.get(uri, headers: headers).timeout(_realtimeTimeout);
+      response = await client
+          .get(uri, headers: headers)
+          .timeout(_realtimeTimeout);
     } on TimeoutException catch (e) {
-      debugPrint('SearchService realtime timeout for $resource: $e');
+      RuntimeLocalization.debug(
+        en: 'Realtime search timed out: $e',
+        fr: 'La recherche temps réel a expiré : $e',
+      );
       return http.Response('', HttpStatus.requestTimeout);
     } on http.ClientException catch (e) {
-      debugPrint('SearchService realtime client closed for $resource: $e');
+      RuntimeLocalization.debug(
+        en: 'Realtime search connection closed: $e',
+        fr: 'La connexion de recherche temps réel a été fermée : $e',
+      );
       return http.Response('', HttpStatus.requestTimeout);
     } on SocketException catch (e) {
-      debugPrint('SearchService realtime socket error for $resource: $e');
+      RuntimeLocalization.debug(
+        en: 'Realtime search network error: $e',
+        fr: 'Erreur réseau de recherche temps réel : $e',
+      );
       return http.Response('', HttpStatus.serviceUnavailable);
     } catch (e) {
-      debugPrint('SearchService realtime request failed for $resource: $e');
+      RuntimeLocalization.debug(
+        en: 'Realtime search request failed: $e',
+        fr: 'La requête de recherche temps réel a échoué : $e',
+      );
       return http.Response('', HttpStatus.serviceUnavailable);
     }
 
@@ -174,16 +193,28 @@ class SearchService {
       if (retryAfter != null && now.isBefore(retryAfter)) {
         return response;
       }
-      _rateLimitRetryUntil[resource] = now.add(Duration(milliseconds: 300 * (attempt + 1)));
+      _rateLimitRetryUntil[resource] = now.add(
+        Duration(milliseconds: 300 * (attempt + 1)),
+      );
       if (attempt < 2) {
         await Future<void>.delayed(Duration(milliseconds: 150 * (attempt + 1)));
-        return _sendRealtimeRequest(uri, resource: resource, attempt: attempt + 1);
+        return _sendRealtimeRequest(
+          uri,
+          resource: resource,
+          attempt: attempt + 1,
+          client: client,
+        );
       }
     }
 
     if (response.statusCode >= 500 && attempt < 1) {
       await Future<void>.delayed(const Duration(milliseconds: 150));
-      return _sendRealtimeRequest(uri, resource: resource, attempt: attempt + 1);
+      return _sendRealtimeRequest(
+        uri,
+        resource: resource,
+        attempt: attempt + 1,
+        client: client,
+      );
     }
 
     return response;
@@ -213,7 +244,11 @@ class SearchService {
     return records;
   }
 
-  List<ApiRecordModel> _sortByMatchScore(String resource, List<ApiRecordModel> records, dynamic decoded) {
+  List<ApiRecordModel> _sortByMatchScore(
+    String resource,
+    List<ApiRecordModel> records,
+    dynamic decoded,
+  ) {
     if (decoded is! Map<String, dynamic>) return records;
     final search = decoded['search'];
     if (search is! Map<String, dynamic>) return records;
@@ -235,7 +270,9 @@ class SearchService {
         final bScore = scoreById[b.id] ?? 0;
         final cmp = bScore.compareTo(aScore);
         if (cmp != 0) return cmp;
-        return _normalizeText(_recordLabel(resource, a.data)).compareTo(_normalizeText(_recordLabel(resource, b.data)));
+        return _normalizeText(
+          _recordLabel(resource, a.data),
+        ).compareTo(_normalizeText(_recordLabel(resource, b.data)));
       });
     return sorted;
   }
@@ -243,12 +280,18 @@ class SearchService {
   String _recordLabel(String resource, Map<String, dynamic> data) {
     switch (_normalizeResource(resource)) {
       case 'users':
-        return (data['pseudo'] ?? data['username'] ?? data['name'] ?? data['email'] ?? '').toString();
+        return (data['pseudo'] ??
+                data['username'] ??
+                data['name'] ??
+                data['email'] ??
+                '')
+            .toString();
       case 'authors':
       case 'editors':
         return (data['name'] ?? '').toString();
       default:
-        return (data['title'] ?? data['titleFr'] ?? data['name'] ?? '').toString();
+        return (data['title'] ?? data['titleFr'] ?? data['name'] ?? '')
+            .toString();
     }
   }
 
@@ -258,21 +301,22 @@ class SearchService {
     String? query,
     int limit = 8,
   }) async {
-    await _ensureInitialized();
-
     final resourceName = _normalizeResource(resource);
     final searchText = (q ?? query ?? '').trim();
     if (searchText.length < 2) {
       return <ApiRecordModel>[];
     }
+    await _ensureInitialized();
 
     final safeLimit = limit.clamp(1, 20);
-    final requestId = ++_requestCounter;
+    final requestId = (_requestCounters[resourceName] ?? 0) + 1;
+    _requestCounters[resourceName] = requestId;
 
     try {
-      _currentClient?.close();
+      _clients[resourceName]?.close();
     } catch (_) {}
-    _currentClient = http.Client();
+    final client = http.Client();
+    _clients[resourceName] = client;
 
     final params = <String, String>{
       'limit': safeLimit.toString(),
@@ -280,15 +324,18 @@ class SearchService {
       if (q != null && q.trim().isNotEmpty) 'q': q.trim(),
     };
 
-    final uri = Uri.parse('$_apiBaseUrl${_resourcePath(resourceName)}/search/realtime').replace(queryParameters: params);
+    final uri = Uri.parse(
+      '$_apiBaseUrl${_resourcePath(resourceName)}/search/realtime',
+    ).replace(queryParameters: params);
 
     final response = await _sendRealtimeRequest(
       uri,
       resource: resourceName,
       attempt: 0,
+      client: client,
     );
 
-    if (requestId != _requestCounter) {
+    if (requestId != _requestCounters[resourceName]) {
       return <ApiRecordModel>[];
     }
 
@@ -328,7 +375,12 @@ class SearchService {
 
     if (response.statusCode >= 200 && response.statusCode < 300) {
       final decoded = jsonDecode(response.body);
-      final pageData = _extractPagedResults(resourceName, decoded, safePage, safeLimit);
+      final pageData = _extractPagedResults(
+        resourceName,
+        decoded,
+        safePage,
+        safeLimit,
+      );
       if (pageData != null) return pageData;
     }
 
@@ -340,7 +392,12 @@ class SearchService {
     );
   }
 
-  RecordPage? _extractPagedResults(String resource, dynamic decoded, int page, int limit) {
+  RecordPage? _extractPagedResults(
+    String resource,
+    dynamic decoded,
+    int page,
+    int limit,
+  ) {
     if (decoded is! Map<String, dynamic>) return null;
 
     final list = _extractResultRows(resource, decoded);
@@ -359,18 +416,36 @@ class SearchService {
         .toList();
 
     final pagination = decoded['pagination'];
-    final paginationMap = pagination is Map<String, dynamic> ? pagination : <String, dynamic>{};
-    final paginationValue = paginationMap['totalItems'] ?? paginationMap['total'] ?? paginationMap['count'] ?? paginationMap['totalCount'];
-    final totalItems = paginationValue is num ? paginationValue.toInt() : int.tryParse(paginationValue?.toString() ?? '0') ?? 0;
-    final totalPagesValue = paginationMap['totalPages'] ?? paginationMap['pages'];
+    final paginationMap = pagination is Map<String, dynamic>
+        ? pagination
+        : <String, dynamic>{};
+    final paginationValue =
+        paginationMap['totalItems'] ??
+        paginationMap['total'] ??
+        paginationMap['count'] ??
+        paginationMap['totalCount'];
+    final totalItems = paginationValue is num
+        ? paginationValue.toInt()
+        : int.tryParse(paginationValue?.toString() ?? '0') ?? 0;
+    final totalPagesValue =
+        paginationMap['totalPages'] ?? paginationMap['pages'];
     final totalPages = totalPagesValue is num
         ? totalPagesValue.toInt()
-        : int.tryParse(totalPagesValue?.toString() ?? '') ?? (items.length >= limit ? page + 1 : page);
+        : int.tryParse(totalPagesValue?.toString() ?? '') ??
+              (items.length >= limit ? page + 1 : page);
 
-    return RecordPage(items: items, page: page, totalPages: totalPages < 1 ? 1 : totalPages, totalItems: totalItems);
+    return RecordPage(
+      items: items,
+      page: page,
+      totalPages: totalPages < 1 ? 1 : totalPages,
+      totalItems: totalItems,
+    );
   }
 
-  List<Map<String, dynamic>> _extractResultRows(String resource, Map<String, dynamic> decoded) {
+  List<Map<String, dynamic>> _extractResultRows(
+    String resource,
+    Map<String, dynamic> decoded,
+  ) {
     final listKey = _responseListKey(resource);
     final candidates = <dynamic>[];
 
@@ -427,18 +502,33 @@ class SearchService {
       return text.contains(normalized);
     }).toList();
 
-    filtered.sort((a, b) => _recordLabel(resource, a.data).compareTo(_recordLabel(resource, b.data)));
+    filtered.sort(
+      (a, b) => _recordLabel(
+        resource,
+        a.data,
+      ).compareTo(_recordLabel(resource, b.data)),
+    );
 
     final start = (page - 1) * limit;
     if (start >= filtered.length) {
-      return RecordPage(items: <ApiRecordModel>[], page: page, totalPages: page, totalItems: filtered.length);
+      return RecordPage(
+        items: <ApiRecordModel>[],
+        page: page,
+        totalPages: page,
+        totalItems: filtered.length,
+      );
     }
 
     final end = (start + limit).clamp(0, filtered.length);
     final pageItems = filtered.sublist(start, end);
     final totalPages = (filtered.length / limit).ceil();
 
-    return RecordPage(items: pageItems, page: page, totalPages: totalPages < 1 ? 1 : totalPages, totalItems: filtered.length);
+    return RecordPage(
+      items: pageItems,
+      page: page,
+      totalPages: totalPages < 1 ? 1 : totalPages,
+      totalItems: filtered.length,
+    );
   }
 
   String _recordSearchText(String resource, Map<String, dynamic> data) {
@@ -503,7 +593,9 @@ class SearchService {
         collect(data['name']);
         break;
       case 'users':
-        collect(data['pseudo'] ?? data['username'] ?? data['name'] ?? data['email']);
+        collect(
+          data['pseudo'] ?? data['username'] ?? data['name'] ?? data['email'],
+        );
         break;
       default:
         collect(data);
@@ -530,5 +622,11 @@ Future<RecordPage> searchPaged(
   int page = 1,
   int limit = 30,
 }) {
-  return SearchService().searchPaged(resource, q: q, query: query, page: page, limit: limit);
+  return SearchService().searchPaged(
+    resource,
+    q: q,
+    query: query,
+    page: page,
+    limit: limit,
+  );
 }

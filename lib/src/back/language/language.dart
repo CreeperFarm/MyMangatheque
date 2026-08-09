@@ -6,7 +6,8 @@ import 'package:flutter_riverpod/legacy.dart';
 
 enum Language {
   english(flag: '🇺🇸', name: 'English', code: 'en'),
-  french(flag: '🇫🇷', name: 'Français', code: 'fr');
+  french(flag: '🇫🇷', name: 'Français', code: 'fr')
+  ;
 
   const Language({required this.flag, required this.name, required this.code});
 

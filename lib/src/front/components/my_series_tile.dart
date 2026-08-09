@@ -18,13 +18,21 @@ class MySeriesTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final expand = SafeExpandReader.asMap(seriesData['expand']);
-    final names = SafeExpandReader.asMapList(
-      expand['editors'],
-    ).map((item) => item['name']?.toString() ?? '').where((name) => name.isNotEmpty).toList();
+    final names =
+        SafeExpandReader.asMapList(
+              expand['editors'],
+            )
+            .map((item) => item['name']?.toString() ?? '')
+            .where((name) => name.isNotEmpty)
+            .toList();
     final editorNames = names.isEmpty ? '' : '• ${names.join(', ')}';
 
-    final title = seriesData['title']?.toString() ?? seriesData['titleFr']?.toString() ?? '';
-    final imageUrl = seriesData['image']?.toString() ?? seriesData['coverUrl']?.toString();
+    final title =
+        seriesData['title']?.toString() ??
+        seriesData['titleFr']?.toString() ??
+        '';
+    final imageUrl =
+        seriesData['image']?.toString() ?? seriesData['coverUrl']?.toString();
 
     final id = seriesData['id']?.toString() ?? '';
     if (id.isEmpty) return const SizedBox.shrink();
@@ -46,7 +54,9 @@ class MySeriesTile extends StatelessWidget {
           : Padding(
               padding: const EdgeInsets.symmetric(vertical: 5.0),
               child: Row(
-                children: [Text(editorNames, style: const TextStyle(fontSize: 15))],
+                children: [
+                  Text(editorNames, style: const TextStyle(fontSize: 15)),
+                ],
               ),
             ),
       leading: ClipRRect(

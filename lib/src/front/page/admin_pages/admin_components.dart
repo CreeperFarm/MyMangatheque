@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:mymangatheque/src/back/language/runtime_localization.dart';
+import 'package:mymangatheque/src/back/services/admin_service.dart';
+import 'package:mymangatheque/src/back/services/security/security_utils.dart';
 import 'package:mymangatheque/src/const/layout.dart';
 
 class AdminPageScaffold extends StatelessWidget {
@@ -356,9 +359,80 @@ class AdminFeedback extends StatelessWidget {
     if (message.isEmpty) return const SizedBox.shrink();
     return AdminStatusBanner(
       icon: isError ? Icons.error_outline_rounded : Icons.task_alt_rounded,
-      title: isError ? 'Action impossible' : 'Action terminée',
+      title: isError
+          ? context.localized(en: 'Action failed', fr: 'Action impossible')
+          : context.localized(en: 'Action completed', fr: 'Action terminée'),
       message: message,
       tone: isError ? AdminBannerTone.error : AdminBannerTone.success,
+    );
+  }
+}
+
+class AdminExportButton extends StatefulWidget {
+  const AdminExportButton({required this.resource, super.key});
+
+  final String resource;
+
+  @override
+  State<AdminExportButton> createState() => _AdminExportButtonState();
+}
+
+class _AdminExportButtonState extends State<AdminExportButton> {
+  final AdminConnector _admin = AdminConnector();
+  bool _busy = false;
+
+  Future<void> _request() async {
+    setState(() => _busy = true);
+    try {
+      final response = await _admin.requestAdminExport(
+        resource: widget.resource,
+      );
+      if (!mounted) return;
+      final rawData = response['data'];
+      final data = rawData is Map
+          ? Map<String, dynamic>.from(rawData)
+          : response;
+      final reference = data['exportId'] ?? data['id'] ?? data['message'] ?? '';
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            reference.toString().trim().isEmpty
+                ? context.localized(
+                    en: 'Export requested. Its download will appear in the audit module.',
+                    fr: 'Export demandé. Son téléchargement apparaîtra dans le module d’audit.',
+                  )
+                : context.localized(
+                    en: 'Export requested: $reference',
+                    fr: 'Export demandé : $reference',
+                  ),
+          ),
+        ),
+      );
+    } catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(redactSensitiveText(error))),
+      );
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      onPressed: _busy ? null : _request,
+      tooltip: context.localized(
+        en: 'Request CSV export',
+        fr: 'Demander un export CSV',
+      ),
+      icon: _busy
+          ? const SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          : const Icon(Icons.download_outlined),
     );
   }
 }

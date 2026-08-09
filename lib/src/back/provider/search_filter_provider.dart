@@ -4,7 +4,7 @@ class SearchFilterNotifier extends Notifier<String> {
   @override
   String build() => 'manga';
 
-  void changeSearchFilter(newSearchFilter) {
+  void changeSearchFilter(String newSearchFilter) {
     state = newSearchFilter;
   }
 }

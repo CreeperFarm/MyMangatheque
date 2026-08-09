@@ -630,6 +630,9 @@ class AppLocalizationsFr extends AppLocalizations {
       'Veuillez confirmer votre nouveau mot de passe.';
 
   @override
+  String get confirmPassword => 'Confirmer le mot de passe';
+
+  @override
   String get passwordsDoNotMatch => 'Les mots de passe ne correspondent pas.';
 
   @override

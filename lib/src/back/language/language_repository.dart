@@ -1,4 +1,5 @@
 import 'package:mymangatheque/src/back/language/language.dart';
+import 'package:mymangatheque/src/back/language/runtime_localization.dart';
 import 'package:mymangatheque/src/models/local_storage/local_storage.dart';
 import 'package:mymangatheque/src/models/local_storage/service_locator.dart';
 import 'package:riverpod/riverpod.dart';
@@ -12,6 +13,7 @@ class LanguageRepository {
 
   Future<void> setLanguage(Language language) async {
     storage.setLanguageCode(language.code);
+    RuntimeLocalization.setLanguageCode(language.code);
     ref.read(languageProvider.notifier).update((_) => language);
   }
 
@@ -19,6 +21,7 @@ class LanguageRepository {
     final languageCode = await storage.getLanguageCode();
     if (languageCode == null) {
       final defaultLanguage = ref.read(languageProvider);
+      RuntimeLocalization.setLanguageCode(defaultLanguage.code);
       ref.read(languageProvider.notifier).update((_) => defaultLanguage);
       return defaultLanguage;
     }
@@ -28,10 +31,12 @@ class LanguageRepository {
   Language _getLanguageFromCode(String code) {
     for (var language in Language.values) {
       if (language.code == code) {
+        RuntimeLocalization.setLanguageCode(language.code);
         ref.read(languageProvider.notifier).update((_) => language);
         return language;
       }
     }
+    RuntimeLocalization.setLanguageCode(Language.english.code);
     return Language.english; // Fallback to English if no match found
   }
 }

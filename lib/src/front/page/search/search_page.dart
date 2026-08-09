@@ -9,10 +9,30 @@ import 'package:mymangatheque/src/const/assets.dart';
 import 'package:mymangatheque/src/const/own_icon.dart';
 import 'package:mymangatheque/src/front/components/safe_network_image.dart';
 import 'package:mymangatheque/src/function/auto_push_or_go.dart';
+import 'package:mymangatheque/src/models/local_storage/local_storage.dart';
 import 'package:video_player/video_player.dart';
 
+typedef SearchPageLoader =
+    Future<RecordPage> Function(
+      String mode,
+      String? query,
+      int page,
+      int limit,
+    );
+typedef SearchSuggestionLoader =
+    Future<List<RecordModel>> Function(String mode, String query, int limit);
+
 class SearchPage extends StatefulWidget {
-  const SearchPage({super.key});
+  const SearchPage({
+    this.pageLoader,
+    this.suggestionLoader,
+    this.debounceDuration = const Duration(milliseconds: 200),
+    super.key,
+  });
+
+  final SearchPageLoader? pageLoader;
+  final SearchSuggestionLoader? suggestionLoader;
+  final Duration debounceDuration;
 
   @override
   State<SearchPage> createState() => _SearchPageState();
@@ -52,7 +72,11 @@ class _SearchPageState extends State<SearchPage> {
     'æ': 'ae',
   };
 
-  static const List<String> _searchModes = <String>['series', 'authors', 'editors'];
+  static const List<String> _searchModes = <String>[
+    'series',
+    'authors',
+    'editors',
+  ];
 
   final AppwriteConnector _connector = AppwriteConnector();
   final TextEditingController _searchController = TextEditingController();
@@ -65,6 +89,7 @@ class _SearchPageState extends State<SearchPage> {
   int _currentPage = 0;
   bool _reachedEnd = false;
   int _loadGeneration = 0;
+  int _suggestionGeneration = 0;
   bool _loading = false;
   String? _error;
   String? _activeSearchQuery;
@@ -90,6 +115,8 @@ class _SearchPageState extends State<SearchPage> {
 
   @override
   void dispose() {
+    _loadGeneration += 1;
+    _suggestionGeneration += 1;
     _debounceTimer?.cancel();
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
@@ -101,7 +128,9 @@ class _SearchPageState extends State<SearchPage> {
 
   void _onScroll() {
     if (!_scrollController.hasClients) return;
-    if (_usingRealtimeSuggestions) return; // do not paginate while showing realtime suggestions
+    if (_usingRealtimeSuggestions) {
+      return; // do not paginate while showing realtime suggestions
+    }
     if (_scrollController.position.extentAfter < 600) {
       _loadNextPage();
     }
@@ -109,17 +138,27 @@ class _SearchPageState extends State<SearchPage> {
 
   void _onModeChanged(String? value) {
     if (value == null || value == _selectedMode) return;
+    _debounceTimer?.cancel();
+    _suggestionGeneration += 1;
     setState(() {
       _selectedMode = value;
       _usingRealtimeSuggestions = false;
       _realtimeSuggestions = <RecordModel>[];
       _loadingRealtime = false;
+      _performingFullSearch = false;
       _activeSearchQuery = null;
+      _performingFullSearch = false;
     });
-    _reload();
+    unawaited(
+      _reload().then((_) {
+        if (mounted) _onSearchChanged();
+      }),
+    );
   }
 
   Future<void> _reload() async {
+    _debounceTimer?.cancel();
+    _suggestionGeneration += 1;
     _loadGeneration++;
     final generation = _loadGeneration;
     setState(() {
@@ -128,6 +167,9 @@ class _SearchPageState extends State<SearchPage> {
       _currentPage = 0;
       _reachedEnd = false;
       _error = null;
+      _usingRealtimeSuggestions = false;
+      _realtimeSuggestions = <RecordModel>[];
+      _loadingRealtime = false;
     });
     await _loadNextPage(generation: generation, force: true);
   }
@@ -144,9 +186,27 @@ class _SearchPageState extends State<SearchPage> {
 
     try {
       final nextPage = _currentPage + 1;
-      final page = (_activeSearchQuery == null || _activeSearchQuery!.trim().isEmpty)
-          ? await _connector.getCollectionPage(_selectedMode, page: nextPage, limit: _pageSize)
-          : await _connector.searchCollectionPage(_selectedMode, query: _activeSearchQuery, page: nextPage, limit: _pageSize);
+      final activeQuery = _activeSearchQuery?.trim();
+      final pageLoader = widget.pageLoader;
+      final page = pageLoader != null
+          ? await pageLoader(
+              _selectedMode,
+              activeQuery,
+              nextPage,
+              _pageSize,
+            )
+          : (activeQuery == null || activeQuery.isEmpty)
+          ? await _connector.getCollectionPage(
+              _selectedMode,
+              page: nextPage,
+              limit: _pageSize,
+            )
+          : await _connector.searchCollectionPage(
+              _selectedMode,
+              query: activeQuery,
+              page: nextPage,
+              limit: _pageSize,
+            );
       if (!mounted || activeGeneration != _loadGeneration) return;
 
       setState(() {
@@ -158,10 +218,13 @@ class _SearchPageState extends State<SearchPage> {
             addedCount += 1;
           }
         }
-        _currentPage = nextPage;
+        _currentPage = page.page;
         // Do not trust backend total counters alone during migration;
         // keep loading until a short/empty page is returned.
-        _reachedEnd = page.items.isEmpty || addedCount == 0 || page.items.length < _pageSize;
+        _reachedEnd =
+            page.items.isEmpty ||
+            addedCount == 0 ||
+            page.items.length < _pageSize;
         _filteredResults = _computeFilteredResults();
       });
     } catch (e) {
@@ -181,6 +244,11 @@ class _SearchPageState extends State<SearchPage> {
   void _onSearchChanged() {
     // keep local filtering behavior for empty queries
     final text = _searchController.text.trim();
+    final suggestionGeneration = ++_suggestionGeneration;
+    if (_performingFullSearch) {
+      _loadGeneration += 1;
+      _performingFullSearch = false;
+    }
     if (text.length < 2) {
       _debounceTimer?.cancel();
       final shouldResetToBrowse = text.isEmpty && _activeSearchQuery != null;
@@ -201,30 +269,42 @@ class _SearchPageState extends State<SearchPage> {
 
     // Debounce realtime suggestions between 150-250ms; use 200ms default.
     _debounceTimer?.cancel();
-    _debounceTimer = Timer(const Duration(milliseconds: 200), () async {
+    _debounceTimer = Timer(widget.debounceDuration, () async {
       final q = text;
-      // Skip if already loading realtime (rapid typing protection)
-      if (_loadingRealtime) return;
+      final mode = _selectedMode;
+      if (!mounted || suggestionGeneration != _suggestionGeneration) return;
       try {
         setState(() => _loadingRealtime = true);
-        // request realtime suggestions
-        final suggestions = await searchRealtime(_selectedMode, q: q, limit: 8);
-        if (!mounted) return;
+        final suggestionLoader = widget.suggestionLoader;
+        final suggestions = suggestionLoader != null
+            ? await suggestionLoader(mode, q, 8)
+            : await searchRealtime(mode, q: q, limit: 8);
+        if (!mounted ||
+            suggestionGeneration != _suggestionGeneration ||
+            mode != _selectedMode ||
+            q != _searchController.text.trim()) {
+          return;
+        }
         setState(() {
           _usingRealtimeSuggestions = true;
           _realtimeSuggestions = suggestions;
           _filteredResults = List<RecordModel>.from(_realtimeSuggestions);
-          _loadingRealtime = false;
         });
       } catch (e) {
-        if (!mounted) return;
+        if (!mounted || suggestionGeneration != _suggestionGeneration) return;
         setState(() {
           _usingRealtimeSuggestions = false;
           _realtimeSuggestions = <RecordModel>[];
           _filteredResults = _computeFilteredResults();
-          _error = e.toString();
-          _loadingRealtime = false;
+          // Realtime suggestions are an enhancement: retain the paged/local
+          // results instead of replacing the entire page with an error.
         });
+      } finally {
+        if (mounted && suggestionGeneration == _suggestionGeneration) {
+          setState(() {
+            _loadingRealtime = false;
+          });
+        }
       }
     });
 
@@ -237,8 +317,19 @@ class _SearchPageState extends State<SearchPage> {
   Future<void> _performFullSearch(String query) async {
     // Called on submit/enter. Use server-side paged search endpoint.
     _debounceTimer?.cancel();
+    _suggestionGeneration += 1;
+    final normalizedQuery = query.trim();
+    if (normalizedQuery.isEmpty) {
+      _activeSearchQuery = null;
+      await _reload();
+      return;
+    }
+
+    final generation = ++_loadGeneration;
+    final mode = _selectedMode;
     setState(() {
       _performingFullSearch = true;
+      _loading = false;
       _usingRealtimeSuggestions = false;
       _reachedEnd = false;
       _loadedRecords.clear();
@@ -246,31 +337,49 @@ class _SearchPageState extends State<SearchPage> {
       _currentPage = 0;
       _error = null;
       _loadingRealtime = false;
-      _activeSearchQuery = query.trim().isEmpty ? null : query.trim();
+      _activeSearchQuery = normalizedQuery;
     });
 
     try {
-      final page = await _connector.searchCollectionPage(_selectedMode, query: query, page: 1, limit: _pageSize);
-      if (!mounted) return;
+      final pageLoader = widget.pageLoader;
+      final page = pageLoader != null
+          ? await pageLoader(mode, normalizedQuery, 1, _pageSize)
+          : await _connector.searchCollectionPage(
+              mode,
+              query: normalizedQuery,
+              page: 1,
+              limit: _pageSize,
+            );
+      if (!mounted ||
+          generation != _loadGeneration ||
+          mode != _selectedMode ||
+          normalizedQuery != _activeSearchQuery) {
+        return;
+      }
       setState(() {
-        _loadedRecords.addAll(page.items);
+        final ids = <String>{};
+        _loadedRecords.addAll(page.items.where((record) => ids.add(record.id)));
         _currentPage = page.page;
-        _reachedEnd = !page.hasMore;
+        _reachedEnd = !page.hasMore || page.items.length < _pageSize;
         _filteredResults = _computeFilteredResults();
       });
     } catch (e) {
-      if (!mounted) return;
+      if (!mounted || generation != _loadGeneration) return;
       setState(() {
         _error = e.toString();
       });
     } finally {
-      if (mounted) setState(() => _performingFullSearch = false);
+      if (mounted && generation == _loadGeneration) {
+        setState(() => _performingFullSearch = false);
+      }
     }
   }
 
   List<RecordModel> _computeFilteredResults() {
     // When using realtime suggestions prefer them over local filtering
-    if (_usingRealtimeSuggestions) return List<RecordModel>.from(_realtimeSuggestions);
+    if (_usingRealtimeSuggestions) {
+      return List<RecordModel>.from(_realtimeSuggestions);
+    }
 
     final query = _normalizeText(_searchController.text.trim());
     final source = List<RecordModel>.from(_loadedRecords);
@@ -280,7 +389,9 @@ class _SearchPageState extends State<SearchPage> {
       return source;
     }
 
-    final filtered = source.where((record) => _recordSearchText(record).contains(query)).toList();
+    final filtered = source
+        .where((record) => _recordSearchText(record).contains(query))
+        .toList();
 
     filtered.sort((a, b) {
       final aText = _recordSearchText(a);
@@ -307,9 +418,13 @@ class _SearchPageState extends State<SearchPage> {
     return FutureBuilder<void>(
       future: _initializeVideoFuture,
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.done && _videoController != null) {
+        if (snapshot.connectionState == ConnectionState.done &&
+            _videoController != null) {
           final aspect = _videoController!.value.aspectRatio;
-          return AspectRatio(aspectRatio: aspect > 0 ? aspect : 4 / 3, child: VideoPlayer(_videoController!));
+          return AspectRatio(
+            aspectRatio: aspect > 0 ? aspect : 4 / 3,
+            child: VideoPlayer(_videoController!),
+          );
         }
         return const Center(child: CircularProgressIndicator());
       },
@@ -319,7 +434,9 @@ class _SearchPageState extends State<SearchPage> {
   String _recordLabel(RecordModel record) {
     switch (record.collectionId) {
       case 'series':
-        return (record.data['title'] ?? record.data['titleFr'] ?? '').toString().toLowerCase();
+        return (record.data['title'] ?? record.data['titleFr'] ?? '')
+            .toString()
+            .toLowerCase();
       case 'authors':
       case 'editors':
         return (record.data['name'] ?? '').toString().toLowerCase();
@@ -417,15 +534,32 @@ class _SearchPageState extends State<SearchPage> {
     return '';
   }
 
-  Widget _buildResultTile(RecordModel record, AppLocalizations localizations) {
+  Widget _buildResultTile(
+    RecordModel record,
+    AppLocalizations localizations,
+    AppDisplayDensity density,
+  ) {
     final data = record.data;
-    final title = record.collectionId == 'authors' || record.collectionId == 'editors'
+    final title =
+        record.collectionId == 'authors' || record.collectionId == 'editors'
         ? (data['name'] ?? '').toString()
         : (data['title'] ?? data['titleFr'] ?? '').toString();
 
-    final imageUrl = (data['image'] ?? data['coverUrl'] ?? data['logo'] ?? data['imageUrl'] ?? '').toString();
+    final imageUrl =
+        (data['image'] ??
+                data['coverUrl'] ??
+                data['logo'] ??
+                data['imageUrl'] ??
+                '')
+            .toString();
 
     return ListTile(
+      key: ValueKey<String>(
+        'search-result-${record.collectionId}-${record.id}',
+      ),
+      visualDensity: density == AppDisplayDensity.compact
+          ? VisualDensity.compact
+          : VisualDensity.standard,
       title: Text(
         title,
         maxLines: 1,
@@ -454,10 +588,12 @@ class _SearchPageState extends State<SearchPage> {
       leading: ClipRRect(
         borderRadius: BorderRadius.circular(8),
         child: SizedBox(
-          width: 45,
-          height: 68,
+          width: density == AppDisplayDensity.compact ? 38 : 45,
+          height: density == AppDisplayDensity.compact ? 57 : 68,
           child: SafeNetworkImage(
             imageUrl: imageUrl,
+            width: density == AppDisplayDensity.compact ? 38 : 45,
+            height: density == AppDisplayDensity.compact ? 57 : 68,
           ),
         ),
       ),
@@ -535,7 +671,9 @@ class _SearchPageState extends State<SearchPage> {
                     value: mode,
                     child: Row(
                       children: [
-                        Expanded(child: Text(_searchModeLabel(localizations, mode))),
+                        Expanded(
+                          child: Text(_searchModeLabel(localizations, mode)),
+                        ),
                         if (selected) const Icon(Icons.check, size: 16),
                       ],
                     ),
@@ -562,11 +700,14 @@ class _SearchPageState extends State<SearchPage> {
                         Center(child: Text(localizations.errorOccurred)),
                         const SizedBox(height: 8),
                         Center(
-                          child: TextButton(onPressed: _reload, child: Text(localizations.tryAgain)),
+                          child: TextButton(
+                            onPressed: _reload,
+                            child: Text(localizations.tryAgain),
+                          ),
                         ),
                       ],
                     )
-                  : (_usingRealtimeSuggestions && _loadingRealtime)
+                  : _loadingRealtime && _filteredResults.isEmpty
                   ? ListView(
                       physics: const AlwaysScrollableScrollPhysics(),
                       children: const [
@@ -582,33 +723,53 @@ class _SearchPageState extends State<SearchPage> {
                         Center(child: Text(localizations.noResults)),
                       ],
                     )
-                  : ListView.builder(
-                      controller: _scrollController,
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      itemCount: _filteredResults.length + 1,
-                      itemBuilder: (context, index) {
-                        if (index >= _filteredResults.length) {
-                          if (_loading) {
-                            return const Padding(
-                              padding: EdgeInsets.symmetric(vertical: 18),
-                              child: Center(child: CircularProgressIndicator()),
-                            );
+                  : ValueListenableBuilder<AppDisplayDensity>(
+                      valueListenable: LocalStorage.displayDensityNotifier,
+                      builder: (context, density, _) => ListView.builder(
+                        key: const PageStorageKey<String>('search-results'),
+                        controller: _scrollController,
+                        cacheExtent: density == AppDisplayDensity.compact
+                            ? 650
+                            : 900,
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        itemCount: _filteredResults.length + 1,
+                        itemBuilder: (context, index) {
+                          if (index >= _filteredResults.length) {
+                            if (_loading) {
+                              return const Padding(
+                                padding: EdgeInsets.symmetric(vertical: 18),
+                                child: Center(
+                                  child: CircularProgressIndicator(),
+                                ),
+                              );
+                            }
+
+                            if (_error != null) {
+                              return Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 8,
+                                ),
+                                child: Center(
+                                  child: TextButton(
+                                    onPressed: _loadNextPage,
+                                    child: Text(localizations.tryAgain),
+                                  ),
+                                ),
+                              );
+                            }
+
+                            return const SizedBox(height: 80);
                           }
 
-                          if (_error != null) {
-                            return Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 8),
-                              child: Center(
-                                child: TextButton(onPressed: _loadNextPage, child: Text(localizations.tryAgain)),
-                              ),
-                            );
-                          }
-
-                          return const SizedBox(height: 80);
-                        }
-
-                        return _buildResultTile(_filteredResults[index], localizations);
-                      },
+                          return RepaintBoundary(
+                            child: _buildResultTile(
+                              _filteredResults[index],
+                              localizations,
+                              density,
+                            ),
+                          );
+                        },
+                      ),
                     ),
             ),
     );
