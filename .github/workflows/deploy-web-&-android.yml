@@ -255,7 +255,7 @@ jobs:
           packageName: com.mymangatheque
           releaseFiles: build/app/outputs/bundle/release/app-release.aab
           releaseName: ${{ steps.android-version.outputs.name }} (${{ steps.android-version.outputs.code }})
-          track: ${{ vars.GOOGLE_PLAY_TRACK || 'internal' }}
+          track: ${{ vars.GOOGLE_PLAY_TRACK || 'alpha' }}
           status: completed
           whatsNewDirectory: distribution/whatsnew
 
