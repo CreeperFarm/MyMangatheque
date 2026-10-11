@@ -1,19 +1,30 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:mymangatheque/src/back/language/runtime_localization.dart';
+import 'package:mymangatheque/src/back/services/import/collection_import_background_controller.dart';
 import 'package:mymangatheque/src/back/services/import/collection_import_models.dart';
 import 'package:mymangatheque/src/back/services/import/collection_import_service.dart';
 import 'package:mymangatheque/src/back/services/security/security_utils.dart';
+import 'package:mymangatheque/src/const/layout.dart';
 import 'package:mymangatheque/src/front/components/safe_network_image.dart';
+import 'package:path/path.dart' as p;
+
+enum _CollectionImportOperationPhase { analyzing, importing, undoing }
 
 class CollectionImportPage extends StatefulWidget {
-  const CollectionImportPage({super.key, this.service});
+  const CollectionImportPage({
+    super.key,
+    this.service,
+    this.backgroundController,
+  });
 
   final CollectionImportService? service;
+  final CollectionImportBackgroundController? backgroundController;
 
   @override
   State<CollectionImportPage> createState() => _CollectionImportPageState();
@@ -22,16 +33,23 @@ class CollectionImportPage extends StatefulWidget {
 class _CollectionImportPageState extends State<CollectionImportPage> {
   late final CollectionImportService _service =
       widget.service ?? CollectionImportService();
+  late final CollectionImportBackgroundController _backgroundController =
+      widget.backgroundController ??
+      PlatformCollectionImportBackgroundController();
   final TextEditingController _contentController = TextEditingController();
   CollectionImportSource _source = CollectionImportSource.mangacollec;
   CollectionImportPreview? _preview;
   List<CollectionImportHistoryEntry> _history =
       const <CollectionImportHistoryEntry>[];
   CollectionImportCancellationToken? _cancellation;
-  bool _busy = false;
+  _CollectionImportOperationPhase? _operationPhase;
+  CollectionImportItem? _currentItem;
+  Future<void> _backgroundUpdateQueue = Future<void>.value();
   int _completed = 0;
   int _total = 0;
   String? _error;
+
+  bool get _busy => _operationPhase != null;
 
   @override
   void initState() {
@@ -53,24 +71,30 @@ class _CollectionImportPageState extends State<CollectionImportPage> {
   }
 
   Future<void> _pickFile() async {
-    final result = await FilePicker.platform.pickFiles(
+    final file = await FilePicker.pickFile(
       type: FileType.custom,
       allowedExtensions: const <String>['csv', 'json', 'txt'],
-      withData: true,
     );
-    if (result == null || result.files.isEmpty) return;
-    final file = result.files.single;
-    final bytes = file.bytes;
-    if (bytes == null) {
-      setState(() {
-        _error = context.localized(
-          en: 'The selected file could not be read.',
-          fr: 'Le fichier sélectionné n’a pas pu être lu.',
-        );
-      });
+    if (file == null) return;
+    late final Uint8List bytes;
+    try {
+      bytes = await file.readAsBytes();
+    } on Object {
+      if (mounted) {
+        setState(() {
+          _error = context.localized(
+            en: 'The selected file could not be read.',
+            fr: 'Le fichier sélectionné n’a pas pu être lu.',
+          );
+        });
+      }
       return;
     }
-    final extension = (file.extension ?? '').toLowerCase();
+    if (!mounted) return;
+    final extension = p
+        .extension(file.name)
+        .replaceFirst('.', '')
+        .toLowerCase();
     setState(() {
       _source = extension == 'json'
           ? CollectionImportSource.json
@@ -86,7 +110,8 @@ class _CollectionImportPageState extends State<CollectionImportPage> {
     if (_busy) return;
     final cancellation = CollectionImportCancellationToken();
     setState(() {
-      _busy = true;
+      _operationPhase = _CollectionImportOperationPhase.analyzing;
+      _currentItem = null;
       _error = null;
       _completed = 0;
       _total = 0;
@@ -102,11 +127,12 @@ class _CollectionImportPageState extends State<CollectionImportPage> {
         _source,
         entries,
         cancellation: cancellation,
-        onProgress: (completed, total, _) {
+        onProgress: (completed, total, item) {
           if (!mounted) return;
           setState(() {
             _completed = completed;
             _total = total;
+            _currentItem = item;
           });
         },
       );
@@ -118,7 +144,8 @@ class _CollectionImportPageState extends State<CollectionImportPage> {
     } finally {
       if (mounted) {
         setState(() {
-          _busy = false;
+          _operationPhase = null;
+          _currentItem = null;
           _cancellation = null;
         });
       }
@@ -159,23 +186,48 @@ class _CollectionImportPageState extends State<CollectionImportPage> {
     );
     if (confirmed != true || !mounted) return;
     final cancellation = CollectionImportCancellationToken();
+    final backgroundServiceError = context.localized(
+      en: 'The Android background import service could not be started. No volume was added.',
+      fr: 'Le service Android d’import en arrière-plan n’a pas pu démarrer. Aucun tome n’a été ajouté.',
+    );
     setState(() {
-      _busy = true;
+      _operationPhase = _CollectionImportOperationPhase.importing;
+      _currentItem = null;
       _completed = 0;
       _total = importable;
       _error = null;
       _cancellation = cancellation;
     });
+    var backgroundServiceStarted = false;
     try {
+      try {
+        await _backgroundController.start(total: importable);
+        backgroundServiceStarted = true;
+        _backgroundUpdateQueue = Future<void>.value();
+      } on Object catch (error) {
+        RuntimeLocalization.debug(
+          en: 'Unable to start the collection import foreground service: $error',
+          fr: 'Impossible de démarrer le service de premier plan de l’import de collection : $error',
+        );
+        if (mounted) setState(() => _error = backgroundServiceError);
+        return;
+      }
       final result = await _service.execute(
         preview,
         cancellation: cancellation,
-        onProgress: (completed, total, _) {
+        onProgress: (completed, total, item) {
+          final title = _progressItemTitle(item);
           if (!mounted) return;
           setState(() {
             _completed = completed;
             _total = total;
+            _currentItem = item;
           });
+          _queueBackgroundProgress(
+            completed: completed,
+            total: total,
+            title: title,
+          );
         },
       );
       if (!mounted) return;
@@ -200,9 +252,21 @@ class _CollectionImportPageState extends State<CollectionImportPage> {
     } catch (error) {
       if (mounted) setState(() => _error = redactSensitiveText(error));
     } finally {
+      if (backgroundServiceStarted) {
+        await _backgroundUpdateQueue;
+        try {
+          await _backgroundController.stop();
+        } on Object catch (error) {
+          RuntimeLocalization.debug(
+            en: 'Unable to stop the collection import foreground service: $error',
+            fr: 'Impossible d’arrêter le service de premier plan de l’import de collection : $error',
+          );
+        }
+      }
       if (mounted) {
         setState(() {
-          _busy = false;
+          _operationPhase = null;
+          _currentItem = null;
           _cancellation = null;
         });
       }
@@ -252,14 +316,18 @@ class _CollectionImportPageState extends State<CollectionImportPage> {
       ),
     );
     if (confirmed != true || !mounted) return;
+    final cancellation = CollectionImportCancellationToken();
     setState(() {
-      _busy = true;
+      _operationPhase = _CollectionImportOperationPhase.undoing;
+      _currentItem = null;
       _completed = 0;
       _total = entry.importedVolumeIds.length;
+      _cancellation = cancellation;
     });
     try {
       await _service.undo(
         entry,
+        cancellation: cancellation,
         onProgress: (completed, total) {
           if (!mounted) return;
           setState(() {
@@ -269,14 +337,61 @@ class _CollectionImportPageState extends State<CollectionImportPage> {
         },
       );
       await _loadHistory();
+    } catch (error) {
+      if (mounted) setState(() => _error = redactSensitiveText(error));
     } finally {
-      if (mounted) setState(() => _busy = false);
+      if (mounted) {
+        setState(() {
+          _operationPhase = null;
+          _currentItem = null;
+          _cancellation = null;
+        });
+      }
     }
+  }
+
+  void _queueBackgroundProgress({
+    required int completed,
+    required int total,
+    required String title,
+  }) {
+    final previousUpdate = _backgroundUpdateQueue;
+    _backgroundUpdateQueue = () async {
+      await previousUpdate;
+      try {
+        await _backgroundController.update(
+          completed: completed,
+          total: total,
+          title: title,
+        );
+      } on Object catch (error) {
+        RuntimeLocalization.debug(
+          en: 'Unable to update the collection import foreground notification: $error',
+          fr: 'Impossible de mettre à jour la notification de l’import de collection : $error',
+        );
+      }
+    }();
+  }
+
+  String _progressItemTitle(CollectionImportItem? item) {
+    if (item == null) return '';
+    final candidateTitle = item.candidate?.title.trim() ?? '';
+    if (candidateTitle.isNotEmpty) return candidateTitle;
+    final entryTitle = item.entry.title.trim();
+    if (entryTitle.isNotEmpty) return entryTitle;
+    return item.entry.ean.trim();
   }
 
   @override
   Widget build(BuildContext context) {
     final preview = _preview;
+    final mediaQuery = MediaQuery.of(context);
+    final phoneNavigationVisible =
+        mediaQuery.size.width <= phoneNavigationMaxWidth &&
+        mediaQuery.viewInsets.bottom == 0;
+    final bottomNavigationClearance = phoneNavigationVisible
+        ? phoneBottomNavigationClearance
+        : 0.0;
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -285,44 +400,123 @@ class _CollectionImportPageState extends State<CollectionImportPage> {
             fr: 'Importer une collection',
           ),
         ),
-        actions: [
-          if (_busy)
-            IconButton(
-              onPressed: _cancellation?.cancel,
-              tooltip: context.localized(en: 'Stop', fr: 'Arrêter'),
-              icon: const Icon(Icons.stop_circle_outlined),
-            ),
-        ],
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          _buildSourceCard(),
-          if (_busy) ...[
-            const SizedBox(height: 16),
-            LinearProgressIndicator(
-              value: _total <= 0 ? null : _completed / _total,
+      body: Padding(
+        key: const ValueKey('collection-import-bottom-clearance'),
+        padding: EdgeInsets.only(bottom: bottomNavigationClearance),
+        child: Stack(
+          children: [
+            ListView(
+              key: const ValueKey('collection-import-list'),
+              padding: EdgeInsets.fromLTRB(16, 16, 16, _busy ? 180 : 24),
+              children: [
+                _buildSourceCard(),
+                if (_error != null) ...[
+                  const SizedBox(height: 16),
+                  Card(
+                    color: Theme.of(context).colorScheme.errorContainer,
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Text(_error!),
+                    ),
+                  ),
+                ],
+                if (preview != null) ...[
+                  const SizedBox(height: 20),
+                  _buildPreview(preview),
+                ],
+                const SizedBox(height: 24),
+                _buildHistory(),
+              ],
             ),
-            const SizedBox(height: 6),
-            Text('$_completed / $_total', textAlign: TextAlign.center),
-          ],
-          if (_error != null) ...[
-            const SizedBox(height: 16),
-            Card(
-              color: Theme.of(context).colorScheme.errorContainer,
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Text(_error!),
+            if (_busy)
+              Positioned(
+                left: 16,
+                right: 16,
+                bottom: 8,
+                child: _buildProgressBanner(),
               ),
-            ),
           ],
-          if (preview != null) ...[
-            const SizedBox(height: 20),
-            _buildPreview(preview),
-          ],
-          const SizedBox(height: 24),
-          _buildHistory(),
-        ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildProgressBanner() {
+    final phase = _operationPhase;
+    final progress = _total <= 0 ? null : (_completed / _total).clamp(0.0, 1.0);
+    final percentage = progress == null ? null : (progress * 100).round();
+    final phaseLabel = switch (phase) {
+      _CollectionImportOperationPhase.analyzing => context.localized(
+        en: 'Analysing the collection',
+        fr: 'Analyse de la collection',
+      ),
+      _CollectionImportOperationPhase.importing => context.localized(
+        en: 'Adding volumes',
+        fr: 'Ajout des tomes',
+      ),
+      _CollectionImportOperationPhase.undoing => context.localized(
+        en: 'Undoing the import',
+        fr: 'Annulation de l’import',
+      ),
+      null => '',
+    };
+    final currentTitle = _progressItemTitle(_currentItem);
+    final counter = _total <= 0 ? '…' : '$_completed / $_total';
+    return Semantics(
+      liveRegion: true,
+      label:
+          '$phaseLabel, $counter${currentTitle.isEmpty ? '' : ', $currentTitle'}',
+      child: Card(
+        key: const ValueKey('collection-import-progress-banner'),
+        elevation: 8,
+        margin: EdgeInsets.zero,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 12, 12),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      phaseLabel,
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                  ),
+                  if (percentage != null) Text('$percentage %'),
+                ],
+              ),
+              const SizedBox(height: 8),
+              LinearProgressIndicator(value: progress),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Text(counter),
+                  if (currentTitle.isNotEmpty) ...[
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        currentTitle,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ] else
+                    const Spacer(),
+                  TextButton.icon(
+                    onPressed: _cancellation?.cancel,
+                    icon: const Icon(Icons.stop_circle_outlined),
+                    label: Text(
+                      context.localized(en: 'Stop', fr: 'Arrêter'),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -627,7 +821,8 @@ class _CollectionImportPageState extends State<CollectionImportPage> {
   };
 
   String _inputHint() => switch (_source) {
-    CollectionImportSource.mangacollec => 'https://www.mangacollec.com/...',
+    CollectionImportSource.mangacollec =>
+      'https://www.mangacollec.com/user/<pseudo>/collection',
     CollectionImportSource.ean => '9781234567890\n9780987654321',
     CollectionImportSource.csv => 'title,tome,ean\nBerserk,1,978...',
     CollectionImportSource.json => '[{"title":"Berserk","volume":1}]',

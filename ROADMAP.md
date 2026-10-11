@@ -63,8 +63,8 @@ The following client-side foundations are now available and validated:
   transport counters;
 - Web/WASM delivery through GHCR and Portainer, plus automated publication of
   the obfuscated AAB to Google Play;
-- strict Web/Android/iOS build validation and scheduled production smoke checks;
-- clean Flutter analysis, **168 passing tests**, and a validated production
+- strict Web/Android/iOS build validation and post-deployment production checks;
+- clean Flutter analysis, **173 passing tests**, and a validated production
   Web/WASM build.
 
 The statuses below are **in progress**, **to do**, and **research**. Completed
@@ -244,8 +244,8 @@ Les fondations suivantes sont désormais disponibles et validées côté client 
 - livraison Web/WASM sur GHCR et Portainer, plus publication automatisée de
   l'AAB obfusqué sur Google Play ;
 - validation stricte des builds Web/Android/iOS et contrôles de production
-  planifiés ;
-- analyse Flutter sans anomalie, **168 tests** réussis et build Web/WASM de
+  post-déploiement ;
+- analyse Flutter sans anomalie, **173 tests** réussis et build Web/WASM de
   production validé.
 
 Les statuts utilisés ci-dessous sont : **en cours**, **à faire** et **étude**.

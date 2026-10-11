@@ -20,11 +20,11 @@ class CollectionImportService {
     AppwriteConnector? connector,
     SearchService? search,
     MobileApiClient? api,
-    CollectionImportParser parser = const CollectionImportParser(),
+    CollectionImportParser? parser,
   }) : _connector = connector ?? AppwriteConnector(),
        _search = search ?? SearchService(),
        _api = api ?? MobileApiClient(),
-       _parser = parser;
+       _parser = parser ?? const CollectionImportParser();
 
   static const String mangacollecPreviewPath =
       '/api/users/me/collection-imports/mangacollec/preview';
@@ -41,31 +41,68 @@ class CollectionImportService {
     String content,
   ) => _parser.parse(source, content);
 
-  Future<List<CollectionImportEntry>> loadMangacollecProfile(
-    String profile,
-  ) async {
+  static String mangacollecCollectionUrl(String profile) {
     final normalized = profile.trim();
     if (normalized.isEmpty || normalized.length > 300) {
       throw const CollectionImportFormatException(
-        'Enter a valid Mangacollec profile name or URL.',
+        'Enter a valid Mangacollec username or collection URL.',
       );
     }
-    final uri = Uri.tryParse(normalized);
-    if (uri != null && uri.hasScheme) {
-      final host = uri.host.toLowerCase();
-      if (uri.scheme != 'https' ||
+
+    final parsed = Uri.tryParse(normalized);
+    late final String username;
+    if (parsed != null && parsed.hasScheme) {
+      final host = parsed.host.toLowerCase();
+      if (parsed.scheme.toLowerCase() != 'https' ||
+          parsed.userInfo.isNotEmpty ||
           !(host == 'mangacollec.com' || host.endsWith('.mangacollec.com'))) {
         throw const CollectionImportFormatException(
-          'Only HTTPS Mangacollec profile URLs are accepted.',
+          'Only HTTPS Mangacollec collection URLs are accepted.',
         );
       }
+
+      final segments = parsed.pathSegments
+          .where((segment) => segment.isNotEmpty)
+          .toList(growable: false);
+      final validPath =
+          (segments.length == 2 || segments.length == 3) &&
+          segments.first.toLowerCase() == 'user' &&
+          (segments.length == 2 || segments.last.toLowerCase() == 'collection');
+      if (!validPath) {
+        throw const CollectionImportFormatException(
+          'The Mangacollec URL must use /user/<username>/collection.',
+        );
+      }
+      username = segments[1].trim();
+    } else {
+      username = normalized;
     }
+
+    if (username.isEmpty ||
+        username.length > 100 ||
+        RegExp(r'[\u0000-\u001F\u007F/\\?#]').hasMatch(username)) {
+      throw const CollectionImportFormatException(
+        'Enter a valid Mangacollec username.',
+      );
+    }
+
+    return Uri(
+      scheme: 'https',
+      host: 'www.mangacollec.com',
+      pathSegments: <String>['user', username, 'collection'],
+    ).toString();
+  }
+
+  Future<List<CollectionImportEntry>> loadMangacollecProfile(
+    String profile,
+  ) async {
+    final collectionUrl = mangacollecCollectionUrl(profile);
 
     final response = await _api.post(
       mangacollecPreviewPath,
       requiresApiKey: true,
       requiresBearer: true,
-      body: <String, dynamic>{'profile': normalized},
+      body: <String, dynamic>{'profile': collectionUrl},
     );
     if (response.statusCode == 404 || response.statusCode == 501) {
       throw StateError(

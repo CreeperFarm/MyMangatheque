@@ -287,7 +287,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 5.0),
-                        child: DropdownButtonFormField2(
+                        child: DropdownButtonFormField2<String>(
                           isExpanded: true,
                           decoration: InputDecoration(
                             contentPadding: const EdgeInsets.symmetric(
@@ -304,15 +304,15 @@ class _SignUpPageState extends State<SignUpPage> {
                             ),
                           ),
                           items: [
-                            DropdownMenuItem(
+                            DropdownItem<String>(
                               value: "male",
                               child: Text(localizations.male),
                             ),
-                            DropdownMenuItem(
+                            DropdownItem<String>(
                               value: "female",
                               child: Text(localizations.female),
                             ),
-                            DropdownMenuItem(
+                            DropdownItem<String>(
                               value: "other",
                               child: Text(localizations.other),
                             ),
@@ -330,12 +330,13 @@ class _SignUpPageState extends State<SignUpPage> {
                             }
                             return null;
                           },
-                          onChanged: (value) {
+                          onChanged: (String? value) {
+                            if (value == null) return;
                             setState(() {
-                              selectedGender.text = value.toString();
+                              selectedGender.text = value;
                             });
                           },
-                          buttonStyleData: const ButtonStyleData(
+                          buttonStyleData: const FormFieldButtonStyleData(
                             padding: EdgeInsets.only(right: 6),
                           ),
                           iconStyleData: IconStyleData(

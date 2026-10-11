@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="collection_import_channel_name">Imports de collection</string>
+    <string name="collection_import_channel_description">Progression des imports de collection exécutés en arrière-plan</string>
+    <string name="collection_import_notification_title">Import de collection en cours</string>
+    <string name="collection_import_progress">%1$d / %2$d tomes traités</string>
+    <string name="collection_import_preparing">Préparation de l’import de collection</string>
+</resources>

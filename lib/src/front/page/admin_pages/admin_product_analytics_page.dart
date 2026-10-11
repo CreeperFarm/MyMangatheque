@@ -53,7 +53,11 @@ class _AdminProductAnalyticsPageState extends State<AdminProductAnalyticsPage> {
     }
   }
 
-  void _refresh() => setState(() => _future = _load());
+  void _refresh() {
+    setState(() {
+      _future = _load();
+    });
+  }
 
   void _changePeriod(int days) {
     if (_days == days) return;
@@ -105,7 +109,7 @@ class _AdminProductAnalyticsPageState extends State<AdminProductAnalyticsPage> {
     return AdminPageScaffold(
       title: context.localized(en: 'Product usage', fr: 'Usage produit'),
       actions: [
-        const AdminExportButton(resource: 'analytics-product'),
+        const AdminExportButton(resource: 'analytics'),
         IconButton(
           onPressed: _refresh,
           tooltip: context.localized(en: 'Refresh', fr: 'Actualiser'),

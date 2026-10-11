@@ -133,9 +133,12 @@ Request:
 
 ```json
 {
-  "profile": "Mangacollec username or HTTPS profile URL"
+  "profile": "https://www.mangacollec.com/user/<username>/collection"
 }
 ```
+
+The Flutter client expands a username to this canonical collection URL before
+sending the request.
 
 The API may use an official Mangacollec API or a legally accessible public
 profile. It must never request or store the user's Mangacollec password or

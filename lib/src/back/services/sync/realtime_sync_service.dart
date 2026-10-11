@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:mymangatheque/src/back/language/runtime_localization.dart';
-import 'package:mymangatheque/src/back/services/analytics/product_analytics_service.dart';
 import 'package:mymangatheque/src/back/services/appwrite_client.dart';
 import 'package:mymangatheque/src/back/services/models/api_record_model.dart';
 
@@ -63,9 +62,7 @@ class RealtimeSyncService {
        _fallbackMaximum = fallbackMaximum,
        _reconnectDelay = reconnectDelay,
        _transportReporter =
-           transportReporter ??
-           ((collectionId, transport) => ProductAnalyticsService()
-               .trackSyncTransport(collectionId, transport));
+           transportReporter ?? ((collectionId, transport) async {});
 
   static final RealtimeSyncService _singleton = RealtimeSyncService._internal();
 

@@ -16,8 +16,7 @@ enum AdminManagementSection {
   catalog('catalog-quality', Icons.fact_check_outlined),
   moderation('moderation', Icons.gavel_outlined),
   operations('operations', Icons.monitor_heart_outlined),
-  audit('audit', Icons.policy_outlined)
-  ;
+  audit('audit', Icons.policy_outlined);
 
   const AdminManagementSection(this.slug, this.icon);
 
@@ -129,7 +128,11 @@ class _AdminManagementPageState extends State<AdminManagementPage> {
     return data;
   }
 
-  void _refresh() => setState(() => _future = _load());
+  void _refresh() {
+    setState(() {
+      _future = _load();
+    });
+  }
 
   void _changePeriod(int days) {
     if (_days == days) return;

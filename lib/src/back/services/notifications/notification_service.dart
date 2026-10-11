@@ -417,7 +417,10 @@ class NotificationService {
     if (!await _appwriteClient.hasAuthenticatedUserSession()) return;
 
     try {
-      await _synchronizePushTarget();
+      final synchronized = await _synchronizePushTarget(
+        requireToken: false,
+      );
+      if (!synchronized) return;
       state.value = const PushNotificationState(
         authorization: PushAuthorizationState.authorized,
         enabled: true,
@@ -643,7 +646,7 @@ class NotificationService {
     }
 
     const settings = InitializationSettings(
-      android: AndroidInitializationSettings('ic_launcher'),
+      android: AndroidInitializationSettings('ic_notification'),
       iOS: DarwinInitializationSettings(
         requestAlertPermission: false,
         requestBadgePermission: false,
@@ -700,9 +703,10 @@ class NotificationService {
     }
   }
 
-  Future<void> _synchronizePushTarget() async {
-    final token = await _getFcmToken();
+  Future<bool> _synchronizePushTarget({bool requireToken = true}) async {
+    final token = await _getFcmToken(requireApnsToken: requireToken);
     if (token == null || token.isEmpty) {
+      if (!requireToken) return false;
       throw StateError(
         RuntimeLocalization.text(
           en: 'Firebase did not return a notification token.',
@@ -717,9 +721,10 @@ class NotificationService {
       await preferences.setString(_targetIdPreferenceKey, targetId);
     }
     await registerPushTarget(deviceToken: token, targetId: targetId);
+    return true;
   }
 
-  Future<String?> _getFcmToken() async {
+  Future<String?> _getFcmToken({bool requireApnsToken = true}) async {
     if (kIsWeb) {
       final vapidKey = Environment.firebaseWebVapidKey.trim();
       if (vapidKey.isEmpty) {
@@ -745,6 +750,7 @@ class NotificationService {
         }
       }
       if (apnsToken == null) {
+        if (!requireApnsToken) return null;
         throw StateError(
           RuntimeLocalization.text(
             en: 'APNs did not return an iOS device token.',

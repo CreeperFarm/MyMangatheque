@@ -43,7 +43,7 @@ All notable changes to this project are documented in reverse chronological orde
   removal on sign-out/opt-out, Web VAPID build injection, and notification CSP
   endpoints.
 - Added notification route-security and Firebase deployment regression tests,
-  bringing the validated suite to **168 passing tests**, with a successful
+  bringing the validated suite to **173 passing tests**, with a successful
   Web/WASM Firebase build and unsigned iOS release build.
 - Added a persistent, bounded notification inbox with unread state, safe
   navigation, mark-all-as-read and local history clearing.
@@ -127,18 +127,28 @@ All notable changes to this project are documented in reverse chronological orde
   platform-specific storage quotas and oldest-entry eviction.
 - Added persistent interface preferences for recommendation order, compact or
   comfortable density, navigation-label visibility and reduced motion.
-- Added scheduled and post-deployment production smoke checks for the Web shell,
-  Wasm artifact, security headers, API health and CORS, plus an unsigned iOS
-  release build on pushes and pull requests.
+- Added post-deployment production checks for the Web shell, Wasm artifact,
+  security headers, API health and CORS, plus an unsigned iOS release build on
+  pushes and pull requests.
 - Added regression tests for cache byte quotas, stale retention, interface
   preference restoration, immediate recommendation reordering, reduced-motion
-  image rendering, production monitoring and iOS release configuration.
+  image rendering, post-deployment checks and iOS release configuration.
 - Added persistent-cache, Planning, missing-volume prioritization, image-cache,
   reliability-monitoring and post-deployment health-check tests, including
   collection-import and recommendation-ranking coverage.
 
 ### Changed
 
+- Aligned the Flutter Appwrite SDK with the deployed 1.8 server and restricted
+  product analytics to the production API allowlist, preventing Realtime 1008
+  reconnect loops and rejected analytics-event floods.
+- Made recommendation tiles consume their actual available height so titles,
+  explanations and volume metadata no longer overflow on compact screens.
+- Removed unsupported SVG filters and reject oversized cache entries before
+  they reach platform preferences, preventing noisy rendering and iOS storage
+  warnings.
+- Migrated all iOS Flutter plugins from CocoaPods to Swift Package Manager,
+  removing Pod installation and integration overhead from iOS builds.
 - Aligned campaign budgets, targeting, placements, editorial fields, catalogue
   scans, volume issue resolution, exports, and monetary rendering with the
   deployed production OpenAPI contract.
@@ -370,7 +380,7 @@ Toutes les modifications notables de ce projet sont documentées par ordre chron
   suppression à la déconnexion/désactivation, injection VAPID dans le build Web
   et endpoints CSP nécessaires aux notifications.
 - Ajout de tests de sécurité des routes de notification et de configuration
-  Firebase, portant la suite validée à **168 tests réussis**, avec build
+  Firebase, portant la suite validée à **173 tests réussis**, avec build
   Web/WASM Firebase et build iOS release non signé validés.
 - Ajout d’une boîte de notifications persistante et bornée avec état lu/non lu,
   navigation sécurisée, marquage global comme lu et suppression de l’historique
@@ -465,18 +475,30 @@ Toutes les modifications notables de ce projet sont documentées par ordre chron
 - Ajout de préférences persistantes pour l’ordre des recommandations, la densité
   compacte ou confortable, la visibilité des libellés de navigation et la
   réduction des animations.
-- Ajout de contrôles de production planifiés et post-déploiement pour le shell
-  Web, l’artefact Wasm, les en-têtes de sécurité, la santé API et CORS, ainsi que
-  d’un build iOS release non signé sur les pushes et pull requests.
+- Ajout de contrôles de production post-déploiement pour le shell Web,
+  l’artefact Wasm, les en-têtes de sécurité, la santé API et CORS, ainsi que d’un
+  build iOS release non signé sur les pushes et pull requests.
 - Ajout de tests pour les quotas en octets, la rétention obsolète, la restauration
   des préférences, le réordonnancement immédiat de l’accueil, la réduction des
-  animations, la surveillance de production et la configuration iOS release.
+  animations, les contrôles post-déploiement et la configuration iOS release.
 - Ajout de tests pour le cache persistant, le Planning, la priorité des tomes
   manquants, le cache d’images, l’observabilité et la santé post-déploiement,
   dont l'import de collection et le classement des recommandations.
 
 ### Modifications
 
+- Alignement du SDK Flutter Appwrite sur le serveur 1.8 déployé et restriction
+  des statistiques produit à l’allowlist de l’API de production, évitant les
+  boucles de reconnexion Realtime 1008 et les rafales d’événements refusés.
+- Adaptation des tuiles de recommandation à leur hauteur réellement disponible
+  afin d’éviter le débordement des titres, explications et numéros de tome sur
+  les écrans compacts.
+- Suppression des filtres SVG non pris en charge et rejet des entrées de cache
+  surdimensionnées avant leur écriture dans les préférences, évitant les
+  avertissements de rendu et de stockage iOS.
+- Migration de tous les plugins Flutter iOS de CocoaPods vers Swift Package
+  Manager, supprimant le coût d’installation et d’intégration des Pods pendant
+  les builds iOS.
 - Alignement des budgets, ciblages, emplacements, champs éditoriaux, analyses du
   catalogue, résolutions d’anomalies, exports et montants sur le contrat OpenAPI
   de production déployé.

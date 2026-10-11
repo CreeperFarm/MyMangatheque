@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="collection_import_channel_name">Collection imports</string>
+    <string name="collection_import_channel_description">Progress of collection imports running in the background</string>
+    <string name="collection_import_notification_title">Collection import in progress</string>
+    <string name="collection_import_progress">%1$d / %2$d volumes processed</string>
+    <string name="collection_import_preparing">Preparing the collection import</string>
+</resources>

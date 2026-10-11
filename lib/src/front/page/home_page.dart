@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart' show ScrollCacheExtent;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mymangatheque/l10n/app_localizations.dart';
 import 'package:mymangatheque/src/back/language/runtime_localization.dart';
@@ -435,9 +436,9 @@ class MyHomePageState extends ConsumerState<MyHomePage> {
                       ),
                       controller: _scrollController,
                       physics: const AlwaysScrollableScrollPhysics(),
-                      cacheExtent: density == AppDisplayDensity.compact
-                          ? 700
-                          : 1000,
+                      scrollCacheExtent: ScrollCacheExtent.pixels(
+                        density == AppDisplayDensity.compact ? 700 : 1000,
+                      ),
                       padding: const EdgeInsets.only(
                         top: 50,
                         left: 10,

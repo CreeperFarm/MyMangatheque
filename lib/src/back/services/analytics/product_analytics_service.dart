@@ -1,11 +1,12 @@
 import 'dart:async';
-import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:mymangatheque/src/back/language/runtime_localization.dart';
 import 'package:mymangatheque/src/back/services/api/mobile_api_client.dart';
+import 'package:mymangatheque/src/back/services/security/security_utils.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:uuid/uuid.dart';
 
 class ProductAnalyticsService {
   ProductAnalyticsService._internal();
@@ -16,15 +17,17 @@ class ProductAnalyticsService {
   factory ProductAnalyticsService() => _singleton;
 
   final MobileApiClient _api = MobileApiClient();
-  final String _sessionId = _newAnonymousSessionId();
+  final String _sessionId = const Uuid().v4();
 
   Future<void>? _sessionStart;
   String? _lastRoute;
   DateTime? _lastRouteAt;
+  bool _disabledForSession = false;
 
   Future<void> trackPageView(String routeName) async {
-    final route = routeName.trim();
-    if (route.isEmpty || route.toLowerCase().startsWith('admin')) return;
+    if (_disabledForSession) return;
+    final route = normalizeProductAnalyticsRoute(routeName);
+    if (route == null || route.startsWith('/admin')) return;
     final now = DateTime.now();
     if (_lastRoute == route &&
         _lastRouteAt != null &&
@@ -34,40 +37,12 @@ class ProductAnalyticsService {
     _lastRoute = route;
     _lastRouteAt = now;
     await _ensureSessionStarted();
+    if (_disabledForSession) return;
     await _send(
       eventName: 'page.view',
       entityType: 'route',
       entityId: route,
       properties: <String, dynamic>{'route': route},
-    );
-  }
-
-  Future<void> trackReliabilityFailure(String category) async {
-    final normalized = category.trim();
-    if (normalized.isEmpty) return;
-    await _send(
-      eventName: 'app.failure',
-      entityType: 'reliability',
-      entityId: normalized,
-      properties: <String, dynamic>{'category': normalized},
-    );
-  }
-
-  Future<void> trackSyncTransport(
-    String collectionId,
-    String transport,
-  ) async {
-    final collection = collectionId.trim();
-    final selectedTransport = transport.trim();
-    if (collection.isEmpty || selectedTransport.isEmpty) return;
-    await _send(
-      eventName: 'sync.transport.changed',
-      entityType: 'collection',
-      entityId: collection,
-      properties: <String, dynamic>{
-        'collectionId': collection,
-        'transport': selectedTransport,
-      },
     );
   }
 
@@ -85,6 +60,7 @@ class ProductAnalyticsService {
     required String entityId,
     Map<String, dynamic> properties = const <String, dynamic>{},
   }) async {
+    if (_disabledForSession) return;
     try {
       final package = await PackageInfo.fromPlatform();
       final response = await _api.post(
@@ -104,9 +80,13 @@ class ProductAnalyticsService {
         },
       );
       if (response.statusCode < 200 || response.statusCode >= 300) {
+        if (response.statusCode >= 500) {
+          _disabledForSession = true;
+        }
+        final details = redactSensitiveText(response.body).trim();
         RuntimeLocalization.debug(
-          en: 'Product analytics event rejected (${response.statusCode}).',
-          fr: 'Événement de statistiques produit refusé (${response.statusCode}).',
+          en: 'Product analytics event rejected (${response.statusCode})${details.isEmpty ? '.' : ': $details'}',
+          fr: 'Événement de statistiques produit refusé (${response.statusCode})${details.isEmpty ? '.' : ' : $details'}',
         );
       }
     } catch (error) {
@@ -130,13 +110,24 @@ class ProductAnalyticsService {
   }
 }
 
-String _newAnonymousSessionId() {
-  final random = Random.secure();
-  final entropy = List<int>.generate(
-    4,
-    (_) => random.nextInt(1 << 32),
-  ).map((value) => value.toRadixString(16).padLeft(8, '0')).join();
-  return '${DateTime.now().toUtc().microsecondsSinceEpoch}-$entropy';
+/// Converts GoRouter's human-readable route names to the privacy-safe path
+/// format accepted by the production analytics contract.
+String? normalizeProductAnalyticsRoute(String routeName) {
+  var route = routeName.trim();
+  if (route.isEmpty) return null;
+
+  if (route.startsWith('/')) {
+    route = Uri.tryParse(route)?.path ?? route;
+  } else {
+    route = '/${route.toLowerCase()}';
+  }
+
+  route = route
+      .replaceAll(RegExp(r'[^A-Za-z0-9/_.:-]+'), '-')
+      .replaceAll(RegExp(r'-+'), '-')
+      .replaceAll(RegExp(r'/$'), '');
+  if (route.isEmpty) return '/';
+  return route.length <= 200 ? route : route.substring(0, 200);
 }
 
 class ProductAnalyticsNavigationObserver extends NavigatorObserver {

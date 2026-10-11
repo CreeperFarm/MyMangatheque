@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart' show ScrollCacheExtent;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mymangatheque/l10n/app_localizations.dart';
 import 'package:mymangatheque/src/back/provider/manga_owned_provider.dart';
@@ -50,7 +51,9 @@ class _CollectionTabState extends ConsumerState<CollectionTab> {
       valueListenable: LocalStorage.displayDensityNotifier,
       builder: (context, density, _) => CustomScrollView(
         key: const PageStorageKey<String>('owned-collection'),
-        cacheExtent: density == AppDisplayDensity.compact ? 500 : 700,
+        scrollCacheExtent: ScrollCacheExtent.pixels(
+          density == AppDisplayDensity.compact ? 500 : 700,
+        ),
         slivers: [
           SliverPadding(
             padding: const EdgeInsets.fromLTRB(10, 10, 10, 0),

@@ -242,6 +242,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "confirmNewPassword": MessageLookupByLibrary.simpleMessage(
       "Confirmer le nouveau mot de passe",
     ),
+    "confirmPassword": MessageLookupByLibrary.simpleMessage(
+      "Confirmer le mot de passe",
+    ),
     "confirmYourPassword": MessageLookupByLibrary.simpleMessage(
       "Confirmer votre mot de passe",
     ),

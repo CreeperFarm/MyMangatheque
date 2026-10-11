@@ -40,7 +40,11 @@ class _AdminNotificationAnalyticsPageState
     return _admin.getNotificationAnalytics(days: _days);
   }
 
-  void _refresh() => setState(() => _future = _load());
+  void _refresh() {
+    setState(() {
+      _future = _load();
+    });
+  }
 
   void _changePeriod(int days) {
     if (_days == days) return;
@@ -92,7 +96,7 @@ class _AdminNotificationAnalyticsPageState
     return AdminPageScaffold(
       title: context.localized(en: 'Notifications', fr: 'Notifications'),
       actions: [
-        const AdminExportButton(resource: 'analytics-notifications'),
+        const AdminExportButton(resource: 'analytics'),
         IconButton(
           onPressed: _refresh,
           tooltip: context.localized(en: 'Refresh', fr: 'Actualiser'),

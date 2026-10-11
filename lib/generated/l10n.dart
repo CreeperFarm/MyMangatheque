@@ -1475,6 +1475,16 @@ class AppLocalizations {
     );
   }
 
+  /// `Confirm password`
+  String get confirmPassword {
+    return Intl.message(
+      'Confirm password',
+      name: 'confirmPassword',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `The new password and confirmation do not match.`
   String get passwordsDoNotMatch {
     return Intl.message(

@@ -96,6 +96,24 @@ void main() {
     expect(await cache.read('newest'), isNotNull);
   });
 
+  test('rejects an oversized entry before writing to preferences', () async {
+    await cache.write(
+      'oversized',
+      'a' * 2000,
+      ttl: const Duration(days: 1),
+      maxEntryBytes: 500,
+    );
+
+    final preferences = await SharedPreferences.getInstance();
+    expect(await cache.read('oversized'), isNull);
+    expect(
+      preferences.getKeys().where(
+        (key) => key.startsWith('mymangatheque.cache.v1:'),
+      ),
+      isEmpty,
+    );
+  });
+
   test('pruning removes entries beyond their stale retention window', () async {
     await cache.write(
       'expired',

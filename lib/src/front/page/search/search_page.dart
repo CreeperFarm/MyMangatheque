@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart' show ScrollCacheExtent;
 import 'package:mymangatheque/l10n/app_localizations.dart';
 import 'package:mymangatheque/src/back/services/appwrite.dart';
 import 'package:mymangatheque/src/back/services/search_service.dart';
@@ -728,9 +729,9 @@ class _SearchPageState extends State<SearchPage> {
                       builder: (context, density, _) => ListView.builder(
                         key: const PageStorageKey<String>('search-results'),
                         controller: _scrollController,
-                        cacheExtent: density == AppDisplayDensity.compact
-                            ? 650
-                            : 900,
+                        scrollCacheExtent: ScrollCacheExtent.pixels(
+                          density == AppDisplayDensity.compact ? 650 : 900,
+                        ),
                         physics: const AlwaysScrollableScrollPhysics(),
                         itemCount: _filteredResults.length + 1,
                         itemBuilder: (context, index) {

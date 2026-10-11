@@ -34,8 +34,12 @@ class PersistentCacheStore {
   static const int _schemaVersion = 1;
   static const int _webMaxBytes = 4 * 1024 * 1024;
   static const int _nativeMaxBytes = 16 * 1024 * 1024;
+  static const int _webMaxEntryBytes = 512 * 1024;
+  static const int _nativeMaxEntryBytes = 2 * 1024 * 1024;
 
   static int get defaultMaxBytes => kIsWeb ? _webMaxBytes : _nativeMaxBytes;
+  static int get defaultMaxEntryBytes =>
+      kIsWeb ? _webMaxEntryBytes : _nativeMaxEntryBytes;
 
   final DateTime Function() _clock;
 
@@ -102,6 +106,7 @@ class PersistentCacheStore {
     required Duration ttl,
     int maxEntries = 80,
     int? maxBytes,
+    int? maxEntryBytes,
   }) async {
     final preferences = await SharedPreferences.getInstance();
     final now = _clock().toUtc();
@@ -116,9 +121,25 @@ class PersistentCacheStore {
       'expiresAt': now.add(ttl).toIso8601String(),
       'data': data,
     };
+    final key = _key(namespace, normalizedScope);
+    final encoded = jsonEncode(envelope);
+    final encodedBytes = utf8.encode(encoded).length;
+    final entryLimit = maxEntryBytes ?? defaultMaxEntryBytes;
+    if (encodedBytes > entryLimit) {
+      await preferences.remove(key);
+      RuntimeLocalization.debug(
+        en: 'Skipped an oversized persistent cache entry ($encodedBytes bytes).',
+        fr: 'Une entrée de cache persistante surdimensionnée a été ignorée ($encodedBytes octets).',
+      );
+      await prune(
+        maxEntries: maxEntries,
+        maxBytes: maxBytes ?? defaultMaxBytes,
+      );
+      return;
+    }
     await preferences.setString(
-      _key(namespace, normalizedScope),
-      jsonEncode(envelope),
+      key,
+      encoded,
     );
     await prune(
       maxEntries: maxEntries,

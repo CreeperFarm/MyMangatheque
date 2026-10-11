@@ -4,6 +4,19 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mymangatheque/src/back/services/models/api_record_model.dart';
 import 'package:mymangatheque/src/back/services/sync/realtime_sync_service.dart';
 
+Future<void> _waitUntil(
+  bool Function() condition, {
+  Duration timeout = const Duration(seconds: 1),
+}) async {
+  final deadline = DateTime.now().add(timeout);
+  while (!condition()) {
+    if (DateTime.now().isAfter(deadline)) {
+      fail('Condition was not reached within $timeout.');
+    }
+    await Future<void>.delayed(const Duration(milliseconds: 5));
+  }
+}
+
 void main() {
   test('forwards native events without periodic polling', () async {
     final source = StreamController<ApiRecordSubscriptionEvent>();
@@ -91,7 +104,7 @@ void main() {
     final events = <ApiRecordSubscriptionEvent>[];
     final subscription = service.watch('owned').listen(events.add);
 
-    await Future<void>.delayed(const Duration(milliseconds: 30));
+    await _waitUntil(() => attempts >= 2);
 
     expect(attempts, greaterThanOrEqualTo(2));
     expect(events.where((event) => event.action == 'poll'), isNotEmpty);

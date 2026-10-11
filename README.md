@@ -206,7 +206,7 @@ flutter build web --release --wasm
 Latest documented local validation:
 
 - clean Flutter analysis;
-- **168 passing unit and widget tests**;
+- **173 passing unit and widget tests**;
 - successful production Flutter Web/WASM build;
 - dedicated tests for OAuth, security, storage, notifications, administration,
   deployment, persistent caching, release planning, reliability monitoring,
@@ -361,8 +361,9 @@ analysis, tests with coverage, and SonarQube analysis for pull requests and
 changes to `main`.
 
 [`validate-ios.yml`](.github/workflows/validate-ios.yml) compiles an unsigned
-iOS release on pushes and pull requests. [`production-smoke.yml`](.github/workflows/production-smoke.yml)
-repeats the external production checks every six hours and on demand.
+iOS release on pushes and pull requests. External production checks run once
+after every Web deployment. iOS plugins are integrated exclusively through
+Swift Package Manager; CocoaPods is not required.
 
 ### Configuration and security
 
@@ -564,7 +565,7 @@ flutter build web --release --wasm
 Dernière validation locale documentée :
 
 - analyse Flutter sans anomalie ;
-- **168 tests unitaires et widgets réussis** ;
+- **173 tests unitaires et widgets réussis** ;
 - build Flutter Web/WASM de production réussi ;
 - tests spécifiques pour OAuth, sécurité, stockage, notifications,
   administration, déploiement, cache persistant, planning des sorties,
@@ -722,8 +723,9 @@ Le workflow [`code-quality.yml`](.github/workflows/code-quality.yml) relance
 pull requests et les changements de `main`.
 
 [`validate-ios.yml`](.github/workflows/validate-ios.yml) compile une release iOS
-non signée sur les pushes et pull requests. [`production-smoke.yml`](.github/workflows/production-smoke.yml)
-répète les contrôles externes de production toutes les six heures et à la demande.
+non signée sur les pushes et pull requests. Les contrôles externes de production
+s’exécutent une fois après chaque déploiement Web. Les plugins iOS sont intégrés
+exclusivement avec Swift Package Manager ; CocoaPods n’est pas requis.
 
 ### Configuration et sécurité
 

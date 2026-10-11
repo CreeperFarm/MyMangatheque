@@ -253,8 +253,7 @@ enum AdminRelationResource {
   series('/api/series/search', 'series'),
   authors('/api/authors/search', 'authors'),
   editors('/api/editors/search', 'editors'),
-  genres('/api/genres/search', 'genres')
-  ;
+  genres('/api/genres/search', 'genres');
 
   const AdminRelationResource(this.searchPath, this.responseKey);
 
@@ -359,8 +358,7 @@ enum AdminUserOrderBy {
   updatedAt(r'$updatedAt', 'Last update', 'Dernière modification'),
   pseudo('pseudo', 'Username', 'Pseudo'),
   mail('mail', 'Email address', 'Adresse e-mail'),
-  role('role', 'Role', 'Rôle')
-  ;
+  role('role', 'Role', 'Rôle');
 
   const AdminUserOrderBy(this.apiValue, this.englishLabel, this.frenchLabel);
 
@@ -373,8 +371,7 @@ enum AdminUserOrderBy {
 
 enum AdminSortDirection {
   ascending('asc', 'Ascending', 'Croissant'),
-  descending('desc', 'Descending', 'Décroissant')
-  ;
+  descending('desc', 'Descending', 'Décroissant');
 
   const AdminSortDirection(this.apiValue, this.englishLabel, this.frenchLabel);
 
@@ -474,8 +471,7 @@ class AdminUserPage {
 enum AdminVolumeIssueType {
   zeroTomeNumber('zero_tome_number'),
   duplicateTomeNumber('duplicate_tome_number'),
-  unknown('unknown')
-  ;
+  unknown('unknown');
 
   const AdminVolumeIssueType(this.apiValue);
 
@@ -497,8 +493,7 @@ enum AdminVolumeIssueType {
 
 enum AdminVolumeIssueStatus {
   open('open'),
-  resolved('resolved')
-  ;
+  resolved('resolved');
 
   const AdminVolumeIssueStatus(this.apiValue);
 
@@ -779,18 +774,12 @@ class AdminConnector {
     await _deleteSecure(_storageKey);
   }
 
-  Future<Map<String, dynamic>> getSummary({
-    int days = 30,
-    bool comparePrevious = true,
-  }) async {
+  Future<Map<String, dynamic>> getSummary({int days = 30}) async {
     await init();
     final response = await _request(
       'GET',
       '/api/analytics/summary',
-      query: <String, dynamic>{
-        'days': days.clamp(1, 365),
-        'comparePrevious': comparePrevious,
-      },
+      query: <String, dynamic>{'days': days.clamp(1, 365)},
     );
     return _decodeMap(response.body);
   }
@@ -834,50 +823,32 @@ class AdminConnector {
     return _decodeMap(response.body);
   }
 
-  Future<Map<String, dynamic>> getProductAnalytics({
-    int days = 30,
-    bool comparePrevious = true,
-  }) async {
+  Future<Map<String, dynamic>> getProductAnalytics({int days = 30}) async {
     await init();
     final response = await _request(
       'GET',
       '/api/analytics/product',
-      query: <String, dynamic>{
-        'days': days.clamp(1, 365),
-        'comparePrevious': comparePrevious,
-      },
+      query: <String, dynamic>{'days': days.clamp(1, 365)},
     );
     return _decodeMap(response.body);
   }
 
-  Future<Map<String, dynamic>> getNotificationAnalytics({
-    int days = 30,
-    bool comparePrevious = true,
-  }) async {
+  Future<Map<String, dynamic>> getNotificationAnalytics({int days = 30}) async {
     await init();
     final response = await _request(
       'GET',
       '/api/analytics/notifications',
-      query: <String, dynamic>{
-        'days': days.clamp(1, 365),
-        'comparePrevious': comparePrevious,
-      },
+      query: <String, dynamic>{'days': days.clamp(1, 365)},
     );
     return _decodeMap(response.body);
   }
 
-  Future<Map<String, dynamic>> getSponsorshipDashboard({
-    int days = 30,
-    bool comparePrevious = true,
-  }) async {
+  Future<Map<String, dynamic>> getSponsorshipDashboard({int days = 30}) async {
     await init();
     final response = await _request(
       'GET',
       '/api/admin/sponsorship',
-      query: <String, dynamic>{
-        'days': days.clamp(1, 365),
-        'comparePrevious': comparePrevious,
-      },
+      query: <String, dynamic>{'days': days.clamp(1, 365)},
     );
     return _decodeMap(response.body);
   }
@@ -1091,18 +1062,12 @@ class AdminConnector {
     await _request('DELETE', '/api/admin/editorial-recommendations/$safeId');
   }
 
-  Future<Map<String, dynamic>> getRevenueDashboard({
-    int days = 30,
-    bool comparePrevious = true,
-  }) async {
+  Future<Map<String, dynamic>> getRevenueDashboard({int days = 30}) async {
     await init();
     final response = await _request(
       'GET',
       '/api/admin/revenue',
-      query: <String, dynamic>{
-        'days': days.clamp(1, 365),
-        'comparePrevious': comparePrevious,
-      },
+      query: <String, dynamic>{'days': days.clamp(1, 365)},
     );
     return _decodeMap(response.body);
   }
@@ -1329,16 +1294,12 @@ class AdminConnector {
   }) async {
     await init();
     const allowedResources = <String>{
+      'users',
+      'catalog',
+      'analytics',
       'sponsorship',
       'revenue',
-      'catalog-quality',
-      'moderation',
-      'operations',
       'audit',
-      'editorial',
-      'analytics-summary',
-      'analytics-product',
-      'analytics-notifications',
     };
     if (!allowedResources.contains(resource)) {
       throw AdminInputException(
@@ -1935,9 +1896,14 @@ class AdminConnector {
     }
 
     if (response.statusCode < 200 || response.statusCode >= 300) {
+      final error = _extractApiError(response);
+      RuntimeLocalization.debug(
+        en: 'Admin request $method $path failed: $error',
+        fr: 'La requête admin $method $path a échoué : $error',
+      );
       throw AdminApiException(
         response.statusCode,
-        _extractApiError(response),
+        error,
       );
     }
     return response;

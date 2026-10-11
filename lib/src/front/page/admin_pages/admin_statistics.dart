@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:mymangatheque/src/back/language/runtime_localization.dart';
@@ -77,7 +79,11 @@ class _StatisticsPageState extends State<StatisticsPage> {
     }
   }
 
-  void _refresh() => setState(() => _dataFuture = _loadData());
+  void _refresh() {
+    setState(() {
+      _dataFuture = _loadData();
+    });
+  }
 
   void _changePeriod(int days) {
     if (_periodDays == days) return;
@@ -125,7 +131,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
     return AdminPageScaffold(
       title: _statsT('Overview', 'Vue générale'),
       actions: [
-        const AdminExportButton(resource: 'analytics-summary'),
+        const AdminExportButton(resource: 'analytics'),
         IconButton(
           onPressed: _refresh,
           tooltip: _statsT('Refresh', 'Actualiser'),
@@ -397,10 +403,23 @@ class _ServiceStatusCard extends StatelessWidget {
     final healthData = _asMap(data.health.data['data']);
     final analytics = _asMap(healthData?['analytics']);
     final serviceHealthy = !data.health.hasError && analytics?['ok'] == true;
-    final summaryError = data.summary.error;
+    final protectedReads = <_StatisticsSection>[
+      data.summary,
+      data.volumes,
+      data.wishlist,
+    ];
+    final protectedReadSucceeded = protectedReads.any(
+      (section) => !section.hasError,
+    );
     final permissionError =
-        summaryError is AdminApiException &&
-        (summaryError.statusCode == 401 || summaryError.statusCode == 403);
+        !protectedReadSucceeded &&
+        protectedReads.any(
+          (section) {
+            final error = section.error;
+            return error is AdminApiException &&
+                (error.statusCode == 401 || error.statusCode == 403);
+          },
+        );
     final app = data.appInformation.data;
     final version = app['version']?.toString() ?? '';
     final build = app['buildNumber']?.toString() ?? '';
@@ -433,10 +452,10 @@ class _ServiceStatusCard extends StatelessWidget {
                       'analytics.read permission required',
                       'Permission analytics.read requise',
                     )
-                  : data.summary.hasError
+                  : !protectedReadSucceeded
                   ? _statsT('Read error', 'Erreur de lecture')
                   : _statsT('Authorized', 'Autorisé'),
-              isError: data.summary.hasError,
+              isError: !protectedReadSucceeded,
             ),
             _StatusItem(
               icon: Icons.info_outline_rounded,
@@ -537,6 +556,7 @@ class _SectionError extends StatelessWidget {
         : null;
     final requiresAuthentication =
         apiError?.statusCode == 401 || apiError?.statusCode == 403;
+    final timedOut = error is TimeoutException;
     return AdminStatusBanner(
       icon: requiresAuthentication
           ? Icons.lock_outline_rounded
@@ -546,6 +566,11 @@ class _SectionError extends StatelessWidget {
           ? _statsT(
               '${redactSensitiveText(error)} Use a key explicitly containing the analytics.read permission.',
               '${redactSensitiveText(error)} Utilisez une clé contenant explicitement la permission analytics.read.',
+            )
+          : timedOut
+          ? _statsT(
+              'The summary service did not respond within 20 seconds. Other metrics remain available.',
+              'Le service de résumé n’a pas répondu sous 20 secondes. Les autres indicateurs restent utilisables.',
             )
           : _statsT(
               '${redactSensitiveText(error)} Other metrics remain available.',

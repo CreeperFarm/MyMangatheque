@@ -119,6 +119,25 @@ class AppwriteClientService {
     }
   }
 
+  Future<bool> _deleteCurrentAnonymousSession() async {
+    late final models.Session session;
+    try {
+      session = await _account.getSession(sessionId: 'current');
+    } on AppwriteException catch (e) {
+      if (e.code == 401 || e.code == 404) return false;
+      rethrow;
+    }
+
+    if (session.provider.toLowerCase() != 'anonymous') return false;
+
+    await _account.deleteSession(sessionId: 'current');
+    RuntimeLocalization.debug(
+      en: 'The anonymous session was removed before Google OAuth.',
+      fr: 'La session anonyme a été supprimée avant OAuth Google.',
+    );
+    return true;
+  }
+
   Future<models.User> createAccount({
     required String email,
     required String password,
@@ -180,6 +199,18 @@ class AppwriteClientService {
   }
 
   Future<void> _loginWithGoogleMobile() async {
+    final anonymousSessionRemoved = await _deleteCurrentAnonymousSession();
+    try {
+      await _runGoogleMobileFlow();
+    } catch (_) {
+      if (anonymousSessionRemoved) {
+        await ensureGuestSession();
+      }
+      rethrow;
+    }
+  }
+
+  Future<void> _runGoogleMobileFlow() async {
     final callbackScheme = OAuthFlow.mobileCallbackScheme(
       Environment.appwriteProjectId,
     );
@@ -225,7 +256,7 @@ class AppwriteClientService {
             fr: 'Le fournisseur d’identité a renvoyé une erreur OAuth.',
           );
       final sessionAlreadyExists = callbackPayload.describesExistingSession;
-      if (sessionAlreadyExists) {
+      if (sessionAlreadyExists && await hasAuthenticatedUserSession()) {
         final currentUser = await tryGetCurrentUser();
         if (currentUser != null) {
           RuntimeLocalization.debug(
@@ -277,7 +308,7 @@ class AppwriteClientService {
     } on AppwriteException catch (e) {
       final sessionAlreadyExists =
           e.type == 'user_session_already_exists' || e.code == 409;
-      if (sessionAlreadyExists) {
+      if (sessionAlreadyExists && await hasAuthenticatedUserSession()) {
         final currentUser = await tryGetCurrentUser();
         if (currentUser != null) {
           RuntimeLocalization.debug(

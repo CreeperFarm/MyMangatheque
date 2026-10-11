@@ -14,7 +14,6 @@ import 'package:mymangatheque/src/back/app_router/app_navigation.dart';
 import 'package:mymangatheque/src/back/language/language.dart';
 import 'package:mymangatheque/src/back/language/language_repository.dart';
 import 'package:mymangatheque/src/back/services/appwrite.dart';
-import 'package:mymangatheque/src/back/services/analytics/product_analytics_service.dart';
 import 'package:mymangatheque/src/back/services/notifications/notification_service.dart';
 import 'package:mymangatheque/src/const/theme/dark_mode.dart';
 import 'package:mymangatheque/src/const/theme/light_mode.dart';
@@ -38,16 +37,8 @@ Future<void> main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   FlutterError.onError = (details) {
     FlutterError.presentError(details);
-    unawaited(
-      ProductAnalyticsService().trackReliabilityFailure('flutter.framework'),
-    );
   };
-  PlatformDispatcher.instance.onError = (error, stack) {
-    unawaited(
-      ProductAnalyticsService().trackReliabilityFailure('flutter.unhandled'),
-    );
-    return false;
-  };
+  PlatformDispatcher.instance.onError = (error, stack) => false;
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
   setupServiceLocator();
 
